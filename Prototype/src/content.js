@@ -121,11 +121,10 @@ window.addEventListener("message", function(event) {
 		});
 
 		var adUnitObj = {};
-		var anyAuctionId;
 
 		adUnitArray.forEach(adUnit => {
 			var adUnitAry = [];
-			//			var anyAuctionId;
+			var anyAuctionId;
 
 			if (typeof auctionObjects['yesBids'][adUnit] !== 'undefined') {
 				let yesBids = auctionObjects['yesBids'][adUnit].bids;
@@ -158,13 +157,7 @@ window.addEventListener("message", function(event) {
 				"adUnitMapToSlot": adUnitMapToSlot
 			};
 		});
-
-		try { // probably should be if (typeof .....) {}
-			auctionObj[anyAuctionId].host = window.location.host;
-		} catch (err) {
-			console.log('PREBID_ERROR: auctionObj[anyAuctionId].host = window.location.host');
-		}
-		auctionObj[anyAuctionId].auctionId = anyAuctionId;
+		
 	} else if (event.data.type && (event.data.type == "GPT_SLOTRENDERED")) {
 		console.log('PREBID_TOOLS: Received GPT_SLOTRENDERED event');
 
