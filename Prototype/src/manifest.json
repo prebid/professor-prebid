@@ -9,13 +9,14 @@
 			],
 			"run_at": "document_start",
 			"js": [
-				"inject.js",
-				"content.js"
+				"js/inject.js",
+				"js/content.js",
+				"js/jquery-3.5.1.min.js"
 			]
 		}
 	],
 	"web_accessible_resources": [
-		"injected.js"
+		"js/injected.js"
 	],
 	"browser_action": {
 		"default_tile": "Message",

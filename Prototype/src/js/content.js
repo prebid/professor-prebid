@@ -9,7 +9,7 @@ var bidRequestedObj = {};
 
 function convertTimestamp(requestTimestamp) {
 	let ts = new Date(requestTimestamp);
-	let year = ts.getYear() + 1900;
+	let year = ts.getFullYear() + 1900;
 	let mon = ts.getMonth() + 1;
 	let day = ts.getUTCDate();
 	let h = ts.getHours();
@@ -73,11 +73,67 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	} else if (msg.type == 'POPUP_GPTBUTTON') {
 		console.log('PREBID_TOOLS: POPUP_GPTBUTTON id=' + msg.obj.target);
 
+		const removeElements = (elms) => elms.forEach(el => el.remove());
+		let toRemove =  document.querySelectorAll(".p_overlay")
+		removeElements(toRemove);
+
+		// for debugging
 		let elmt = document.getElementById(msg.obj.target);
 		elmt.style.borderWidth = "4px";
-		elmt.style.borderColor = "red";
+		elmt.style.borderColor = "blue";
 		elmt.style.borderStyle = "solid";
+		elmt.style.fillOpacity = "0.5";
+		elmt.style.fill = "orange";
+		elmt.style.background = "green";
 		elmt.scrollIntoView();
+
+		// desired size
+	
+		let iframe_elmt = elmt.querySelector("iframe");
+		// let cssObj = window.getComputedStyle(elmt, null);
+		// let txt="";
+		// for (let i = 0; i < cssObj.length; i++) {
+		// 	let cssObjProp = cssObj.item(i)
+		// 	let prop = cssObjProp + " = " + cssObj.getPropertyValue(cssObjProp)
+    	// 	txt += prop + "\n";
+		// }
+		// console.log(txt);
+		
+		let cWidth = 0;
+		let cHeight = 0;
+		if (iframe_elmt) {
+			let ifDestination = $('iframe:first').offset();
+//			console.log(ifDestination);
+			let elmtStyle = window.getComputedStyle(elmt, null);
+			cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
+			cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
+			// elmtStyle = window.getComputedStyle(elmt.parentElement, null);
+			// cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
+			// cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
+		}
+
+		// create a mask
+		let mask_container = document.createElement("div");
+		let mask_container_id = "mask_container_" + msg.obj.target;
+		mask_container.id = mask_container_id;
+		mask_container.className = "p_overlay";
+		mask_container.style.borderWidth = "4px";
+		mask_container.style.borderColor = "red"
+		mask_container.style.borderStyle = "solid";
+		mask_container.style.margin = "0 auto";
+		mask_container.style.background = "rgba(100, 100, 200, .75)";
+		mask_container.style.zIndex = "99";
+		mask_container.style.position = "absolute"; 
+		mask_container.style.width = cWidth + "px"; 
+		mask_container.style.height = cHeight + "px"; 
+
+		let title_elmt = document.createElement("p");
+		title_elmt.style.fontSize = "20px";
+		title_elmt.style.color = "white";
+		title_elmt.style.fontWeight = "bold";
+		title_elmt.innerText = msg.obj.target + "<br/>";
+		mask_container.appendChild(title_elmt);
+		elmt.parentElement.insertBefore(mask_container, elmt);
 
 		sendResponse({
 			msg: 'POPUP_GPTBUTTON_RESPONSE'

@@ -51,6 +51,77 @@ var do_once_pbjs = 1;
 
 // Check for PBJS loaded and add listeners to various events when ready
 
+
+function getAllBids(pbjs) {
+	function forEach(responses, cb) {
+	  Object.keys(responses).forEach(function(adUnitCode) {
+		var response = responses[adUnitCode];
+		response.bids.forEach(function(bid) {
+		  cb(adUnitCode, bid);
+		});
+	  });
+	}
+	var winners = pbjs.getAllWinningBids();
+	var output = [];
+	forEach(pbjs.getBidResponses(), function(code, bid) {
+	  output.push({
+		bid: bid,
+		adunit: code,
+		adId: bid.adId,
+		bidder: bid.bidder,
+		time: bid.timeToRespond,
+		cpm: bid.cpm,
+		msg: bid.statusMessage,
+		rendered: !!winners.find(function(winner) {
+		  return winner.adId==bid.adId;
+		})
+	  });
+	});
+	forEach(pbjs.getNoBids && pbjs.getNoBids() || {}, function(code, bid) {
+	  output.push({
+		msg: "no bid",
+		adunit: code,
+		adId: bid.bidId,
+		bidder: bid.bidder
+	  });
+	});
+	if (output.length) {
+	  if (console.table) {
+		console.table(output);
+	  } else {
+		for (var j = 0; j < output.length; j++) {
+		  console.log(output[j]);
+		}
+	  }
+	} else {
+	  console.warn('NO prebid responses');
+	}
+};
+
+
+function getWonBids(pbjs) {
+	var bids = pbjs.getHighestCpmBids();
+	var output = [];
+	for (var i = 0; i < bids.length; i++) {
+		var b = bids[i];
+		output.push({
+			'adunit': b.adUnitCode, 'adId': b.adId, 'bidder': b.bidder,
+			'time': b.timeToRespond, 'cpm': b.cpm
+		});
+	}
+	if (output.length) {
+		if (console.table) {
+			console.table(output);
+		} else {
+			for (var j = 0; j < output.length; j++) {
+				console.log(output[j]);
+			}
+		}
+	} else {
+		console.warn('No prebid winners');
+	}
+}
+
 function checkForPBJS(domFoundTime) {
 	if (window.pbjs && window.pbjs.libLoaded && do_once_pbjs == 1) {
 
@@ -80,6 +151,10 @@ function checkForPBJS(domFoundTime) {
 				"bidderRequests": data.bidderRequests,
 				"rawData": data
 			};
+
+			// Just dump all and won bids
+			getAllBids(window.pbjs);
+			getWonBids(window.pbjs);
 
 			sendMessage("AUCTION_END", response);
 		});

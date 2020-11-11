@@ -11,7 +11,7 @@ function injectScript(file_path, tag) {
 
 function checkForDOM() {
 	if (document.head) {
-		injectScript(chrome.extension.getURL('injected.js'), 'head');
+		injectScript(chrome.extension.getURL('js/injected.js'), 'head');
 	} else {
 		requestIdleCallback(checkForDOM);
 	}
