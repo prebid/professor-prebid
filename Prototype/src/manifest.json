@@ -9,13 +9,17 @@
 			],
 			"run_at": "document_start",
 			"js": [
+				"js/jquery-3.5.1.min.js",
+				"js/moment.min.js",
+				"js/dataframe.js",
 				"js/inject.js",
-				"js/content.js",
-				"js/jquery-3.5.1.min.js"
+				"js/content.js"
 			]
 		}
 	],
 	"web_accessible_resources": [
+		"js/dataframe.js",
+		"js/moment.min.js",
 		"js/injected.js"
 	],
 	"browser_action": {

@@ -7,39 +7,6 @@ var auctionObj = {};
 var gptObj = {};
 var bidRequestedObj = {};
 
-function convertTimestamp(requestTimestamp) {
-	let ts = new Date(requestTimestamp);
-	let year = ts.getFullYear() + 1900;
-	let mon = ts.getMonth() + 1;
-	let day = ts.getUTCDate();
-	let h = ts.getHours();
-	let m = ts.getMinutes();
-	let s = ts.getSeconds();
-	let ms = ts.getMilliseconds();
-
-	if (mon < 10) {
-		mon = '0' + mon
-	}
-
-	if (day < 10) {
-		day = '0' + day
-	}
-
-	if (h < 10) {
-		h = '0' + h
-	}
-
-	if (m < 10) {
-		m = '0' + m
-	}
-
-	if (s < 10) {
-		s = '0' + s
-	}
-
-	return (`${year}-${mon}-${day} ${h}:${m}:${s}.${ms}`);
-}
-
 function myCallBack(response) {
 	console.log('PREBID_TOOLS: From BACKGROUND.js = ' + response.msg);
 }
@@ -72,12 +39,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		});
 	} else if (msg.type == 'POPUP_GPTBUTTON') {
 		console.log('PREBID_TOOLS: POPUP_GPTBUTTON id=' + msg.obj.target);
+		// TODO use auction data 
+
 
 		const removeElements = (elms) => elms.forEach(el => el.remove());
 		let toRemove =  document.querySelectorAll(".p_overlay")
 		removeElements(toRemove);
 
-		// for debugging
+		// TODO - needs to be tidied up
 		let elmt = document.getElementById(msg.obj.target);
 		elmt.style.borderWidth = "4px";
 		elmt.style.borderColor = "blue";
@@ -88,29 +57,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		elmt.scrollIntoView();
 
 		// desired size
-	
-		let iframe_elmt = elmt.querySelector("iframe");
-		// let cssObj = window.getComputedStyle(elmt, null);
-		// let txt="";
-		// for (let i = 0; i < cssObj.length; i++) {
-		// 	let cssObjProp = cssObj.item(i)
-		// 	let prop = cssObjProp + " = " + cssObj.getPropertyValue(cssObjProp)
-    	// 	txt += prop + "\n";
-		// }
-		// console.log(txt);
-		
-		let cWidth = 0;
-		let cHeight = 0;
-		if (iframe_elmt) {
-			let ifDestination = $('iframe:first').offset();
+//		let ifDestination = $('iframe:first').offset();
 //			console.log(ifDestination);
-			let elmtStyle = window.getComputedStyle(elmt, null);
-			cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
-			cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
-			// elmtStyle = window.getComputedStyle(elmt.parentElement, null);
-			// cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
-			// cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
-		}
+		let elmtStyle = window.getComputedStyle(elmt, null);
+		let cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
+		let cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
 
 		// create a mask
 		let mask_container = document.createElement("div");
@@ -146,6 +97,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 });
 
+
+// data received from injected.js
 window.addEventListener("message", function(event) {
 	if (event.source != window) {
 		return;
@@ -156,6 +109,17 @@ window.addEventListener("message", function(event) {
 
 		// When we get AUCTION_END from injected script build data structure
 		// to be sent to the POPUP script when it activates
+		if(event.data.dfs) {
+			allBidsDf = new dfjs.DataFrame(event.data.dfs['AllBids']);
+			console.log('passed all bids df');
+			console.log(allBidsDf.toCSV());
+			highestCpmBidsDf = new dfjs.DataFrame(event.data.dfs['HighestCpmBids']);
+			console.log('passed highest cpm bids df');
+			console.log(highestCpmBidsDf.toCSV());
+			allWinningBidsDf = new dfjs.DataFrame(event.data.dfs['AllWinningBids']);
+			console.log('passed all winning bids df');
+			console.log(allWinningBidsDf.toCSV());
+		}
 
 		let auctionObjects = JSON.parse(event.data.obj);
 		let auctionTimestamp = auctionObjects['auctionTimestamp'];
@@ -208,7 +172,7 @@ window.addEventListener("message", function(event) {
 
 			adUnitObj[adUnit] = adUnitAry.filter(unique);
 			auctionObj[anyAuctionId] = {
-				"auctionTimestamp": convertTimestamp(auctionTimestamp),
+				"auctionTimestamp": moment().format("YYYY-MM-DD HH:mm:ss.SSS", auctionTimestamp),
 				"adUnitObj": adUnitObj,
 				"adUnitMapToSlot": adUnitMapToSlot
 			};

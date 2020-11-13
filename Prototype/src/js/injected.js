@@ -3,47 +3,16 @@
 // The only way for an injected script to message to the content.js
 // script is via window.postMessage()
 
-function convertTimestamp(requestTimestamp) {
-	let ts = new Date(requestTimestamp);
-	let year = ts.getYear() + 1900;
-	let mon = ts.getMonth() + 1;
-	let day = ts.getUTCDate();
-	let h = ts.getHours();
-	let m = ts.getMinutes();
-	let s = ts.getSeconds();
-	let ms = ts.getMilliseconds();
-
-	if (mon < 10) {
-		mon = '0' + mon
-	}
-
-	if (day < 10) {
-		day = '0' + day
-	}
-
-	if (h < 10) {
-		h = '0' + h
-	}
-
-	if (m < 10) {
-		m = '0' + m
-	}
-
-	if (s < 10) {
-		s = '0' + s
-	}
-
-	return (`${year}-${mon}-${day} ${h}:${m}:${s}.${ms}`);
-}
 
 // Need to use window.postMessage() to communicate with content.js
 
-function sendMessage(evt, x) {
+function sendMessage(evt, x, dfs) {
 	console.log('PREBID_TOOLS: sendMessage(' + evt + ')');
 
 	window.postMessage({
 		type: evt,
-		obj: JSON.stringify(x)
+		obj: JSON.stringify(x),
+		dfs : dfs || {}
 	});
 }
 
@@ -51,26 +20,48 @@ var do_once_pbjs = 1;
 
 // Check for PBJS loaded and add listeners to various events when ready
 
-
-function getAllBids(pbjs) {
-	function forEach(responses, cb) {
-	  Object.keys(responses).forEach(function(adUnitCode) {
-		var response = responses[adUnitCode];
-		response.bids.forEach(function(bid) {
-		  cb(adUnitCode, bid);
-		});
-	  });
+function displayTable(output, defaultOutput) {
+	if (output.length) {
+		if (console.table) {
+			console.table(output);
+		} else {
+			for (var j = 0; j < output.length; j++) {
+				console.log(output[j]);
+			}
+		}
+	} else {
+		console.warn(defaultOutput);
 	}
-	var winners = pbjs.getAllWinningBids();
-	var output = [];
+
+}
+
+function forEach(responses, cb) {
+	Object.keys(responses).forEach(function(adUnitCode) {
+	  var response = responses[adUnitCode];
+	  response.bids.forEach(function(bid) {
+		cb(adUnitCode, bid);
+	  });
+	});
+  }
+
+  function getAllBids(pbjs) {
+	let winners = pbjs.getAllWinningBids();
+	console.log('num winners at ' + moment().format() + " = " + winners.length)
+	let pwinners = pbjs.getAllPrebidWinningBids();
+	console.log('num pwinners at ' + moment().format() + " = " + pwinners.length)
+	let output = [];
 	forEach(pbjs.getBidResponses(), function(code, bid) {
 	  output.push({
-		bid: bid,
+		auction: bid.auctionId,
 		adunit: code,
 		adId: bid.adId,
 		bidder: bid.bidder,
 		time: bid.timeToRespond,
 		cpm: bid.cpm,
+		slotSize: bid.size,
+		netRevenue: bid.netRevenue,
+		dealId: bid.dealId,
+		creativeId: bid.creativeId,
 		msg: bid.statusMessage,
 		rendered: !!winners.find(function(winner) {
 		  return winner.adId==bid.adId;
@@ -82,51 +73,61 @@ function getAllBids(pbjs) {
 		msg: "no bid",
 		adunit: code,
 		adId: bid.bidId,
-		bidder: bid.bidder
+		bidder: bid.bidder,
+		slotSize: bid.size,
+		dealId: bid.dealId
+
 	  });
 	});
-	if (output.length) {
-	  if (console.table) {
-		console.table(output);
-	  } else {
-		for (var j = 0; j < output.length; j++) {
-		  console.log(output[j]);
-		}
-	  }
-	} else {
-	  console.warn('NO prebid responses');
-	}
+	return output;
 };
 
 
-function getWonBids(pbjs) {
-	var bids = pbjs.getHighestCpmBids();
-	var output = [];
-	for (var i = 0; i < bids.length; i++) {
-		var b = bids[i];
+function getHighestCpmBids(pbjs) {
+	let output = [];
+	pbjs.getHighestCpmBids().forEach( bid => {
 		output.push({
-			'adunit': b.adUnitCode, 'adId': b.adId, 'bidder': b.bidder,
-			'time': b.timeToRespond, 'cpm': b.cpm
-		});
-	}
-	if (output.length) {
-		if (console.table) {
-			console.table(output);
-		} else {
-			for (var j = 0; j < output.length; j++) {
-				console.log(output[j]);
-			}
-		}
-	} else {
-		console.warn('No prebid winners');
-	}
+			auction: bid.auctionId,
+			adunit: bid.adUnitCode,
+			adId: bid.adId, 
+			bidder: bid.bidder,
+			time: bid.timeToRespond, 
+			cpm: bid.cpm,
+			slotSize: bid.size,
+			netRevenue: bid.netRevenue,
+			dealId: bid.dealId,
+			creativeId: bid.creativeId
+			});
+	});
+	return output;
 }
+
+
+function getAllWinningBids(pbjs) {
+	let output = [];
+	pbjs.getAllWinningBids().forEach( bid => {
+		output.push({
+			auction: bid.auctionId,
+			adunit: bid.adUnitCode,
+			adId: bid.adId, 
+			bidder: bid.bidder,
+			time: bid.timeToRespond, 
+			cpm: bid.cpm,
+			slotSize: bid.size,
+			netRevenue: bid.netRevenue,
+			dealId: bid.dealId,
+			creativeId: bid.creativeId
+			});
+	});
+	return output;
+}
+
 
 function checkForPBJS(domFoundTime) {
 	if (window.pbjs && window.pbjs.libLoaded && do_once_pbjs == 1) {
 
 		window.pbjs.onEvent('auctionEnd', function(data) {
-			console.log('PREBID_TOOLS: auctionEnd ' + convertTimestamp(Date.now()));
+			console.log('PREBID_TOOLS: auctionEnd ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
 			// TODO hmmm 'data' seems to contain all (and more) data that I use from
 			// the various other pbjs.get... methods. I guess longer term should look to
 			// parse and use 'data' directly
@@ -153,12 +154,38 @@ function checkForPBJS(domFoundTime) {
 			};
 
 			// Just dump all and won bids
-			getAllBids(window.pbjs);
-			getWonBids(window.pbjs);
+			console.log('show all the bids for each auction/ad slot');
+			displayTable(getAllBids(window.pbjs), 'No prebid responses');
+			console.log('return the highest bids for each slot that have not been rendered.');
+			console.log('this means from one call to the next if the highest bid from the firtst call is actually rendered then the second call will return the 2nd highest bid from that auction.');
+			displayTable(getHighestCpmBids(window.pbjs), 'No prebid winners');
+			console.log('record any (including historic) rendered ads that a pb bidder won.')
+			displayTable(getAllWinningBids(window.pbjs), 'No Prebid Rendered Ads');
 
-			sendMessage("AUCTION_END", response);
+			let allBidsDf = new dfjs.DataFrame(getAllBids(window.pbjs));
+			let highestCpmBids = new dfjs.DataFrame(getHighestCpmBids(window.pbjs));
+			let allWinningBids = new dfjs.DataFrame(getAllWinningBids(window.pbjs));
+			console.log('all bids df');
+			console.log(allBidsDf.toArray());
+			let dfs = {};
+			dfs['AllBids'] = allBidsDf.toCollection();
+			dfs['HighestCpmBids'] = highestCpmBids.toCollection();
+			dfs['AllWinningBids'] = allWinningBids.toCollection();
+			sendMessage("AUCTION_END", response, dfs);
 		});
 
+		window.pbjs.onEvent('bidWon', function(data) {
+		    console.log('PREBID_TOOLS: renderAd ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
+			// we want to capture the adId and relate back to wonbids to update it to a adserver win
+			console.log(data.adId);
+			console.log(data.bidderCode);
+			console.log(data.auctionId);
+			console.log(data.creativeId);
+			console.log(data.meta);
+			console.log(data);
+			// TODO send message to content about the winning bid
+		});
+		
 		window.pbjs.onEvent('addAdUnits', function() {
 			console.log('Ad units were added to Prebid.')
 		});
@@ -168,7 +195,7 @@ function checkForPBJS(domFoundTime) {
 		});
 
 		window.pbjs.onEvent('auctionInit', function(data) {
-			console.log('PREBID_TOOLS: auctionInit ' + convertTimestamp(Date.now()));
+			console.log('PREBID_TOOLS: auctionInit ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
 		});
 
 		window.pbjs.onEvent('bidTimeout', function(data) {
@@ -179,7 +206,7 @@ function checkForPBJS(domFoundTime) {
 
 		do_once_pbjs = 0;
 
-		console.log('PREBID_TOOLS: PBJS check found: ' + convertTimestamp(Date.now()) + ' ' + (Date.now() - domFoundTime) + 'ms');
+		console.log('PREBID_TOOLS: PBJS check found: ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()) + ' ' + (Date.now() - domFoundTime) + 'ms');
 
 		return 1;
 	} else {
@@ -259,7 +286,7 @@ function checkForGPT(domFoundTime) {
 
 		do_once_gpt = 0;
 
-		console.log('PREBID_TOOLS: GPT check found: ' + convertTimestamp(Date.now()) + ' ' + (Date.now() - domFoundTime) + 'ms');
+		console.log('PREBID_TOOLS: GPT check found: ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()) + ' ' + (Date.now() - domFoundTime) + 'ms');
 
 		return 1;
 	} else {
@@ -272,7 +299,7 @@ function checkForGPT(domFoundTime) {
 
 var domFoundTime = Date.now();
 
-console.log('PREBID_TOOLS: Entry ' + convertTimestamp(Date.now()));
+console.log('PREBID_TOOLS: Entry ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
 
 if (checkForPBJS(domFoundTime) == 0) {
 	var count_pbjs = 0;

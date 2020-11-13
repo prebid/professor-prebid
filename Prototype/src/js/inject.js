@@ -11,6 +11,8 @@ function injectScript(file_path, tag) {
 
 function checkForDOM() {
 	if (document.head) {
+		injectScript(chrome.extension.getURL('js/dataframe.js'), 'head');
+		injectScript(chrome.extension.getURL('js/moment.min.js'), 'head');
 		injectScript(chrome.extension.getURL('js/injected.js'), 'head');
 	} else {
 		requestIdleCallback(checkForDOM);
