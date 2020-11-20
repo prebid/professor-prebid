@@ -39,3 +39,4 @@ pids
 # Output of 'npm pack'
 *.tgz
 
+node_modules

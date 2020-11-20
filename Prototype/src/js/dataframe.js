@@ -7311,22 +7311,38 @@ var dfjs = (function (exports) {
 	      return this.__newInstance__(this.toArray(), newColumnNames);
 	    }
 	    /**
-	     * Rename a column.
-	     * @param {String} columnName The column to rename.
-	     * @param {String} replacement The new name for the column.
-	     * @returns {DataFrame} A new DataFrame with the new column name.
+	     * Rename one or more columns.
+	     * @param {String | dict} Either a single columnName to rename or a dict of column name remappings. 
+	     * @param {String | undefined } replacement name for the single case or undefined if a dict is provided.
+	     * @returns {DataFrame} A new DataFrame with the new column names.
 	     * @example
 	     * df.rename('column1', 'columnRenamed')
+	     * df.rename({'column1' : 'column1Renamed', 'column5' : 'column5Renamed'})
 	     */
 
 	  }, {
 	    key: "rename",
-	    value: function rename(columnName, replacement) {
-	      var newColumnNames = this[__columns__$1].map(function (column) {
-	        return column === columnName ? replacement : column;
-	      });
+	    value: function rename(param1, param2) {
+		  if (arguments.length == 1) {
+			// renameMany
+			let replacements = param1;
+			if (replacements.constructor != Object) {
+				throw new WrongSchemaError(replacements, "dictionary");
+			}
+			var newColumnNames = this[__columns__$1].map(function (column) {
+				return column in replacements ? replacements[column] : column;
+			});
 
-	      return this.renameAll(newColumnNames);
+	        return this.renameAll(newColumnNames);
+		  } else if (arguments.length == 2) {
+			let columnName = param1;
+			let replacement = param2;
+	        var newColumnNames = this[__columns__$1].map(function (column) {
+	        	return column === columnName ? replacement : column;
+	      	});
+
+	      	return this.renameAll(newColumnNames);
+		  }
 	    }
 	    /**
 	     * Cast each column into a given type.
@@ -7368,21 +7384,25 @@ var dfjs = (function (exports) {
 	        return typeFunction(row.get(columnName));
 	      });
 	    }
-	    /**
-	     * Remove a single column.
-	     * @param {String} columnName The column to drop.
-	     * @returns {DataFrame} A new DataFrame without the dropped column.
+		/**
+	     * Remove one or more columns.
+	     * @param {String | Array<string>} columnNames The columns to drop.
+	     * @returns {DataFrame} A new DataFrame without the dropped columns.
 	     * @example
 	     * df.drop('column2')
+	     * df.drop(['column2', 'column3'])
 	     */
-
-	  }, {
+	}, {
 	    key: "drop",
-	    value: function drop(columnName) {
+	    value: function drop(columnNames) {
+		  if (!Array.isArray(columnNames)) {
+			columnNames = [columnNames];
+		  }		
 	      return this.__newInstance__(this[__rows__].map(function (row) {
-	        return row.delete(columnName);
+			columnNames.forEach(c => row = row.delete(c));
+	        return row;
 	      }), this[__columns__$1].filter(function (column) {
-	        return column !== columnName;
+	        return !(columnNames.includes(column));
 	      }));
 	    }
 	    /**
@@ -7440,6 +7460,35 @@ var dfjs = (function (exports) {
 	     * Filter DataFrame rows.
 	     * Alias of .filter()
 	     * @param {Function | Object} condition A filter function or a column/value object.
+	     * @returns {Array<{index,Row}>} An array of the filtered rows with their corresponding indices.
+	     * @example
+	     * df.filterWithIndex(row => row.get('column1') >= 3)
+	     * df.filterWithIndex({'column2': 5, 'column1': 3}))
+	     */
+
+	  }, {
+	    key: "filterWithIndex",
+	    value: function filterWithIndex(condition) {
+	      var func = _typeof(condition) === "object" ? function (row) {
+	        return Object.entries(condition).map(function (_ref6) {
+	          var _ref7 = _slicedToArray(_ref6, 2),
+	              column = _ref7[0],
+	              value = _ref7[1];
+
+	          return Object.is(row.get(column), value);
+	        }).reduce(function (p, n) {
+	          return p && n;
+	        });
+	      } : condition;
+	      var filteredRows = iter(this[__rows__], function (row, i) {
+	        return func(row, i) ? {'index' : i, 'row' : row} : false;
+	      });
+	      return filteredRows;
+	    }
+	    /**
+	     * Filter DataFrame rows.
+	     * Alias of .filter()
+	     * @param {Function | Object} condition A filter function or a column/value object.
 	     * @returns {DataFrame} A new filtered DataFrame.
 	     * @example
 	     * df.where(row => row.get('column1') >= 3)
@@ -7464,6 +7513,21 @@ var dfjs = (function (exports) {
 	    key: "find",
 	    value: function find(condition) {
 	      return this.filter(condition)[__rows__][0];
+	    }
+	    /**
+	     * Find a row (the first met) based on a condition.
+	     * @param {Function} func A function to apply on each row taking the row as parameter.
+	     * @returns {'index':index, 'row' : Row} The targeted index and Row.
+	     * @example
+	     * df.find(row => row.get('column1') === 3)
+	     * df.find({'column1': 3})
+	     */
+
+	  }, {
+	    key: "findWithIndex",
+	    value: function findWithIndex(condition) {
+			let rs = this.filterWithIndex(condition);
+	      return rs.length > 0 ? rs[0] : undefined;
 	    }
 	    /**
 	     * Map on DataFrame rows. /!\ Prefer to use .chain().
@@ -7977,6 +8041,7 @@ var dfjs = (function (exports) {
 	    /**
 	     * Modify a Row a the given index.
 	     * @param {Number} [index=0] The index to select the row.
+	     * @param {Row => Row} [func=0] The function to modify the row.
 	     * @returns {DataFrame} A new DataFrame with the modified Row.
 	     * @example
 	     * df2.setRowByIndex(1, row => row.set("column1", 33))
@@ -7991,6 +8056,23 @@ var dfjs = (function (exports) {
 	      var newRows = Array.from(this[__rows__]);
 	      newRows[index] = func(newRows[index]);
 	      return this.__newInstance__(newRows, this[__columns__$1]);
+	    }
+	    /**
+	     * Modify a Row in place (by mutation) at the given index.
+	     * @param {Number} [index=0] The index to select the row.
+	     * @returns {DataFrame} The current DataFrame with the modified row.
+	     * @example
+	     * df2.setRowByIndex(1, row => row.set("column1", 33))
+	     */
+
+	  }, {
+	    key: "setRowInPlace",
+	    value: function setRowInPlace(index) {
+	      var func = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (row) {
+	        return row;
+	      };
+	      this[__rows__][index] = func(this[__rows__][index]);
+	      return this;
 	    }
 	  }]);
 

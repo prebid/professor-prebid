@@ -1,0 +1,42 @@
+/* The emerging W3C standard
+   that is currently Firefox-only */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: blue orange;
+}
+
+/* Works on Chrome/Edge/Safari */
+*::-webkit-scrollbar {
+    width: 12px;
+}
+*::-webkit-scrollbar-track {
+    background: orange;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: blue;
+    border-radius: 20px;
+    border: 3px solid orange;
+}
+
+.p_overlay {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    border-width : 4px;
+	border-color : red;
+	border-style : solid;
+	margin : 0 auto;
+	background : rgba(100, 100, 200, .75);
+	z-index : 99;
+    position : absolute; 
+}
+
+.p_overlay_body {
+    overflow-y: auto;
+    background: rgba(77, 91, 99, .75);
+    height: 100%;
+}
+
+.mask_body_table * {
+    font-size: 12px;
+}

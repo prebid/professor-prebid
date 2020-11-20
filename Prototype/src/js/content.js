@@ -24,6 +24,122 @@ function sendMessageToBackground(evt, datum, callback) {
 	}
 }
 
+function createMask(target, creativeRenderTime) {
+	//	const removeElements = (elms) => elms != null ? elms.forEach(el => el.remove()) : null;
+	let mask_container_id = "mask_container_" + target;
+	if (document.getElementById(mask_container_id)) {
+		document.getElementById(mask_container_id).remove();
+	}
+
+	// TODO - needs to be tidied up
+	let elmt = document.getElementById(target);
+	elmt.style.borderWidth = "4px";
+	elmt.style.borderColor = "blue";
+	elmt.style.borderStyle = "solid";
+	elmt.style.fillOpacity = "0.5";
+	elmt.style.fill = "orange";
+	elmt.style.background = "green";
+	elmt.scrollIntoView();
+
+	// desired size
+	let elmtStyle = window.getComputedStyle(elmt, null);
+	let cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
+	let cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
+
+	// create a mask
+	let mask_container = document.createElement("div");
+	mask_container.id = mask_container_id;
+	mask_container.classList.add("p_overlay");	
+	mask_container.style.width = cWidth + "px"; 
+	mask_container.style.height = cHeight + "px"; 
+	
+	let title_elmt = document.createElement("p");
+	title_elmt.style.fontSize = "20px";
+	title_elmt.style.color = "white";
+	title_elmt.style.fontWeight = "bold";
+	title_elmt.innerText = target;
+	mask_container.appendChild(title_elmt);
+	let hr1 = document.createElement("hr");
+	hr1.style.margin = "0px";
+	mask_container.appendChild(hr1);
+	// Main body
+	let mask_container_body_id = "mask_container_body_" + target;
+	mask_body_elmt = document.createElement('div');
+	mask_body_elmt.classList.add('p_overlay_body');
+	mask_body_elmt.id = mask_container_body_id;
+	mask_container.appendChild(mask_body_elmt);
+
+	// General section
+	let general_section_elmt = document.createElement("p");
+	general_section_elmt.style.fontSize = "10px";
+	general_section_elmt.style.color = "grey";
+	general_section_elmt.innerText = 	"\nAd render time - " + creativeRenderTime;
+	let hr2 = document.createElement("hr");
+	hr2.style.margin = "0px";
+	general_section_elmt.appendChild(hr2);
+	mask_body_elmt.appendChild(general_section_elmt);
+
+	// Add the mask to the doc
+	elmt.parentElement.insertBefore(mask_container, elmt);
+}
+
+function updateMask(slotDf, bidsDf) {
+	let row = slotDf.getRow(0);
+	let target = row.get('slotElementId');
+	let creativeRenderTime = row.get('slotLoadTs') - row.get('slotRenderedTs');
+	// TODO get auction time
+	createMask(target, creativeRenderTime);
+
+	// do we have a prebid winner?
+	bidsDf = bidsDf.sortBy('rendered', true); // rendered = true will be first
+	let winner = bidsDf.filter(row => row.get('rendered') == true);
+	let prebidRenderedAd = winner.dim()[0] != 0 ? true : false;
+
+	// if we do display them first
+	let mask_container_body_id = "mask_container_body_" + target;
+	let mask_body_elmt = document.getElementById(mask_container_body_id);
+	let body_table = document.createElement('table');
+	body_table.style.width = '100%';
+	body_table.classList.add('mask_body_table');
+
+	if (prebidRenderedAd) {
+		mask_body_elmt.style.background = 'yellow';
+	}
+
+	function extractBidderInfo(body, row) {
+		let tr = document.createElement('tr');
+		let td = document.createElement('td');
+		td.style.fontWeight = 'bold';
+		td.style.textAlign = 'center';
+		td.style.verticalAlign = 'middle';
+		td.innerText = row.get('bidder') + (row.get('rendered') ? ' - Auction Winner' : '');
+		tr.appendChild(td);
+		body.appendChild(tr);
+		tr = document.createElement('tr');
+		td = document.createElement('td');
+		td.style.textAlign = 'center';
+		td.style.verticalAlign = 'middle';
+		td.innerText = 'Response Time - ' + (row.has('time') && row.get('time') ? row.get('time') + 'ms' : 'N/A');
+		tr.appendChild(td);
+		body.appendChild(tr);
+		tr = document.createElement('tr');
+		td = document.createElement('td');
+		td.style.textAlign = 'center';
+		td.style.verticalAlign = 'middle';
+		td.innerText = 'Bid CPM - ' + (row.has('cpm') && row.get('cpm') ? row.get('cpm') : 'No Bid');
+		tr.appendChild(td);
+		body.appendChild(tr);
+		let hr = document.createElement('hr');
+		hr.style.borderTop = 'dotted 1px';
+		hr.style.margin = '0px'
+		body.appendChild(hr);
+	}
+
+	mask_body_elmt.appendChild(body_table);
+	bidsDf.map(row => extractBidderInfo(body_table, row));
+}
+
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	// When POPUP becomes active it will send us a message, in response we
 	// send back the collected data structures
@@ -41,55 +157,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		console.log('PREBID_TOOLS: POPUP_GPTBUTTON id=' + msg.obj.target);
 		// TODO use auction data 
 
-
-		const removeElements = (elms) => elms.forEach(el => el.remove());
-		let toRemove =  document.querySelectorAll(".p_overlay")
-		removeElements(toRemove);
-
-		// TODO - needs to be tidied up
-		let elmt = document.getElementById(msg.obj.target);
-		elmt.style.borderWidth = "4px";
-		elmt.style.borderColor = "blue";
-		elmt.style.borderStyle = "solid";
-		elmt.style.fillOpacity = "0.5";
-		elmt.style.fill = "orange";
-		elmt.style.background = "green";
-		elmt.scrollIntoView();
-
-		// desired size
-//		let ifDestination = $('iframe:first').offset();
-//			console.log(ifDestination);
-		let elmtStyle = window.getComputedStyle(elmt, null);
-		let cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
-		let cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
-
-		// create a mask
-		let mask_container = document.createElement("div");
-		let mask_container_id = "mask_container_" + msg.obj.target;
-		mask_container.id = mask_container_id;
-		mask_container.className = "p_overlay";
-		mask_container.style.borderWidth = "4px";
-		mask_container.style.borderColor = "red"
-		mask_container.style.borderStyle = "solid";
-		mask_container.style.margin = "0 auto";
-		mask_container.style.background = "rgba(100, 100, 200, .75)";
-		mask_container.style.zIndex = "99";
-		mask_container.style.position = "absolute"; 
-		mask_container.style.width = cWidth + "px"; 
-		mask_container.style.height = cHeight + "px"; 
-
-		let title_elmt = document.createElement("p");
-		title_elmt.style.fontSize = "20px";
-		title_elmt.style.color = "white";
-		title_elmt.style.fontWeight = "bold";
-		title_elmt.innerText = msg.obj.target + "<br/>";
-		mask_container.appendChild(title_elmt);
-		elmt.parentElement.insertBefore(mask_container, elmt);
+		updateMask(msg.obj.target, null);
 
 		sendResponse({
 			msg: 'POPUP_GPTBUTTON_RESPONSE'
 		});
 
+		// reset all other masks
 		msg.obj.nottarget.forEach(t => {
 			let elmt = document.getElementById(t);
 			elmt.style.borderWidth = "0px";
@@ -109,31 +183,16 @@ window.addEventListener("message", function(event) {
 
 		// When we get AUCTION_END from injected script build data structure
 		// to be sent to the POPUP script when it activates
-		if(event.data.dfs) {
-			allBidsDf = new dfjs.DataFrame(event.data.dfs['AllBids']);
+		let auctionObjects = JSON.parse(event.data.obj);
+		if(auctionObjects['dfs']) {
+			allBidsDf = new dfjs.DataFrame(auctionObjects['dfs']['allBids']);
 			console.log('passed all bids df');
 			console.log(allBidsDf.toCSV());
-			highestCpmBidsDf = new dfjs.DataFrame(event.data.dfs['HighestCpmBids']);
-			console.log('passed highest cpm bids df');
-			console.log(highestCpmBidsDf.toCSV());
-			allWinningBidsDf = new dfjs.DataFrame(event.data.dfs['AllWinningBids']);
-			console.log('passed all winning bids df');
-			console.log(allWinningBidsDf.toCSV());
 		}
-
-		let auctionObjects = JSON.parse(event.data.obj);
+	
 		let auctionTimestamp = auctionObjects['auctionTimestamp'];
 		let adUnitMapToSlot = auctionObjects['adUnits'];
-		let rawData = auctionObjects['rawData'];
 
-		const unique = (value, index, self) => {
-			return self.indexOf(value) === index
-		};
-
-		let yesBids = Object.keys(auctionObjects['yesBids']);
-		let noBids = Object.keys(auctionObjects['noBids']);
-		let adUnitArray = yesBids.concat(noBids).filter(unique);
-		let wonBids = auctionObjects['wonBids'];
 		let bidderRequests = auctionObjects['bidderRequests'];
 
 		bidderRequests.forEach(bidderRequest => {
@@ -141,48 +200,25 @@ window.addEventListener("message", function(event) {
 		});
 
 		var adUnitObj = {};
-
-		adUnitArray.forEach(adUnit => {
-			var adUnitAry = [];
-			var anyAuctionId;
-
-			if (typeof auctionObjects['yesBids'][adUnit] !== 'undefined') {
-				let yesBids = auctionObjects['yesBids'][adUnit].bids;
-
-				adUnitAry = adUnitAry.concat(yesBids);
-
-				yesBids.forEach(bid => {
-					if (typeof bid.auctionId !== 'undefined') {
-						anyAuctionId = bid.auctionId;
-					}
-				});
-			}
-
-			if (typeof auctionObjects['noBids'][adUnit] !== 'undefined') {
-				let noBids = auctionObjects['noBids'][adUnit].bids;
-
-				adUnitAry = adUnitAry.concat(noBids);
-
-				noBids.forEach(bid => {
-					if (typeof bid.auctionId !== 'undefined') {
-						anyAuctionId = bid.auctionId;
-					}
-				});
-			}
-
-			adUnitObj[adUnit] = adUnitAry.filter(unique);
-			auctionObj[anyAuctionId] = {
-				"auctionTimestamp": moment().format("YYYY-MM-DD HH:mm:ss.SSS", auctionTimestamp),
-				"adUnitObj": adUnitObj,
-				"adUnitMapToSlot": adUnitMapToSlot
-			};
-		});
+		// auctionObj[anyAuctionId] = {
+		// 	"auctionTimestamp": moment().format("YYYY-MM-DD HH:mm:ss.SSS", auctionTimestamp),
+		// 	"adUnitObj": adUnitObj,
+		// 	"adUnitMapToSlot": adUnitMapToSlot
+		// };
 		
 	} else if (event.data.type && (event.data.type == "GPT_SLOTRENDERED")) {
 		console.log('PREBID_TOOLS: Received GPT_SLOTRENDERED event');
 
 		let gptSlotInfo = JSON.parse(event.data.obj);
 		gptObj[gptSlotInfo.slotElementId] = gptSlotInfo;
+	} else if (event.data.type && (event.data.type == "GPT_SLOTLOADED")) {
+		console.log('PREBID_TOOLS: Received GPT_SLOTLOADED event');
+		let response = JSON.parse(event.data.obj);
+		let slotDf = new dfjs.DataFrame(response['slotDf']);
+		let bidsDf = new dfjs.DataFrame(response['bidsDf']);
+		updateMask(slotDf, bidsDf);
+		
+
 	} else if (event.data.type && (event.data.type == "GPT_VISIBILITY_EVENT")) {
 		console.log('PREBID_TOOLS: Received GPT_VISIBILITY_EVENT event');
 

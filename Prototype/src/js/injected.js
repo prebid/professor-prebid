@@ -3,23 +3,25 @@
 // The only way for an injected script to message to the content.js
 // script is via window.postMessage()
 
+var do_once_pbjs = 1;
+var allBidsDf, bidderDoneDf;
+var auctionDf, slotDf;
+// TODO do we need this ?
+//var slotDf = new pbjs.DataFrame([], ['slotId', 'slotPath', 'size', 'prebidWinnerId']);
+
 
 // Need to use window.postMessage() to communicate with content.js
 
-function sendMessage(evt, x, dfs) {
+function sendMessage(evt, x) {
 	console.log('PREBID_TOOLS: sendMessage(' + evt + ')');
 
 	window.postMessage({
 		type: evt,
-		obj: JSON.stringify(x),
-		dfs : dfs || {}
+		obj: JSON.stringify(x)
 	});
 }
 
-var do_once_pbjs = 1;
-
 // Check for PBJS loaded and add listeners to various events when ready
-
 function displayTable(output, defaultOutput) {
 	if (output.length) {
 		if (console.table) {
@@ -36,88 +38,102 @@ function displayTable(output, defaultOutput) {
 }
 
 function forEach(responses, cb) {
-	Object.keys(responses).forEach(function(adUnitCode) {
-	  var response = responses[adUnitCode];
-	  response.bids.forEach(function(bid) {
-		cb(adUnitCode, bid);
-	  });
+	Object.keys(responses).forEach(function (adUnitCode) {
+		var response = responses[adUnitCode];
+		response.bids.forEach(function (bid) {
+			cb(adUnitCode, bid);
+		});
 	});
-  }
+}
 
-  function getAllBids(pbjs) {
+function getAllBids(pbjs, ts) {
 	let winners = pbjs.getAllWinningBids();
 	console.log('num winners at ' + moment().format() + " = " + winners.length)
 	let pwinners = pbjs.getAllPrebidWinningBids();
 	console.log('num pwinners at ' + moment().format() + " = " + pwinners.length)
 	let output = [];
-	forEach(pbjs.getBidResponses(), function(code, bid) {
-	  output.push({
-		auction: bid.auctionId,
-		adunit: code,
-		adId: bid.adId,
-		bidder: bid.bidder,
-		time: bid.timeToRespond,
-		cpm: bid.cpm,
-		slotSize: bid.size,
-		netRevenue: bid.netRevenue,
-		dealId: bid.dealId,
-		creativeId: bid.creativeId,
-		msg: bid.statusMessage,
-		rendered: !!winners.find(function(winner) {
-		  return winner.adId==bid.adId;
-		})
-	  });
+	forEach(pbjs.getBidResponses(), function (code, bid) {
+		output.push({
+			auction: bid.auctionId,
+			adunit: code,
+			adId: bid.adId,
+			bidder: bid.bidder,
+			time: bid.timeToRespond,
+			cpm: bid.cpm,
+			slotSize: bid.size,
+			netRevenue: bid.netRevenue,
+			dealId: bid.dealId,
+			creativeId: bid.creativeId,
+			msg: bid.statusMessage,
+			nonRenderedHighestCpm: false,
+			rendered: !!winners.find(function (winner) {
+				return winner.adId == bid.adId;
+			}),
+			created: ts,
+			modified: ts
+		});
 	});
-	forEach(pbjs.getNoBids && pbjs.getNoBids() || {}, function(code, bid) {
-	  output.push({
-		msg: "no bid",
-		adunit: code,
-		adId: bid.bidId,
-		bidder: bid.bidder,
-		slotSize: bid.size,
-		dealId: bid.dealId
-
-	  });
+	forEach(pbjs.getNoBids && pbjs.getNoBids() || {}, function (code, bid) {
+		output.push({
+			auction: bid.auctionId,
+			adunit: code,
+			adId: bid.adId,
+			bidder: bid.bidder,
+			slotSize: bid.size,
+			msg: "no bid",
+			nonRenderedHighestCpm: false,
+			rendered: false,
+			created: ts,
+			modified: ts
+		});
 	});
 	return output;
 };
 
-
-function getHighestCpmBids(pbjs) {
+// TODO May merge into single df
+function getHighestCpmBids(pbjs, ts) {
 	let output = [];
-	pbjs.getHighestCpmBids().forEach( bid => {
+	pbjs.getHighestCpmBids().forEach(bid => {
 		output.push({
 			auction: bid.auctionId,
 			adunit: bid.adUnitCode,
-			adId: bid.adId, 
+			adId: bid.adId,
 			bidder: bid.bidder,
-			time: bid.timeToRespond, 
+			time: bid.timeToRespond,
 			cpm: bid.cpm,
 			slotSize: bid.size,
 			netRevenue: bid.netRevenue,
 			dealId: bid.dealId,
-			creativeId: bid.creativeId
-			});
+			creativeId: bid.creativeId,
+			nonRenderedHighestCpm: true,
+			rendered: false,
+			created: ts,
+			modified: ts
+		});
 	});
 	return output;
 }
 
-
-function getAllWinningBids(pbjs) {
+// TODO may merge into single df
+function getAllWinningBids(pbjs, ts) {
 	let output = [];
-	pbjs.getAllWinningBids().forEach( bid => {
+	pbjs.getAllWinningBids().forEach(bid => {
 		output.push({
 			auction: bid.auctionId,
 			adunit: bid.adUnitCode,
-			adId: bid.adId, 
+			adId: bid.adId,
 			bidder: bid.bidder,
-			time: bid.timeToRespond, 
+			time: bid.timeToRespond,
 			cpm: bid.cpm,
 			slotSize: bid.size,
 			netRevenue: bid.netRevenue,
 			dealId: bid.dealId,
-			creativeId: bid.creativeId
-			});
+			creativeId: bid.creativeId,
+			nonRenderedHighestCpm: false,
+			rendered: true,
+			created: ts,
+			modified: ts
+		});
 	});
 	return output;
 }
@@ -126,8 +142,23 @@ function getAllWinningBids(pbjs) {
 function checkForPBJS(domFoundTime) {
 	if (window.pbjs && window.pbjs.libLoaded && do_once_pbjs == 1) {
 
-		window.pbjs.onEvent('auctionEnd', function(data) {
-			console.log('PREBID_TOOLS: auctionEnd ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
+		window.pbjs.onEvent('auctionInit', function (data) {
+			let ts = Date.now();
+			console.log('PREBID_TOOLS: auctionInit ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", ts));
+
+			let existingRow = auctionDf.find(r => r.auction == data.auctionId)
+			if (existingRow) {
+				existingRow.set("auctionStart", ts);
+			} else {
+				auctionDf.push([data.auctionId, ts, null]);
+			}
+		});
+
+		window.pbjs.onEvent('auctionEnd', function (data) {
+			let auctionStartTime = data.timestamp;
+			let auctionEndTime = Date.now();
+			console.log('PREBID_TOOLS: auctionEnd ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", auctionEndTime));
+
 			// TODO hmmm 'data' seems to contain all (and more) data that I use from
 			// the various other pbjs.get... methods. I guess longer term should look to
 			// parse and use 'data' directly
@@ -142,63 +173,110 @@ function checkForPBJS(domFoundTime) {
 				adUnitObj[e.code] = e.path;
 			});
 
+			// Just dump all and won bids
+			console.log('PREBID_TOOLS: auctionEnd. Show all the bids for each auction/ad slot');
+			displayTable(getAllBids(window.pbjs, domFoundTime), 'No prebid responses');
+			console.log('PREBID_TOOLS: auctionEnd . Return the highest bids for each slot that have not been rendered.');
+			console.log('this means from one call to the next if the highest bid from the firtst call is actually rendered then the second call will return the 2nd highest bid from that auction.');
+			displayTable(getHighestCpmBids(window.pbjs, domFoundTime), 'No prebid winners');
+			console.log('PREBID_TOOLS: auctionEnd. Record any (including historic) rendered ads that a pb bidder won.')
+			displayTable(getAllWinningBids(window.pbjs, domFoundTime), 'No Prebid Rendered Ads');
+
+
+			let new_allBidsDf = new dfjs.DataFrame(getAllBids(window.pbjs, domFoundTime));
+			let highestCpmBids = new dfjs.DataFrame(getHighestCpmBids(window.pbjs, domFoundTime));
+			let allWinningBids = new dfjs.DataFrame(getAllWinningBids(window.pbjs, domFoundTime));
+
+			let auction = auctionDf.findWithIndex(row => row.auction == data.auctionId);
+			if (auction) {
+				auctionDf.setRowInPlace(auction.index, row => row.set('auctionStart', auctionStartTime).set('auctionEnd', auctionEndTime));
+			} else {
+				auctionDf.push([data.auctionId, auctionStartTime, auctionEndTime]);
+			}		
+			console.log('Auction DF');
+			console.log(auctionDf.toCSV());
+
+			function createOrUpdateDf(a, b) {
+				return a ? a.union(b) : b;
+			}
+			allBidsDf = createOrUpdateDf(allBidsDf, new_allBidsDf);
+			allBidsDf = allBidsDf.join(highestCpmBids.select('auction', 'adunit', 'adId', 'bidder', 'nonRenderedHighestCpm', 'modified').rename({'nonRenderedHighestCpm' :'nonRenderedHighestCpm_2', 'modified' : 'modified_2'}), ['auction', 'adunit', 'adId', 'bidder'], 'outer');
+			allBidsDf = allBidsDf.map(row => row.set('nonRenderedHighestCpm', row.get('nonRenderedHighestCpm_2') ? true : false)).drop(['nonRenderedHighestCpm_2', 'modified_2']);
+			allBidsDf = allBidsDf.join(allWinningBids.select('auction', 'adunit', 'adId', 'bidder', 'nonRenderedHighestCpm', 'rendered', 'modified').rename({'nonRenderedHighestCpm' : 'nonRenderedHighestCpm_2', 'rendered' : 'rendered_2', 'modified' : 'modified_2'}), ['auction', 'adunit', 'adId', 'bidder'], 'left');
+			allBidsDf = allBidsDf.map(row => row.set('nonRenderedHighestCpm', row.get('nonRenderedHighestCpm_2') ? true : false) && row.set('rendered', row.get('rendered_2') ? true : false)).drop(['nonRenderedHighestCpm_2', 'rendered_2', 'modified_2']);
+			try {
+				allBidsDf = allBidsDf.join(bidderDoneDf, ['auction', 'adunit', 'bidder'], left);
+				allBidsDf = allBidsDf.map(row => row.set('time', row.get('time') == undefined ? row.get('responseTime') - auctionStartTime : row.get('time'))).drop(['responseTime']);
+			} catch (e) {
+				console.log(e);
+			}
+
+
+			let dfs = {};
+			dfs['allBids'] = allBidsDf.toCollection();
+			dfs['auction'] = auctionDf.toCollection();
+			dfs['slots'] = slotDf.toCollection();
+
+
 			// On auctionEnd, let the content script know it happened
 			let response = {
 				"auctionTimestamp": Date.now(),
-				"yesBids": window.pbjs.getBidResponses(),
-				"noBids": window.pbjs.getNoBids(),
-				"wonBids": window.pbjs.getAllPrebidWinningBids(),
 				"adUnits": adUnitObj,
 				"bidderRequests": data.bidderRequests,
-				"rawData": data
+				"dfs" : dfs
 			};
-
-			// Just dump all and won bids
-			console.log('show all the bids for each auction/ad slot');
-			displayTable(getAllBids(window.pbjs), 'No prebid responses');
-			console.log('return the highest bids for each slot that have not been rendered.');
-			console.log('this means from one call to the next if the highest bid from the firtst call is actually rendered then the second call will return the 2nd highest bid from that auction.');
-			displayTable(getHighestCpmBids(window.pbjs), 'No prebid winners');
-			console.log('record any (including historic) rendered ads that a pb bidder won.')
-			displayTable(getAllWinningBids(window.pbjs), 'No Prebid Rendered Ads');
-
-			let allBidsDf = new dfjs.DataFrame(getAllBids(window.pbjs));
-			let highestCpmBids = new dfjs.DataFrame(getHighestCpmBids(window.pbjs));
-			let allWinningBids = new dfjs.DataFrame(getAllWinningBids(window.pbjs));
-			console.log('all bids df');
-			console.log(allBidsDf.toArray());
-			let dfs = {};
-			dfs['AllBids'] = allBidsDf.toCollection();
-			dfs['HighestCpmBids'] = highestCpmBids.toCollection();
-			dfs['AllWinningBids'] = allWinningBids.toCollection();
-			sendMessage("AUCTION_END", response, dfs);
+			sendMessage("AUCTION_END", response);
 		});
 
-		window.pbjs.onEvent('bidWon', function(data) {
-		    console.log('PREBID_TOOLS: renderAd ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
+		// won the adserver auction
+		window.pbjs.onEvent('bidWon', function (data) {
+			console.log('PREBID_TOOLS: bidWon ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
 			// we want to capture the adId and relate back to wonbids to update it to a adserver win
-			console.log(data.adId);
-			console.log(data.bidderCode);
-			console.log(data.auctionId);
-			console.log(data.creativeId);
-			console.log(data.meta);
+			console.log('PREBID_TOOLS: bidWon auctionId: ' + data.auctionId);
+			console.log('PREBID_TOOLS: bidWon adunit: ' + data.adUnitCode);
+			console.log('PREBID_TOOLS: bidWon AdId: ' + data.adId);
+			console.log('PREBID_TOOLS: bidWon bidder: ' + data.bidderCode);
+			console.log('PREBID_TOOLS: bidWon creativeId: ' + data.creativeId);
+			console.log('PREBID_TOOLS: bidWon meta: ' + data.meta);
 			console.log(data);
-			// TODO send message to content about the winning bid
+
+
+			let r = allBidsDf.findWithIndex(row => row.get('auction') == data.auctionId && row.get('adunit') == data.adUnitCode && row.get('adId') == data.adId && row.get('bidder') == data.bidderCode);
+			allBidsDf = allBidsDf.setRow(r.index, row => row.set('rendered', true).set('nonRenderedHighestCpm', false));
+			displayTable(allBidsDf.toCollection())
+
 		});
+
+        /* Log when ad units are added to Prebid */
+		window.pbjs.onEvent('addAdUnits', function () {
+			console.log('PREBID_TOOLS: Ad units were added to Prebid.');
+			console.log(pbjs.adUnits);
+		});
+
+		window.pbjs.onEvent('bidResponse', function (data) {
+//			console.log('PREBID_TOOLS: Bid Response '  + JSON.stringify(data))
+		});
+
+		window.pbjs.onEvent('bidderDone', function (data) {
+			console.log('PREBID_TOOLS: Bidder Done '  + JSON.stringify(data.bidderCode));
+			let ts = Date.now();
+			function updateBidderDoneDf(doneBid) {
+				bidderDoneDf = bidderDoneDf.push([doneBid.auctionId, doneBid.adUnitCode, doneBid.bidder, 'done', ts]);
+			}
+			data.bids.forEach(doneBid => updateBidderDoneDf(doneBid));
+		});
+
 		
-		window.pbjs.onEvent('addAdUnits', function() {
-			console.log('Ad units were added to Prebid.')
-		});
+		window.pbjs.onEvent('bidTimeout', function (data) {
+			// adUnitCode: "/43340684/EGNET_LB_2"
+			// auctionId: "69ba022d-d486-45ca-b9b5-d59463130379"
+			// bidId: "55dff330955aa37"
+			// bidder: "sovrn"
+			console.log('PREBID_TOOLS: bidTimeout ' + JSON.stringify(data));
+			let ts = Date.now();
+			data.bids.forEach(doneBid => bidderDoneDf.push(doneBid.auctionId, doneBid.adUnitCode, doneBid.bidder, 'done', ts));
 
-		window.pbjs.onEvent('bidResponse', function(response) {
-			console.log('Bid Responses.')
-		});
 
-		window.pbjs.onEvent('auctionInit', function(data) {
-			console.log('PREBID_TOOLS: auctionInit ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()));
-		});
-
-		window.pbjs.onEvent('bidTimeout', function(data) {
 			data.forEach(nobid => {
 				console.log('PREBID_TOOLS: bidTimeout ' + JSON.stringify(nobid));
 			});
@@ -222,11 +300,14 @@ var slotIdHash = {};
 
 function checkForGPT(domFoundTime) {
 	if (window.googletag && window.googletag.pubadsReady && window.googletag.apiReady && do_once_gpt == 1) {
-		googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+		// fires when a creative is injected into a slot. It will occur before the creative's resources are fetched.
+		googletag.pubads().addEventListener('slotRenderEnded', function (event) {
 			let targeting = {};
-
-			slotIdHash[event.slot.getSlotElementId()] = Date.now();
-
+			let ts = Date.now();
+			slotIdHash[event.slot.getSlotElementId()] = ts;
+			console.log('GPT_TOOLS: SlotRenderEnded slotElementId ' + event.slot.getSlotElementId());
+			console.log('GPT_TOOLS: SlotRenderEnded slotId ' + event.slot.getSlotId());
+			console.log('GPT_TOOLS: SlotRenderEnded adunitpath ' + event.slot.getAdUnitPath());
 			console.log('GPT_TOOLS: SlotRenderEnded ' + JSON.stringify(event));
 
 			event.slot.getTargetingKeys().forEach(k => {
@@ -234,6 +315,11 @@ function checkForGPT(domFoundTime) {
 			});
 
 			console.log('GPT_TOOLS: campaignId=' + event.campaignId + ' lineItemId=' + event.lineItemId + ' advertiserId=' + event.advertiserId);
+
+			let existingRow = slotDf.find(r => r.slotElementId == event.slot.slotElementId && r.adUnitPath == event.slot.getAdUnitPath());
+			if (!existingRow) {
+				slotDf = slotDf.push([event.slot.getSlotElementId(), event.slot.getAdUnitPath(), ts, null]);
+			}
 
 			let response = {
 				"gptTimestamp": Date.now(),
@@ -245,31 +331,42 @@ function checkForGPT(domFoundTime) {
 			sendMessage("GPT_SLOTRENDERED", response);
 		});
 
-		googletag.pubads().addEventListener('slotOnload', function(event) {
+		googletag.pubads().addEventListener('slotOnload', function (event) {
 			// Is this how GAM computed creative render time?
-			let creativeRenderTime = Date.now() - slotIdHash[event.slot.getSlotElementId()];
+			let loadTs = Date.now();
+			let creativeRenderTime = loadTs - slotIdHash[event.slot.getSlotElementId()];
 
-			console.log("(slotOnload_Time - slotRenderEnded_Time)[" + event.slot.getSlotElementId() + "] = " + creativeRenderTime + 'msec');
-			
+			console.log("GPT_TOOLS: (slotOnload_Time - slotRenderEnded_Time)[" + event.slot.getSlotElementId() + "] = " + creativeRenderTime + 'msec');
+
+			slotDf = slotDf.map(row => row.set('slotLoadTs', (row.get('slotElementId') == event.slot.getSlotElementId() &&  row.get('adUnitPath') == event.slot.getAdUnitPath()) ? loadTs : row.get('slotLoadTs')));
+			displayTable(slotDf.toCollection());
+
+			let slotBidsDf = allBidsDf.filter(row => row.get('adunit') == event.slot.getAdUnitPath());
+//			slotBidsDf = slotBidsDf.join(slotDf, ['adUnitPath']);
 			// Remove SlotElementID from hash
 			delete slotIdHash[event.slot.getSlotElementId()];
 
 			console.log('GPT_TOOLS: slotOnload ' + JSON.stringify(event));
+			let response = {
+				slotDf : slotDf.filter(row => row.get('slotElementId') == event.slot.getSlotElementId() && row.get('adUnitPath') == event.slot.getAdUnitPath()).toCollection(),
+				bidsDf : slotBidsDf.toCollection()
+			}
+			sendMessage('GPT_SLOTLOADED', response, response);
 		});
 
-		googletag.pubads().addEventListener('impressionViewable', function(event) {
+		googletag.pubads().addEventListener('impressionViewable', function (event) {
 			console.log('GPT_TOOLS: ImpressionViewable ' + JSON.stringify(event));
 		});
 
-		googletag.pubads().addEventListener('slotRequested', function(event) {
+		googletag.pubads().addEventListener('slotRequested', function (event) {
 			console.log('GPT_TOOLS: SlotRequested ' + JSON.stringify(event));
 		});
 
-		googletag.pubads().addEventListener('slotResponse', function(event) {
+		googletag.pubads().addEventListener('slotResponse', function (event) {
 			console.log('GPT_TOOLS: SlotResponse ' + JSON.stringify(event));
 		});
 
-		googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
+		googletag.pubads().addEventListener('slotVisibilityChanged', function (event) {
 			console.log('GPT_TOOLS: SlotVisibilityChanged ' + JSON.stringify(event));
 
 			// Want this to feed the popup but can't message to that directly so this
@@ -313,6 +410,9 @@ if (checkForPBJS(domFoundTime) == 0) {
 			}
 		} else {
 			clearInterval(timer_pbjs);
+			auctionDf = new dfjs.DataFrame([], ['auction', 'startTime', 'endTime']);
+			bidderDoneDf = new dfjs.DataFrame([], ['auction', 'adunit', 'bidder', 'type', 'responseTime']);
+			slotDf = new dfjs.DataFrame([], ['slotElementId', 'adUnitPath', 'slotRenderedTs', 'slotLoadTs']);
 		}
 	}
 }
@@ -332,3 +432,4 @@ if (checkForGPT(domFoundTime) == 0) {
 		}
 	}
 }
+
