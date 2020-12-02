@@ -2,7 +2,7 @@
    that is currently Firefox-only */
 * {
     scrollbar-width: thin;
-    scrollbar-color: blue orange;
+    scrollbar-color: rgb(135, 135, 238) rgb(100, 100, 100);
 }
 
 /* Works on Chrome/Edge/Safari */
@@ -10,12 +10,12 @@
     width: 12px;
 }
 *::-webkit-scrollbar-track {
-    background: orange;
+    background: rgb(100, 100, 100);
 }
 *::-webkit-scrollbar-thumb {
-    background-color: blue;
+    background-color: rgb(135, 135, 238);
     border-radius: 20px;
-    border: 3px solid orange;
+    border: 3px solid rgb(100, 100, 100);
 }
 
 .p_overlay {
@@ -26,17 +26,19 @@
 	border-color : red;
 	border-style : solid;
 	margin : 0 auto;
-	background : rgba(100, 100, 200, .75);
+	background : rgba(138, 204, 255, 0.75);
 	z-index : 99;
     position : absolute; 
 }
 
 .p_overlay_body {
     overflow-y: auto;
-    background: rgba(77, 91, 99, .75);
+    background: rgba(138, 204, 255, .75);
     height: 100%;
 }
 
 .mask_body_table * {
     font-size: 12px;
 }
+
+
