@@ -262,32 +262,6 @@ Chart.elements.Rectangle.prototype.draw = function() {
   }
 };
 
-/**Chart Data**/
-var data = {
-  labels: [""],
-  datasets: [{
-    label: 'data 0',
-    data: [10],
-    backgroundColor: [
-      'rgba(200, 200, 200, 1)'
-    ],
-    borderWidth: 0
-  }, {
-    label: 'data 1',
-    data: [20],
-    backgroundColor: [
-      'rgba(100, 100, 255, 1)'
-    ],
-    borderWidth: 0
-  }, {
-    label: 'data 2',
-    data: [15],
-    backgroundColor: [
-      'rgba(255, 255, 100, 1)'
-    ],
-    borderWidth: 0
-  }]
-};
 
 /**Chart Options - Radius options are here**/
 var options = {
@@ -307,15 +281,17 @@ var options = {
       radius: 10
     }
   },
+  dataset : {
+    barThickness: 15
+  },
   legend: {
-    display: false
+    display: true
 	},
   scales: {
     yAxes: [{
       stacked: true,
       radius: 10,
-      barThickness: 15,
-      display: false
+      display: true
     }],
     xAxes: [{
       stacked: true,
@@ -328,7 +304,8 @@ var options = {
         labels: {
             title: {
                 font: {
-                    weight: 'bold'
+					weight: 'bold',
+					fontSize: 10
                 }
             },
             value: {
@@ -336,22 +313,45 @@ var options = {
             }
         },
         anchor : 'center',
-        align : 'top',
-        offset : 5
+        align : 'center',
+        offset : 0
 
     }
   }  
 };
 
-for (var i=0; i<3;i++) {
-  data.datasets[i].data = [10 + i*10];
-}
-/**Generate Chart**/
-Chart.plugins.unregister(ChartDataLabels);
-var ctxBar = document.getElementById("myChart");
-var myBarChart = new Chart(ctxBar, {
-  type: 'horizontalBar',
-  data: data,
-  plugins: [ChartDataLabels],
-  options: options
-});
+
+
+/**Chart Data**/
+var overviewPageTimelineData = {
+  labels: [""],
+  datasets: [{
+    label: 'pre-auction',
+    backgroundColor: [
+      'rgba(200, 200, 200, 1)', 'rgba(200, 200, 200, 1)'
+    ],
+    borderWidth: 0
+  }, {
+    label: 'auction',
+    backgroundColor: [
+      'rgba(100, 100, 255, 1)', 'rgba(100, 100, 255, 1)'
+    ],
+    borderWidth: 0
+  }, {
+    label: 'ad server',
+    backgroundColor: [
+      'rgba(255, 255, 100, 1)', 'rgba(255, 255, 100, 1)'
+    ],
+    borderWidth: 0
+  },
+  {
+    label: 'render',
+    backgroundColor: [
+      'rgba(200, 50, 50, 1)', 'rgba(200, 50, 50, 1)'
+    ],
+    borderWidth: 0
+  }]
+};
+
+
+
