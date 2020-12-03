@@ -11,7 +11,9 @@ function makeTabsIntoSlidingTabs($tabs) {
 		var tab = $tabs.tabs("option", "active");
 		$tabs.find(".slidingTabs div").first().animate({
 			marginLeft: (tab * -100) + '%'
-		}, 400, function() {});
+		}, 400, function() {
+			displayTabContent(tab);
+		});
 		}
 	});
 }

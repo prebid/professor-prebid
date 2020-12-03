@@ -9,36 +9,39 @@
 	<script type="text/javascript" src="js/3p/chartjs-plugin-datalabels"></script>
 	<script type="text/javascript" src="js/3p/jquery-3.5.1.min.js"></script>
 	<script type="text/javascript" src="js/3p/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="js/3p/slick.min.js"></script>
 	<script type="text/javascript" src="js/roundedChart.js"></script>
 	<!--<script type="text/javascript" src="js/react-main.js"></script>-->
 	<!-- TODO change to min when lib updated -->
 	<script type="module" src="js/dataframejs/dataframe-index.js"></script>
 
-	<link href="resources/jquery-ui.css" rel="stylesheet" />
-	<link href="resources/popup-styles.css" rel="stylesheet" />
+	<link rel="stylesheet" href="resources/jquery-ui.css"  />
+	<link rel="stylesheet" type="text/css" href="resources/slick.css"/>
+	<link rel="stylesheet" type="text/css" href="resources/slick-theme.css"/>
+	<link rel="stylesheet" href="resources/popup-styles.css"  />
 </head>
 
 </style>
 
-<body style='height:600px;width:800px'>
+<body style='height:580px;width:800px'>
 
 	<div id="view" style="font-weight: bold;"></div>
 	<hr />
 
-	<div id="tabs">
-		<div id="tabs-1" class='myTab' style='height:800px'>
+	<div id="tabs" style='width:95%'>
+		<div id="tabs-1" class='myTab'>
 			<div id='overview-content'></div>
 			<div class='timeline-container' id='timeline-container'>
 			</div>
 
 		</div>
-		<div id="tabs-2" class='myTab' style='height:800px'>
-			<p>Content for Tab 2</p>
+		<div id="tabs-2" class='myTab'>
+			<div id='bidder-stats-container' width='95%'></div>
 		</div>
-		<div id="tabs-3" class='myTab' style='height:800px'>
+		<div id="tabs-3" class='myTab'>
 			<p>Content for Tab 3</p>
 		</div>
-		<div id="tabs-4" class='myTab' style='height:800px'>
+		<div id="tabs-4" class='myTab'>
 			<p>Content for Tab 4</p>
 		</div>
 		<label class="switch">

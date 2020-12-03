@@ -198,3 +198,42 @@ input:checked + .slider:before {
     height: 50%;
     margin: 0
   }
+
+.slick-next:before {
+  font-weight: bold;  
+  font-size: 30px;
+  color:red;
+}
+.slick-prev:before {
+  font-weight: bold;  
+  font-size: 30px;
+  color:red;
+}
+
+.slick-prev, .slick-next {
+    top: auto;
+    bottom: -33%;
+    right: 35px;
+    z-index: 10;
+    border:none;
+}
+
+
+button.slick-prev.slick-arrow, button.slick-next.slick-arrow {
+  border:none;
+  padding:none;
+}
+
+button.slick-prev.slick-arrow:hover, button.slick-next.slick-arrow:hover {
+  background-color:transparent;
+  color:transparent;
+}
+
+.slick-prev {
+  left: 5px;
+ 
+}
+
+.slick-next {
+  right: 30px;
+}
