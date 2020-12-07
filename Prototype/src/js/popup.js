@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		pp_switch.checked = isEnabled;
 	});
 
+  document.getElementById('btn--data-tab').addEventListener('click', openDataTab, false)
 	document.getElementById('pp_enabled_switch').addEventListener('click', handleEnableButtonStateChange, false);
 
 	getAllAuctionData(getOverviewTabContent);
@@ -658,6 +659,14 @@ function onclickGpt() {
 	event.currentTarget.className += " active";
 }
 
-
-
+/**
+ * openDataTab
+ * 
+ * opens the "main" html file in a new tab
+ */
+function openDataTab () {
+  chrome.tabs.create({ url: './main.html' }, function (tab) {
+    // here we can get the tab id, store it for later and feed it with data from the page
+  })
+}
 

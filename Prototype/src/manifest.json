@@ -21,7 +21,8 @@
 		"js/3p/dataframe.js",
 		"js/3p/moment.min.js",
 		"js/injected.js",
-		"resources/content-styles.css"
+    "js/main.js",
+    "resources/content-styles.css"
 	],
 	"browser_action": {
 		"default_tile": "Message",
