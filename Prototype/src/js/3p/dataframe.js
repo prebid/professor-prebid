@@ -1,4 +1,4 @@
-var dfjs = (function (exports) {
+window.dfjs = (function (exports) {
 	'use strict';
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -17,9 +17,7 @@ var dfjs = (function (exports) {
 	  check(typeof globalThis == 'object' && globalThis) ||
 	  check(typeof window == 'object' && window) ||
 	  check(typeof self == 'object' && self) ||
-	  check(typeof commonjsGlobal == 'object' && commonjsGlobal) ||
-	  // eslint-disable-next-line no-new-func
-	  (function () { return this; })() || Function('return this')();
+	  check(typeof commonjsGlobal == 'object' && commonjsGlobal)
 
 	var fails = function (exec) {
 	  try {
@@ -4421,8 +4419,9 @@ var dfjs = (function (exports) {
 	  // object. Either way, the resulting object will be used to initialize
 	  // the regeneratorRuntime variable at the top of this file.
 	  module.exports
-	));
-
+  ));
+  
+  window.regeneratorRuntime = null
 	try {
 	  regeneratorRuntime = runtime;
 	} catch (accidentalStrictMode) {
@@ -4435,7 +4434,10 @@ var dfjs = (function (exports) {
 	  // you've misconfigured your bundler to force strict mode and applied a
 	  // CSP to forbid Function, and you're not willing to fix either of those
 	  // problems, please detail your unique predicament in a GitHub issue.
-	  Function("r", "regeneratorRuntime = r")(runtime);
+    // Function("r", "regeneratorRuntime = r")(runtime);
+    (function () {
+      regeneratorRuntime = runtime
+    })()
 	}
 	});
 
