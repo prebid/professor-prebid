@@ -272,7 +272,7 @@ var options = {
   //Default: false; if true, this rounds each box in the stack instead of only final box;
   stackedRounded: true,
   responsive: false,
-  maintainAspectRatio: false,
+  maintainAspectRatio: true,
   tooltips: {
     enabled: false
   },
@@ -291,6 +291,7 @@ var options = {
     yAxes: [{
       stacked: true,
       radius: 10,
+      maxBarThickness: 15,
       display: true
     }],
     xAxes: [{
@@ -314,44 +315,16 @@ var options = {
         },
         anchor : 'center',
         align : 'center',
-        offset : 0
-
+        offset : 0,
+        display: function(context) {
+          var index = context.dataIndex;
+          var value = context.dataset.data[index];
+          return value == 0 ? '' : value;
+      }
     }
   }  
 };
 
-
-
-/**Chart Data**/
-var overviewPageTimelineData = {
-  labels: [""],
-  datasets: [{
-    label: 'pre-auction',
-    backgroundColor: [
-      'rgba(200, 200, 200, 1)', 'rgba(200, 200, 200, 1)'
-    ],
-    borderWidth: 0
-  }, {
-    label: 'auction',
-    backgroundColor: [
-      'rgba(100, 100, 255, 1)', 'rgba(100, 100, 255, 1)'
-    ],
-    borderWidth: 0
-  }, {
-    label: 'ad server',
-    backgroundColor: [
-      'rgba(255, 255, 100, 1)', 'rgba(255, 255, 100, 1)'
-    ],
-    borderWidth: 0
-  },
-  {
-    label: 'render',
-    backgroundColor: [
-      'rgba(200, 50, 50, 1)', 'rgba(200, 50, 50, 1)'
-    ],
-    borderWidth: 0
-  }]
-};
 
 
 

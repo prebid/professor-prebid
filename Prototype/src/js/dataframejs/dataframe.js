@@ -1145,7 +1145,7 @@ class DataFrame {
      * @example
      * df.join(df2, 'column1', 'full')
      */
-    join(dfToJoin, columnNames, how = "inner", shouldDropDuplicates = false) {
+    join(dfToJoin, columnNames, how = "inner", shouldDropDuplicates = true) {
         const joinMethods = {
             inner: () => this.innerJoin(dfToJoin, columnNames, shouldDropDuplicates),
             full: () => this.fullJoin(dfToJoin, columnNames, shouldDropDuplicates),

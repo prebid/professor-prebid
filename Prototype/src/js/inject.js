@@ -11,9 +11,13 @@ function injectScript(file_path, tag) {
 
 function checkForDOM() {
 	if (document.head) {
-		injectScript(chrome.extension.getURL('js/3p/dataframe.js'), 'head');
-		injectScript(chrome.extension.getURL('js/3p/moment.min.js'), 'head');
-		injectScript(chrome.extension.getURL('js/injected.js'), 'head');
+		chrome.storage.local.get(["PP_Enabled"], function(result) {
+			if (result.PP_Enabled) {
+				injectScript(chrome.extension.getURL('js/3p/dataframe.js'), 'head');
+				injectScript(chrome.extension.getURL('js/3p/moment.min.js'), 'head');
+				injectScript(chrome.extension.getURL('js/injected.js'), 'head');
+			}
+		});
 	} else {
 		requestIdleCallback(checkForDOM);
 	}
