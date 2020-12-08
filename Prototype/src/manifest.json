@@ -17,6 +17,10 @@
 			"css" : [ "resources/content-styles.css"]
 		}
 	],
+	"background": {
+		"scripts": ["js/background.js"],
+		"persistent": true
+	},
 	"web_accessible_resources": [
 		"js/3p/dataframe.js",
 		"js/3p/moment.min.js",
