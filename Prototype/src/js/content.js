@@ -6,8 +6,9 @@
 
 var bidRequestedObj = {};
 
+var allBidsDf = new dfjs.DataFrame([]), allAuctionsDf = new dfjs.DataFrame([]), allSlotsDf = new dfjs.DataFrame([]);
+var prebidConfig = {};
 
-var allBidsDf, allAuctionsDf, allSlotsDf;
 
 function myCallBack(response) {
 	console.log('PREBID_TOOLS: From BACKGROUND.js = ' + response.msg);
@@ -176,7 +177,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 				auction: allAuctionsDf.toCollection(),
 				slots: allSlotsDf.toCollection(),
 				allBids: allBidsDf.toCollection()
-			}
+			},
+			prebidConfig : JSON.stringify(prebidConfig)
 		});
 		sendResponse(data);
 	} else if (msg.type == 'POPUP_GPTBUTTON') {
@@ -189,13 +191,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		});
 
 	} else if (msg.type == 'PROFESSOR_PREBID_ENABLED') {
-		if (msg.obj.isEnabled) {
-			updateAllMasks();
-		} else {
+		if (!msg.obj.isEnabled) {
 			removeMask();
 		}
 		sendResponse({
-			msg: 'MASKS_UPDATED'
+			msg: 'MASKS_REMOVED'
 		});
 	} else  {
 		console.log('PREBID_TOOLS: UNKNOWN MESSAGE ' + msg);
@@ -210,8 +210,11 @@ window.addEventListener("message", function(event) {
 	if (event.source != window) {
 		return;
 	}
-
-	if (event.data.type && (event.data.type == "AUCTION_END")) {
+	if (event.data.type && (event.data.type == "CONFIG_AVAILABLE")) {
+		console.log('PREBID_TOOLS: Received CONFIG_AVAILABLE event');
+		prebidConfig = JSON.parse(event.data.obj)['prebidConfig'];
+		console.log(prebidConfig);
+	} else if (event.data.type && (event.data.type == "AUCTION_END")) {
 		console.log('PREBID_TOOLS: Received AUCTION_END event');
 
 		// When we get AUCTION_END from injected script build data structure
@@ -235,38 +238,47 @@ window.addEventListener("message", function(event) {
 		
 	} else if (event.data.type && (event.data.type == "GPT_SLOTRENDERED")) {
 		console.log('PREBID_TOOLS: Received GPT_SLOTRENDERED event');
-		console.log('XXXXXXXXXXXXXXXXXX NOT IMPLEMENTED YET');
-
 		let gptSlotInfo = JSON.parse(event.data.obj);
 		console.log(gptSlotInfo);
+		let response = JSON.parse(event.data.obj);
+		let auctionDf = new dfjs.DataFrame(response['auctionDf']);
+		if (auctionDf.count() > 0) {
+			let auctionId = auctionDf.getRow(0).get('auction');
+			let adunit = auctionDf.getRow(0).get('adUnitPath');
+			let slotElementId = response['slotElementId'];
+			let auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit);
+			if (auction) {
+				allAuctionsDf.setRowInPlace(auction.index, row => row.set('slotElementId', slotElementId));
+			} else {
+				console.warn("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
+			}		
+		}
 	} else if (event.data.type && (event.data.type == "GPT_SLOTLOADED")) {
 		console.log('PREBID_TOOLS: Received GPT_SLOTLOADED event');
-
+		let gptSlotInfo = JSON.parse(event.data.obj);
+		console.log(gptSlotInfo);
 		chrome.storage.local.get(["PP_Enabled"], function(result) {
-			let response = JSON.parse(event.data.obj);
-			let slotLoadedDf = new dfjs.DataFrame(response['slotDf']);
-			let auctionDf = new dfjs.DataFrame(response['auctionDf']);
-			let slotBidsDf = new dfjs.DataFrame(response['bidsDf']);
-			allSlotsDf = allSlotsDf ? allSlotsDf.join(slotLoadedDf, ['slotElementId', 'adUnitPath'], 'outer') : slotLoadedDf;
+			if (result.PP_Enabled) {
+				let response = JSON.parse(event.data.obj);
+				let slotLoadedDf = new dfjs.DataFrame(response['slotDf']);
+				let auctionDf = new dfjs.DataFrame(response['auctionDf']);
+				let slotBidsDf = new dfjs.DataFrame(response['bidsDf']);
+				allSlotsDf = allSlotsDf ? allSlotsDf.join(slotLoadedDf, ['slotElementId', 'adUnitPath'], 'outer') : slotLoadedDf;
 
-			allBidsDf = allBidsDf ? allBidsDf.diff(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder']).join(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder'], 'outer') : slotBidsDf;
-			
-			// we can get a slot loaded event but no auction or bid data
-			if (auctionDf.count() > 0) {
-				let auctionId = auctionDf.getRow(0).get('auction');
-				let adunit = auctionDf.getRow(0).get('adUnitPath');
-				let slotElementId = slotLoadedDf.getRow(0).get('slotElementId');
-				let auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit);
-				if (auction) {
-					allAuctionsDf.setRowInPlace(auction.index, row => row.set('slotElementId', slotElementId));
-				} else {
-					allAuctionsDf = allAuctionsDf.push(auction.row.toArray());
-				}		
-				let isEnabled = result.PP_Enabled;
-				if (isEnabled) {
+				allBidsDf = allBidsDf ? allBidsDf.diff(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder']).join(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder'], 'outer') : slotBidsDf;
+				
+				if (auctionDf.count() > 0) {
+					let auctionId = auctionDf.getRow(0).get('auction');
+					let adunit = auctionDf.getRow(0).get('adUnitPath');
+					let slotElementId = slotLoadedDf.getRow(0).get('slotElementId');
+					let auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit && row.get('slotElementId') == undefined);
+					if (auction) {
+						allAuctionsDf.setRowInPlace(auction.index, row => row.set('slotElementId', slotElementId));
+					} else {
+						console.warn("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
+					}		
 					updateMask(slotLoadedDf.getRow(0), slotBidsDf);
 				}
-	
 			}
 		});
 	  	

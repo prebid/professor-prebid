@@ -8178,7 +8178,7 @@ window.dfjs = (function (exports) {
 	      var _this6 = this;
 
 	      var how = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "inner";
-	      var shouldDropDuplicates = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+	      var shouldDropDuplicates = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
 	      var joinMethods = {
 	        inner: function inner() {
 	          return _this6.innerJoin(dfToJoin, columnNames, shouldDropDuplicates);
