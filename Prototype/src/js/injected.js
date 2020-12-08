@@ -346,7 +346,7 @@ var visibleSlots = new Set();
 ////////////////////////////////////
 
 
-function bidSlotFallbackLinker(adUnitSlots, slotElementId) {
+function bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slotElementId) {
 		// should never happen now that we are using hb_adid
 	console.warn("Uh oh, hb_adid is empty. Trying to link using time...")
 	// sort by time and for each find the bids that have a response time earlier
@@ -370,13 +370,16 @@ function bidSlotFallbackLinker(adUnitSlots, slotElementId) {
 	
 }
 
+// if hb_adid exists then we'll use that, otherwise we'll check if the bids adunitpaths are actually slotelementdids.
+// finally we'll attempt to use time for the case where we have mult auctions on the same adunitpath and diff slot ids
 function matchBids(allBidsDf, slotBidsDf, adUnitSlots, slot) {
 	if (slot.getTargetingMap()['hb_adid'] != undefined) {
 		let bidderWithMatchingTargeting = allBidsDf.filter(row => row.get('adId') == slot.getTargetingMap()['hb_adid']);
 		let matchingAuction = bidderWithMatchingTargeting.select('auction');
 		return slotBidsDf.filter(row => row.get('auction') == matchingAuction);
 	} else {
-		return bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slot.getSlotElementId());
+		let biddersUseSlotIdForAUP = slotBidsDf.filter(bid => bid.get('adUnitPath') == slot.getSlotElementId());
+		return biddersUseSlotIdForAUP.count() > 0 ? biddersUseSlotIdForAUP : bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slot.getSlotElementId());
 	}
 
 }
@@ -436,7 +439,8 @@ function checkForGPT(domFoundTime) {
 			
 			// we now want to link the bids to this slot. 
 			// There is no auction id in the slot event. We could use the adUnitPath but multiple auctions can run on the same adUnit which means it can be difficult to link correctly. However we can use the hb_adid to link to the adid.
-			let slotBidsDf = allBidsDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() && row.get('cpm') != undefined);
+			// some sites have the slot element id in the bidder adunitpath
+			let slotBidsDf = allBidsDf.filter(row => (row.get('adUnitPath') == event.slot.getAdUnitPath() || row.get('adUnitPath') == event.slot.getSlotElementId()) && row.get('cpm') != undefined);
 
 			// multiple slots with same adunitpath?
 			let adUnitSlots = slotDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() );
