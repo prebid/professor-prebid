@@ -29,6 +29,7 @@ function sendMessage(evt, x) {
 	});
 }
 
+// TODO could do with a debug flag and encompass displayTable in that
 // Check for PBJS loaded and add listeners to various events when ready
 function displayTable(output, defaultOutput) {
 	if (output.length) {
@@ -232,7 +233,6 @@ function checkForPBJS(domFoundTime) {
 			let highestCpmBids = new dfjs.DataFrame(getHighestCpmBids(window.pbjs, auctionEndTime), bidColumns);
 			let allWinningBids = new dfjs.DataFrame(getAllWinningBids(window.pbjs, auctionEndTime), bidColumns);
 
-			// TODO need to extract this update into a general df func
 			let auction = auctionDf.findWithIndex(row => row.get('auction') == data.auctionId);
 			if (auction) {
 				auctionDf.setRowInPlace(auction.index, row => row.set('startTime', auctionStartTime).set('endTime', auctionEndTime));
@@ -293,11 +293,11 @@ function checkForPBJS(domFoundTime) {
 			console.log(data);
 
 
-			let r = allBidsDf.findWithIndex(row => row.get('auction') == data.auctionId && row.get('adUnitPath') == data.adUnitCode && row.get('adId') == data.adId && row.get('bidder') == data.bidderCode);
 			let ts = Date.now();
-			allBidsDf = allBidsDf.setRow(r.index, row => row.set('rendered', true).set('nonRenderedHighestCpm', false).set('modified', ts));
-			displayTable(allBidsDf.toCollection())
-
+			let bid = allBidsDf.findWithIndex(row => row.get('auction') == data.auctionId && row.get('adUnitPath') == data.adUnitCode && row.get('adId') == data.adId && row.get('bidder') == data.bidderCode);
+			if (bid) {
+				allBidsDf.setRowInPlace(r.index, row => row.set('rendered', true).set('nonRenderedHighestCpm', false).set('modified', ts));
+			}
 		});
 
         /* Log when ad units are added to Prebid */
@@ -366,8 +366,7 @@ function bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slotElementId) {
 				slotBidsDf = slotBidsDf.diff(thisSlotBids, ['auction'])
 			}
 	}
-	adUnitSlots.map(slot => extractSlotBids(slot));
-	
+	adUnitSlots.map(slot => extractSlotBids(slot));	
 }
 
 // if hb_adid exists then we'll use that, otherwise we'll check if the bids adunitpaths are actually slotelementdids.
@@ -381,7 +380,6 @@ function matchBids(allBidsDf, slotBidsDf, adUnitSlots, slot) {
 		let biddersUseSlotIdForAUP = slotBidsDf.filter(bid => bid.get('adUnitPath') == slot.getSlotElementId());
 		return biddersUseSlotIdForAUP.count() > 0 ? biddersUseSlotIdForAUP : bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slot.getSlotElementId());
 	}
-
 }
 
 function checkForGPT(domFoundTime) {

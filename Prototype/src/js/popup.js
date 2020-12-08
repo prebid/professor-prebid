@@ -169,6 +169,9 @@ function handleEnableButtonStateChange(event) {
 }
 
 
+////////////////////////////////////
+// Initialisation and Overview
+////////////////////////////////////
 function getAllAuctionData(showContentCB) {
 	chrome.tabs.query({
 		currentWindow: true,
@@ -178,9 +181,8 @@ function getAllAuctionData(showContentCB) {
 			type: 'POPUP_ACTIVE',
 			obj: ''
 		};
-		// When POPUP is activated, send message, "processResponse()" is a callback that the
-		// content.js script populates in response. SO, content.js builds data structures but
-		// doesn't do anything until popup activates'
+		// When POPUP is activated, send message, . The pipe is a curried pair of functions that act as the callback. 
+		// content.js script populates in response. We first initialise the data and then display the overview tab
 		chrome.tabs.sendMessage(tabs[0].id, JSON.stringify(data), pipe(initialiseData, showContentCB));
 	});
 }
@@ -275,17 +277,19 @@ function getOverviewTabContent(overviewData) {
 	// for each auction
 	function addAuctionCard(auctionData) {
 
-        let auctionId = auctionData.getRow(0).get('auction')
+		// build the overview stats
+		let auctionId = auctionData.getRow(0).get('auction')
 		auctionData.map(row => addStatsToPage(overviewContentContainerElement, auctionId, row));
+
 		// for debug
-		let auctionContent = auctionData.toArray().reduce((p, n) => p + n.join('\t') + '\n', '');
-		console.log(auctionContent);
+		let debugContent = auctionData.toArray().reduce((p, n) => p + n.join('\t') + '\n', '');
+		console.log(debugContent);
 		let auctionContentEl = document.createElement('p');
-		auctionContentEl.innerText = auctionContent;
+		auctionContentEl.innerText = debugContent;
 		overviewContentContainerElement.appendChild(auctionContentEl);
 
+		// prepare and add the timeline data 
 		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs').toArray();
-		// TODO for mult auctions we need to insert a first el which is the time from the earliest auc start to this auc
 		if (timelineData.length > 0) {
 			timelineData = transpose(computeElementDiffs(timelineData)).slice(1);
 			console.log(timelineData);
@@ -312,12 +316,16 @@ function getOverviewTabContent(overviewData) {
 			options: options
 		});
 	}
+
+	// add the overview and timelines for each auction/adUnitPath pair
 	overviewData.groupBy('auction', 'adUnitPath').aggregate(group => addAuctionCard(group))
 }
 
 
 
-
+////////////////////////////////////
+// Create the statistics tab content
+////////////////////////////////////
 function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 	// get avg cpm and time for each bidder
 	// for all auctions but optionally for a selected ad unit
@@ -356,7 +364,6 @@ function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 		container.appendChild(cardDiv);
 	}
 
-
 	if (selectedAdUnit != 'all') {
 		allBidders = allBidders.filter(r => r.get('adUnitPath') == selectedAdUnit)
 	}
@@ -379,6 +386,9 @@ function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 	}); 
 }
 
+////////////////////////////////////
+// Create the statistics options and then build the content
+////////////////////////////////////
 function getBidderStatisticsContent() {
 		// get list of ad units
 		let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy('cpm', true)
@@ -394,8 +404,10 @@ function getBidderStatisticsContent() {
 		updateBidderStatisticsContent(allBidders, 'all');	
 }
 
-
-function updateBidderTimelineContent(auctionId, adUnitPath) {
+////////////////////////////////////
+// Create the bidder timeline data
+////////////////////////////////////
+function buildBidderTimelineData(auctionId, adUnitPath) {
 
 	function collectAuctionBidderData(groupedBidders, auctionId, adUnitPath) {
 
@@ -421,7 +433,9 @@ function updateBidderTimelineContent(auctionId, adUnitPath) {
 	return collectAuctionBidderData(allBidders.groupBy('auction'), auctionId, adUnitPath);
 }
 
-
+////////////////////////////////////
+// Create the bidder timeline  content
+////////////////////////////////////
 function updateTimelinePageContent(atld) {
 	
 	// for each auction
@@ -469,10 +483,13 @@ function updateTimelinePageContent(atld) {
 	$('#bidder-timeline-content').empty();
 	$('#bidder-timeline-container').empty();
     atld.map(auction => addTimeline(auction.get('auction'), auction.get('aggregation')));
-
 }
 
-function getBidderTimelineContent() {
+
+////////////////////////////////////
+// Build the bidder timeline options
+////////////////////////////////////
+function showBidderTimelines() {
 	// get list of ad units
 	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy('cpm', true)
 	let adUnits = ['all'].concat(allBidders.distinct('adUnitPath').toArray())
@@ -486,22 +503,24 @@ function getBidderTimelineContent() {
 	let atld = undefined;
 	$('#bidder-timeline-auction-selector').on('change', function() {
 		let auction = $(this).val();
-		atld = updateBidderTimelineContent(auction, $('#bidder-timeline-adunit-selector').val());
+		atld = buildBidderTimelineData(auction, $('#bidder-timeline-adunit-selector').val());
 		updateTimelinePageContent(atld);
 	});
 
 	$('#bidder-timeline-adunit-selector').on('change', function() {
 		let adunit = $(this).val();
-		atld = updateBidderTimelineContent($('#bidder-timeline-auction-selector').val(), adunit);
+		atld = buildBidderTimelineData($('#bidder-timeline-auction-selector').val(), adunit);
 		updateTimelinePageContent(atld);
 	});
 
-	atld = updateBidderTimelineContent('all', 'all');	
+	atld = buildBidderTimelineData('all', 'all');	
 	// now update the page
 	updateTimelinePageContent(atld);
 }
  
-
+////////////////////////////////////
+// Create the prebid config page data/content
+////////////////////////////////////
 function getPrebidConfig() {
 	$('#prebid-config-container').empty();
 	let prebidConfigElement = document.createElement('div');
@@ -514,340 +533,21 @@ function getPrebidConfig() {
 	// $('#prebid-config-container').add(prebidConfigElement);
 }
 
+////////////////////////////////////
+// Callback for the sliding tabs
+////////////////////////////////////
 function displayTabContent(tab) {
 	switch (tab) {
 		case 0: updateAllAuctionData(getOverviewTabContent); // will update/set auctionTimelineData
 			break;
 		case 1: getBidderStatisticsContent();
 			break;
-		case 2: getBidderTimelineContent();
+		case 2: showBidderTimelines();
 			break;
 		case 3: getPrebidConfig();
 			break;
 		default: console.log('not implemented yet. tab ' + tab);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-// ***********************************************
-// * OLD
-// Some of the below might be useful
-
-
-
-function convertTimestamp(requestTimestamp) {
-	let ts = new Date(requestTimestamp);
-	let h = ts.getHours();
-	let m = ts.getMinutes();
-	let s = ts.getSeconds();
-	let ms = ts.getMilliseconds();
-
-	if (h < 10) {
-		h = '0' + h
-	}
-	if (m < 10) {
-		m = '0' + m
-	}
-	if (s < 10) {
-		s = '0' + s
-	}
-
-	return (`${h}:${m}:${s}.${ms}`);
-}
-
-// This method populated the 3 tabs in the popup. I'm sure there is a much better way
-// to build the popup HTML using jquery. This works but hardly elegant nor flexible.
-
-function processResponse(response) {
-	gResponse = response;
-
-	var auctionDiv = document.getElementById('auctionDiv');
-	var requestDiv = document.getElementById('requestDiv');
-	var gptDiv = document.getElementById('gptDiv');
-
-	// Auction Tab
-
-	var tableNumber = 1;
-	var tabId = null;
-
-	for (let [auctionId, auctionData] of Object.entries(JSON.parse(response.auction))) {
-		console.log('auctionId=' + auctionId);
-
-		const hr = document.createElement('hr');
-
-		let adUnitObj = auctionData.adUnitObj;
-
-		const auctionHeading = document.createElement('div');
-		auctionHeading.style = "font-weight:bold";
-		auctionHeading.textContent = `AuctionTime: ${auctionData.auctionTimestamp} AuctionID: ${auctionId}`;
-		auctionDiv.appendChild(hr);
-		auctionDiv.appendChild(auctionHeading);
-
-		for (let [adUnit, value1] of Object.entries(adUnitObj)) {
-			console.log('adUnit=' + adUnit);
-			console.log(value1);
-
-			const adUnitHeading = document.createElement('div');
-			adUnitHeading.style = "font-weight:bold";
-			adUnitHeading.textContent = `AdUnitName: ${adUnit}`;
-			auctionDiv.appendChild(adUnitHeading);
-
-			const slotHeading = document.createElement('div');
-			slotHeading.style = "font-weight:bold";
-			let slot = auctionData.adUnitMapToSlot[adUnit];
-			slotHeading.textContent = `AdUnitPath: ${slot}`;
-			auctionDiv.appendChild(slotHeading);
-
-			const tab = document.createElement('table');
-			tab.id = 'table_' + tableNumber;
-			auctionDiv.appendChild(tab);
-
-			let r = tab.insertRow(0);
-			r.style = "background-color:yellow";
-
-			let c = r.insertCell(0);
-			c.innerHTML = 'Bidder';
-
-			c = r.insertCell(1);
-			c.innerHTML = 'RequestTimestamp';
-
-			c = r.insertCell(2);
-			c.innerHTML = 'TimeToRespond';
-
-			c = r.insertCell(3);
-			c.innerHTML = 'Size';
-
-			c = r.insertCell(4);
-			c.innerHTML = 'CPM';
-
-			var rowNumber = 1;
-			value1.forEach(e => {
-				let r = tab.insertRow(rowNumber);
-				r.style = "background-color:gainsboro";
-
-				let c = r.insertCell(0);
-				c.innerHTML = `${e.bidder}`;
-
-				c = r.insertCell(1);
-				if (typeof e.requestTimestamp !== 'undefined') {
-					c.innerHTML = convertTimestamp(e.requestTimestamp);
-				} else {
-					c.innerHTML = "-";
-				}
-
-				c = r.insertCell(2);
-				if (typeof e.timeToRespond !== 'undefined') {
-					c.innerHTML = `${e.timeToRespond}`;
-				} else {
-					c.innerHTML = "-";
-				}
-
-				c = r.insertCell(3);
-				if (typeof e.size !== 'undefined') {
-					c.innerHTML = `${e.size}`;
-				} else {
-					c.innerHTML = "-";
-				}
-
-				c = r.insertCell(4);
-				if (typeof e.cpm !== 'undefined') {
-					c.innerHTML = `${e.cpm.toFixed(2)}`;
-				} else {
-					c.innerHTML = "-";
-				}
-
-				rowNumber++;
-			});
-		}
-	}
-
-	// REQUEST Tab
-
-	// This is just a SAMPLE of data that can be displayed, there is lots more in the data structure
-
-	for (let [auctionId, info] of Object.entries(JSON.parse(response.bidrequested))) {
-		const hr = document.createElement('hr');
-
-		requestDiv.appendChild(hr);
-
-		let requestHeading = document.createElement('div');
-		requestHeading.style = "font-weight:bold";
-		requestHeading.textContent = `AuctionID: ${info.auctionId}`;
-		requestDiv.appendChild(requestHeading);
-
-		requestHeading = document.createElement('div');
-		requestHeading.style = "font-weight:bold";
-		requestHeading.textContent = `Bidder: ${info.bidderCode}`;
-		requestDiv.appendChild(requestHeading);
-
-		if (typeof info.gdprConsent !== 'undefined') {
-			requestHeading = document.createElement('div');
-			requestHeading.textContent = `Gdpr Consent String: ${info.gdprConsent.consentString}`;
-			requestDiv.appendChild(requestHeading);
-
-			requestHeading = document.createElement('div');
-			requestHeading.textContent = `Gdpr Vendor Data Metadata: ${info.gdprConsent.vendorData.metadata}`;
-			requestDiv.appendChild(requestHeading);
-
-			requestHeading = document.createElement('div');
-			requestHeading.textContent = `Gdpr gdprApplies: ${info.gdprConsent.vendorData.gdprApplies}`;
-			requestDiv.appendChild(requestHeading);
-
-			requestHeading = document.createElement('div');
-			requestHeading.textContent = `Gdpr hasGlobalScope: ${info.gdprConsent.vendorData.hasGlobalScope}`;
-			requestDiv.appendChild(requestHeading);
-		} else if (typeof info.uspConsent !== 'undefined') {
-			requestHeading = document.createElement('div');
-			requestHeading.textContent = `uspConsent: ${info.uspConsent}`;
-			requestDiv.appendChild(requestHeading);
-		}
-	}
-
-	// GPT Tab
-
-	// This is just a SAMPLE of data that can be displayed, there is lots more in the data structure
-
-	function treeListener(idx) {
-		var node = document.getElementById('myUL' + idx);
-		var toggler = node.getElementsByClassName("caret");
-		var i;
-
-		toggler[0].addEventListener("click", function () {
-			this.parentElement.querySelector(".nested").classList.toggle("active");
-			this.classList.toggle("caret-down");
-		});
-	}
-
-	var i = 0;
-	for (let [slot, info] of Object.entries(JSON.parse(response.gpt))) {
-		const hr = document.createElement('hr');
-
-		let gptAdUnitPath = info.adUnitPath;
-		let gptSlotElementId = info.slotElementId;
-
-		gptDiv.appendChild(hr);
-		let gptButton = document.createElement('button');
-		gptButton.innerHTML = "Press To Highlight Ad Slot";
-		gptButton.id = gptSlotElementId;
-		gptDiv.appendChild(gptButton);
-		document.getElementById(gptSlotElementId).addEventListener('click', onclickGptButton, false)
-
-		let gptHeading = document.createElement('div');
-		gptHeading.style = "font-weight:bold";
-		gptHeading.textContent = `${gptAdUnitPath}`;
-		gptDiv.appendChild(gptHeading);
-
-		gptHeading = document.createElement('div');
-		gptHeading.style = "font-weight:bold";
-		gptHeading.textContent = `${gptSlotElementId}`;
-		gptDiv.appendChild(gptHeading);
-
-		let ul0 = document.createElement('ul');
-		let ul1 = document.createElement('ul');
-		let il = document.createElement('il');
-		let span = document.createElement('span');
-
-		ul0.id = "myUL" + i;
-		ul1.className = "nested";
-		span.className = "caret";
-		span.innerHTML = "Targeting KV Pairs";
-
-		gptDiv.appendChild(ul0);
-		ul0.appendChild(il);
-		il.appendChild(span);
-		il.appendChild(ul1);
-
-		for (let [k, v] of Object.entries(info.gptTargeting)) {
-			let li = document.createElement('li');
-			li.innerHTML = `${k} = ${v}`;
-			ul1.appendChild(li);
-		}
-
-		treeListener(i);
-
-		i++;
-	}
-};
-
-function onclickGptButton(event) {
-	if (gResponse !== 'undefined') {
-		let data = {
-			target: event.target.id,
-			nottarget: []
-		};
-
-		for (let [slot, info] of Object.entries(JSON.parse(gResponse.gpt))) {
-			if (info.slotElementId !== event.target.id) {
-				data.nottarget.push(info.slotElementId);
-			}
-		}
-
-		sendMessage('POPUP_GPTBUTTON', data);
-	} else {
-		console.log('gResponse is undefined');
-	}
-}
-
-function onclickAuction() {
-	var i, tabcontent, tablinks;
-
-	tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-	}
-
-	tablinks = document.getElementsByClassName("tablinks");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(" active", "");
-	}
-
-	document.getElementById('auctionDiv').style.display = "block";
-	event.currentTarget.className += " active";
-}
-
-function onclickRequest() {
-	var i, tabcontent, tablinks;
-
-	tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-	}
-
-	tablinks = document.getElementsByClassName("tablinks");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(" active", "");
-	}
-
-	document.getElementById('requestDiv').style.display = "block";
-	event.currentTarget.className += " active";
-}
-
-function onclickGpt() {
-	var i, tabcontent, tablinks;
-
-	tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-	}
-
-	tablinks = document.getElementsByClassName("tablinks");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(" active", "");
-	}
-
-	document.getElementById('gptDiv').style.display = "block";
-	event.currentTarget.className += " active";
-}
-
-
 
 
