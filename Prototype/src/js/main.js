@@ -7,8 +7,17 @@ const EVENT_MAIN_PAGE_REQUEST_DATA = 'PROFESSOR_PREBID_MAIN_PAGE_REQUEST_DATA'
 
 document.addEventListener('DOMContentLoaded', function () {
 	console.log('asking data from background.js')
-	chrome.runtime.sendMessage({ type: EVENT_MAIN_PAGE_REQUEST_DATA }, pipe(initialiseData, getOverviewTabContent))
+	getDataFromBackground()
 }, false);
+
+/**
+ * getDataFromBackground
+ * 
+ * get data from background.js script
+ */
+function getDataFromBackground () {
+	chrome.runtime.sendMessage({ type: EVENT_MAIN_PAGE_REQUEST_DATA }, pipe(initialiseData, getOverviewTabContent))
+}
 
 // allow us to curry functions
 const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x);
@@ -136,6 +145,11 @@ function initialiseData(response) {
 // Now create the page content
 ////////////////////////////////////
 function getOverviewTabContent(overviewData) {
+	if (!overviewData) {
+		console.error('getOverviewTabContent was called without data')
+		return
+	}
+
 	function addStatsToPage(container, auctionId, atld) {
 		let tableElement = document.createElement("table");
 		var rowElement = document.createElement("tr");
@@ -424,7 +438,7 @@ function getPrebidConfig() {
 // eslint-disable-next-line no-unused-vars
 function displayTabContent(tab) {
 	switch (tab) {
-		case 0: getOverviewTabContent(); // will update/set auctionTimelineData
+		case 0: getDataFromBackground();
 			break;
 		case 1: getBidderStatisticsContent();
 			break;
