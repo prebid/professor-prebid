@@ -14,12 +14,14 @@
   <!--<script type="text/javascript" src="js/react-main.js"></script>-->
   <!-- TODO change to min when lib updated -->
   <script type="module" src="js/3p/dataframe.js"></script>
-
   <link rel="stylesheet" href="resources/popup-styles.css" />
 </head>
 
 <body style='height:580px;width:750px'>
-  <div style='position:relative; height: 40px;'>
+  <div id="view" style="font-weight: bold;"></div>
+  <hr />
+
+  <div style='position:relative; height:40px;'>
     <label class="switch">
       <input id='pp_enabled_switch' type="checkbox" checked />
       <span class="slider round"></span>
@@ -29,6 +31,7 @@
   <br />
   <button id='btn--data-tab'>Data tab</button>
 
+  <script type="text/javascript" src="js/tabs.js" charset="utf-8"></script>
   <script type="text/javascript" src="js/popup.js" charset="utf-8"></script>
 </body>
 
