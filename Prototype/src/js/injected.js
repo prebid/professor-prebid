@@ -3,12 +3,14 @@
 // The only way for an injected script to message to the content.js
 // script is via window.postMessage()
 
-const bidColumns = ['auction', 'adUnitPath', 'adId', 'bidder', 'time', 'cpm', 'slotSize', 'netRevenue', 'dealId', 'creativeId', 'msg', 'nonRenderedHighestCpm', 'rendered', 		'bidRequestTime', 'bidResponseTime', 'created', 'modified', 'type', 'slotElementId'];
+const bidColumns = ['auction', 'adUnitPath', 'adId', 'bidder', 'time', 'cpm', 'slotSize', 'netRevenue', 'dealId', 'creativeId', 'msg', 'nonRenderedHighestCpm', 'rendered', 'bidRequestTime', 'bidResponseTime', 'created', 'modified', 'type', 'slotElementId'];
 var domFoundTime = Date.now();
 var do_once_pbjs = 1;
+var prebidInitialised = false;
 var allBidsDf, bidderDoneDf;
 var auctionDf, slotDf;
 var slotBidsBySlotElementId = {}
+var prebidConfig;
 
 
 ////////////////////////////////////
@@ -190,16 +192,21 @@ function updateBidderDoneDf(doneBid) {
 ////////////////////////////////////
 function checkForPBJS(domFoundTime) {
 	if (window.pbjs && window.pbjs.libLoaded && do_once_pbjs == 1) {
+		prebidConfig = window.pbjs.getConfig();
+		let response = {
+			"prebidConfig": prebidConfig
+		};
+		sendMessage("CONFIG_AVAILABLE", response);
 
 		window.pbjs.onEvent('auctionInit', function (data) {
-			let ts = Date.now();
-			console.log('PREBID_TOOLS: auctionInit ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", ts));
+			console.log('PREBID_TOOLS: auctionInit ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", data.timestamp));
 
 			let existingRows = auctionDf.find(r => r.get('auction') == data.auctionId)
 			if (existingRows) {
 				console.log('XXXXXXXXXXXXXXXXXXXX Should not happen!!! XXXXXXXXXXXXXXXXXX');
 			} else {
-				data.adUnitCodes.forEach(aup => updateAuctionDf(data.auctionId, aup, domFoundTime, data.timestamp));
+				// pre-auction is only relevant for an initial page load where we don't get an auction init, only the auction end. then we can use domloadedtime as the time between the dom being ready and the auction start. For auctions that occur when a user scrolls down for example, then the first event is the auction init so there is no relevant pre-auction activty.
+				data.adUnitCodes.forEach(aup => updateAuctionDf(data.auctionId, aup, data.timestamp, data.timestamp));
 				console.log('XXXXXXXXXXXXXXXXXXXX Could capture bid requests here');
 			}
 		});
@@ -228,7 +235,7 @@ function checkForPBJS(domFoundTime) {
 			// TODO need to extract this update into a general df func
 			let auction = auctionDf.findWithIndex(row => row.get('auction') == data.auctionId);
 			if (auction) {
-				auctionDf.setRowInPlace(auction.index, row => row.set('preAuctionStartTime', domFoundTime).set('startTime', auctionStartTime).set('endTime', auctionEndTime));
+				auctionDf.setRowInPlace(auction.index, row => row.set('startTime', auctionStartTime).set('endTime', auctionEndTime));
 			} else {
 				data.adUnitCodes.forEach(aup => updateAuctionDf(data.auctionId, aup, domFoundTime, auctionStartTime, auctionEndTime));
 			}		
@@ -322,7 +329,7 @@ function checkForPBJS(domFoundTime) {
 
 		do_once_pbjs = 0;
 
-		console.log('PREBID_TOOLS: PBJS check found: ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", Date.now()) + ' ' + (Date.now() - domFoundTime) + 'ms');
+		console.log('PREBID_TOOLS: PBJS check found: ' + Date.now() + ' ' + (Date.now() - domFoundTime) + 'ms');
 
 		return 1;
 	} else {
@@ -337,9 +344,47 @@ var visibleSlots = new Set();
 ////////////////////////////////////
 // GPT Slot  event handing
 ////////////////////////////////////
+
+
+function bidSlotFallbackLinker(adUnitSlots, slotElementId) {
+		// should never happen now that we are using hb_adid
+	console.warn("Uh oh, hb_adid is empty. Trying to link using time...")
+	// sort by time and for each find the bids that have a response time earlier
+	// these are these slots bids. remove them from the total and continue
+	adUnitSlots = adUnitSlots.sortBy('slotRenderedTs');
+
+	function extractSlotBids(slot) {
+			let thisSlotBids = slotBidsDf.filter(row => row.get('bidResponseTime') < slot.get('slotRenderedTs'));
+			let thisSlotAuction = thisSlotBids.distinct('auction');
+			if (thisSlotAuction.count() > 1) {
+					console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')
+					thisSlotAuction.map(a => console.log('Auction ' + a));
+			}
+			if (slot.get('slotElementId') == slotElementId) {
+				return slotBidsDf;
+			} else {
+				slotBidsDf = slotBidsDf.diff(thisSlotBids, ['auction'])
+			}
+	}
+	adUnitSlots.map(slot => extractSlotBids(slot));
+	
+}
+
+function matchBids(allBidsDf, slotBidsDf, adUnitSlots, slot) {
+	if (slot.getTargetingMap()['hb_adid'] != undefined) {
+		let bidderWithMatchingTargeting = allBidsDf.filter(row => row.get('adId') == slot.getTargetingMap()['hb_adid']);
+		let matchingAuction = bidderWithMatchingTargeting.select('auction');
+		return slotBidsDf.filter(row => row.get('auction') == matchingAuction);
+	} else {
+		return bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slot.getSlotElementId());
+	}
+
+}
+
 function checkForGPT(domFoundTime) {
-	if (window.googletag && window.googletag.pubadsReady && window.googletag.apiReady && do_once_gpt == 1) {
+	if (prebidInitialised && window.googletag && window.googletag.pubadsReady && window.googletag.apiReady && do_once_gpt == 1) {
 		// fires when a creative is injected into a slot. It will occur before the creative's resources are fetched.
+		// we can get these before we have fully initialised
 		googletag.pubads().addEventListener('slotRenderEnded', function (event) {
 			let ts = Date.now();
 			console.log('GPT_TOOLS: SlotRenderEnded slotElementId ' + event.slot.getSlotElementId());
@@ -355,19 +400,30 @@ function checkForGPT(domFoundTime) {
 			console.log('GPT_TOOLS: hb_adid=' + targeting['hb_adid'] + ' campaignId=' + event.campaignId + ' lineItemId=' + event.lineItemId + ' advertiserId=' + event.advertiserId);
 
 			// add it to our slots dataframe
-			let existingRow = slotDf.find(r => r.get('slotElementId') == event.slot.getSlotElementId() && r.get('adUnitPath') == event.slot.getAdUnitPath());
-			if (!existingRow) {
-				slotDf = slotDf.push([event.slot.getSlotElementId(), event.slot.getAdUnitPath(), event.slot.getTargetingMap()['hb_adid'], ts, null]);
+			if (prebidInitialised) {
+				let existingRow = slotDf.find(r => r.get('slotElementId') == event.slot.getSlotElementId() && r.get('adUnitPath') == event.slot.getAdUnitPath());
+				if (!existingRow) {
+					slotDf = slotDf.push([event.slot.getSlotElementId(), event.slot.getAdUnitPath(), event.slot.getTargetingMap()['hb_adid'], ts, null]);
+				}
+				// update the auction with the slotId
+				let bid = allBidsDf.find(r=>r.get('adId') == targeting['hb_adid']);
+				if (bid) {
+					let auction = auctionDf.findWithIndex(r => r.get('auction') == bid.get('auction') && r.get('adUnitPath') == event.slot.getAdUnitPath());
+					if (auction) {
+						auctionDf.setRowInPlace(auction.index, row => row.set('slotElementId', event.slot.getSlotElementId()));
+					}
+				}
+
+				let response = {
+					"gptTimestamp": Date.now(),
+					"gptTargeting": targeting,
+					"adUnitPath": event.slot.getAdUnitPath(),
+					"slotElementId": event.slot.getSlotElementId(),
+					"auctionDf" : auctionDf.filter(row => row.get('slotElementId') == event.slot.getSlotElementId()).toCollection()
+				};
+
+				sendMessage("GPT_SLOTRENDERED", response);
 			}
-
-			let response = {
-				"gptTimestamp": Date.now(),
-				"gptTargeting": targeting,
-				"adUnitPath": event.slot.getAdUnitPath(),
-				"slotElementId": event.slot.getSlotElementId()
-			};
-
-			sendMessage("GPT_SLOTRENDERED", response);
 		});
 
 		googletag.pubads().addEventListener('slotOnload', function (event) {
@@ -386,37 +442,14 @@ function checkForGPT(domFoundTime) {
 			let adUnitSlots = slotDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() );
 			if (adUnitSlots.count() > 1) {
 				// mult auctions for this adUnitPath. find the auction we are looking at from the highest prebid bidder which will have its hb_adid set. We can then identify the slotElementId for these bids
-				let bidderWithMatchingTargeting = allBidsDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() && row.get('adId') == event.slot.getTargetingMap()['hb_adid']);
-				let matchingAuction = bidderWithMatchingTargeting.select('auction');
-				let thisSlotBids = slotBidsDf.filter(row => row.get('auction') == matchingAuction);
+				let thisSlotBids = matchBids(allBidsDf, slotBidsDf, adUnitSlots, event.slot)
+				slotBidsBySlotElementId[event.slot.get('slotElementId')] = thisSlotBids;
 				let thisSlotAuction = thisSlotBids.distinct('auction');
 				if (thisSlotAuction.count() > 1) {
 					console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')
 					thisSlotAuction.map(a => console.log('Auction ' + a));
 				}
-				slotBidsBySlotElementId[event.slot.get('slotElementId')] = thisSlotBids;
 			}
-
-// 				// should never happen now that we are using hb_adid
-// 				console.warn("Uh oh, is hb_adid targeting a single slot?")
-// 				// sort by time and for each find the bids that have a response time earlier
-// 				// these are these slots bids. remove them from the total and continue
-// 				adUnitSlots = adUnitSlots.sortBy('slotRenderedTs');
-				
-// 				function extractSlotBids(slot) {
-// 					let thisSlotBids = slotBidsDf.filter(row => row.get('bidResponseTime') < slot.get('slotRenderedTs'));
-// 					let thisSlotAuction = thisSlotBids.distinct('auction');
-// 					if (thisSlotAuction.count() > 1) {
-// 						console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')
-// 						thisSlotAuction.map(a => console.log('Auction ' + a));
-// 					}
-// 					slotBidsBySlotElementId[slot.get('slotElementId')] = thisSlotBids;
-// //					slot.set('auction', thisSlotAuction.getRow(0).get('auction'));
-// 					slotBidsDf = slotBidsDf.diff(thisSlotBids, ['auction'])
-// 				}	
-// 				adUnitSlots.map(slot => extractSlotBids(slot));
-// 				slotBidsDf = slotBidsBySlotElementId[event.slot.getSlotElementId()];
-// 			}
 			else {
 				// we only have one slot for this adUnitPath
 				slotBidsBySlotElementId[event.slot.getSlotElementId()] = slotBidsDf;
@@ -487,8 +520,7 @@ function checkForGPT(domFoundTime) {
 
 // Set a interval check to see when the PBJS and GPT ojects are loaded and ready
 
-
-console.log('PREBID_TOOLS: Entry ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", domFoundTime));
+console.log('PREBID_TOOLS: Entry ' + domFoundTime);
 
 if (checkForPBJS(domFoundTime) == 0) {
 	var count_pbjs = 0;
@@ -502,10 +534,12 @@ if (checkForPBJS(domFoundTime) == 0) {
 			}
 		} else {
 			clearInterval(timer_pbjs);
+			console.log('PREBID_TOOLS: Entry ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", domFoundTime));
 			allBidsDf = new dfjs.DataFrame([], bidColumns);
 			auctionDf = new dfjs.DataFrame([], ['auction', 'slotElementId', 'adUnitPath', 'preAuctionStartTime', 'startTime', 'endTime']);
 			bidderDoneDf = new dfjs.DataFrame([], ['auction', 'adUnitPath', 'bidder', 'type', 'responseTime']);
 			slotDf = new dfjs.DataFrame([], ['slotElementId', 'adUnitPath', 'adId', 'slotRenderedTs', 'slotLoadTs']);
+			prebidInitialised = true;
 		}
 	}
 }
@@ -522,6 +556,7 @@ if (checkForGPT(domFoundTime) == 0) {
 			}
 		} else {
 			clearInterval(timer_gpt);
+			console.log('PREBID_TOOLS: GPT check success');
 		}
 	}
 }

@@ -36,13 +36,31 @@
 
 		</div>
 		<div id="tabs-2" class='myTab'>
-			<div id='bidder-stats-container' width='95%'></div>
+			<div id='adunit-selector-container'>
+				<label id='bidder-stats-adunit-selector-label' for="bidder-stats-adunit-selector">Ad Unit</label>
+				<select name="bidder-stats-adunit-selector" id="bidder-stats-adunit-selector">
+					<option value="all" selected='selected'>all</option>
+				</select>
+			</div>
+		<div id='bidder-stats-container' width='95%'></div>
 		</div>
 		<div id="tabs-3" class='myTab'>
-			<p>Content for Tab 3</p>
+			<div id='bidder-timeline-selector-container'>
+				<label id='bidder-timeline-auction-selector-label' for="bidder-timeline-auction-selector">Auction</label>
+				<select name="bidder-stats-auction-selector" id="bidder-timeline-auction-selector">
+					<option value="all" selected='selected'>all</option>
+				</select>
+				<label id='bidder-timeline-adunit-selector-label' for="bidder-timeline-adunit-selector">Ad Unit</label>
+				<select name="bidder-timeline-adunit-selector" id="bidder-timeline-adunit-selector">
+					<option value="all" selected='selected'>all</option>
+				</select>
+			</div>
+			<div id='bidder-timeline-content'></div>
+			<div class='bidder-timeline-container' id='bidder-timeline-container'>
+			</div>
 		</div>
 		<div id="tabs-4" class='myTab'>
-			<p>Content for Tab 4</p>
+			<div id="prebid-config-container"></div>
 		</div>
 		<label class="switch">
 			<input id='pp_enabled_switch' type="checkbox" checked/>

@@ -1,5 +1,5 @@
 /* Existing styling */
-<style type="text/css">
+
 body {
 	width: 800px;
 	height: 800px;
@@ -78,7 +78,7 @@ ul {
 
 .caret-down::before {
 	-ms-transform: rotate(90deg); /* IE 9 */
-	-webkit-transform: rotate(90deg); /* Safari */ '
+	-webkit-transform: rotate(90deg); /* Safari */ 
 	transform: rotate(90deg);
 }
 
