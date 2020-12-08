@@ -255,7 +255,6 @@ function checkForPBJS(domFoundTime) {
 			allBidsDf = allBidsDf.map(row => row.set('nonRenderedHighestCpm', row.get('nonRenderedHighestCpm_2') ? true : false) && row.set('rendered', row.get('rendered_2') ? true : false)).drop(['nonRenderedHighestCpm_2', 'rendered_2', 'modified_2']);
 
 			// merge in any bidder done data that comes in
-			// TODO need to clear this data so not updatad multiple times?
 			try {
 				allBidsDf = allBidsDf.join(bidderDoneDf, ['auction', 'adUnitPath', 'bidder'], 'left');
 				allBidsDf = allBidsDf.map(row => row.set('time', row.get('time') == undefined ? row.get('responseTime') - auctionStartTime : row.get('time'))).drop(['responseTime']);
@@ -429,6 +428,7 @@ function checkForGPT(domFoundTime) {
 
 		googletag.pubads().addEventListener('slotOnload', function (event) {
 			// Is this how GAM computed creative render time?
+			// Fires when the slot is actually loaded and available in the browser
 			console.log('GPT_TOOLS: slotOnload ' + JSON.stringify(event));
 			let loadTs = Date.now();
 			// update the slot dataframe with the load timestamp
@@ -436,8 +436,11 @@ function checkForGPT(domFoundTime) {
 			displayTable(slotDf.toCollection());
 			
 			// we now want to link the bids to this slot. 
-			// There is no auction id in the slot event. We could use the adUnitPath but multiple auctions can run on the same adUnit which means it can be difficult to link correctly. However we can use the hb_adid to link to the adid.
-			// some sites have the slot element id in the bidder adunitpath
+			// There is no auction id in the slot event. We could use the adUnitPath but multiple auctions can run
+			// on the same adUnit which means it can be difficult to link correctly. 
+			// If it is available we can use the hb_adid to link to the adid.
+			// Also some sites have the slot element id in the bidder adunitpath!
+
 			let slotBidsDf = allBidsDf.filter(row => (row.get('adUnitPath') == event.slot.getAdUnitPath() || row.get('adUnitPath') == event.slot.getSlotElementId()) && row.get('cpm') != undefined);
 
 			// multiple slots with same adunitpath?
