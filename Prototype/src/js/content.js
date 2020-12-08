@@ -1,3 +1,4 @@
+/* global dfjs */
 // Extension content.js script, listens for (window) messages from
 // injected script, build auction data structure. Also listens for
 // (chrome) messages from Popup.js when it runs and responds to it 
