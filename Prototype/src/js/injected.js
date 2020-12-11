@@ -541,11 +541,16 @@ if (checkForPBJS(domFoundTime) == 0) {
 		} else {
 			clearInterval(timer_pbjs);
 			console.log('PREBID_TOOLS: Entry ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", domFoundTime));
-			allBidsDf = new dfjs.DataFrame([], bidColumns);
-			auctionDf = new dfjs.DataFrame([], ['auction', 'slotElementId', 'adUnitPath', 'preAuctionStartTime', 'startTime', 'endTime']);
-			bidderDoneDf = new dfjs.DataFrame([], ['auction', 'adUnitPath', 'bidder', 'type', 'responseTime']);
-			slotDf = new dfjs.DataFrame([], ['slotElementId', 'adUnitPath', 'adId', 'slotRenderedTs', 'slotLoadTs']);
-			prebidInitialised = true;
+
+			if (!dfjs) {
+				console.error('PREBID_TOOLS, dfjs not loaded yet')
+			} else {
+				allBidsDf = new dfjs.DataFrame([], bidColumns);
+				auctionDf = new dfjs.DataFrame([], ['auction', 'slotElementId', 'adUnitPath', 'preAuctionStartTime', 'startTime', 'endTime']);
+				bidderDoneDf = new dfjs.DataFrame([], ['auction', 'adUnitPath', 'bidder', 'type', 'responseTime']);
+				slotDf = new dfjs.DataFrame([], ['slotElementId', 'adUnitPath', 'adId', 'slotRenderedTs', 'slotLoadTs']);
+				prebidInitialised = true;
+			}
 		}
 	}
 }
