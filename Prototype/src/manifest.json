@@ -28,6 +28,7 @@
     "js/main.js",
     "resources/content-styles.css"
 	],
+	"incognito": "split",
 	"browser_action": {
 		"default_tile": "Message",
 		"default_popup": "popup.html"

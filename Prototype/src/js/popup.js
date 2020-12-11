@@ -1,49 +1,60 @@
 // This script runs when the extension popup is activated.
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-	let msg = JSON.parse(request);
+const LOG_PREFIX = 'PP_POPUP:'
+const SWITCH_STORAGE_KEY = 'PP_Enabled'
+const EVENT_POPUP_ACTIVE = 'PROFESSOR_PREBID_POPUP_ACTIVE'
+const EVENT_MASKS_STATE = 'PROFESSOR_PREBID_MASKS_STATE'
+const EVENT_OPEN_MAIN_PAGE = 'PROFESSOR_PREBID_OPEN_MAIN'
+const EVENT_SEND_DATA_TO_BACKGROUND = 'PROFESSOR_PREBID_AUCTION_DATA'
+const EVENT_GPT_VISIBILITY_EVENT = 'GPT_VISIBILITY_EVENT'
 
-	if (msg.type == 'GPT_VISIBILITY_EVENT') {
-		let view = '';
+chrome.runtime.onMessage.addListener(function (request) {
+	const msg = JSON.parse(request);
 
-		console.log('GPT_VISIBILITY_EVENT: ' + msg.obj);
+	if (msg.type === EVENT_GPT_VISIBILITY_EVENT) {
+		console.log(`${LOG_PREFIX} GPT_VISIBILITY_EVENT:`, msg.obj);
 
+		let view = ''
 		msg.obj.forEach(x => {
-			console.log(x);
-			view = view.concat('<div>' + x + '</div>');
+			view += `<div>${x}</div>`
 		});
 
 		document.getElementById('view').innerHTML = view;
-
-		sendResponse({
-			msg: 'GPT_VISIBILITY_EVENT_RESPONSE'
-		});
 	}
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-	var gResponse;
-
-	// Inform content.js script that we just became active and it will
-	// respond with any auction data that might be available
-
-	chrome.storage.local.get(["PP_Enabled"], function (result) {
-		isEnabled = result.PP_Enabled;
-		let pp_switch = document.getElementById('pp_enabled_switch');
-		pp_switch.checked = isEnabled;
+	chrome.storage.local.get([SWITCH_STORAGE_KEY], function (result) {
+		const isEnabled = result[SWITCH_STORAGE_KEY];
+		const switchEl = document.getElementById('pp_enabled_switch');
+		switchEl.checked = isEnabled;
 	});
-
+	
   document.getElementById('btn--data-tab').addEventListener('click', openDataTab, false)
 	document.getElementById('pp_enabled_switch').addEventListener('click', handleEnableButtonStateChange, false);
-
+	
+	// talk with content.js
 	getAllAuctionData()
 }, false);
 
+function handleEnableButtonStateChange(event) {
+	const isEnabled = event.target.checked
+	chrome.storage.local.set({ SWITCH_STORAGE_KEY: isEnabled }, function () {
+		console.log(`${LOG_PREFIX} switch button state changed to: `, isEnabled);
+	});
 
-function sendMessage(evt, x) {
-	let data = {
-		type: evt,
-		obj: x
+	sendMessageToActiveWindow(EVENT_MASKS_STATE, { isEnabled });
+}
+
+/**
+ * sendMessageToActiveWindow
+ * 
+ * sends a message to the active page
+ */
+function sendMessageToActiveWindow(type, payload) {
+	const data = {
+		type,
+		payload
 	};
 
 	chrome.tabs.query({
@@ -51,37 +62,27 @@ function sendMessage(evt, x) {
 		active: true
 	}, function (tabs) {
 		chrome.tabs.sendMessage(tabs[0].id, JSON.stringify(data), function (response) {
-			console.log('PP_POPUP: sentMessage(' + evt + ' ' + x + ')');
-			console.log('PP_POPUP: received response(' + response + ')');
-
+			console.log(`${LOG_PREFIX} sendMessage:`, type, data);
+			console.log(`${LOG_PREFIX} received response: `, response);
 		});
 	});
 }
 
-function handleEnableButtonStateChange(event) {
-
-	let isEnabled = event.target.checked
-	chrome.storage.local.set({ "PP_Enabled": isEnabled }, function () {
-		console.log('Value is set to ' + isEnabled);
-	});
-
-	sendMessage('PROFESSOR_PREBID_ENABLED', { 'isEnabled': isEnabled });
-}
-
-
+/**
+ * getAllAuctionData
+ * 
+ * request data from content.js and sends it to the background
+ */
 function getAllAuctionData() {
 	chrome.tabs.query({
 		currentWindow: true,
 		active: true
 	}, function (tabs) {
-		let data = {
-			type: 'POPUP_ACTIVE',
-			obj: ''
-		};
-		// When POPUP is activated, send message, "processResponse()" is a callback that the
-		// content.js script populates in response. SO, content.js builds data structures but
-		// doesn't do anything until popup activates'
-		chrome.tabs.sendMessage(tabs[0].id, JSON.stringify(data), sendDataToBackground);
+		const data = {
+			type: EVENT_POPUP_ACTIVE,
+		}
+
+		chrome.tabs.sendMessage(tabs[0].id, data, sendDataToBackground);
 	});
 }
 
@@ -92,7 +93,7 @@ function getAllAuctionData() {
  */
 function openDataTab () {
 	chrome.runtime.sendMessage({
-		type: 'PROFESSOR_PREBID_OPEN_MAIN'
+		type: EVENT_OPEN_MAIN_PAGE
 	})
 }
 
@@ -104,7 +105,7 @@ function openDataTab () {
 function sendDataToBackground (data) {
 	if (data) {
 		chrome.runtime.sendMessage({
-			type: 'PROFESSOR_PREBID_AUCTION_DATA',
+			type: EVENT_SEND_DATA_TO_BACKGROUND,
 			payload: data
 		})
 	}

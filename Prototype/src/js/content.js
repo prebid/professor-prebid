@@ -4,203 +4,195 @@
 // (chrome) messages from Popup.js when it runs and responds to it 
 // with the auction data it collected so far
 
-var bidRequestedObj = {};
+const LOG_PREFIX = 'PROFESSOR_PREBID_CONTENT.JS:'
+const EVENT_POPUP_ACTIVE = 'PROFESSOR_PREBID_POPUP_ACTIVE'
+const EVENT_MASKS_STATE = 'PROFESSOR_PREBID_MASKS_STATE'
 
-var allBidsDf = new dfjs.DataFrame([]), allAuctionsDf = new dfjs.DataFrame([]), allSlotsDf = new dfjs.DataFrame([]);
 var prebidConfig = {};
+var bidRequestedObj = {};
+var allBidsDf = new dfjs.DataFrame([]),
+		allAuctionsDf = new dfjs.DataFrame([]),
+		allSlotsDf = new dfjs.DataFrame([]);
 
+chrome.runtime.onMessage.addListener(function(message, _, sendResponse) {
+	const messageObj = safelyParseJSON(message)
+	const type = messageObj.type
+	const payload = messageObj.payload
 
-function myCallBack(response) {
-	console.log('PREBID_TOOLS: From BACKGROUND.js = ' + response.msg);
-}
+	if (type === EVENT_POPUP_ACTIVE) {
+		console.log(`${LOG_PREFIX} sending auction data to popup`);
 
-function sendMessageToBackground(evt, datum, callback) {
-	let data = {
-		type: evt,
-		obj: datum
-	}
-
-	try {
-		chrome.runtime.sendMessage(JSON.stringify(data), callback);
-	} catch (err) {
-		console.log('PREBID_ERROR sendMessageToBackground() ' + err);
-	}
-}
-
-////////////////////////////////////
-// Masks
-////////////////////////////////////
-function createMask(target, creativeRenderTime) {
-	let mask_container_id = "mask_container_" + target;
-	if (document.getElementById(mask_container_id)) {
-		document.getElementById(mask_container_id).remove();
-	}
-
-	// TODO - needs to be tidied up
-	let elmt = document.getElementById(target);
-	elmt.style.borderWidth = "4px";
-	elmt.style.borderColor = "blue";
-	elmt.style.borderStyle = "solid";
-	elmt.style.fillOpacity = "0.5";
-	elmt.style.fill = "orange";
-	elmt.style.background = "green";
-	elmt.scrollIntoView();
-
-	// desired size
-	let elmtStyle = window.getComputedStyle(elmt, null);
-	let cWidth = parseInt(elmtStyle.getPropertyValue("width"), 10);
-	let cHeight = parseInt(elmtStyle.getPropertyValue("height"), 10);
-
-	// create a mask
-	let mask_container = document.createElement("div");
-	mask_container.id = mask_container_id;
-	mask_container.classList.add("p_overlay");	
-	mask_container.style.width = cWidth + "px"; 
-	mask_container.style.height = cHeight + "px"; 
-	
-	let title_elmt = document.createElement("p");
-	title_elmt.style.fontSize = "20px";
-	title_elmt.style.color = "white";
-	title_elmt.style.fontWeight = "bold";
-	title_elmt.innerText = target;
-	mask_container.appendChild(title_elmt);
-	let hr1 = document.createElement("hr");
-	hr1.style.margin = "0px";
-	mask_container.appendChild(hr1);
-	// Main body
-	let mask_container_body_id = "mask_container_body_" + target;
-	mask_body_elmt = document.createElement('div');
-	mask_body_elmt.classList.add('p_overlay_body');
-	mask_body_elmt.id = mask_container_body_id;
-	mask_container.appendChild(mask_body_elmt);
-
-	// General section
-	let general_section_elmt = document.createElement("p");
-	general_section_elmt.style.fontSize = "10px";
-	general_section_elmt.style.color = "grey";
-	general_section_elmt.innerText = 	"\nAd render time - " + creativeRenderTime;
-	let hr2 = document.createElement("hr");
-	hr2.style.margin = "0px";
-	general_section_elmt.appendChild(hr2);
-	mask_body_elmt.appendChild(general_section_elmt);
-
-	// Add the mask to the doc
-	elmt.parentElement.insertBefore(mask_container, elmt);
-}
-
-
-function updateMask(slotRow, slotBidsDf) {
-	let target = slotRow.get('slotElementId');
-	let creativeRenderTime = slotRow.get('slotLoadTs') - slotRow.get('slotRenderedTs');
-	// TODO get auction time
-	createMask(target, creativeRenderTime);
-
-	// do we have a prebid winner?
-	slotBidsDf = slotBidsDf.sortBy('rendered', true); // rendered = true will be first
-	let winner = slotBidsDf.filter(row => row.get('rendered') == true);
-	let prebidRenderedAd = winner.dim()[0] != 0 ? true : false;
-
-	// if we do display them first
-	let mask_container_body_id = "mask_container_body_" + target;
-	let mask_body_elmt = document.getElementById(mask_container_body_id);
-	let body_table = document.createElement('table');
-	body_table.style.width = '100%';
-	body_table.classList.add('mask_body_table');
-
-	if (prebidRenderedAd) {
-		mask_body_elmt.style.background = '#F9FFCB';
-	}
-
-
-	function extractBidderInfo(body, row) {
-		let tr = document.createElement('tr');
-		let td = document.createElement('td');
-		td.style.fontWeight = 'bold';
-		td.style.textAlign = 'center';
-		td.style.verticalAlign = 'middle';
-		td.innerText = row.get('bidder') + (row.get('rendered') ? ' - Auction Winner' : '');
-		tr.appendChild(td);
-		body.appendChild(tr);
-		tr = document.createElement('tr');
-		td = document.createElement('td');
-		td.style.textAlign = 'center';
-		td.style.verticalAlign = 'middle';
-		td.innerText = 'Response Time - ' + (row.has('time') && row.get('time') ? row.get('time') + 'ms' : 'N/A');
-		tr.appendChild(td);
-		body.appendChild(tr);
-		tr = document.createElement('tr');
-		td = document.createElement('td');
-		td.style.textAlign = 'center';
-		td.style.verticalAlign = 'middle';
-		td.innerText = 'Bid CPM - ' + (row.has('cpm') && row.get('cpm') ? row.get('cpm') : 'No Bid');
-		tr.appendChild(td);
-		body.appendChild(tr);
-		let hr = document.createElement('hr');
-		hr.style.borderTop = 'dotted 1px';
-		hr.style.margin = '0px'
-		body.appendChild(hr);
-	}
-
-	mask_body_elmt.appendChild(body_table);
-	slotBidsDf.map(row => extractBidderInfo(body_table, row));
-}
-
-
-function updateAllMasks(slotDf = allSlotsDf, slotBidsDf = allBidsDf) {
-	function getSlotBids(slotRow, allBids) {
-		return allBidsDf.filter(row => row.get('adUnitPath') == slotRow.get('adUnitPath'));
-	}
-	allSlotsDf.map(row => updateMask(row, getSlotBids(row, slotBidsDf)));
-}
-
-function removeMask() {
-	const removeElements = (elms) => elms != null ? elms.forEach(el => el.remove()) : null;
-	let toRemove = document.querySelectorAll('.p_overlay');
-	removeElements(toRemove);
-}
-
-
-////////////////////////////////////
-// Chrome Extension Events
-////////////////////////////////////
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	// When POPUP becomes active it will send us a message, in response we
-	// send back the collected data structures
-
-	let msg = JSON.parse(request);
-
-	if (msg.type == 'POPUP_ACTIVE' || msg.type == 'REFRESH') {
-		console.log('PREBID_TOOLS: Sending auction data in response');
-		let data = JSON.stringify({
-			msg: 'POPUP_ACTIVE_RESPONSE',
+		const data = {
 			dfs: {
 				auction: allAuctionsDf.toCollection(),
 				slots: allSlotsDf.toCollection(),
 				allBids: allBidsDf.toCollection()
 			},
 			prebidConfig : JSON.stringify(prebidConfig)
-		});
-		sendResponse(data);
-	} else if (msg.type == 'POPUP_GPTBUTTON') {
-		console.log('PREBID_TOOLS: POPUP_GPTBUTTON id=' + msg.obj.target);
-		// TODO use auction data 
-		console.log('XXXXXXXXXXXXXXXXXX NOT IMPLEMENTED YET');
-
-		sendResponse({
-			msg: 'POPUP_GPTBUTTON_RESPONSE'
-		});
-
-	} else if (msg.type == 'PROFESSOR_PREBID_ENABLED') {
-		if (!msg.obj.isEnabled) {
-			removeMask();
 		}
-		sendResponse({
-			msg: 'MASKS_REMOVED'
-		});
-	} else  {
-		console.log('PREBID_TOOLS: UNKNOWN MESSAGE ' + msg);
+		
+		sendResponse(data);
+	} else if (type === EVENT_MASKS_STATE) {
+		if (payload.isEnabled) {
+			showMasks()
+			sendResponse('mask overlays visible')
+		} else {
+			hideMasks();
+			sendResponse('mask overlays hidden')
+		}
+	} else {
+		console.log(`${LOG_PREFIX} received unhandled message`, message)
 	}
 });
+
+/**
+ * createMask
+ * 
+ * create the mask overlays
+ */
+function createMask(slotRow, slotBidsDf, auctionRow) {
+	const targetId = slotRow.get('slotElementId');
+	const creativeRenderTime = slotRow.get('slotLoadTs') - slotRow.get('slotRenderedTs');
+	const auctionTime = auctionRow.get('endTime') - auctionRow.get('startTime')
+
+	// do we have a prebid winner?
+	const sortedSlotBidsDf = slotBidsDf.sortBy('rendered', true); // rendered = true will be first
+	const winner = sortedSlotBidsDf.filter(row => row.get('rendered') == true);
+	const prebidRenderedAd = winner.dim()[0] ? true : false;
+
+	const maskContainerId = `prpb_mask_container_${targetId}`
+	const targetEl = document.getElementById(targetId)
+	let maskContainerEl = document.getElementById(maskContainerId)
+
+	if (maskContainerEl) {
+		maskContainerEl.remove()
+	} else {
+		maskContainerEl = document.createElement('div')
+	}
+
+	// get the size of the ad so it can attached to the mask 
+	const targetElStyles = window.getComputedStyle(targetEl);
+	const targetWidth = targetElStyles.getPropertyValue('width')
+	const targetHeight = targetElStyles.getPropertyValue('height')
+
+	// create the mask
+	maskContainerEl.id = maskContainerId
+	maskContainerEl.classList.add('prpb-mask__overlay', 'js-prpb-mask');	
+	maskContainerEl.style.width = targetWidth; 
+	maskContainerEl.style.height = targetHeight; 
+
+	if (prebidRenderedAd) {
+		maskContainerEl.classList.add('prpb-mask__overlay--bg-yellow')
+	} else {
+		maskContainerEl.classList.add('prpb-mask__overlay--bg-blue')
+	}
+	
+	// create the title
+	const titleEl = document.createElement('p');
+	titleEl.classList.add('prpb-mask__title')
+	titleEl.innerText = `${targetId}`;
+	
+	// create the mask body
+	const maskBodyId =  `prpb_mask_body_${targetId}`;
+	const maskBodyEl = document.createElement('div');
+	maskBodyEl.id = maskBodyId;
+	maskBodyEl.classList.add('prpb-mask__overlay-body');
+	
+	// create the status element
+	const statusEl = document.createElement('p')
+	statusEl.classList.add('prpb-mask__status')
+	statusEl.textContent = `Status - ${prebidRenderedAd ? 'Ad Server Impression' : 'Prebid Impression'}`
+
+	// create the general section
+	const generalSectionEl = document.createElement('div');
+	generalSectionEl.classList.add('prpb-mask__general-section')
+	
+	// create the ad render time element
+	const adRenderTimeEl = document.createElement('p')
+	adRenderTimeEl.textContent = `Ad render time - ${creativeRenderTime}ms`
+	
+	generalSectionEl.append(adRenderTimeEl)
+
+	if (prebidRenderedAd) {
+		// create the winner element
+		const winnerEl = document.createElement('div')
+		winnerEl.classList.add('prpb-mask__general-section-winner')
+		
+		// create the winner element's content
+		const winnerTitleEl = document.createElement('p')
+		const winnerCPMEl = document.createElement('p')
+		const auctionTimeEl = document.createElement('p')
+
+		winnerTitleEl.textContent = `Bidder Won - ${winner.get('bidder')}`
+		winnerCPMEl.textContent = `Bid win CPM - ${winner.get('cpm')}`
+		auctionTimeEl.textContent = `Auction time - ${auctionTime}`
+
+		winnerEl.append(winnerTitleEl, winnerCPMEl, auctionTimeEl)
+		generalSectionEl.append(winnerEl)
+	}
+
+	const bidderListTitleEl = document.createElement('p')
+	bidderListTitleEl.classList.add('prpb-mask__bidder-list-title')
+	bidderListTitleEl.textContent = 'Bidders'
+
+	const bidderListEl = document.createElement('ul')
+	bidderListEl.classList.add('prpb-mask__bidder-list')
+
+	// create bidder list items
+	sortedSlotBidsDf.map(bid => {
+		const bidder = bid.get('bidder')
+		const responseTime = bid.has('time') ? bid.get('time') : null
+		const cpm = bid.has('cpm') ? bid.get('cpm') : null
+		const isWinner = bid.get('rendered') ? true : false
+
+		// create the bidder item element
+		const itemEl = document.createElement('li')
+		itemEl.classList.add('prpb-mask__bidder-list-item')
+
+		// create the bidder item element's content
+		const titleEl = document.createElement('p')
+		titleEl.classList.add('prpb-mask__bidder_list-item-title')
+		const responseTimeEl = document.createElement('p')
+		const cpmEl = document.createElement('p')
+
+		titleEl.textContent = `${bidder} ${isWinner ? ' - Auction Winner' : ''}`
+		responseTimeEl.textContent = `Response Time - ${responseTime ? `${responseTime}ms` : 'N/A'}`
+		cpmEl.textContent = `Bid CPM - ${cpm || 'No bid'}`
+
+		itemEl.append(titleEl, responseTimeEl, cpmEl)
+		bidderListEl.append(itemEl)
+	})
+
+	maskBodyEl.append(statusEl, generalSectionEl, bidderListTitleEl, bidderListEl);
+	maskContainerEl.append(titleEl, maskBodyEl)
+
+	// insert the mask above the ad element
+	targetEl.parentElement.insertBefore(maskContainerEl, targetEl);
+}
+
+/**
+ * hideMasks
+ * 
+ * traverse all masks on page and hide them by adding a "hidden" class
+ */
+function hideMasks() {
+	const masks = document.querySelectorAll('.js-prpb-mask');
+	masks.forEach(mask => {
+		mask.classList.add('prpb-mask--hidden')
+	})
+}
+
+/**
+ * showMasks
+ * 
+ * traverse all masks on page and remove their hidden class
+ */
+function showMasks() {
+	const masks = document.querySelectorAll('.js-prpb-mask');
+	masks.forEach(mask => {
+		mask.classList.remove('prpb-mask--hidden')
+	})
+}
 
 
 ////////////////////////////////////
@@ -210,6 +202,7 @@ window.addEventListener("message", function(event) {
 	if (event.source != window) {
 		return;
 	}
+
 	if (event.data.type && (event.data.type == "CONFIG_AVAILABLE")) {
 		console.log('PREBID_TOOLS: Received CONFIG_AVAILABLE event');
 		prebidConfig = JSON.parse(event.data.obj)['prebidConfig'];
@@ -277,11 +270,10 @@ window.addEventListener("message", function(event) {
 					} else {
 						console.warn("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
 					}		
-					updateMask(slotLoadedDf.getRow(0), slotBidsDf);
+					createMask(slotLoadedDf.getRow(0), slotBidsDf, auctionDf.getRow(0));
 				}
 			}
 		});
-	  	
 
 	} else if (event.data.type && (event.data.type == "GPT_VISIBILITY_EVENT")) {
 		console.log('PREBID_TOOLS: Received GPT_VISIBILITY_EVENT event');
@@ -302,3 +294,18 @@ window.addEventListener("message", function(event) {
 		}
 	}
 }, false);
+
+/**
+ * Utils
+ */
+
+function safelyParseJSON (data) {
+	if (typeof data === 'object') { return data }
+
+	try {
+		return JSON.parse(data)
+	} catch (e) {
+		console.error(`${LOG_PREFIX}.safelyParseJSON failed with data `, data)
+		return {}
+	}
+}

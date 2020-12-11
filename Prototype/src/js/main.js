@@ -113,17 +113,15 @@ function displayTable(output, defaultOutput = 'n/a') {
 
 function initialiseData(response) {
 	if (response) {
-		console.log(response);
-		let responseData = JSON.parse(response);
-		if (responseData['dfs']) {
-			allBidsDf = new dfjs.DataFrame(responseData['dfs']['allBids']);
+		if (response['dfs']) {
+			allBidsDf = new dfjs.DataFrame(response['dfs']['allBids']);
 			console.log('passed all bids df');
 			displayTable(allBidsDf.toCollection());
-			allAuctionsDf = new dfjs.DataFrame(responseData['dfs']['auction']);
+			allAuctionsDf = new dfjs.DataFrame(response['dfs']['auction']);
 			displayTable(allAuctionsDf.toCollection());
-			allSlotsDf = new dfjs.DataFrame(responseData['dfs']['slots']);
+			allSlotsDf = new dfjs.DataFrame(response['dfs']['slots']);
 			displayTable(allSlotsDf.toCollection());
-			prebidConfig = JSON.parse(responseData['prebidConfig']);
+			prebidConfig = JSON.parse(response['prebidConfig']);
 		}
 
 		// join auctions and slots
