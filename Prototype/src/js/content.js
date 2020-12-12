@@ -62,13 +62,7 @@ function createMask(slotRow, slotBidsDf, auctionRow) {
 
 	const maskContainerId = `prpb_mask_container_${targetId}`
 	const targetEl = document.getElementById(targetId)
-	let maskContainerEl = document.getElementById(maskContainerId)
-
-	if (maskContainerEl) {
-		maskContainerEl.remove()
-	} else {
-		maskContainerEl = document.createElement('div')
-	}
+	const maskContainerEl = document.createElement('div')
 
 	// get the size of the ad so it can attached to the mask 
 	const targetElStyles = window.getComputedStyle(targetEl);
@@ -166,8 +160,15 @@ function createMask(slotRow, slotBidsDf, auctionRow) {
 	maskBodyEl.append(statusEl, generalSectionEl, bidderListTitleEl, bidderListEl);
 	maskContainerEl.append(titleEl, maskBodyEl)
 
-	// insert the mask above the ad element
-	targetEl.parentElement.insertBefore(maskContainerEl, targetEl);
+	const prevContainerEl = document.getElementById(maskContainerId)
+
+	// insert to DOM
+	if (prevContainerEl) {
+		prevContainerEl.replaceWith(maskContainerEl)
+	} else {
+		targetEl.insertBefore(maskContainerEl, targetEl.firstChild);
+	}
+
 }
 
 /**
