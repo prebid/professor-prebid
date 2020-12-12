@@ -1,23 +1,114 @@
-/* Round slider switch */
-/* The switch - the box around the slider */
+body {
+	width: 453px;
+	background-color: rgb(248,248,248);
+	color: rgb(112,112,112);
+	font-family: -apple-system, "Segoe UI", sans-serif;
+	font-size: 16px;
+	margin: 16px;
+}
+
+h1, p {
+	margin: 0;
+}
+
+h1 {
+	font-size: 1.6em;
+}
+
+hr {
+	border-color: rgba(112,112,112, 0.1);
+}
+
+.page-title {
+	font-weight: 500;
+	text-align: center;
+}
+
+.general-section {
+	padding: 16px;
+}
+
+.menu {
+	padding: 8px 0;
+}
+
+.menu > ul {
+	display: flex;
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+}
+
+.menu > ul > li {
+	position: relative;
+	display: inline-block;
+	width: 20%;
+	padding: 0 8px;
+	border-right: 1px solid rgb(226,226,226);
+	text-align: center;
+	font-size: 13px;
+	cursor: pointer;
+}
+
+.menu > ul > li:last-child {
+	border: 0;
+}
+
+.menu > ul > li > .iconify {
+	margin-bottom: -4px;
+	font-size: 22px;
+}
+
+#ad-load-runtime-title {
+	text-align: center;
+}
+
+.timeline-bar-container {
+	display: flex;
+	margin-bottom: 16px;
+}
+
+.timeline-bar-container .bar-label {
+	min-width: 62px;
+	font-size: 12px;
+	text-align: center;
+	white-space: pre-line;
+}
+
+.timeline-bar-container .bar-label > span:first-child {
+	/* make sure pre-auction label is not wrapped */
+	white-space: nowrap;
+}
+
+.timeline-bar-container .bar {
+	height: 24px;
+	width: 100%;
+	border-radius: 10px;
+}
+
+.timeline-bar-container .pre-auction .bar {
+	background-color: rgb(203,203,203);
+}
+
+.timeline-bar-container .auction .bar {
+	background-color: rgb(197,233,252);
+}
+
+.timeline-bar-container .ad-server .bar {
+	background-color: rgb(249,255,203);
+}
+
 .switch {
-  position: absolute; 
-  bottom: 1.25em; 
-  z-index: 20;
-  left: 1.0em; 
-  width: 36px;
-  height: 20px;
-  margin: 1px 0 0px 0px;
+	position: relative;
+	display: inline-block;
+	width: 36px;
+	height: 18px;
 }
 
 .switch input { 
   opacity: 0;
-  width: 0;
   height: 0;
-}
-
-.enable-button-label {
-    margin: 3px 0 0px 0px;
+  width: 0;
 }
 
 .slider {
@@ -35,9 +126,9 @@
 .slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
+  height: 14px;
+  width: 14px;
+  left: 4px;
   bottom: 2px;
   background-color: white;
   -webkit-transition: .4s;
@@ -53,12 +144,11 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(16px);
-  -ms-transform: translateX(16px);
-  transform: translateX(16px);
+  -webkit-transform: translateX(14px);
+  -ms-transform: translateX(14px);
+  transform: translateX(14px);
 }
 
-/* Rounded sliders */
 .slider.round {
   border-radius: 10px;
 }

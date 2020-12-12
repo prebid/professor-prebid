@@ -142,6 +142,8 @@ function initialiseData(response) {
 ////////////////////////////////////
 // Now create the page content
 ////////////////////////////////////
+
+// TODO -> remove this from main.js into popup.js
 function getOverviewTabContent(overviewData) {
 	if (!overviewData) {
 		console.error('getOverviewTabContent was called without data')

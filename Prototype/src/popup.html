@@ -3,37 +3,76 @@
 
 <head>
 	<meta charset="utf-8">
-
-	<script type="text/javascript" src="js/3p/moment.min.js"></script>
 	<script type="text/javascript" src="js/3p/Chart.min.js"></script>
 	<script type="text/javascript" src="js/3p/chartjs-plugin-datalabels"></script>
-	<script type="text/javascript" src="js/3p/jquery-3.5.1.min.js"></script>
-	<script type="text/javascript" src="js/3p/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="js/3p/slick.min.js"></script>
+	<script type="text/javascript" src="js/3p/dataframe.js"></script>
 	<script type="text/javascript" src="js/roundedChart.js"></script>
-	<!--<script type="text/javascript" src="js/react-main.js"></script>-->
-	<!-- TODO change to min when lib updated -->
-	<script type="module" src="js/3p/dataframe.js"></script>
+	<script type="text/javascript" src="js/iconify.js"></script>
 	<link rel="stylesheet" href="resources/popup-styles.css" />
 </head>
 
-<body style='height:580px;width:750px'>
-	<div id="view" style="font-weight: bold;"></div>
-	<hr />
+<body>
+	<h1 class="page-title">Professor Prebid</h1>
 
-	<div style='position:relative; height:40px;'>
-		<label class="switch">
-			<input id='pp_enabled_switch' type="checkbox" checked />
-			<span class="slider round"></span>
-			<p class='enable-button-label'>Enable</p>
-		</label>
+	<div class="general-section">
+		<p>Ads detected - <span data-slot="ads_detected">N/A</span></p>
+		<p>Number of bidders - <span data-slot="num_of_bidders">N/A</span></p>
+		<p>No bid ratio - <span data-slot="no_bid_ratio">N/A</span></p>
 	</div>
-	<br />
-	<button id='btn--data-tab'>Data tab</button>
+	<hr />
+	<div id="timeline-section">
+		<p id='ad-load-runtime-title'>Ad load runtime - <span>N\A</span></p>
+		<div class='timeline-bar-container'>
+			<div id="timeline-section__pre-auction" class='pre-auction'>
+				<div class="bar-label">
+					<span>Pre-auction</span>
+					<span class='bar-value'></span>
+				</div>
+				<div class='bar'></div>
+			</div>
+			<div id="timeline-section__auction" class='auction'>
+				<div class="bar-label">
+					<span>Auction</span>
+					<span class='bar-value'></span>
+				</div>
+				<div class='bar'></div>
+			</div>
+			<div id="timeline-section__ad-server" class='ad-server'>
+				<div class="bar-label">
+					<span>Ad server</span>
+					<span class='bar-value'></span>
+				</div>
+				<div class='bar'></div>
+			</div>
+		</div>
+	</div>
+	<hr />
+	<!-- <button id='btn--data-tab'>Data tab</button> -->
+	<nav class="menu">
+		<ul>
+			<li id="open_console">
+				<label class="switch">
+					<input id='pp_enabled_switch' type="checkbox" />
+					<span class="slider round"></span>
+				</label>
+				<p>Open console</p>
+			</li>
+			<li id="bidder_statistics">
+				<span class="iconify" data-icon="mdi:robot-vacuum" data-inline="false"></span>
+				<p>Bidder Statistics</p>
+			</li>
+			<li id="timeline">
+				<span class="iconify" data-icon="mdi:robot-vacuum" data-inline="false"></span>
+				<p>Timeline</p>
+			</li>
+			<li id="config_more">
+				<span class="iconify" data-icon="mdi:robot-vacuum" data-inline="false"></span>
+				<p>Config & more</p>
+			</li>
+		</ul>
+	</nav>
 
-	<script type="text/javascript" src="js/tabs.js" charset="utf-8"></script>
 	<script type="text/javascript" src="js/popup.js" charset="utf-8"></script>
 </body>
-
 
 </html>

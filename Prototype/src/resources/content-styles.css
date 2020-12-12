@@ -43,6 +43,7 @@
 .prpb-mask__title {
 	font-weight: bold;
 	font-size: 20px;
+	text-align: center;
 }
 
 .prpb-mask__status {
@@ -69,6 +70,7 @@
 
 .prpb-mask__bidder-list {
 	margin: auto;
+	padding: 0;
 	list-style: none;
 }
 

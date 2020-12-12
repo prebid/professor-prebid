@@ -5,7 +5,7 @@
  */
 
 const EVENT_OPEN_MAIN_TAB = 'PROFESSOR_PREBID_OPEN_MAIN'
-const EVENT_AUCTION_DATA = 'PROFESSOR_PREBID_AUCTION_DATA'
+const EVENT_SEND_DATA_TO_BACKGROUND = 'PROFESSOR_PREBID_AUCTION_DATA'
 const EVENT_MAIN_PAGE_REQUEST_DATA = 'PROFESSOR_PREBID_MAIN_PAGE_REQUEST_DATA'
 
 let mainTabId
@@ -27,8 +27,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         })
       }
       break
-    case EVENT_AUCTION_DATA:
-      console.log(`received event: ${EVENT_AUCTION_DATA}`, message)
+    case EVENT_SEND_DATA_TO_BACKGROUND:
+      console.log(`received event: ${EVENT_SEND_DATA_TO_BACKGROUND}`, message)
       console.log('storing payload in a temp variable')
       tempData = message.payload
       break

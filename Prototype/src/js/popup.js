@@ -1,3 +1,4 @@
+/* global dfjs */
 // This script runs when the extension popup is activated.
 
 const LOG_PREFIX = 'PP_POPUP:'
@@ -19,7 +20,7 @@ chrome.runtime.onMessage.addListener(function (request) {
 			view += `<div>${x}</div>`
 		});
 
-		document.getElementById('view').innerHTML = view;
+		// document.getElementById('view').innerHTML = view;
 	}
 });
 
@@ -30,21 +31,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		switchEl.checked = isEnabled;
 	});
 	
-  document.getElementById('btn--data-tab').addEventListener('click', openDataTab, false)
-	document.getElementById('pp_enabled_switch').addEventListener('click', handleEnableButtonStateChange, false);
+  document.getElementById('bidder_statistics').addEventListener('click', openDataTab, false)
+  document.getElementById('timeline').addEventListener('click', openDataTab, false)
+  document.getElementById('config_more').addEventListener('click', openDataTab, false)
+	document.getElementById('open_console').addEventListener('click', handleEnableButtonStateChange, false);
 	
 	// talk with content.js
 	getAllAuctionData()
 }, false);
-
-function handleEnableButtonStateChange(event) {
-	const isEnabled = event.target.checked
-	chrome.storage.local.set({ SWITCH_STORAGE_KEY: isEnabled }, function () {
-		console.log(`${LOG_PREFIX} switch button state changed to: `, isEnabled);
-	});
-
-	sendMessageToActiveWindow(EVENT_MASKS_STATE, { isEnabled });
-}
 
 /**
  * sendMessageToActiveWindow
@@ -82,7 +76,7 @@ function getAllAuctionData() {
 			type: EVENT_POPUP_ACTIVE,
 		}
 
-		chrome.tabs.sendMessage(tabs[0].id, data, sendDataToBackground);
+		chrome.tabs.sendMessage(tabs[0].id, data, handleAuctionData);
 	});
 }
 
@@ -98,15 +92,106 @@ function openDataTab () {
 }
 
 /**
- * sendDataToBackground
+ * handleAuctionData
  * 
- * sends the data from content.js (via initialiseData) to the background.js script where it gets passed to the main.js script
+ * 1. create the popup's ui
+ * 2. sends the data from content.js (via initialiseData) to the background.js script where it gets passed to the main.js script
  */
-function sendDataToBackground (data) {
+function handleAuctionData (data) {
 	if (data) {
+		createPopupUI(data)
+
+		// send to background
 		chrome.runtime.sendMessage({
 			type: EVENT_SEND_DATA_TO_BACKGROUND,
 			payload: data
 		})
 	}
 }
+
+/**
+ * popup UI
+ * 
+ */
+
+function handleEnableButtonStateChange() {
+	const checkbox = document.getElementById('pp_enabled_switch')
+	const isEnabled = !checkbox.checked
+	checkbox.checked = isEnabled
+	
+	chrome.storage.local.set({ SWITCH_STORAGE_KEY: isEnabled }, function () {
+		console.log(`${LOG_PREFIX} switch button state changed to: `, isEnabled);
+	});
+	
+	sendMessageToActiveWindow(EVENT_MASKS_STATE, { isEnabled });
+}
+
+function createPopupUI (data) {
+	if (data.dfs) {
+		const allBidsDf = new dfjs.DataFrame(data['dfs']['allBids']); 
+		const allAuctionsDf = new dfjs.DataFrame(data['dfs']['auction']);
+		const allSlotsDf = new dfjs.DataFrame(data['dfs']['slots']);
+
+		// join auctions and slots
+		const auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'adUnitPath']);
+		// join with bids and set global
+		const auctionBidDataDf = auctionData.join(
+			allBidsDf.select(
+				'auction', 'adUnitPath', 'slotElementId', 'bidder', 'type', 'bidRequestTime', 'bidResponseTime', 'nonRenderedHighestCpm', 'rendered'), ['auction', 'adUnitPath'],
+				'inner',
+				false
+			)
+		// calculate the stats
+		let res = auctionBidDataDf.groupBy('auction', 'adUnitPath')
+			.aggregate(g => 
+				[
+					g.filter(r => r.get('type') == 'noBid').distinct('bidder').count(), 
+					g.filter(r => r.get('type') == 'bid').distinct('bidder').count(), 
+					g.distinct('adUnitPath').count(), 
+					g.distinct('bidder').count()
+				]
+			)
+			.rename('aggregation', 'bidStats');
+		// collect all the data for the popup
+		res = res.join(auctionData, ['auction', 'adUnitPath']);
+
+		createStatsUI(res)
+		createTimelineUI(res)
+	}
+}
+
+function createStatsUI (data) {
+	const adsDetected = data.groupBy('adUnitPath').aggregate(g => g.count()).count()
+	const numberOfBidders = '0' // TODO -> get get average from data
+	const noBidsRatio = '0/0' // TODO -> get average from data
+
+	document.querySelector('[data-slot="ads_detected"]').textContent = adsDetected
+	document.querySelector('[data-slot="num_of_bidders"]').textContent = numberOfBidders
+	document.querySelector('[data-slot="no_bid_ratio"]').textContent = noBidsRatio
+
+}
+
+function createTimelineUI (data) {
+	// TODO -> get real values
+	const preAuctionTime = 103 
+	const auctionTime = 567
+	const adServerTime = 212
+	const total = preAuctionTime + auctionTime + adServerTime
+
+	const preAuction = document.querySelector('#timeline-section__pre-auction')
+	const auction = document.querySelector('#timeline-section__auction')
+	const adServer = document.querySelector('#timeline-section__ad-server')
+
+	const getPercentage = (v) => 100 * (v / total)
+
+	preAuction.style.width = `${getPercentage(preAuctionTime)}%`
+	auction.style.width = `${getPercentage(auctionTime)}%`
+	adServer.style.width = `${getPercentage(adServerTime)}%`
+
+	preAuction.querySelector('.bar-value').textContent = `${preAuctionTime}ms`
+	auction.querySelector('.bar-value').textContent = `${auctionTime}ms`
+	adServer.querySelector('.bar-value').textContent = `${adServerTime}ms`
+
+	document.querySelector('#ad-load-runtime-title > span').textContent = `${total}ms`
+}
+
