@@ -119,6 +119,8 @@ function createMask(slotRow, slotBidsDf, auctionRow) {
 	generalSectionEl.append(adRenderTimeEl)
 
 	if (prebidRenderedAd) {
+		const winnerRow = winner.getRow(0)
+
 		// create the winner element
 		const winnerEl = document.createElement('div')
 		winnerEl.classList.add('prpb-mask__general-section-winner')
@@ -128,8 +130,8 @@ function createMask(slotRow, slotBidsDf, auctionRow) {
 		const winnerCPMEl = document.createElement('p')
 		const auctionTimeEl = document.createElement('p')
 
-		winnerTitleEl.textContent = `Bidder Won - ${winner.get('bidder')}`
-		winnerCPMEl.textContent = `Bid win CPM - ${winner.get('cpm')}`
+		winnerTitleEl.textContent = `Bidder Won - ${winnerRow.get('bidder')}`
+		winnerCPMEl.textContent = `Bid win CPM - ${winnerRow.get('cpm')}`
 		auctionTimeEl.textContent = `Auction time - ${auctionTime}`
 
 		winnerEl.append(winnerTitleEl, winnerCPMEl, auctionTimeEl)
