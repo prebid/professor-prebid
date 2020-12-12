@@ -119,7 +119,7 @@ function handleEnableButtonStateChange() {
 	const isEnabled = !checkbox.checked
 	checkbox.checked = isEnabled
 	
-	chrome.storage.local.set({ SWITCH_STORAGE_KEY: isEnabled }, function () {
+	chrome.storage.local.set({ [SWITCH_STORAGE_KEY]: isEnabled }, function () {
 		console.log(`${LOG_PREFIX} switch button state changed to: `, isEnabled);
 	});
 	
