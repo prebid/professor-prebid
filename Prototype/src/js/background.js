@@ -13,16 +13,17 @@ let tempData
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   const msgType = message && message.type
+	const payload = message && message.payload
 
   switch (msgType) {
     case EVENT_OPEN_MAIN_TAB:
       if (mainTabId) {
-        chrome.tabs.update(mainTabId, { active: true  }, function (tab) {
+        chrome.tabs.update(mainTabId, { active: true,  url: `./main.html#${payload}` }, function (tab) {
 					mainTabId = tab.id
 					sendResponse()
         })
       } else {
-        chrome.tabs.create({ url: './main.html' }, function (tab) {
+        chrome.tabs.create({ url: `./main.html#${payload}` }, function (tab) {
 					mainTabId = tab.id
 					console.log('created tab with tabId: ', mainTabId)
 					sendResponse()

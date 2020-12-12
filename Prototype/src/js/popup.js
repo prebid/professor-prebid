@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', function () {
 		switchEl.checked = isEnabled;
 	});
 	
-  document.getElementById('bidder_statistics').addEventListener('click', openDataTab, false)
+  document.getElementById('bidder-stats').addEventListener('click', openDataTab, false)
   document.getElementById('timeline').addEventListener('click', openDataTab, false)
-  document.getElementById('config_more').addEventListener('click', openDataTab, false)
+  document.getElementById('config').addEventListener('click', openDataTab, false)
 	document.getElementById('open_console').addEventListener('click', handleEnableButtonStateChange, false);
 	
 	// talk with content.js
@@ -84,9 +84,10 @@ function getAllAuctionData() {
  * 
  * opens the "main" html file in a new tab via the background.js script
  */
-function openDataTab () {
+function openDataTab (e) {
 	chrome.runtime.sendMessage({
-		type: EVENT_OPEN_MAIN_PAGE
+		type: EVENT_OPEN_MAIN_PAGE,
+		payload: e.currentTarget.id
 	})
 }
 

@@ -2,73 +2,143 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
 
-  <script type="text/javascript" src="js/3p/moment.min.js"></script>
-  <script type="text/javascript" src="js/3p/Chart.min.js"></script>
-  <script type="text/javascript" src="js/3p/chartjs-plugin-datalabels"></script>
-  <script type="text/javascript" src="js/3p/jquery-3.5.1.min.js"></script>
-  <script type="text/javascript" src="js/3p/jquery-ui.min.js"></script>
-  <script type="text/javascript" src="js/3p/slick.min.js"></script>
-  <script type="text/javascript" src="js/roundedChart.js"></script>
-  <script type="module" src="js/3p/dataframe.js"></script>
+	<title>Professor Prebid</title>
+	<script type="text/javascript" src="js/3p/moment.min.js"></script>
+	<script type="text/javascript" src="js/3p/Chart.min.js"></script>
+	<script type="text/javascript" src="js/3p/chartjs-plugin-datalabels"></script>
+	<script type="text/javascript" src="js/3p/jquery-3.5.1.min.js"></script>
+	<script type="text/javascript" src="js/3p/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="js/3p/slick.min.js"></script>
+	<script type="text/javascript" src="js/roundedChart.js"></script>
+	<script type="module" src="js/3p/dataframe.js"></script>
 
-  <link rel="stylesheet" href="resources/jquery-ui.css" />
-  <link rel="stylesheet" type="text/css" href="resources/slick.css" />
-  <link rel="stylesheet" type="text/css" href="resources/slick-theme.css" />
-  <link rel="stylesheet" href="resources/main-styles.css" />
+	<link rel="stylesheet" href="resources/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="resources/slick.css" />
+	<link rel="stylesheet" type="text/css" href="resources/slick-theme.css" />
+	<link rel="stylesheet" href="resources/main-styles.css" />
+	<link rel="stylesheet" href="resources/main/main-nav.css" />
+	<link rel="stylesheet" href="resources/main/config-page.css" />
 </head>
 
 <body>
-  <div id="tabs" style='width:95%'>
-    <div id="tabs-1" class='myTab'>
-      <div id='overview-content'></div>
-      <div class='timeline-container' id='timeline-container'>
-      </div>
+	<header id="main-nav">
+		<nav>
+			<a href="#bidder-stats">Bidder Statistics</a>
+			<a href="#timeline">Timeline</a>
+			<a href="#config">Config & More</a>
+		</nav>
+	</header>
 
-    </div>
-    <div id="tabs-2" class='myTab'>
-      <div id='adunit-selector-container'>
-        <label id='bidder-stats-adunit-selector-label' for="bidder-stats-adunit-selector">Ad Unit</label>
-        <select name="bidder-stats-adunit-selector" id="bidder-stats-adunit-selector">
-          <option value="all" selected='selected'>all</option>
-        </select>
-      </div>
-      <div id='bidder-stats-container' width='95%'></div>
-    </div>
-    <div id="tabs-3" class='myTab'>
-      <div id='bidder-timeline-selector-container'>
-        <label id='bidder-timeline-auction-selector-label' for="bidder-timeline-auction-selector">Auction</label>
-        <select name="bidder-stats-auction-selector" id="bidder-timeline-auction-selector">
-          <option value="all" selected='selected'>all</option>
-        </select>
-        <label id='bidder-timeline-adunit-selector-label' for="bidder-timeline-adunit-selector">Ad Unit</label>
-        <select name="bidder-timeline-adunit-selector" id="bidder-timeline-adunit-selector">
-          <option value="all" selected='selected'>all</option>
-        </select>
-      </div>
-      <div id='bidder-timeline-content'></div>
-      <div class='bidder-timeline-container' id='bidder-timeline-container'>
-      </div>
-    </div>
-    <div id="tabs-4" class='myTab'>
-      <div id="prebid-config-container"></div>
-    </div>
-    <ul>
-      <li><a href="#tabs-1">Overview</a>
-      </li>
-      <li><a href="#tabs-2">Bidder Stats </a>
-      </li>
-      <li><a href="#tabs-3">Timeline</a>
-      </li>
-      <li><a href="#tabs-4">Config & More</a>
-      </li>
-    </ul>
-  </div>
+	<main>
+		<!-- Bidder Statistics page  -->
+		<div id="bidder-stats" class="page">
+			<div id='adunit-selector-container'>
+				<label id='bidder-stats-adunit-selector-label' for="bidder-stats-adunit-selector">Ad Unit</label>
+				<select name="bidder-stats-adunit-selector" id="bidder-stats-adunit-selector">
+					<option value="all" selected='selected'>all</option>
+				</select>
+			</div>
+			<div id='bidder-stats-container' width='95%'></div>
+		</div>
 
+		<!-- Timeline page -->
+		<div id="timeline" class="page">
+			<div id='bidder-timeline-selector-container'>
+				<label id='bidder-timeline-auction-selector-label' for="bidder-timeline-auction-selector">Auction</label>
+				<select name="bidder-stats-auction-selector" id="bidder-timeline-auction-selector">
+					<option value="all" selected='selected'>all</option>
+				</select>
+				<label id='bidder-timeline-adunit-selector-label' for="bidder-timeline-adunit-selector">Ad Unit</label>
+				<select name="bidder-timeline-adunit-selector" id="bidder-timeline-adunit-selector">
+					<option value="all" selected='selected'>all</option>
+				</select>
+			</div>
+			<div id='bidder-timeline-content'></div>
+			<div class='bidder-timeline-container' id='bidder-timeline-container'>
+			</div>
+		</div>
 
-  <script type="text/javascript" src="js/tabs.js" charset="utf-8"></script>
-  <script type="text/javascript" src="js/main.js"></script>
+		<!-- Config page -->
+		<div id="config" class="page">
+			<div class="config-page__section">
+				<h1>Prebid Configuration</h1>
+				<div class="config-page__cards">
+					<div class="config-page__card">
+						<p class="config-page__card-top-title">Custom Pricing</p>
+						<div class="config-page__card-content">
+							<div>N/A</div>
+						</div>
+						<p class="config-page__card-bottom-title">Price Granularity</p>
+					</div>
+					<div class="config-page__card">
+						<div class="config-page__card-content">
+							<div>N/A</div>
+						</div>
+						<p class="config-page__card-bottom-title">Modules</p>
+					</div>
+					<div class="config-page__card">
+						<div class="config-page__card-content">
+							<div>N/A</div>
+						</div>
+						<p class="config-page__card-bottom-title">Analytics Modules</p>
+					</div>
+					<div class="config-page__card">
+						<div class="config-page__card-content">
+							<div>N/A</div>
+						</div>
+						<p class="config-page__card-bottom-title">Server 2 Server</p>
+					</div>
+					<div class="config-page__minimize-cards-container">
+						<div class="config-page__card">
+							<div class="config-page__card-content minimize">
+								<div>1,500ms</div>
+							</div>
+							<p class="config-page__card-bottom-title">Timeout</p>
+						</div>
+						<div class="config-page__card">
+							<div class="config-page__card-content minimize">
+								<div>False</div>
+							</div>
+							<p class="config-page__card-bottom-title">Bid Cache</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="config-page__section">
+				<h1>Privacy Status</h1>
+				<div class="config-page__cards">
+					<div class="config-page__card">
+						<div class="config-page__card-content minimize">
+							<div>N/A</div>
+						</div>
+						<p class="config-page__card-bottom-title">GDPR</p>
+					</div>
+					<div class="config-page__card">
+						<div class="config-page__card-content minimize">
+							<div>N/A</div>
+						</div>
+						<p class="config-page__card-bottom-title">CCPA</p>
+					</div>
+				</div>
+			</div>
+			<div class="config-page__section">
+				<h1>Bidder Settings</h1>
+				<div class="config-page__card">
+					<p class="config-page__card-top-title">Bidder 1</p>
+					<div class="config-page__card-content">
+						<p>Sizes - N/A</p>
+						<p>Media types - N/A</p>
+						<p>Bidder params - N/A</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<script type="text/javascript" src="js/main.js"></script>
 </body>
 
 </html>

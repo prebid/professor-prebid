@@ -3,12 +3,155 @@ var allBidsDf, allAuctionsDf, allSlotsDf, auctionBidDataDf;
 var prebidConfig = {};
 Chart.plugins.unregister(ChartDataLabels);
 
+const DEBUG = 0
+
 const EVENT_MAIN_PAGE_REQUEST_DATA = 'PROFESSOR_PREBID_MAIN_PAGE_REQUEST_DATA'
 
 document.addEventListener('DOMContentLoaded', function () {
-	console.log('asking data from background.js')
+	if (DEBUG) {
+		console.log('asking data from background.js')
+	}
 	getDataFromBackground()
 }, false);
+
+/**
+ * onHashChange
+ * 
+ * acts as a simple hash router
+ */
+function onHashChange () {
+	const hash = window.location.hash.substr(1);
+
+	if (!hash) {
+		window.location.hash = '#timeline'
+	}
+
+	handleNavbarActiveItem()
+	handleActivePage()
+
+	switch (hash) {
+		case 'timeline':
+			onTimelinePage()
+			break
+		case 'bidder-stats':
+			onBidderStatsPage()
+			break
+		case 'config':
+			onConfigPage()
+			break
+	}
+}
+
+/**
+ * handleActivePage
+ * 
+ * runs on hash change and set a data-active attribute on the correct page element
+ */
+function handleActivePage () {
+	const hash = window.location.hash
+
+	const oldContent = document.querySelector('.page[data-active="true"]')
+	const newContent = document.querySelector(hash)
+
+	if (oldContent) {
+		oldContent.removeAttribute('data-active')
+	}
+
+	if (newContent) {
+		newContent.setAttribute('data-active', true)
+	} else {
+		// handle unknown hash
+	}
+}
+
+/**
+ * handleNavbarActiveItem
+ * 
+ * change the active item in the main navbar whenever the page hash changes 
+ */
+function handleNavbarActiveItem () {
+	const hash = window.location.hash
+
+	// switch old active with new one
+	const oldActive = document.querySelector(`#main-nav a.active`)
+	const newActive = document.querySelector(`#main-nav a[href="${hash}"]`)
+
+	if (oldActive) {
+		oldActive.classList.remove('active')
+	}
+	if (newActive) {
+		newActive.classList.add('active')
+	} else {
+		// handle unknown hash
+	}
+}
+
+function onTimelinePage () {
+	getBidderTimelineContent()
+}
+
+function onBidderStatsPage () {
+	getBidderStatisticsContent()
+}
+
+function onConfigPage () {
+	getPrebidConfig()
+}
+
+/**
+ * initPage
+ * 
+ * run this function right after data initialization
+ */
+function initPage (data) {
+	if (data) {
+		window.addEventListener('hashchange', onHashChange)
+		onHashChange() // run once at start
+
+		if (DEBUG) {
+			console.log('initialize hash router')
+		}
+	} else {
+		alert('could not get data from background!!')
+	}
+}
+
+/**
+ * initializeData
+ * 
+ * popuplate dataframes with data from background
+ */
+function initializeData(response) {
+	if (!response || !response['dfs']) {
+		if (DEBUG) {
+			console.error('called initializeData without a response')
+		}
+		return
+	}
+
+	allBidsDf = new dfjs.DataFrame(response['dfs']['allBids']);
+	allAuctionsDf = new dfjs.DataFrame(response['dfs']['auction']);
+	allSlotsDf = new dfjs.DataFrame(response['dfs']['slots']);
+	prebidConfig = JSON.parse(response['prebidConfig']);
+
+	if (DEBUG) {
+		console.log('passed all bids df');
+		displayTable(allBidsDf.toCollection());
+		displayTable(allAuctionsDf.toCollection());
+		displayTable(allSlotsDf.toCollection());
+	}
+
+	// join auctions and slots
+	let auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'adUnitPath']);
+	// join with bids and set global
+	auctionBidDataDf = auctionData.join(allBidsDf.select('auction', 'adUnitPath', 'slotElementId', 'bidder', 'type', 'bidRequestTime', 'bidResponseTime', 'nonRenderedHighestCpm', 'rendered'), ['auction', 'adUnitPath'], 'inner', false)
+	// calculate the stats
+	let res = auctionBidDataDf.groupBy('auction', 'adUnitPath').aggregate(g => [g.filter(r => r.get('type') == 'noBid').distinct('bidder').count(), g.filter(r => r.get('type') == 'bid').distinct('bidder').count(), g.distinct('adUnitPath').count(), g.distinct('bidder').count()]).rename('aggregation', 'bidStats');
+	res = res.join(auctionData, ['auction', 'adUnitPath']);
+
+	// collect all the data for the overview page : for each auction, for each slot, the number of ads, bidders etc & the timestamps for each phase of the auction
+	return res;
+}
 
 /**
  * getDataFromBackground
@@ -16,56 +159,8 @@ document.addEventListener('DOMContentLoaded', function () {
  * get data from background.js script
  */
 function getDataFromBackground () {
-	chrome.runtime.sendMessage({ type: EVENT_MAIN_PAGE_REQUEST_DATA }, pipe(initialiseData, getOverviewTabContent))
+	chrome.runtime.sendMessage({ type: EVENT_MAIN_PAGE_REQUEST_DATA }, pipe(initializeData, initPage))
 }
-
-// allow us to curry functions
-const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x);
-
-// We need to calculate the diffs from the timestamps for the timeline barchar 
-// and it needs to be transposed to be in the correct format
-function computeElementDiffs(m) {
-	return m.map(a => a.map((n, i, a) => i ? n - a[i - 1] : 0 - n));
-}
-
-function transpose(arr) {
-	return Object.keys(arr[0]).map(function (c) {
-		return arr.map(function (r) {
-			return r[c];
-		});
-	});
-}
-
-/**Chart Data**/
-var overviewPageTimelineDataTemplate = {
-  labels: [""],
-  datasets: [{
-    label: 'pre-auction',
-    backgroundColor: [
-      'rgba(200, 200, 200, 1)', 'rgba(200, 200, 200, 1)'
-    ],
-    borderWidth: 0
-  }, {
-    label: 'auction',
-    backgroundColor: [
-      'rgba(100, 100, 255, 1)', 'rgba(100, 100, 255, 1)'
-    ],
-    borderWidth: 0
-  }, {
-    label: 'ad server',
-    backgroundColor: [
-      'rgba(255, 255, 100, 1)', 'rgba(255, 255, 100, 1)'
-    ],
-    borderWidth: 0
-  },
-  {
-    label: 'render',
-    backgroundColor: [
-      'rgba(200, 50, 50, 1)', 'rgba(200, 50, 50, 1)'
-    ],
-    borderWidth: 0
-  }]
-};
 
 var bidderPageTimelineDataTemplate = {
 	labels: [""],
@@ -96,151 +191,9 @@ var bidderPageTimelineDataTemplate = {
 	}]
 };
 
-// For Debug
-function displayTable(output, defaultOutput = 'n/a') {
-	if (output.length) {
-		if (console.table) {
-			console.table(output);
-		} else {
-			for (var j = 0; j < output.length; j++) {
-				console.log(output[j]);
-			}
-		}
-	} else {
-		console.warn(defaultOutput);
-	}
-}
-
-function initialiseData(response) {
-	if (response) {
-		if (response['dfs']) {
-			allBidsDf = new dfjs.DataFrame(response['dfs']['allBids']);
-			console.log('passed all bids df');
-			displayTable(allBidsDf.toCollection());
-			allAuctionsDf = new dfjs.DataFrame(response['dfs']['auction']);
-			displayTable(allAuctionsDf.toCollection());
-			allSlotsDf = new dfjs.DataFrame(response['dfs']['slots']);
-			displayTable(allSlotsDf.toCollection());
-			prebidConfig = JSON.parse(response['prebidConfig']);
-		}
-
-		// join auctions and slots
-		let auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'adUnitPath']);
-		// join with bids and set global
-		auctionBidDataDf = auctionData.join(allBidsDf.select('auction', 'adUnitPath', 'slotElementId', 'bidder', 'type', 'bidRequestTime', 'bidResponseTime', 'nonRenderedHighestCpm', 'rendered'), ['auction', 'adUnitPath'], 'inner', shouldDropDuplicates = false)
-		// calculate the stats
-		let res = auctionBidDataDf.groupBy('auction', 'adUnitPath').aggregate(g => [g.filter(r => r.get('type') == 'noBid').distinct('bidder').count(), g.filter(r => r.get('type') == 'bid').distinct('bidder').count(), g.distinct('adUnitPath').count(), g.distinct('bidder').count()]).rename('aggregation', 'bidStats');
-		res = res.join(auctionData, ['auction', 'adUnitPath']);
-
-		// collect all the data for the overview page : for each auction, for each slot, the number of ads, bidders etc & the timestamps for each phase of the auction
-		return res;
-	} else {
-		console.error('called initialiseData without a response')
-	}
-}
-
 ////////////////////////////////////
 // Now create the page content
 ////////////////////////////////////
-
-// TODO -> remove this from main.js into popup.js
-function getOverviewTabContent(overviewData) {
-	if (!overviewData) {
-		console.error('getOverviewTabContent was called without data')
-		return
-	}
-
-	function addStatsToPage(container, auctionId, atld) {
-		let tableElement = document.createElement("table");
-		var rowElement = document.createElement("tr");
-		var tdElement = document.createElement("td");
-		tdElement.setAttribute('colSpan', 2);
-		let auctionBidders = atld.get('bidStats')
-		let auctionElement = document.createElement("p");
-		auctionElement.style.fontSize = "10px";
-		auctionElement.style.color = "grey";
-		auctionElement.innerText = "Auction - " + auctionId;
-		tdElement.appendChild(auctionElement);
-		rowElement.appendChild(tdElement);
-		tdElement = document.createElement("td");
-		let adUnitElement = document.createElement("p");
-		adUnitElement.style.fontSize = "10px";
-		adUnitElement.style.color = "grey";
-		adUnitElement.innerText = "Ad Unit - " + atld.get('adUnitPath');
-		tdElement.appendChild(adUnitElement);
-		rowElement.appendChild(tdElement);
-		tableElement.appendChild(rowElement);
-		rowElement = document.createElement("tr");
-		tdElement = document.createElement("td");
-		let numberAdsElement = document.createElement("p");
-		numberAdsElement.style.fontSize = "10px";
-		numberAdsElement.style.color = "grey";
-		numberAdsElement.innerText = "Ads detected - " + auctionBidders[2];
-		tdElement.appendChild(numberAdsElement);
-		rowElement.appendChild(tdElement);
-		tdElement = document.createElement("td");
-		let numberBiddersElement = document.createElement("p");
-		numberBiddersElement.style.fontSize = "10px";
-		numberBiddersElement.style.color = "grey";
-		numberBiddersElement.innerText = "Number of bidders - " + auctionBidders[1];
-		tdElement.appendChild(numberBiddersElement);
-		rowElement.appendChild(tdElement);
-		tdElement = document.createElement("td");
-		let noBidRatioElement = document.createElement("p");
-		noBidRatioElement.style.fontSize = "10px";
-		noBidRatioElement.style.color = "grey";
-		noBidRatioElement.innerText = "No bids ratio - " + auctionBidders[0] + "/" + auctionBidders[3];
-		tdElement.appendChild(noBidRatioElement);
-		rowElement.appendChild(tdElement);
-		tableElement.appendChild(rowElement);
-		container.appendChild(tableElement);
-	}
-
-	$('#overview-content').empty();
-	$('#timeline-container').empty();
-	let overviewContentContainerElement = document.getElementById('overview-content');
-	// for each auction
-	function addAuctionCard(auctionData) {
-
-        let auctionId = auctionData.getRow(0).get('auction')
-		auctionData.map(row => addStatsToPage(overviewContentContainerElement, auctionId, row));
-		// for debug
-		let auctionContent = auctionData.toArray().reduce((p, n) => p + n.join('\t') + '\n', '');
-		console.log(auctionContent);
-		let auctionContentEl = document.createElement('p');
-		auctionContentEl.innerText = auctionContent;
-		overviewContentContainerElement.appendChild(auctionContentEl);
-
-		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs').toArray();
-		// TODO for mult auctions we need to insert a first el which is the time from the earliest auc start to this auc
-		if (timelineData.length > 0) {
-			timelineData = transpose(computeElementDiffs(timelineData)).slice(1);
-			console.log(timelineData);
-		}
-
-		let overviewPageTimelineData = $.extend( true, {}, overviewPageTimelineDataTemplate );
-		overviewPageTimelineData.labels = auctionData.distinct('adUnitPath').toArray();
-		for (var i = 0; i < 4; i++) {
-			overviewPageTimelineData.datasets[i].data = timelineData[i];
-		}
-
-		Chart.plugins.unregister(ChartDataLabels);
-		let timelineContainer = document.getElementById('timeline-container');
-		let canvasElement = document.createElement('canvas');
-		canvasElement.style.width = '800px';
-		canvasElement.style.height = '75px';
-		timelineContainer.appendChild(canvasElement);
-
-
-		var myBarChart1 = new Chart(canvasElement, {
-			type: 'horizontalBar',
-			data: overviewPageTimelineData,
-			plugins: [ChartDataLabels],
-			options: options
-		});
-	}
-	overviewData.groupBy('auction', 'adUnitPath').aggregate(group => addAuctionCard(group))
-}
 
 function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 	// get avg cpm and time for each bidder
@@ -352,7 +305,10 @@ function updateTimelinePageContent(atld) {
 		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'bidRequestTime', 'bidResponseTime', 'endTime', 'slotRenderedTs', 'slotLoadTs').toArray();
 		if (timelineData.length > 0) {
 			timelineData = transpose(computeElementDiffs(timelineData)).slice(1);
-			console.log(timelineData);
+
+			if (DEBUG) {
+				console.log('timelineData ', timelineData);
+			}
 
 			let bidderPageTimelineData = $.extend( true, {}, bidderPageTimelineDataTemplate );
 			bidderPageTimelineData.labels = auctionData.select('bidder').toArray();
@@ -424,28 +380,189 @@ function getBidderTimelineContent() {
 }
 
 function getPrebidConfig() {
-	$('#prebid-config-container').empty();
-	let prebidConfigElement = document.createElement('div');
-	let pre = document.createElement('pre');
-	pre.innerHTML = JSON.stringify(prebidConfig, undefined, 2);
-	prebidConfigElement.appendChild(pre);
-	let configContainer = document.getElementById('prebid-config-container');
-	configContainer.appendChild(prebidConfigElement);
-	// TODO jquery not working???
-	// $('#prebid-config-container').add(prebidConfigElement);
+	// do something with prebidConfig
+	console.log(prebidConfig)
 }
 
-// eslint-disable-next-line no-unused-vars
-function displayTabContent(tab) {
-	switch (tab) {
-		case 0: getDataFromBackground();
-			break;
-		case 1: getBidderStatisticsContent();
-			break;
-		case 2: getBidderTimelineContent();
-			break;
-		case 3: getPrebidConfig();
-			break;
-		default: console.log('not implemented yet. tab ' + tab);
+/**
+ * Utils
+ */
+
+// allow us to curry functions
+const pipe = (...fns) => x => fns.reduce((y, f) => f(y), x);
+
+// We need to calculate the diffs from the timestamps for the timeline barchar 
+// and it needs to be transposed to be in the correct format
+function computeElementDiffs(m) {
+	return m.map(a => a.map((n, i, a) => i ? n - a[i - 1] : 0 - n));
+}
+
+function transpose(arr) {
+	return Object.keys(arr[0]).map(function (c) {
+		return arr.map(function (r) {
+			return r[c];
+		});
+	});
+}
+
+// For Debug
+function displayTable(output, defaultOutput = 'n/a') {
+	if (DEBUG) {
+		if (output.length) {
+			if (console.table) {
+				console.table(output);
+			} else {
+				for (var j = 0; j < output.length; j++) {
+					console.log(output[j]);
+				}
+			}
+		} else {
+			console.warn(defaultOutput);
+		}
 	}
 }
+
+// Old TODO -> remove if not needed
+
+// /**Chart Data**/
+// var overviewPageTimelineDataTemplate = {
+//   labels: [""],
+//   datasets: [{
+//     label: 'pre-auction',
+//     backgroundColor: [
+//       'rgba(200, 200, 200, 1)', 'rgba(200, 200, 200, 1)'
+//     ],
+//     borderWidth: 0
+//   }, {
+//     label: 'auction',
+//     backgroundColor: [
+//       'rgba(100, 100, 255, 1)', 'rgba(100, 100, 255, 1)'
+//     ],
+//     borderWidth: 0
+//   }, {
+//     label: 'ad server',
+//     backgroundColor: [
+//       'rgba(255, 255, 100, 1)', 'rgba(255, 255, 100, 1)'
+//     ],
+//     borderWidth: 0
+//   },
+//   {
+//     label: 'render',
+//     backgroundColor: [
+//       'rgba(200, 50, 50, 1)', 'rgba(200, 50, 50, 1)'
+//     ],
+//     borderWidth: 0
+//   }]
+// };
+
+// function getOverviewTabContent(overviewData) {
+// 	if (!overviewData) {
+// 		console.error('getOverviewTabContent was called without data')
+// 		return
+// 	}
+
+// 	function addStatsToPage(container, auctionId, atld) {
+// 		let tableElement = document.createElement("table");
+// 		var rowElement = document.createElement("tr");
+// 		var tdElement = document.createElement("td");
+// 		tdElement.setAttribute('colSpan', 2);
+// 		let auctionBidders = atld.get('bidStats')
+// 		let auctionElement = document.createElement("p");
+// 		auctionElement.style.fontSize = "10px";
+// 		auctionElement.style.color = "grey";
+// 		auctionElement.innerText = "Auction - " + auctionId;
+// 		tdElement.appendChild(auctionElement);
+// 		rowElement.appendChild(tdElement);
+// 		tdElement = document.createElement("td");
+// 		let adUnitElement = document.createElement("p");
+// 		adUnitElement.style.fontSize = "10px";
+// 		adUnitElement.style.color = "grey";
+// 		adUnitElement.innerText = "Ad Unit - " + atld.get('adUnitPath');
+// 		tdElement.appendChild(adUnitElement);
+// 		rowElement.appendChild(tdElement);
+// 		tableElement.appendChild(rowElement);
+// 		rowElement = document.createElement("tr");
+// 		tdElement = document.createElement("td");
+// 		let numberAdsElement = document.createElement("p");
+// 		numberAdsElement.style.fontSize = "10px";
+// 		numberAdsElement.style.color = "grey";
+// 		numberAdsElement.innerText = "Ads detected - " + auctionBidders[2];
+// 		tdElement.appendChild(numberAdsElement);
+// 		rowElement.appendChild(tdElement);
+// 		tdElement = document.createElement("td");
+// 		let numberBiddersElement = document.createElement("p");
+// 		numberBiddersElement.style.fontSize = "10px";
+// 		numberBiddersElement.style.color = "grey";
+// 		numberBiddersElement.innerText = "Number of bidders - " + auctionBidders[1];
+// 		tdElement.appendChild(numberBiddersElement);
+// 		rowElement.appendChild(tdElement);
+// 		tdElement = document.createElement("td");
+// 		let noBidRatioElement = document.createElement("p");
+// 		noBidRatioElement.style.fontSize = "10px";
+// 		noBidRatioElement.style.color = "grey";
+// 		noBidRatioElement.innerText = "No bids ratio - " + auctionBidders[0] + "/" + auctionBidders[3];
+// 		tdElement.appendChild(noBidRatioElement);
+// 		rowElement.appendChild(tdElement);
+// 		tableElement.appendChild(rowElement);
+// 		container.appendChild(tableElement);
+// 	}
+
+// 	$('#overview-content').empty();
+// 	$('#timeline-container').empty();
+// 	let overviewContentContainerElement = document.getElementById('overview-content');
+// 	// for each auction
+// 	function addAuctionCard(auctionData) {
+
+//         let auctionId = auctionData.getRow(0).get('auction')
+// 		auctionData.map(row => addStatsToPage(overviewContentContainerElement, auctionId, row));
+// 		// for debug
+// 		let auctionContent = auctionData.toArray().reduce((p, n) => p + n.join('\t') + '\n', '');
+// 		console.log(auctionContent);
+// 		let auctionContentEl = document.createElement('p');
+// 		auctionContentEl.innerText = auctionContent;
+// 		overviewContentContainerElement.appendChild(auctionContentEl);
+
+// 		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs').toArray();
+// 		// TODO for mult auctions we need to insert a first el which is the time from the earliest auc start to this auc
+// 		if (timelineData.length > 0) {
+// 			timelineData = transpose(computeElementDiffs(timelineData)).slice(1);
+// 			console.log(timelineData);
+// 		}
+
+// 		let overviewPageTimelineData = $.extend( true, {}, overviewPageTimelineDataTemplate );
+// 		overviewPageTimelineData.labels = auctionData.distinct('adUnitPath').toArray();
+// 		for (var i = 0; i < 4; i++) {
+// 			overviewPageTimelineData.datasets[i].data = timelineData[i];
+// 		}
+
+// 		Chart.plugins.unregister(ChartDataLabels);
+// 		let timelineContainer = document.getElementById('timeline-container');
+// 		let canvasElement = document.createElement('canvas');
+// 		canvasElement.style.width = '800px';
+// 		canvasElement.style.height = '75px';
+// 		timelineContainer.appendChild(canvasElement);
+
+
+// 		var myBarChart1 = new Chart(canvasElement, {
+// 			type: 'horizontalBar',
+// 			data: overviewPageTimelineData,
+// 			plugins: [ChartDataLabels],
+// 			options: options
+// 		});
+// 	}
+// 	overviewData.groupBy('auction', 'adUnitPath').aggregate(group => addAuctionCard(group))
+// }
+
+// function displayTabContent(tab) {
+// 	switch (tab) {
+// 		case 0: getDataFromBackground();
+// 			break;
+// 		case 1: getBidderStatisticsContent();
+// 			break;
+// 		case 2: getBidderTimelineContent();
+// 			break;
+// 		case 3: getPrebidConfig();
+// 			break;
+// 		default: console.log('not implemented yet. tab ' + tab);
+// 	}
+// }

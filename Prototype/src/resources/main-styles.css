@@ -1,8 +1,37 @@
 /* Existing styling */
 
 body {
-	width: 800px;
-	height: 800px;
+	margin: 0;
+	color: rgb(112,112,112);
+	background-color: rgb(248,248,248);
+	font-family: -apple-system, "Segoe UI", sans-serif;
+	font-size: 16px;
+}
+
+main {
+	margin: 16px;
+}
+
+h1, p {
+	margin: 0;
+}
+
+h1 {
+	font-size: 1.7em;
+	font-weight: 700;
+}
+
+hr {
+	border-color: rgba(112,112,112, 0.1);
+}
+
+.page {
+	display: none;
+	padding: 16px 64px;
+}
+
+.page[data-active="true"] {
+	display: block;
 }
 
 table {

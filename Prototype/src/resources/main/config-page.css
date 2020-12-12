@@ -1,0 +1,67 @@
+.config-page__section {
+	margin-bottom: 32px;
+}
+
+.config-page__section > h1 {
+	margin-bottom: 16px;
+}
+
+.config-page__cards {
+	margin: 8px 0;
+}
+
+.config-page__card {
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: space-between;
+	width: 200px;
+	max-height: 192px;
+	margin-top: 4px;
+	padding: 8px 16px;
+	background: rgb(213,213,213);
+	border-radius: 5px;
+}
+
+.config-page__card:not(:last-child) {
+	margin-right: 16px;
+}
+
+.config-page__card-top-title {
+	margin-bottom: 16px;
+	padding-bottom: 8px;
+	border-bottom: 1px dashed rgba(112,112,112, 0.5);
+	font-weight: 600;
+	text-align: center;
+
+}
+
+.config-page__card-content {
+	height: 150px;
+	max-height: 150px;
+	overflow: auto;
+	padding: 0px 8px;
+}
+
+.config-page__card-content.minimize {
+	height: 35px;
+}
+
+.config-page__minimize-cards-container {
+	position: relative;
+	display: inline-flex;
+	flex-direction: column;
+	top: 7px;
+}
+
+.config-page__minimize-cards-container > .config-page__card:first-child {
+	margin-bottom: 8px;
+	margin-right: 0;
+}
+
+.config-page__card-bottom-title {
+	margin-top: 16px;
+	padding-top: 4px;
+	border-top: 1px dashed rgba(112,112,112, 0.5);
+	font-weight: 600;
+	text-align: center;
+}
