@@ -37,6 +37,7 @@ chrome.runtime.onMessage.addListener(function(message, _, sendResponse) {
 		}
 	} else {
 		console.log(`${LOG_PREFIX} received unhandled message`, message)
+		sendResponse()
 	}
 });
 

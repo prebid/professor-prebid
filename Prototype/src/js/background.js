@@ -18,23 +18,29 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     case EVENT_OPEN_MAIN_TAB:
       if (mainTabId) {
         chrome.tabs.update(mainTabId, { active: true  }, function (tab) {
-          mainTabId = tab.id
+					mainTabId = tab.id
+					sendResponse()
         })
       } else {
         chrome.tabs.create({ url: './main.html' }, function (tab) {
-          mainTabId = tab.id
-          console.log('created tab with tabId: ', mainTabId)
+					mainTabId = tab.id
+					console.log('created tab with tabId: ', mainTabId)
+					sendResponse()
         })
-      }
-      break
+			}
+			
+			return true
     case EVENT_SEND_DATA_TO_BACKGROUND:
       console.log(`received event: ${EVENT_SEND_DATA_TO_BACKGROUND}`, message)
       console.log('storing payload in a temp variable')
-      tempData = message.payload
+			tempData = message.payload
+			sendResponse()
       break
     case EVENT_MAIN_PAGE_REQUEST_DATA:
       sendResponse(tempData)
-      break
+			break
+		default:
+			sendResponse()
   }
 })
 

@@ -9,7 +9,7 @@ const EVENT_OPEN_MAIN_PAGE = 'PROFESSOR_PREBID_OPEN_MAIN'
 const EVENT_SEND_DATA_TO_BACKGROUND = 'PROFESSOR_PREBID_AUCTION_DATA'
 const EVENT_RECEIEVED_AUCTION_DATA = 'PROFESSOR_PREBID_AUCTION_DATA_FROM_CONTENT'
 
-chrome.runtime.onMessage.addListener(function (request) {
+chrome.runtime.onMessage.addListener(function (request, _, sendResponse) {
 	const msg = safelyParseJSON(request);
 	const type = msg.type
 	const payload = msg.payload
@@ -19,6 +19,8 @@ chrome.runtime.onMessage.addListener(function (request) {
 	if (type === EVENT_RECEIEVED_AUCTION_DATA) {
 		handleAuctionData(payload)
 	}
+
+	sendResponse()
 });
 
 document.addEventListener('DOMContentLoaded', function () {
