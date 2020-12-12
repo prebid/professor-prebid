@@ -296,7 +296,7 @@ function checkForPBJS(domFoundTime) {
 			let ts = Date.now();
 			let bid = allBidsDf.findWithIndex(row => row.get('auction') == data.auctionId && row.get('adUnitPath') == data.adUnitCode && row.get('adId') == data.adId && row.get('bidder') == data.bidderCode);
 			if (bid) {
-				allBidsDf.setRowInPlace(r.index, row => row.set('rendered', true).set('nonRenderedHighestCpm', false).set('modified', ts));
+				allBidsDf.setRowInPlace(bid.index, row => row.set('rendered', true).set('nonRenderedHighestCpm', false).set('modified', ts));
 			}
 		});
 
@@ -523,52 +523,66 @@ function checkForGPT(domFoundTime) {
 	}
 }
 
+// make sure dfjs is available
+function checkForDFJS () {
+	try {
+		allBidsDf = new dfjs.DataFrame([], bidColumns);
+		auctionDf = new dfjs.DataFrame([], ['auction', 'slotElementId', 'adUnitPath', 'preAuctionStartTime', 'startTime', 'endTime']);
+		bidderDoneDf = new dfjs.DataFrame([], ['auction', 'adUnitPath', 'bidder', 'type', 'responseTime']);
+		slotDf = new dfjs.DataFrame([], ['slotElementId', 'adUnitPath', 'adId', 'slotRenderedTs', 'slotLoadTs']);
+		return true
+	} catch (e) {
+		return false
+	}
+}
 
 // Set a interval check to see when the PBJS and GPT ojects are loaded and ready
 
 console.log('PREBID_TOOLS: Entry ' + domFoundTime);
 
-if (checkForPBJS(domFoundTime) == 0) {
-	var count_pbjs = 0;
-	var timer_pbjs = setInterval(checkForPBJSExists, 10);
-
-	function checkForPBJSExists() {
+let depCheck = setInterval(() => {
+	if (checkForDFJS()) {
+		clearInterval(depCheck)
 		if (checkForPBJS(domFoundTime) == 0) {
-			if (count_pbjs++ > 1000) {
-				clearInterval(timer_pbjs);
-				console.log('PREBID_TOOLS: PBJS check failure');
-			}
-		} else {
-			clearInterval(timer_pbjs);
-			console.log('PREBID_TOOLS: Entry ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", domFoundTime));
-
-			if (!dfjs) {
-				console.error('PREBID_TOOLS, dfjs not loaded yet')
-			} else {
-				allBidsDf = new dfjs.DataFrame([], bidColumns);
-				auctionDf = new dfjs.DataFrame([], ['auction', 'slotElementId', 'adUnitPath', 'preAuctionStartTime', 'startTime', 'endTime']);
-				bidderDoneDf = new dfjs.DataFrame([], ['auction', 'adUnitPath', 'bidder', 'type', 'responseTime']);
-				slotDf = new dfjs.DataFrame([], ['slotElementId', 'adUnitPath', 'adId', 'slotRenderedTs', 'slotLoadTs']);
-				prebidInitialised = true;
+			var count_pbjs = 0;
+			var timer_pbjs = setInterval(checkForPBJSExists, 10);
+		
+			function checkForPBJSExists() {
+				if (checkForPBJS(domFoundTime) == 0) {
+					if (count_pbjs++ > 1000) {
+						clearInterval(timer_pbjs);
+						console.log('PREBID_TOOLS: PBJS check failure');
+					}
+				} else {
+					clearInterval(timer_pbjs);
+					console.log('PREBID_TOOLS: Entry ' + moment().format("YYYY-MM-DD HH:mm:ss.SSS", domFoundTime));
+					
+					prebidInitialised = true;
+				}
 			}
 		}
-	}
-}
-
-if (checkForGPT(domFoundTime) == 0) {
-	var count_gpt = 0;
-	var timer_gpt = setInterval(checkForGPTExists, 10);
-
-	function checkForGPTExists() {
+		
 		if (checkForGPT(domFoundTime) == 0) {
-			if (count_gpt++ > 1000) {
-				clearInterval(timer_gpt);
-				console.log('PREBID_TOOLS: GPT check failure');
+			var count_gpt = 0;
+			var timer_gpt = setInterval(checkForGPTExists, 10);
+		
+			function checkForGPTExists() {
+				if (checkForGPT(domFoundTime) == 0) {
+					if (count_gpt++ > 1000) {
+						clearInterval(timer_gpt);
+						console.log('PREBID_TOOLS: GPT check failure');
+					}
+				} else {
+					clearInterval(timer_gpt);
+					console.log('PREBID_TOOLS: GPT check success');
+				}
 			}
-		} else {
-			clearInterval(timer_gpt);
-			console.log('PREBID_TOOLS: GPT check success');
 		}
 	}
-}
+}, 10)
 
+setTimeout(() => {
+	clearInterval(depCheck)
+
+	// stop tryin after 8 seconds
+}, 8000)
