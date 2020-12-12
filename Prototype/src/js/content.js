@@ -14,6 +14,9 @@ var allBidsDf = new dfjs.DataFrame([]),
 		allAuctionsDf = new dfjs.DataFrame([]),
 		allSlotsDf = new dfjs.DataFrame([]);
 
+// when pp is not enabled by default, we can defer masks creation using a que
+const createMaskQue = []
+
 chrome.runtime.onMessage.addListener(function(message, _, sendResponse) {
 	const messageObj = safelyParseJSON(message)
 	const type = messageObj.type
@@ -189,6 +192,13 @@ function hideMasks() {
  * traverse all masks on page and remove their hidden class
  */
 function showMasks() {
+	console.log(createMaskQue)
+	if (createMaskQue.length > 0) {
+		while (createMaskQue.length) {
+			createMaskQue.shift()()
+		}
+	}
+
 	const masks = document.querySelectorAll('.js-prpb-mask');
 	masks.forEach(mask => {
 		mask.classList.remove('prpb-mask--hidden')
@@ -252,26 +262,31 @@ window.addEventListener("message", function(event) {
 		let gptSlotInfo = JSON.parse(event.data.obj);
 		console.log(gptSlotInfo);
 		chrome.storage.local.get(["PP_Enabled"], function(result) {
-			if (result.PP_Enabled) {
-				let response = JSON.parse(event.data.obj);
-				let slotLoadedDf = new dfjs.DataFrame(response['slotDf']);
-				let auctionDf = new dfjs.DataFrame(response['auctionDf']);
-				let slotBidsDf = new dfjs.DataFrame(response['bidsDf']);
-				allSlotsDf = allSlotsDf ? allSlotsDf.join(slotLoadedDf, ['slotElementId', 'adUnitPath'], 'outer') : slotLoadedDf;
+			const isEnabled = result.PP_Enabled
+			const response = JSON.parse(event.data.obj);
+			const slotLoadedDf = new dfjs.DataFrame(response['slotDf']);
+			const auctionDf = new dfjs.DataFrame(response['auctionDf']);
+			const slotBidsDf = new dfjs.DataFrame(response['bidsDf']);
 
-				allBidsDf = allBidsDf ? allBidsDf.diff(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder']).join(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder'], 'outer') : slotBidsDf;
+			allSlotsDf = allSlotsDf ? allSlotsDf.join(slotLoadedDf, ['slotElementId', 'adUnitPath'], 'outer') : slotLoadedDf;
+			allBidsDf = allBidsDf ? allBidsDf.diff(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder']).join(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder'], 'outer') : slotBidsDf;
+			
+			if (auctionDf.count() > 0) {
+				const auctionId = auctionDf.getRow(0).get('auction');
+				const adunit = auctionDf.getRow(0).get('adUnitPath');
+				const slotElementId = slotLoadedDf.getRow(0).get('slotElementId');
+				const auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit && row.get('slotElementId') == undefined);
 				
-				if (auctionDf.count() > 0) {
-					let auctionId = auctionDf.getRow(0).get('auction');
-					let adunit = auctionDf.getRow(0).get('adUnitPath');
-					let slotElementId = slotLoadedDf.getRow(0).get('slotElementId');
-					let auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit && row.get('slotElementId') == undefined);
-					if (auction) {
-						allAuctionsDf.setRowInPlace(auction.index, row => row.set('slotElementId', slotElementId));
-					} else {
-						console.warn("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
-					}		
+				if (auction) {
+					allAuctionsDf.setRowInPlace(auction.index, row => row.set('slotElementId', slotElementId));
+				} else {
+					console.warn("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
+				}
+
+				if (isEnabled) {
 					createMask(slotLoadedDf.getRow(0), slotBidsDf, auctionDf.getRow(0));
+				} else {
+					createMaskQue.push(() => createMask(slotLoadedDf.getRow(0), slotBidsDf, auctionDf.getRow(0)))
 				}
 			}
 		});
