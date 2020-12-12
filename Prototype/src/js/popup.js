@@ -7,20 +7,17 @@ const EVENT_POPUP_ACTIVE = 'PROFESSOR_PREBID_POPUP_ACTIVE'
 const EVENT_MASKS_STATE = 'PROFESSOR_PREBID_MASKS_STATE'
 const EVENT_OPEN_MAIN_PAGE = 'PROFESSOR_PREBID_OPEN_MAIN'
 const EVENT_SEND_DATA_TO_BACKGROUND = 'PROFESSOR_PREBID_AUCTION_DATA'
-const EVENT_GPT_VISIBILITY_EVENT = 'GPT_VISIBILITY_EVENT'
+const EVENT_RECEIEVED_AUCTION_DATA = 'PROFESSOR_PREBID_AUCTION_DATA_FROM_CONTENT'
 
 chrome.runtime.onMessage.addListener(function (request) {
-	const msg = JSON.parse(request);
+	const msg = safelyParseJSON(request);
+	const type = msg.type
+	const payload = msg.payload
 
-	if (msg.type === EVENT_GPT_VISIBILITY_EVENT) {
-		console.log(`${LOG_PREFIX} GPT_VISIBILITY_EVENT:`, msg.obj);
-
-		let view = ''
-		msg.obj.forEach(x => {
-			view += `<div>${x}</div>`
-		});
-
-		// document.getElementById('view').innerHTML = view;
+	// handle auction data even when the popup is already open
+	// this makes sure that the popup is always updated with latest values
+	if (type === EVENT_RECEIEVED_AUCTION_DATA) {
+		handleAuctionData(payload)
 	}
 });
 
@@ -195,3 +192,17 @@ function createTimelineUI (data) {
 	document.querySelector('#ad-load-runtime-title > span').textContent = `${total}ms`
 }
 
+/**
+ * Utils
+ */
+
+function safelyParseJSON (data) {
+	if (typeof data === 'object') { return data }
+
+	try {
+		return JSON.parse(data)
+	} catch (e) {
+		console.error(`${LOG_PREFIX}.safelyParseJSON failed with data `, data)
+		return {}
+	}
+}

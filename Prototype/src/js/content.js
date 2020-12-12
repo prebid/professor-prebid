@@ -7,6 +7,7 @@
 const LOG_PREFIX = 'PROFESSOR_PREBID_CONTENT.JS:'
 const EVENT_POPUP_ACTIVE = 'PROFESSOR_PREBID_POPUP_ACTIVE'
 const EVENT_MASKS_STATE = 'PROFESSOR_PREBID_MASKS_STATE'
+const EVENT_SEND_AUCTION_DATA_TO_POPUP = 'PROFESSOR_PREBID_AUCTION_DATA_FROM_CONTENT'
 
 var prebidConfig = {};
 var bidRequestedObj = {};
@@ -24,16 +25,7 @@ chrome.runtime.onMessage.addListener(function(message, _, sendResponse) {
 
 	if (type === EVENT_POPUP_ACTIVE) {
 		console.log(`${LOG_PREFIX} sending auction data to popup`);
-
-		const data = {
-			dfs: {
-				auction: allAuctionsDf.toCollection(),
-				slots: allSlotsDf.toCollection(),
-				allBids: allBidsDf.toCollection()
-			},
-			prebidConfig : JSON.stringify(prebidConfig)
-		}
-		
+		const data = getAuctionData()
 		sendResponse(data);
 	} else if (type === EVENT_MASKS_STATE) {
 		if (payload.isEnabled) {
@@ -47,6 +39,22 @@ chrome.runtime.onMessage.addListener(function(message, _, sendResponse) {
 		console.log(`${LOG_PREFIX} received unhandled message`, message)
 	}
 });
+
+/**
+ * getAuctionData
+ * 
+ * get the data that will be sent to other scripts
+ */
+function getAuctionData () {
+	return {
+		dfs: {
+			auction: allAuctionsDf.toCollection(),
+			slots: allSlotsDf.toCollection(),
+			allBids: allBidsDf.toCollection()
+		},
+		prebidConfig : JSON.stringify(prebidConfig)
+	}
+}
 
 /**
  * createMask
@@ -282,6 +290,12 @@ window.addEventListener("message", function(event) {
 				} else {
 					console.warn("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
 				}
+
+				// if popup is open, this will make sure it gets updated!
+				chrome.runtime.sendMessage({
+					type: EVENT_SEND_AUCTION_DATA_TO_POPUP,
+					payload: getAuctionData()
+				})
 
 				if (isEnabled) {
 					createMask(slotLoadedDf.getRow(0), slotBidsDf, auctionDf.getRow(0));
