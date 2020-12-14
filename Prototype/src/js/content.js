@@ -237,12 +237,8 @@ window.addEventListener("message", function(event) {
 		let auctionObjects = JSON.parse(event.data.obj);
 		if(auctionObjects['dfs']) {
 			allBidsDf = new dfjs.DataFrame(auctionObjects['dfs']['allBids']);
-			console.log('passed all bids df');
-			console.log(allBidsDf.toCSV());
 			allAuctionsDf = new dfjs.DataFrame(auctionObjects['dfs']['auction']);
-			console.log(allAuctionsDf.toCSV());
 			allSlotsDf = new dfjs.DataFrame(auctionObjects['dfs']['slots']);
-			console.log(allSlotsDf.toCSV());
 		}
 
 		// TODO use this info

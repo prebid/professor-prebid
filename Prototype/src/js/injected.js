@@ -34,16 +34,18 @@ function sendMessage(evt, x) {
 // TODO could do with a debug flag and encompass displayTable in that
 // Check for PBJS loaded and add listeners to various events when ready
 function displayTable(output, defaultOutput) {
-	if (output.length) {
-		if (console.table) {
-			console.table(output);
-		} else {
-			for (var j = 0; j < output.length; j++) {
-				console.log(output[j]);
+	if (DEBUG) {
+		if (output.length) {
+			if (console.table) {
+				console.table(output);
+			} else {
+				for (var j = 0; j < output.length; j++) {
+					console.log(output[j]);
+				}
 			}
+		} else {
+			console.warn(defaultOutput);
 		}
-	} else {
-		console.warn(defaultOutput);
 	}
 }
 
@@ -63,9 +65,11 @@ function forEach(responses, cb) {
 function getAllBids(pbjs, ts) {
 	let highestCPMBids = pbjs.getHighestCpmBids();
 	let winners = pbjs.getAllWinningBids();
-	console.log('num winners at ' + moment().format() + " = " + winners.length)
 	let pwinners = pbjs.getAllPrebidWinningBids();
-	console.log('num pwinners at ' + moment().format() + " = " + pwinners.length)
+	if (DEBUG) {
+		console.log('num winners at ' + moment().format() + " = " + winners.length)
+		console.log('num pwinners at ' + moment().format() + " = " + pwinners.length)
+	}
 	let output = [];
 	forEach(pbjs.getBidResponses(), function (code, bid) {
 		output.push({
@@ -246,10 +250,6 @@ function checkForPBJS(domFoundTime) {
 
 			function createOrUpdateDf(a, b) {
 				return a ? a.union(b) : b;
-			}
-			if (DEBUG) {
-				console.log('Existing Bids');
-				displayTable(allBidsDf.toCollection());
 			}
 			allBidsDf = createOrUpdateDf(allBidsDf, new_allBidsDf);
 			// TODO need to extract this update into a general df func
