@@ -3,7 +3,7 @@ var allBidsDf, allAuctionsDf, allSlotsDf, auctionBidDataDf;
 var prebidConfig = {};
 Chart.plugins.unregister(ChartDataLabels);
 
-const DEBUG = 0
+const DEBUG = 1
 
 const EVENT_MAIN_PAGE_REQUEST_DATA = 'PROFESSOR_PREBID_MAIN_PAGE_REQUEST_DATA'
 
@@ -143,7 +143,7 @@ function initializeData(response) {
 	}
 
 	// join auctions and slots
-	let auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'adUnitPath']);
+	let auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId']);
 	// join with bids and set global
 	auctionBidDataDf = auctionData.join(allBidsDf.select('auction', 'adUnitPath', 'slotElementId', 'bidder', 'type', 'bidRequestTime', 'bidResponseTime', 'nonRenderedHighestCpm', 'rendered'), ['auction', 'adUnitPath'], 'inner', false)
 	// calculate the stats
@@ -167,27 +167,23 @@ var bidderPageTimelineDataTemplate = {
 	labels: [""],
 	datasets: [{
 		label: 'pre-auction',
-		backgroundColor: Array(6).fill('rgba(200, 200, 200, .75)'),
+		backgroundColor: Array(5).fill('rgba(200, 200, 200, .75)'),
 		borderWidth: 0
 	},{
 		label: 'auction-init',
-		backgroundColor: Array(6).fill('rgba(100, 100, 255, .75)'),
+		backgroundColor: Array(5).fill('rgba(100, 100, 255, .75)'),
 		borderWidth: 0
 	},{
 		label: 'bid time',
-		backgroundColor: Array(6).fill('rgba(255, 255, 100, .75)'),
+		backgroundColor: Array(5).fill('rgba(255, 255, 100, .75)'),
 		borderWidth: 0
 	},{
 		label: 'post-auction wait',
-		backgroundColor: Array(6).fill('rgba(200, 50, 50, .75)'),
-		borderWidth: 0
-	},{
-		label: 'ad server',
-		backgroundColor: Array(6).fill('rgba(150, 100, 150, .75)'),
+		backgroundColor: Array(5).fill('rgba(200, 50, 50, .75)'),
 		borderWidth: 0
 	},{
 		label: 'render',
-		backgroundColor: Array(6).fill('rgba(150, 150, 150, .75)'),
+		backgroundColor: Array(5).fill('rgba(150, 150, 150, .75)'),
 		borderWidth: 0
 	}]
 };
@@ -254,8 +250,8 @@ function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 }
 
 function getBidderStatisticsContent() {
-	// get list of ad units
-	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy('cpm', true)
+	// get list of ad units for which we have rendered
+	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).sortBy('cpm', true)
 	let adUnits = ['all'].concat(allBidders.distinct('adUnitPath').toArray())
 	$('#bidder-stats-adunit-selector').empty();
 	adUnits.map(au => $('#bidder-stats-adunit-selector').append(new Option(au, au)));
@@ -290,7 +286,7 @@ function updateBidderTimelineContent(auctionId, adUnitPath) {
 	}
 	// collect all the data for the bidder timeline page : for each auction, bidder, possibly filtered by slot
 	// for each return the number of ads, bidders etc & the timestamps for each phase of the auction
-	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid')
+	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined)
 	return collectAuctionBidderData(allBidders.groupBy('auction'), auctionId, adUnitPath);
 }
 
@@ -299,23 +295,49 @@ function updateTimelinePageContent(atld) {
 	// for each auction
 	function addTimeline(auctionId, auctionData) {
 
-		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'bidRequestTime', 'bidResponseTime', 'endTime', 'slotRenderedTs', 'slotLoadTs').toArray();
-		if (timelineData.length > 0) {
-			timelineData = transpose(computeElementDiffs(timelineData)).slice(1);
+		// function computeTimelinePerAuction(auctionGroup) {
 
+		// 	let preAuction = auctionGroup.stat.mean('preAuctionStartTime');
+		// 	let startTime = auctionGroup.stat.mean('startTime');
+		// 	let endTime = auctionGroup.stat.mean('endTime');
+		// 	let slotRendered = auctionGroup.stat.mean('slotRenderedTs');
+		// 	let slotLoad = auctionGroup.stat.mean('slotLoadTs');
+		// 	return new dfjs.DataFrame([[preAuction, startTime, endTime, slotRendered, slotLoad]], ['preAuctionStartTime','startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs']);
+		// }
+
+
+
+		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'bidRequestTime', 'bidResponseTime', 'endTime', 'slotRenderedTs', 'slotLoadTs');
+		if (timelineData.count() > 0) {
+
+			let tld = timelineData.map(r => new dfjs.Row([r.get('startTime') - r.get('preAuctionStartTime'), r.get('bidRequestTime') - r.get('startTime'), r.get('bidResponseTime') - r.get('bidRequestTime'), r.get('endTime') - r.get('bidResponseTime'), r.get('slotLoadTs') == null ? 0 : r.get('slotLoadTs') - r.get('slotRenderedTs')], ['preAuction', 'auctionInit', 'bidTime', 'postAuctionWait', 'render']));
+            tld = tld.toArray();
+            
+// 			let preAuction =  tld.select('preAuction').map(r => r.get('preAuction'));
+// 			let auctionInit =  (tld.stat.mean('auctionInit')).toFixed(0);
+// 			let bidTime =  (tld.stat.mean('bidTime')).toFixed(0);
+// 			let postAuctionWait =  (tld.stat.mean('postAuctionWait')).toFixed(0);
+// 			// sometimes we might not have had the slot render event yet so we'll remove those from the average calcs
+// 			let render =  (tld.filter(r => r.get('render') > 0 ).stat.mean('render')).toFixed(0);
+
+// 			timelineData = [ preAuction, auctionInit, bidTime, postAuctionWait, render ];
+// 			timelineData = transpose(timelineData)
+
+
+			timelineData = transpose(tld);
 			if (DEBUG) {
 				console.log('timelineData ', timelineData);
 			}
 
 			let bidderPageTimelineData = $.extend( true, {}, bidderPageTimelineDataTemplate );
 			bidderPageTimelineData.labels = auctionData.select('bidder').toArray();
-			for (var i = 0; i < 6; i++) {
+			for (var i = 0; i < 5; i++) {
 				bidderPageTimelineData.datasets[i].data = timelineData[i];
 				bidderPageTimelineData.datasets[i].backgroundColor  = Array(bidderPageTimelineData.labels.length).fill(bidderPageTimelineData.datasets[i].backgroundColor[0]);
 			}
 			let winner = auctionData.findWithIndex(r => r.get('rendered') == true)
 			if (winner) {
-				for(i=0; i<6; i++) {
+				for(i=0; i<5; i++) {
 					bidderPageTimelineData.datasets[i].borderWidth = Array(bidderPageTimelineData.labels.length).fill(0);	
 					bidderPageTimelineData.datasets[i].borderWidth[winner.index] = 2; 
 					bidderPageTimelineData.datasets[i].borderColor = Array(bidderPageTimelineData.labels.length).fill('black')
@@ -354,8 +376,8 @@ function updateTimelinePageContent(atld) {
 function getBidderTimelineContent() {
 	// get list of ad units
 	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy('cpm', true)
-	let adUnits = ['all'].concat(allBidders.distinct('adUnitPath').toArray())
-	let auctions  = ['all'].concat(allBidders.distinct('auction').toArray())
+	let adUnits = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('adUnitPath').toArray());
+	let auctions  = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('auction').toArray());
 
 	$('#bidder-timeline-auction-selector').empty();
 	$('#bidder-timeline-adunit-selector').empty();

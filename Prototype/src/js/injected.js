@@ -4,6 +4,7 @@
 // The only way for an injected script to message to the content.js
 // script is via window.postMessage()
 
+const DEBUG = 0
 const bidColumns = ['auction', 'adUnitPath', 'adId', 'bidder', 'time', 'cpm', 'slotSize', 'netRevenue', 'dealId', 'creativeId', 'msg', 'nonRenderedHighestCpm', 'rendered', 'bidRequestTime', 'bidResponseTime', 'created', 'modified', 'type', 'slotElementId'];
 var domFoundTime = Date.now();
 var do_once_pbjs = 1;
@@ -147,7 +148,7 @@ function getAllWinningBids(pbjs, ts) {
 	pbjs.getAllWinningBids().forEach(bid => {
 		output.push({
 			auction: bid.auctionId,
-			adunit: bid.adUnitCode,
+			adUnitPath: bid.adUnitCode,
 			adId: bid.adId,
 			bidder: bid.bidder,
 			time: bid.timeToRespond,
@@ -246,6 +247,10 @@ function checkForPBJS(domFoundTime) {
 			function createOrUpdateDf(a, b) {
 				return a ? a.union(b) : b;
 			}
+			if (DEBUG) {
+				console.log('Existing Bids');
+				displayTable(allBidsDf.toCollection());
+			}
 			allBidsDf = createOrUpdateDf(allBidsDf, new_allBidsDf);
 			// TODO need to extract this update into a general df func
 			// Let's mark the highest cpm bids - these can change if a bidder is selected as a winner
@@ -294,7 +299,7 @@ function checkForPBJS(domFoundTime) {
 
 
 			let ts = Date.now();
-			let bid = allBidsDf.findWithIndex(row => row.get('auction') == data.auctionId && row.get('adUnitPath') == data.adUnitCode && row.get('adId') == data.adId && row.get('bidder') == data.bidderCode);
+			let bid = allBidsDf.findWithIndex(row => row.get('auction') == data.auctionId && row.get('adId') == data.adId && row.get('bidder') == data.bidderCode);
 			if (bid) {
 				allBidsDf.setRowInPlace(bid.index, row => row.set('rendered', true).set('nonRenderedHighestCpm', false).set('modified', ts));
 			}
@@ -374,7 +379,7 @@ function bidSlotFallbackLinker(adUnitSlots, slotBidsDf, slotElementId) {
 function matchBids(allBidsDf, slotBidsDf, adUnitSlots, slot) {
 	if (slot.getTargetingMap()['hb_adid'] != undefined) {
 		let bidderWithMatchingTargeting = allBidsDf.filter(row => row.get('adId') == slot.getTargetingMap()['hb_adid']);
-		let matchingAuction = bidderWithMatchingTargeting.select('auction');
+		let matchingAuction = bidderWithMatchingTargeting.getRow(0).get('auction');
 		return slotBidsDf.filter(row => row.get('auction') == matchingAuction);
 	} else {
 		let biddersUseSlotIdForAUP = slotBidsDf.filter(bid => bid.get('adUnitPath') == slot.getSlotElementId());
@@ -431,6 +436,9 @@ function checkForGPT(domFoundTime) {
 			// Is this how GAM computed creative render time?
 			// Fires when the slot is actually loaded and available in the browser
 			console.log('GPT_TOOLS: slotOnload ' + JSON.stringify(event));
+			console.log('GPT_TOOLS: SlotRenderEnded slotElementId ' + event.slot.getSlotElementId());
+			console.log('GPT_TOOLS: SlotRenderEnded slotId ' + event.slot.getSlotId());
+			console.log('GPT_TOOLS: SlotRenderEnded adunitpath ' + event.slot.getAdUnitPath());
 			let loadTs = Date.now();
 			// update the slot dataframe with the load timestamp
 			slotDf = slotDf.map(row => row.set('slotLoadTs', (row.get('slotElementId') == event.slot.getSlotElementId() && row.get('adUnitPath') == event.slot.getAdUnitPath()) ? loadTs : row.get('slotLoadTs')));
@@ -442,7 +450,7 @@ function checkForGPT(domFoundTime) {
 			// If it is available we can use the hb_adid to link to the adid.
 			// Also some sites have the slot element id in the bidder adunitpath!
 
-			let slotBidsDf = allBidsDf.filter(row => (row.get('adUnitPath') == event.slot.getAdUnitPath() || row.get('adUnitPath') == event.slot.getSlotElementId()) && row.get('cpm') != undefined);
+			let slotBidsDf = allBidsDf.filter(row => (row.get('adUnitPath') == event.slot.getAdUnitPath() || row.get('adUnitPath') == event.slot.getSlotElementId()) && row.get('cpm') != undefined && row.get('slotElementId') == undefined);
 
 			// multiple slots with same adunitpath?
 			let adUnitSlots = slotDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() );
@@ -450,6 +458,7 @@ function checkForGPT(domFoundTime) {
 				// mult auctions for this adUnitPath. find the auction we are looking at from the highest prebid bidder which will have its hb_adid set. We can then identify the slotElementId for these bids
 				let thisSlotBids = matchBids(allBidsDf, slotBidsDf, adUnitSlots, event.slot)
 				slotBidsBySlotElementId[event.slot.get('slotElementId')] = thisSlotBids;
+				slotBidsDf = thisSlotBids;
 				let thisSlotAuction = thisSlotBids.distinct('auction');
 				if (thisSlotAuction.count() > 1) {
 					console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')

@@ -135,7 +135,7 @@ function createPopupUI (data) {
 		const allSlotsDf = new dfjs.DataFrame(data['dfs']['slots']);
 
 		// join auctions and slots - makes sure we are counting all the bids for which we have known auctions and slots
-		const auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'adUnitPath']);
+		const auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'slotElementId']);
 		// join with bids and set global
 		auctionBidDataDf = auctionData.join(
 			allBidsDf.select(
