@@ -114,6 +114,8 @@ function handleAuctionData (data) {
  * 
  */
 
+ var auctionBidDataDf;
+
 function handleEnableButtonStateChange() {
 	const checkbox = document.getElementById('pp_enabled_switch')
 	const isEnabled = !checkbox.checked
@@ -132,72 +134,134 @@ function createPopupUI (data) {
 		const allAuctionsDf = new dfjs.DataFrame(data['dfs']['auction']);
 		const allSlotsDf = new dfjs.DataFrame(data['dfs']['slots']);
 
-		// join auctions and slots
+		// join auctions and slots - makes sure we are counting all the bids for which we have known auctions and slots
 		const auctionData = allAuctionsDf.join(allSlotsDf, ['slotElementId', 'adUnitPath']);
 		// join with bids and set global
-		const auctionBidDataDf = auctionData.join(
+		auctionBidDataDf = auctionData.join(
 			allBidsDf.select(
 				'auction', 'adUnitPath', 'slotElementId', 'bidder', 'type', 'bidRequestTime', 'bidResponseTime', 'nonRenderedHighestCpm', 'rendered'), ['auction', 'adUnitPath'],
 				'inner',
 				false
 			)
 		// calculate the stats
-		let res = auctionBidDataDf.groupBy('auction', 'adUnitPath')
-			.aggregate(g => 
-				[
-					g.filter(r => r.get('type') == 'noBid').distinct('bidder').count(), 
-					g.filter(r => r.get('type') == 'bid').distinct('bidder').count(), 
-					g.distinct('adUnitPath').count(), 
-					g.distinct('bidder').count()
-				]
-			)
-			.rename('aggregation', 'bidStats');
-		// collect all the data for the popup
-		res = res.join(auctionData, ['auction', 'adUnitPath']);
-
-		createStatsUI(res)
-		createTimelineUI(res)
+		createOverviewContent(auctionBidDataDf);
 	}
 }
 
-function createStatsUI (data) {
-	const adsDetected = data.groupBy('adUnitPath').aggregate(g => g.count()).count()
-	const numberOfBidders = '0' // TODO -> get get average from data
-	const noBidsRatio = '0/0' // TODO -> get average from data
 
+
+////////////////////////////////////
+// Now create the page content
+////////////////////////////////////
+
+function addStatsToPage(adsDetected, numberOfBidders, noBidsRatio) {
 	document.querySelector('[data-slot="ads_detected"]').textContent = adsDetected
 	document.querySelector('[data-slot="num_of_bidders"]').textContent = numberOfBidders
 	document.querySelector('[data-slot="no_bid_ratio"]').textContent = noBidsRatio
+}
+
+function createOverviewContent(overviewData) {
+	if (!overviewData) {
+		console.error('getOverviewTabContent was called without data')
+		return
+	}
+
+	addStatsToPage(
+		overviewData.distinct('adUnitPath').count(), 
+		overviewData.distinct('bidder').count(),
+		overviewData.filter(r => r.get('type') == 'noBid').distinct('bidder').count() / 
+			overviewData.distinct('bidder').count()
+	);
+
+	let timelineData = [0,0,0,0];
+	let timelineDataDf = overviewData.select('auction', 'preAuctionStartTime', 'startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs');
+	
+	if (timelineDataDf.count() > 0) {
+		// we need to take the average for each auction and then average those. only the initial auctions pre-auction time is relevant.
+
+		function computeTimelinePerAuction(auctionGroup) {
+
+			let preAuction = auctionGroup.stat.mean('preAuctionStartTime');
+			let startTime = auctionGroup.stat.mean('startTime');
+			let endTime = auctionGroup.stat.mean('endTime');
+			let slotRendered = auctionGroup.stat.mean('slotRenderedTs');
+			let slotLoad = auctionGroup.stat.mean('slotLoadTs');
+			return new dfjs.DataFrame([[preAuction, startTime, endTime, slotRendered, slotLoad]], ['preAuctionStartTime','startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs']);
+		}
+
+		let perAuctionTimelineData = timelineDataDf.groupBy('auction').aggregate(auction => computeTimelinePerAuction(auction));
+
+		let tld = perAuctionTimelineData.reduce((p, n) => p.union(n.get('aggregation')), new dfjs.DataFrame([], ['preAuctionStartTime','startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs']))
+
+		tld = tld.map(r => new dfjs.Row([r.get('startTime') - r.get('preAuctionStartTime'), r.get('endTime') - r.get('startTime'), r.get('slotRenderedTs') - r.get('endTime'), r.get('slotLoadTs') - r.get('slotRenderedTs')], ['preAuction', 'auction', 'adServer', 'render']));
+		
+		let preAuction =  (tld.filter(r => r.get('preAuction') != 0).stat.mean('preAuction')).toFixed(0);
+		let auction =  (tld.stat.mean('auction')).toFixed(0);
+		let adServer =  (tld.stat.mean('adServer')).toFixed(0);
+		let render =  (tld.stat.mean('render')).toFixed(0);
+
+		timelineData = [ preAuction, auction, adServer, render ];
+	}
+
+	let overviewPageTimelineData = $.extend( true, {}, overviewPageTimelineDataTemplate );
+	for (var i = 0; i < 4; i++) {
+		overviewPageTimelineData.datasets[i].data = [timelineData[i]];
+	}
+
+	Chart.plugins.unregister(ChartDataLabels);
+	let timelineContainer = document.getElementById('timeline-bar-container');
+	let canvasElement = document.createElement('canvas');
+	canvasElement.style.width = '800px';
+	canvasElement.style.height = '75px';
+	canvasElement.style.border = 'none';
+	timelineContainer.appendChild(canvasElement);
+
+	let overviewTimelineOptions = $.extend( true, {}, options );
+	var myBarChart1 = new Chart(canvasElement, {
+		type: 'horizontalBar',
+		data: overviewPageTimelineData,
+		plugins: [ChartDataLabels],
+		options: overviewTimelineOptions
+	});
 
 }
 
-function createTimelineUI (data) {
-	// TODO -> get real values
-	const preAuctionTime = 103 
-	const auctionTime = 567
-	const adServerTime = 212
-	const total = preAuctionTime + auctionTime + adServerTime
 
-	const preAuction = document.querySelector('#timeline-section__pre-auction')
-	const auction = document.querySelector('#timeline-section__auction')
-	const adServer = document.querySelector('#timeline-section__ad-server')
-
-	const getPercentage = (v) => 100 * (v / total)
-
-	preAuction.style.width = `${getPercentage(preAuctionTime)}%`
-	auction.style.width = `${getPercentage(auctionTime)}%`
-	adServer.style.width = `${getPercentage(adServerTime)}%`
-
-	preAuction.querySelector('.bar-value').textContent = `${preAuctionTime}ms`
-	auction.querySelector('.bar-value').textContent = `${auctionTime}ms`
-	adServer.querySelector('.bar-value').textContent = `${adServerTime}ms`
-
-	document.querySelector('#ad-load-runtime-title > span').textContent = `${total}ms`
-}
+// /**Chart Data**/
+var overviewPageTimelineDataTemplate = {
+  labels: [""],
+  datasets: [{
+    label: 'pre-auction',
+    backgroundColor: [
+      'rgba(200, 200, 200, 1)'
+    ],
+    borderWidth: 0
+  }, {
+    label: 'auction',
+    backgroundColor: [
+      'rgba(100, 100, 255, 1)'
+    ],
+    borderWidth: 0
+  }, {
+    label: 'ad-server',
+    backgroundColor: [
+      'rgba(255, 255, 100, 1)'
+    ],
+    borderWidth: 0
+  },
+  {
+    label: 'render',
+    backgroundColor: [
+      'rgba(200, 50, 50, 1)'
+    ],
+    borderWidth: 0
+  }]
+};
 
 /**
  * Utils
  */
+
 
 function safelyParseJSON (data) {
 	if (typeof data === 'object') { return data }

@@ -112,7 +112,8 @@ function initPage (data) {
 			console.log('initialize hash router')
 		}
 	} else {
-		alert('could not get data from background!!')
+//		alert('could not get data from background!!')
+		console.log('no data')
 	}
 }
 
@@ -190,10 +191,6 @@ var bidderPageTimelineDataTemplate = {
 		borderWidth: 0
 	}]
 };
-
-////////////////////////////////////
-// Now create the page content
-////////////////////////////////////
 
 function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 	// get avg cpm and time for each bidder
@@ -335,11 +332,15 @@ function updateTimelinePageContent(atld) {
 			timelineContainer.appendChild(auctionHeader);
 			timelineContainer.appendChild(canvasElement);
 
+			let timelineOptions = $.extend( true, {}, options );
+			timelineOptions['legend']['display'] = true;
+			timelineOptions['plugins']['datalabels']['align'] = 'center';
+			timelineOptions['plugins']['datalabels']['formatter'] = 'function(value, context) { return value == 0 ? "" : value;';
 			new Chart(canvasElement, {
 				type: 'horizontalBar',
 				data: bidderPageTimelineData,
 				plugins: [ChartDataLabels],
-				options: options
+				options: timelineOptions
 			});
 		}
 	}

@@ -285,14 +285,14 @@ var options = {
     barThickness: 15
   },
   legend: {
-    display: true
+    display: false
 	},
   scales: {
     yAxes: [{
       stacked: true,
       radius: 10,
       maxBarThickness: 15,
-      display: true
+      display: false
     }],
     xAxes: [{
       stacked: true,
@@ -301,26 +301,21 @@ var options = {
   },
   plugins: {
     datalabels: {
-        color: 'blue',
         labels: {
-            title: {
-                font: {
-					weight: 'bold',
-					fontSize: 10
-                }
-            },
             value: {
-                color: 'green'
+                color: 'green',
+                font: {
+                  weight: 'bold'
+              }
             }
         },
-        anchor : 'center',
-        align : 'center',
-        offset : 0,
-        display: function(context) {
-          var index = context.dataIndex;
-          var value = context.dataset.data[index];
-          return value == 0 ? '' : value;
-      }
+        anchor : 'top',
+        align : 'top',
+        offset : 10,
+        formatter: function(value, context) {
+          let lab = context.dataset.label;
+          return value == 0 ? '' : lab + ' ' + value;
+        }
     }
   }  
 };

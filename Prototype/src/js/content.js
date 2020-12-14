@@ -286,7 +286,7 @@ window.addEventListener("message", function(event) {
 				const auctionId = auctionDf.getRow(0).get('auction');
 				const adunit = auctionDf.getRow(0).get('adUnitPath');
 				const slotElementId = slotLoadedDf.getRow(0).get('slotElementId');
-				const auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit && row.get('slotElementId') == undefined);
+				const auction = allAuctionsDf.findWithIndex(row => row.get('auction') == auctionId && row.get('adUnitPath') == adunit);
 				
 				if (auction) {
 					allAuctionsDf.setRowInPlace(auction.index, row => row.set('slotElementId', slotElementId));
