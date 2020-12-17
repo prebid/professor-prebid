@@ -8211,7 +8211,7 @@ window.dfjs = (function (exports) {
 
 	  }, {
 	    key: "innerJoin",
-	    value: function innerJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+	    value: function innerJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
 	      return this._join(dfToJoin, columnNames, ["in"], shouldDropDuplicates);
 	    }
 	    /**
@@ -8226,7 +8226,7 @@ window.dfjs = (function (exports) {
 
 	  }, {
 	    key: "fullJoin",
-	    value: function fullJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+	    value: function fullJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
 	      return this._join(dfToJoin, columnNames, ["full", "full"], shouldDropDuplicates);
 	    }
 	    /**
@@ -8241,7 +8241,7 @@ window.dfjs = (function (exports) {
 
 	  }, {
 	    key: "outerJoin",
-	    value: function outerJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+	    value: function outerJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
 	      return this.fullJoin(dfToJoin, columnNames, shouldDropDuplicates);
 	    }
 	    /**
@@ -8256,7 +8256,7 @@ window.dfjs = (function (exports) {
 
 	  }, {
 	    key: "leftJoin",
-	    value: function leftJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+	    value: function leftJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
 	      return this._join(dfToJoin, columnNames, ["full", "in"], shouldDropDuplicates);
 	    }
 	    /**
@@ -8271,7 +8271,7 @@ window.dfjs = (function (exports) {
 
 	  }, {
 	    key: "rightJoin",
-	    value: function rightJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+	    value: function rightJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
 	      return this._join(dfToJoin, columnNames, ["in", "full"], shouldDropDuplicates);
 	    }
 	    /**

@@ -292,7 +292,7 @@ var options = {
       stacked: true,
       radius: 10,
       maxBarThickness: 15,
-      display: false
+      display: true
     }],
     xAxes: [{
       stacked: true,
@@ -311,10 +311,10 @@ var options = {
         },
         anchor : 'top',
         align : 'top',
-        offset : 10,
+        offset : 5,
         formatter: function(value, context) {
           let lab = context.dataset.label;
-          return value == 0 ? '' : lab + ' ' + value;
+          return value == 0 ? '' : lab + '\n' + value;
         }
     }
   }  

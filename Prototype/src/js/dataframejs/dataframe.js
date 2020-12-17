@@ -1166,7 +1166,7 @@ class DataFrame {
      * df.join(df2, 'id')
      * df.join(df2, 'id', 'inner')
      */
-    innerJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+    innerJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
         return this._join(dfToJoin, columnNames, ["in"], shouldDropDuplicates);
     }
 
@@ -1179,7 +1179,7 @@ class DataFrame {
      * df.fullJoin(df2, 'id')
      * df.join(df2, 'id', 'full')
      */
-    fullJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+    fullJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
         return this._join(dfToJoin, columnNames, ["full", "full"], shouldDropDuplicates);
     }
 
@@ -1192,7 +1192,7 @@ class DataFrame {
      * df2.outerJoin(df2, 'id')
      * df2.join(df2, 'id', 'outer')
      */
-    outerJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+    outerJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
         return this.fullJoin(dfToJoin, columnNames, shouldDropDuplicates);
     }
 
@@ -1205,7 +1205,7 @@ class DataFrame {
      * df.leftJoin(df2, 'id')
      * df.join(df2, 'id', 'left')
      */
-    leftJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+    leftJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
         return this._join(dfToJoin, columnNames, ["full", "in"], shouldDropDuplicates);
     }
 
@@ -1218,7 +1218,7 @@ class DataFrame {
      * df.rightJoin(df2, 'id')
      * df.join(df2, 'id', 'right')
      */
-    rightJoin(dfToJoin, columnNames, shouldDropDuplicates) {
+    rightJoin(dfToJoin, columnNames, shouldDropDuplicates = true) {
         return this._join(dfToJoin, columnNames, ["in", "full"], shouldDropDuplicates);
     }
 

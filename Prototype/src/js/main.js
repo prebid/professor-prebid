@@ -279,7 +279,7 @@ function updateBidderTimelineContent(auctionId, adUnitPath) {
 				res = res.groupBy('auction', 'adUnitPath', 'bidder').aggregate(g => ({'cpm' : g.stat.mean('cpm'), 'bidderStart' : g.stat.mean('bidRequestTime'), 'bidderEnd' : g.stat.mean('bidResponseTime')})).rename('aggregation', 'bidStats');
 			}
 			res = res.join(auctionBidDataDf, ['auction', 'adUnitPath', 'bidder']);
-			return res.sortBy(['startTime', 'bidResponseTime']);
+			return res.sortBy(['adUnitPath', 'startTime', 'bidResponseTime']);
 		}
 		// for each auction process the set of bids
 		return groupedBidders.aggregate(g => collectAuctionBidderSlotData(g))
@@ -334,18 +334,21 @@ function updateTimelinePageContent(atld) {
 			for (var i = 0; i < 5; i++) {
 				bidderPageTimelineData.datasets[i].data = timelineData[i];
 				bidderPageTimelineData.datasets[i].backgroundColor  = Array(bidderPageTimelineData.labels.length).fill(bidderPageTimelineData.datasets[i].backgroundColor[0]);
-			}
-			let winner = auctionData.findWithIndex(r => r.get('rendered') == true)
-			if (winner) {
-				for(i=0; i<5; i++) {
 					bidderPageTimelineData.datasets[i].borderWidth = Array(bidderPageTimelineData.labels.length).fill(0);	
-					bidderPageTimelineData.datasets[i].borderWidth[winner.index] = 2; 
 					bidderPageTimelineData.datasets[i].borderColor = Array(bidderPageTimelineData.labels.length).fill('black')
-					bidderPageTimelineData.datasets[i].borderColor[winner.index] = 'rgba(255, 0, 0, 1)'
-					bidderPageTimelineData.datasets[i].backgroundColor[winner.index] = bidderPageTimelineData.datasets[i].backgroundColor[winner.index].replace(/[^,]+(?=\))/, '1')
-				}
 			}
+			let winners = auctionData.filterWithIndex(r => r.get('rendered') == true)
+			if (winners.length>0) {
+				function showWinner(winner) {
+					for (var i = 0; i < 5; i++) {
+						bidderPageTimelineData.datasets[i].borderColor[winner.index] = 'rgba(255, 0, 0, 1)'
+    					bidderPageTimelineData.datasets[i].borderWidth[winner.index] = 2;	
+						bidderPageTimelineData.datasets[i].backgroundColor[winner.index] = bidderPageTimelineData.datasets[i].backgroundColor[winner.index].replace(/[^,]+(?=\))/, '1')
+					}
+				}
 
+				winners.map(r => showWinner(r));
+			}
 			let timelineContainer = document.getElementById('bidder-timeline-container');
 			let auctionHeader = document.createElement('div');
 			auctionHeader.innerHTML='<p>Auction ' + auctionId + '</p>'
@@ -375,7 +378,7 @@ function updateTimelinePageContent(atld) {
 
 function getBidderTimelineContent() {
 	// get list of ad units
-	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy('cpm', true)
+	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy( 'cpm', true)
 	let adUnits = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('adUnitPath').toArray());
 	let auctions  = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('auction').toArray());
 
