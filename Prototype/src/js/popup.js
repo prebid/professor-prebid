@@ -144,7 +144,10 @@ function createPopupUI (data) {
 				false
 			)
 		// calculate the stats
-		createOverviewContent(auctionBidDataDf);
+		let content = createOverviewContent(auctionBidDataDf);
+		// Render to popup
+		addStatsToPage(content.adsDetected, content.numberOfBidders, content.noBidsRatio);
+		addTimeline(content.adLoadRuntime, content.timelineData);
 	}
 }
 
@@ -153,27 +156,19 @@ function createPopupUI (data) {
 ////////////////////////////////////
 // Now create the page content
 ////////////////////////////////////
-
-function addStatsToPage(adsDetected, numberOfBidders, noBidsRatio) {
-	document.querySelector('[data-slot="ads_detected"]').textContent = adsDetected
-	document.querySelector('[data-slot="num_of_bidders"]').textContent = numberOfBidders
-	document.querySelector('[data-slot="no_bid_ratio"]').textContent = noBidsRatio
-}
-
 function createOverviewContent(overviewData) {
 	if (!overviewData) {
 		console.error('getOverviewTabContent was called without data')
 		return
 	}
 
-	addStatsToPage(
-		overviewData.distinct('adUnitPath').count(), 
-		overviewData.distinct('bidder').count(),
-		overviewData.filter(r => r.get('type') == 'noBid').distinct('bidder').count() / 
-			overviewData.distinct('bidder').count()
-	);
+	let content = { adsDetected : overviewData.distinct('adUnitPath').count(), 
+				numberOfBidders : overviewData.distinct('bidder').count(),
+				noBidsRatio : overviewData.filter(r => r.get('type') == 'noBid').distinct('bidder').count() / 
+				overviewData.distinct('bidder').count()
+			}
 
-	let timelineData = [0,0,0,0];
+	content.timelineData = [0,0,0,0];
 	let timelineDataDf = overviewData.select('auction', 'preAuctionStartTime', 'startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs');
 	
 	if (timelineDataDf.count() > 0) {
@@ -200,16 +195,31 @@ function createOverviewContent(overviewData) {
 		let adServer =  (tld.stat.mean('adServer')).toFixed(0);
 		let render =  (tld.stat.mean('render')).toFixed(0);
 
-		timelineData = [ preAuction, auction, adServer, render ];
+		content.timelineData = [ preAuction, auction, adServer, render ];
 	}
+	content.adLoadRuntime = content.timelineData.reduce((p,n) => p + parseInt(n), 0)
+	return content;
+}
 
+
+////////////////////////////////////
+// Render the page content
+////////////////////////////////////
+function addStatsToPage(adsDetected, numberOfBidders, noBidsRatio) {
+	document.querySelector('[data-slot="ads_detected"]').textContent = adsDetected
+	document.querySelector('[data-slot="num_of_bidders"]').textContent = numberOfBidders
+	document.querySelector('[data-slot="no_bid_ratio"]').textContent = noBidsRatio
+}
+
+function addTimeline(adLoadRuntime, timelineData) {
+	// Using ChartJS
 	let overviewPageTimelineData = $.extend( true, {}, overviewPageTimelineDataTemplate );
 	for (var i = 0; i < 4; i++) {
 		overviewPageTimelineData.datasets[i].data = [timelineData[i]];
 	}
 
 	let adLoadTimelineTitle = document.getElementById('ad-load-runtime-title');
-	adLoadTimelineTitle.innerHTML = 'Ad load runtime - ' + timelineData.reduce((p,n) => p + parseInt(n), 0) + ' ms'
+	adLoadTimelineTitle.innerHTML = 'Ad load runtime - ' + adLoadRuntime + ' ms'
 
 	Chart.plugins.unregister(ChartDataLabels);
 	Chart.defaults.global.elements.rectangle.borderWidth = 2;
@@ -229,7 +239,6 @@ function createOverviewContent(overviewData) {
 	});
 
 }
-
 
 // /**Chart Data**/
 var overviewPageTimelineDataTemplate = {

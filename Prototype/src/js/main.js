@@ -234,9 +234,9 @@ function updateBidderStatisticsContent(allBidders, selectedAdUnit) {
 	let bidderDf = allBidders.groupBy('bidder').aggregate(bidderGroup => ({cpm:bidderGroup.stat.mean('cpm'), 'time':bidderGroup.stat.mean('time')}));
 	bidderDf.map(r => addCard(bidderStatsContentElement, r.get('bidder'), r.get('aggregation').cpm, r.get('aggregation').time));
 
-	// TODO get all these behind a debug flag
-	displayTable(bidderDf.toArray());
-
+	if (DEBUG) {
+		displayTable(bidderDf.toArray());
+	}
 
 	$('#bidder-stats-content').slick({
 		arrows: true,
@@ -290,22 +290,11 @@ function updateBidderTimelineContent(auctionId, adUnitPath) {
 	return collectAuctionBidderData(allBidders.groupBy('auction'), auctionId, adUnitPath);
 }
 
+
 function updateTimelinePageContent(atld) {
 	
 	// for each auction
 	function addTimeline(auctionId, auctionData) {
-
-		// function computeTimelinePerAuction(auctionGroup) {
-
-		// 	let preAuction = auctionGroup.stat.mean('preAuctionStartTime');
-		// 	let startTime = auctionGroup.stat.mean('startTime');
-		// 	let endTime = auctionGroup.stat.mean('endTime');
-		// 	let slotRendered = auctionGroup.stat.mean('slotRenderedTs');
-		// 	let slotLoad = auctionGroup.stat.mean('slotLoadTs');
-		// 	return new dfjs.DataFrame([[preAuction, startTime, endTime, slotRendered, slotLoad]], ['preAuctionStartTime','startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs']);
-		// }
-
-
 
 		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'bidRequestTime', 'bidResponseTime', 'endTime', 'slotRenderedTs', 'slotLoadTs');
 		if (timelineData.count() > 0) {
@@ -313,66 +302,22 @@ function updateTimelinePageContent(atld) {
 			let tld = timelineData.map(r => new dfjs.Row([r.get('startTime') - r.get('preAuctionStartTime'), r.get('bidRequestTime') - r.get('startTime'), r.get('bidResponseTime') - r.get('bidRequestTime'), r.get('endTime') - r.get('bidResponseTime'), r.get('slotLoadTs') == null ? 0 : r.get('slotLoadTs') - r.get('slotRenderedTs')], ['preAuction', 'auctionInit', 'bidTime', 'postAuctionWait', 'render']));
             tld = tld.toArray();
             
-// 			let preAuction =  tld.select('preAuction').map(r => r.get('preAuction'));
-// 			let auctionInit =  (tld.stat.mean('auctionInit')).toFixed(0);
-// 			let bidTime =  (tld.stat.mean('bidTime')).toFixed(0);
-// 			let postAuctionWait =  (tld.stat.mean('postAuctionWait')).toFixed(0);
-// 			// sometimes we might not have had the slot render event yet so we'll remove those from the average calcs
-// 			let render =  (tld.filter(r => r.get('render') > 0 ).stat.mean('render')).toFixed(0);
-
-// 			timelineData = [ preAuction, auctionInit, bidTime, postAuctionWait, render ];
-// 			timelineData = transpose(timelineData)
-
-
 			timelineData = transpose(tld);
 			if (DEBUG) {
 				console.log('timelineData ', timelineData);
 			}
+		}
 
-			let bidderPageTimelineData = $.extend( true, {}, bidderPageTimelineDataTemplate );
-			bidderPageTimelineData.labels = auctionData.select('bidder').toArray();
-			for (var i = 0; i < 5; i++) {
-				bidderPageTimelineData.datasets[i].data = timelineData[i];
-				bidderPageTimelineData.datasets[i].backgroundColor  = Array(bidderPageTimelineData.labels.length).fill(bidderPageTimelineData.datasets[i].backgroundColor[0]);
-					bidderPageTimelineData.datasets[i].borderWidth = Array(bidderPageTimelineData.labels.length).fill(0);	
-					bidderPageTimelineData.datasets[i].borderColor = Array(bidderPageTimelineData.labels.length).fill('black')
-			}
-			let winners = auctionData.filterWithIndex(r => r.get('rendered') == true)
-			if (winners.length>0) {
-				function showWinner(winner) {
-					for (var i = 0; i < 5; i++) {
-						bidderPageTimelineData.datasets[i].borderColor[winner.index] = 'rgba(255, 0, 0, 1)'
-    					bidderPageTimelineData.datasets[i].borderWidth[winner.index] = 2;	
-						bidderPageTimelineData.datasets[i].backgroundColor[winner.index] = bidderPageTimelineData.datasets[i].backgroundColor[winner.index].replace(/[^,]+(?=\))/, '1')
-					}
-				}
-
-				winners.map(r => showWinner(r));
-			}
-			let timelineContainer = document.getElementById('bidder-timeline-container');
-			let auctionHeader = document.createElement('div');
-			auctionHeader.innerHTML='<p>Auction ' + auctionId + '</p>'
-			let canvasElement = document.createElement('canvas');
-			canvasElement.style.width = '800px';
-			timelineContainer.appendChild(auctionHeader);
-			timelineContainer.appendChild(canvasElement);
-
-			let timelineOptions = $.extend( true, {}, options );
-			timelineOptions['legend']['display'] = true;
-			timelineOptions['plugins']['datalabels']['align'] = 'center';
-			timelineOptions['plugins']['datalabels']['formatter'] = 'function(value, context) { return value == 0 ? "" : value;';
-			new Chart(canvasElement, {
-				type: 'horizontalBar',
-				data: bidderPageTimelineData,
-				plugins: [ChartDataLabels],
-				options: timelineOptions
-			});
+		return {	
+			auction : auctionId,
+			timelineData : timelineData, 
+			bidders : auctionData.select('bidder').toArray(), 
+			winners : auctionData.filterWithIndex(r => r.get('rendered') == true) 
 		}
 	}
 
-	$('#bidder-timeline-content').empty();
-	$('#bidder-timeline-container').empty();
-	atld.map(auction => addTimeline(auction.get('auction'), auction.get('aggregation')));
+	let bidderTimelines = atld.withColumn('tld', auction => addTimeline(auction.get('auction'), auction.get('aggregation'))).select('tld').toArray();
+	bidderTimelines.map(tld => renderBidderTimeline(tld[0]));
 
 }
 
@@ -404,6 +349,55 @@ function getBidderTimelineContent() {
 	// now update the page
 	updateTimelinePageContent(atld);
 }
+
+
+////////////////////////////////////
+// Render functions
+////////////////////////////////////
+function renderBidderTimeline(tld) {
+
+	$('#bidder-timeline-content').empty();
+	$('#bidder-timeline-container').empty();
+
+	let bidderPageTimelineData = $.extend( true, {}, bidderPageTimelineDataTemplate );
+	bidderPageTimelineData.labels = tld.bidders;
+	for (var i = 0; i < 5; i++) {
+		bidderPageTimelineData.datasets[i].data = tld.timelineData[i];
+		bidderPageTimelineData.datasets[i].backgroundColor  = Array(bidderPageTimelineData.labels.length).fill(bidderPageTimelineData.datasets[i].backgroundColor[0]);
+			bidderPageTimelineData.datasets[i].borderWidth = Array(bidderPageTimelineData.labels.length).fill(0);	
+			bidderPageTimelineData.datasets[i].borderColor = Array(bidderPageTimelineData.labels.length).fill('black')
+	}
+	if (tld.winners.length>0) {
+		function showWinner(winner) {
+			for (var i = 0; i < 5; i++) {
+				bidderPageTimelineData.datasets[i].borderColor[winner.index] = 'rgba(255, 0, 0, 1)'
+				bidderPageTimelineData.datasets[i].borderWidth[winner.index] = 2;	
+				bidderPageTimelineData.datasets[i].backgroundColor[winner.index] = bidderPageTimelineData.datasets[i].backgroundColor[winner.index].replace(/[^,]+(?=\))/, '1')
+			}
+		}
+
+		tld.winners.map(r => showWinner(r));
+	}
+	let timelineContainer = document.getElementById('bidder-timeline-container');
+	let auctionHeader = document.createElement('div');
+	auctionHeader.innerHTML='<p>Auction ' + tld.auctionId + '</p>'
+	let canvasElement = document.createElement('canvas');
+	canvasElement.style.width = '800px';
+	timelineContainer.appendChild(auctionHeader);
+	timelineContainer.appendChild(canvasElement);
+
+	let timelineOptions = $.extend( true, {}, options );
+	timelineOptions['legend']['display'] = true;
+	timelineOptions['plugins']['datalabels']['align'] = 'center';
+	timelineOptions['plugins']['datalabels']['formatter'] = 'function(value, context) { return value == 0 ? "" : value;';
+	new Chart(canvasElement, {
+		type: 'horizontalBar',
+		data: bidderPageTimelineData,
+		plugins: [ChartDataLabels],
+		options: timelineOptions
+	});
+}
+
 
 function getPrebidConfig() {
 	// do something with prebidConfig
@@ -448,147 +442,3 @@ function displayTable(output, defaultOutput = 'n/a') {
 	}
 }
 
-// Old TODO -> remove if not needed
-
-// /**Chart Data**/
-// var overviewPageTimelineDataTemplate = {
-//   labels: [""],
-//   datasets: [{
-//     label: 'pre-auction',
-//     backgroundColor: [
-//       'rgba(200, 200, 200, 1)', 'rgba(200, 200, 200, 1)'
-//     ],
-//     borderWidth: 0
-//   }, {
-//     label: 'auction',
-//     backgroundColor: [
-//       'rgba(100, 100, 255, 1)', 'rgba(100, 100, 255, 1)'
-//     ],
-//     borderWidth: 0
-//   }, {
-//     label: 'ad server',
-//     backgroundColor: [
-//       'rgba(255, 255, 100, 1)', 'rgba(255, 255, 100, 1)'
-//     ],
-//     borderWidth: 0
-//   },
-//   {
-//     label: 'render',
-//     backgroundColor: [
-//       'rgba(200, 50, 50, 1)', 'rgba(200, 50, 50, 1)'
-//     ],
-//     borderWidth: 0
-//   }]
-// };
-
-// function getOverviewTabContent(overviewData) {
-// 	if (!overviewData) {
-// 		console.error('getOverviewTabContent was called without data')
-// 		return
-// 	}
-
-// 	function addStatsToPage(container, auctionId, atld) {
-// 		let tableElement = document.createElement("table");
-// 		var rowElement = document.createElement("tr");
-// 		var tdElement = document.createElement("td");
-// 		tdElement.setAttribute('colSpan', 2);
-// 		let auctionBidders = atld.get('bidStats')
-// 		let auctionElement = document.createElement("p");
-// 		auctionElement.style.fontSize = "10px";
-// 		auctionElement.style.color = "grey";
-// 		auctionElement.innerText = "Auction - " + auctionId;
-// 		tdElement.appendChild(auctionElement);
-// 		rowElement.appendChild(tdElement);
-// 		tdElement = document.createElement("td");
-// 		let adUnitElement = document.createElement("p");
-// 		adUnitElement.style.fontSize = "10px";
-// 		adUnitElement.style.color = "grey";
-// 		adUnitElement.innerText = "Ad Unit - " + atld.get('adUnitPath');
-// 		tdElement.appendChild(adUnitElement);
-// 		rowElement.appendChild(tdElement);
-// 		tableElement.appendChild(rowElement);
-// 		rowElement = document.createElement("tr");
-// 		tdElement = document.createElement("td");
-// 		let numberAdsElement = document.createElement("p");
-// 		numberAdsElement.style.fontSize = "10px";
-// 		numberAdsElement.style.color = "grey";
-// 		numberAdsElement.innerText = "Ads detected - " + auctionBidders[2];
-// 		tdElement.appendChild(numberAdsElement);
-// 		rowElement.appendChild(tdElement);
-// 		tdElement = document.createElement("td");
-// 		let numberBiddersElement = document.createElement("p");
-// 		numberBiddersElement.style.fontSize = "10px";
-// 		numberBiddersElement.style.color = "grey";
-// 		numberBiddersElement.innerText = "Number of bidders - " + auctionBidders[1];
-// 		tdElement.appendChild(numberBiddersElement);
-// 		rowElement.appendChild(tdElement);
-// 		tdElement = document.createElement("td");
-// 		let noBidRatioElement = document.createElement("p");
-// 		noBidRatioElement.style.fontSize = "10px";
-// 		noBidRatioElement.style.color = "grey";
-// 		noBidRatioElement.innerText = "No bids ratio - " + auctionBidders[0] + "/" + auctionBidders[3];
-// 		tdElement.appendChild(noBidRatioElement);
-// 		rowElement.appendChild(tdElement);
-// 		tableElement.appendChild(rowElement);
-// 		container.appendChild(tableElement);
-// 	}
-
-// 	$('#overview-content').empty();
-// 	$('#timeline-container').empty();
-// 	let overviewContentContainerElement = document.getElementById('overview-content');
-// 	// for each auction
-// 	function addAuctionCard(auctionData) {
-
-//         let auctionId = auctionData.getRow(0).get('auction')
-// 		auctionData.map(row => addStatsToPage(overviewContentContainerElement, auctionId, row));
-// 		// for debug
-// 		let auctionContent = auctionData.toArray().reduce((p, n) => p + n.join('\t') + '\n', '');
-// 		console.log(auctionContent);
-// 		let auctionContentEl = document.createElement('p');
-// 		auctionContentEl.innerText = auctionContent;
-// 		overviewContentContainerElement.appendChild(auctionContentEl);
-
-// 		let timelineData = auctionData.select('preAuctionStartTime', 'startTime', 'endTime', 'slotRenderedTs', 'slotLoadTs').toArray();
-// 		// TODO for mult auctions we need to insert a first el which is the time from the earliest auc start to this auc
-// 		if (timelineData.length > 0) {
-// 			timelineData = transpose(computeElementDiffs(timelineData)).slice(1);
-// 			console.log(timelineData);
-// 		}
-
-// 		let overviewPageTimelineData = $.extend( true, {}, overviewPageTimelineDataTemplate );
-// 		overviewPageTimelineData.labels = auctionData.distinct('adUnitPath').toArray();
-// 		for (var i = 0; i < 4; i++) {
-// 			overviewPageTimelineData.datasets[i].data = timelineData[i];
-// 		}
-
-// 		Chart.plugins.unregister(ChartDataLabels);
-// 		let timelineContainer = document.getElementById('timeline-container');
-// 		let canvasElement = document.createElement('canvas');
-// 		canvasElement.style.width = '800px';
-// 		canvasElement.style.height = '75px';
-// 		timelineContainer.appendChild(canvasElement);
-
-
-// 		var myBarChart1 = new Chart(canvasElement, {
-// 			type: 'horizontalBar',
-// 			data: overviewPageTimelineData,
-// 			plugins: [ChartDataLabels],
-// 			options: options
-// 		});
-// 	}
-// 	overviewData.groupBy('auction', 'adUnitPath').aggregate(group => addAuctionCard(group))
-// }
-
-// function displayTabContent(tab) {
-// 	switch (tab) {
-// 		case 0: getDataFromBackground();
-// 			break;
-// 		case 1: getBidderStatisticsContent();
-// 			break;
-// 		case 2: getBidderTimelineContent();
-// 			break;
-// 		case 3: getPrebidConfig();
-// 			break;
-// 		default: console.log('not implemented yet. tab ' + tab);
-// 	}
-// }
