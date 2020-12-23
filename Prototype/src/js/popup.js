@@ -208,11 +208,15 @@ function createOverviewContent(overviewData) {
 		overviewPageTimelineData.datasets[i].data = [timelineData[i]];
 	}
 
+	let adLoadTimelineTitle = document.getElementById('ad-load-runtime-title');
+	adLoadTimelineTitle.innerHTML = 'Ad load runtime - ' + timelineData.reduce((p,n) => p + parseInt(n), 0) + ' ms'
+
 	Chart.plugins.unregister(ChartDataLabels);
+	Chart.defaults.global.elements.rectangle.borderWidth = 2;
 	let timelineContainer = document.getElementById('timeline-bar-container');
 	let canvasElement = document.createElement('canvas');
 	canvasElement.style.width = '800px';
-	canvasElement.style.height = '75px';
+	canvasElement.style.height = '100px';
 	canvasElement.style.border = 'none';
 	timelineContainer.appendChild(canvasElement);
 

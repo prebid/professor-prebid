@@ -292,7 +292,10 @@ var options = {
       stacked: true,
       radius: 10,
       maxBarThickness: 15,
-      display: true
+      display: true,
+      gridLines: {
+        color: "rgba(0, 0, 0, 0)"
+      }
     }],
     xAxes: [{
       stacked: true,
