@@ -264,20 +264,20 @@ function getBidderStatisticsContent() {
 	updateBidderStatisticsContent(allBidders, 'all');	
 }
 
-function updateBidderTimelineContent(auctionId, adUnitPath) {
+function updateBidderTimelineContent(auctionId, adUnitPath, bidder) {
 
-	function collectAuctionBidderData(groupedBidders, auctionId, adUnitPath) {
+	function collectAuctionBidderData(groupedBidders, auctionId, adUnitPath, bidder) {
 
 		function collectAuctionBidderSlotData(group) {
 
 			let res =  auctionId != 'all' ? group.filter(r => r.get('auction') == auctionId) : group;
 			if (adUnitPath != 'all') {
 				res = res.filter(r => r.get('adUnitPath') == adUnitPath);
-				res = res.groupBy('auction', 'bidder').aggregate(g => ({'cpm' : g.stat.mean('cpm'), 'bidderStart' : g.stat.mean('bidRequestTime'), 'bidderEnd' : g.stat.mean('bidResponseTime')})).rename('aggregation', 'bidStats');
-				res = res.withColumn('adUnitPath', () => adUnitPath);
-			} else {
-				res = res.groupBy('auction', 'adUnitPath', 'bidder').aggregate(g => ({'cpm' : g.stat.mean('cpm'), 'bidderStart' : g.stat.mean('bidRequestTime'), 'bidderEnd' : g.stat.mean('bidResponseTime')})).rename('aggregation', 'bidStats');
 			}
+			if (bidder != 'all') {
+				res = res.filter(r => r.get('bidder') == bidder);
+			}
+			res = res.groupBy('auction', 'adUnitPath', 'bidder').aggregate(g => ({'cpm' : g.stat.mean('cpm'), 'bidderStart' : g.stat.mean('bidRequestTime'), 'bidderEnd' : g.stat.mean('bidResponseTime')})).rename('aggregation', 'bidStats');
 			res = res.join(auctionBidDataDf, ['auction', 'adUnitPath', 'bidder']);
 			return res.sortBy(['adUnitPath', 'startTime', 'bidResponseTime']);
 		}
@@ -287,7 +287,8 @@ function updateBidderTimelineContent(auctionId, adUnitPath) {
 	// collect all the data for the bidder timeline page : for each auction, bidder, possibly filtered by slot
 	// for each return the number of ads, bidders etc & the timestamps for each phase of the auction
 	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined)
-	return collectAuctionBidderData(allBidders.groupBy('auction'), auctionId, adUnitPath);
+	console.log('auction ' + auctionId + ' : adUnitPath ' + adUnitPath + ' : bidder ' + bidder)
+	return collectAuctionBidderData(allBidders.groupBy('auction'), auctionId, adUnitPath, bidder);
 }
 
 
@@ -311,11 +312,12 @@ function updateTimelinePageContent(atld) {
 		return {	
 			auction : auctionId,
 			timelineData : timelineData, 
-			bidders : auctionData.select('bidder').toArray(), 
+			bidders : auctionData.select('adUnitPath', 'bidder').toArray().map(r => (r[0].length > 12 ? '...' + r[0].slice(-10) : r[0]) + ' ' + (r[1].length > 12 ? '...' + r[1].slice(-10) : r[1])), 
 			winners : auctionData.filterWithIndex(r => r.get('rendered') == true) 
 		}
 	}
 
+	clearTimelines();
 	let bidderTimelines = atld.withColumn('tld', auction => addTimeline(auction.get('auction'), auction.get('aggregation'))).select('tld').toArray();
 	bidderTimelines.map(tld => renderBidderTimeline(tld[0]));
 
@@ -326,26 +328,38 @@ function getBidderTimelineContent() {
 	let allBidders = allBidsDf.filter(r => r.get('type') == 'bid').sortBy( 'cpm', true)
 	let adUnits = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('adUnitPath').toArray());
 	let auctions  = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('auction').toArray());
+	let bidders = ['all'].concat(allBidders.filter(r => r.get('type') == 'bid' && r.get('slotElementId') != undefined).distinct('bidder').toArray());
 
 	$('#bidder-timeline-auction-selector').empty();
 	$('#bidder-timeline-adunit-selector').empty();
+	$('#bidder-timeline-bidder-selector').empty();
 	auctions.map(a => $('#bidder-timeline-auction-selector').append(new Option(a, a)));
 	adUnits.map(au => $('#bidder-timeline-adunit-selector').append(new Option(au, au)));
+	bidders.map(b => $('#bidder-timeline-bidder-selector').append(new Option(b, b)));
 
 	let atld = undefined;
 	$('#bidder-timeline-auction-selector').on('change', function() {
 		let auction = $(this).val();
-		atld = updateBidderTimelineContent(auction, $('#bidder-timeline-adunit-selector').val());
+		// TODO update relevant adunit and bidder dropdowns for this adunit?
+		atld = updateBidderTimelineContent(auction, $('#bidder-timeline-adunit-selector').val(), $('#bidder-timeline-bidder-selector').val());
 		updateTimelinePageContent(atld);
 	});
 
 	$('#bidder-timeline-adunit-selector').on('change', function() {
 		let adunit = $(this).val();
-		atld = updateBidderTimelineContent($('#bidder-timeline-auction-selector').val(), adunit);
+		// TODO update relevant auction and bidder dropdowns for this adunit?
+		atld = updateBidderTimelineContent($('#bidder-timeline-auction-selector').val(), adunit, $('#bidder-timeline-bidder-selector').val());
 		updateTimelinePageContent(atld);
 	});
 
-	atld = updateBidderTimelineContent('all', 'all');	
+	$('#bidder-timeline-bidder-selector').on('change', function() {
+		let bidder = $(this).val();
+		// TODO update relevant auction and adunit dropdowns for this adunit?
+		atld = updateBidderTimelineContent($('#bidder-timeline-auction-selector').val(), $('#bidder-timeline-adunit-selector').val(), bidder);
+		updateTimelinePageContent(atld);
+	});
+
+	atld = updateBidderTimelineContent('all', 'all', 'all');	
 	// now update the page
 	updateTimelinePageContent(atld);
 }
@@ -354,10 +368,12 @@ function getBidderTimelineContent() {
 ////////////////////////////////////
 // Render functions
 ////////////////////////////////////
-function renderBidderTimeline(tld) {
-
+function clearTimelines() {
 	$('#bidder-timeline-content').empty();
 	$('#bidder-timeline-container').empty();
+}
+
+function renderBidderTimeline(tld) {
 
 	let bidderPageTimelineData = $.extend( true, {}, bidderPageTimelineDataTemplate );
 	bidderPageTimelineData.labels = tld.bidders;
@@ -380,7 +396,7 @@ function renderBidderTimeline(tld) {
 	}
 	let timelineContainer = document.getElementById('bidder-timeline-container');
 	let auctionHeader = document.createElement('div');
-	auctionHeader.innerHTML='<p>Auction ' + tld.auctionId + '</p>'
+	auctionHeader.innerHTML='<p>Auction ' + tld.auction + '</p>'
 	let canvasElement = document.createElement('canvas');
 	canvasElement.style.width = '800px';
 	timelineContainer.appendChild(auctionHeader);
@@ -389,7 +405,7 @@ function renderBidderTimeline(tld) {
 	let timelineOptions = $.extend( true, {}, options );
 	timelineOptions['legend']['display'] = true;
 	timelineOptions['plugins']['datalabels']['align'] = 'center';
-	timelineOptions['plugins']['datalabels']['formatter'] = 'function(value, context) { return value == 0 ? "" : value;';
+	timelineOptions['plugins']['datalabels']['formatter'] = function(value, context) { return value == 0 ? "" : value;};
 	new Chart(canvasElement, {
 		type: 'horizontalBar',
 		data: bidderPageTimelineData,
