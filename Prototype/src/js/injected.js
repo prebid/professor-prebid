@@ -452,25 +452,27 @@ function checkForGPT(domFoundTime) {
 
 			let slotBidsDf = allBidsDf.filter(row => (row.get('adUnitPath') == event.slot.getAdUnitPath() || row.get('adUnitPath') == event.slot.getSlotElementId()) && row.get('cpm') != undefined && row.get('slotElementId') == undefined);
 
-			// multiple slots with same adunitpath?
-			let adUnitSlots = slotDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() );
-			if (adUnitSlots.count() > 1) {
-				// mult auctions for this adUnitPath. find the auction we are looking at from the highest prebid bidder which will have its hb_adid set. We can then identify the slotElementId for these bids
-				let thisSlotBids = matchBids(allBidsDf, slotBidsDf, adUnitSlots, event.slot)
-				slotBidsBySlotElementId[event.slot.get('slotElementId')] = thisSlotBids;
-				slotBidsDf = thisSlotBids;
-				let thisSlotAuction = thisSlotBids.distinct('auction');
-				if (thisSlotAuction.count() > 1) {
-					console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')
-					thisSlotAuction.map(a => console.log('Auction ' + a));
+			if (slotBidsDf.count() > 0) {
+				// multiple slots with same adunitpath?
+				let adUnitSlots = slotDf.filter(row => row.get('adUnitPath') == event.slot.getAdUnitPath() );
+				if (adUnitSlots.count() > 1) {
+					// mult auctions for this adUnitPath. find the auction we are looking at from the highest prebid bidder which will have its hb_adid set. We can then identify the slotElementId for these bids
+					let thisSlotBids = matchBids(allBidsDf, slotBidsDf, adUnitSlots, event.slot)
+					slotBidsBySlotElementId[event.slot.get('slotElementId')] = thisSlotBids;
+					slotBidsDf = thisSlotBids;
+					let thisSlotAuction = thisSlotBids.distinct('auction');
+					if (thisSlotAuction.count() > 1) {
+						console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')
+						thisSlotAuction.map(a => console.log('Auction ' + a));
+					}
 				}
+				else {
+					// we only have one slot for this adUnitPath
+					slotBidsBySlotElementId[event.slot.getSlotElementId()] = slotBidsDf;
+				}
+				// We now have the correct set of bids for this slot 
+				slotBidsDf = slotBidsDf.replace(undefined, event.slot.getSlotElementId(), ['slotElementId']);
 			}
-			else {
-				// we only have one slot for this adUnitPath
-				slotBidsBySlotElementId[event.slot.getSlotElementId()] = slotBidsDf;
-			}
-			// We now have the correct set of bids for this slot 
-			slotBidsDf = slotBidsDf.replace(undefined, event.slot.getSlotElementId(), ['slotElementId']);
 			console.log('slotbidsdf for ' + event.slot.getSlotElementId());
 			displayTable(slotBidsDf.toCollection(), 'no slot bids');
 			if (slotBidsDf.count() > 0) {
