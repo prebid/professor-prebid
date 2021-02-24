@@ -460,11 +460,6 @@ function checkForGPT(domFoundTime) {
 					let thisSlotBids = matchBids(allBidsDf, slotBidsDf, adUnitSlots, event.slot)
 					slotBidsBySlotElementId[event.slot.get('slotElementId')] = thisSlotBids;
 					slotBidsDf = thisSlotBids;
-					let thisSlotAuction = thisSlotBids.distinct('auction');
-					if (thisSlotAuction.count() > 1) {
-						console.error('XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?')
-						thisSlotAuction.map(a => console.log('Auction ' + a));
-					}
 				}
 				else {
 					// we only have one slot for this adUnitPath
