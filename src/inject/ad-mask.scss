@@ -1,0 +1,20 @@
+.prpb-mask--container {
+  position: relative;
+}
+
+.prpb-mask__overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: block;
+  overflow: auto;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  background: #b3c1cc;
+  color: rgb(112, 112, 112);
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  font-size: 18px;
+}

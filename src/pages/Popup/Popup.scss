@@ -1,0 +1,57 @@
+@import '../../styling.scss';
+
+.popup {
+  display: flex;
+  flex-direction: column;
+  height: 272px;
+  width: 669px;
+  background: #eceeef;
+
+  header {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 22px;
+    background: $primary;
+
+    & > h1 {
+      margin: 0;
+      color: white;
+      font-size: 15px;
+      font-weight: normal;
+    }
+  }
+
+  main {
+    display: flex;
+    flex: 1;
+  }
+
+  .data-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    width: 201px;
+    margin: 0 22px;
+    padding: 12px 0;
+    text-align: center;
+    font-weight: 600;
+    box-sizing: border-box;
+
+    ul.stats-list {
+      margin: 0;
+      list-style-type: none;
+      padding-inline-start: 0;
+
+      li {
+        padding: 8.5px 0;
+        list-style-type: none;
+
+        &:not(:last-child) {
+          border-bottom: 1px solid #cdcfd1;
+        }
+      }
+    }
+  }
+}

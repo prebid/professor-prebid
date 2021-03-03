@@ -1,0 +1,17 @@
+{
+	"EVENTS": {
+		"CONFIG_AVAILABLE": "configAvailable",
+		"AUCTION_END": "auctionEnd",
+		"GPT_SLOTRENDERED": "gptSlotRendered",
+		"GPT_SLOTLOADED": "gptSlotLoaded",
+		"GPT_VISIBILITY_EVENT": "gptVisibilityEvent",
+		"DATA_READY_FROM_CONTENT": "dataReadyFromContent",
+		"REQUEST_CONSOLE_STATE": "requestConsoleState",
+		"OPEN_DATA_TAB": "openDataTab",
+		"SEND_DATA_TO_BACKGROUND": "sendDataToBackground",
+		"REQUEST_DATA_FROM_BACKGROUND": "requestDataFromBackground"
+	},
+	"CONSOLE_TOGGLE": "PP_CONSOLE_STATE",
+	"SAVE_MASK": "PP_SAVE_MASK",
+	"LOCAL_DATA": "PP_LOCAL_DATA"
+}
