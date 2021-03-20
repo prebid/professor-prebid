@@ -15,7 +15,7 @@ The extension is made out of 3 main components
 src/inject
 ```
 
-This script contains code which (as it's name suggests) gets injected into the web page and is the entry point for all prebid & gpt data collection.
+This script contains code which (as its name suggests) gets injected into the web page and is the entry point for all prebid & gpt data collection.
 
 It has 3 main roles
 
