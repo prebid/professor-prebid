@@ -120,15 +120,6 @@ var options = {
         },
       ],
     }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: 'src/pages/Content/content.styles.css',
-          to: path.join(__dirname, 'build'),
-          force: true,
-        },
-      ],
-    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'App', 'index.html'),
       filename: 'app.html',

@@ -81,9 +81,7 @@ export const Popup = () => {
             <div>Open Console</div>
           </div>
         </aside>
-        <div>
-          <button onClick={handleOpenMainTab}>open main tab</button>
-        </div>
+        <div>{/* <button onClick={handleOpenMainTab}>open main tab</button> */}</div>
       </main>
     </div>
   );
