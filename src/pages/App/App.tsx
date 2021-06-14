@@ -11,10 +11,11 @@ const App: React.FC = () => {
     appHandler.getDataFromBackground((data: AppData) => {
       logger.log('received data from background', data);
       // TODO -> do something with the data
+      
     });
   }, []);
 
-  return <div>Professor Prebid App</div>;
+  return <div>Professor Prebid App (In-Development)</div>;
 };
 
 export default App;
