@@ -6,7 +6,7 @@ import { __columns__, __rows__ } from "./symbol.js";
 import * as io from "./io-shim.js";
 
 /**
- * DataFrame data structure providing an immutable, flexible and powerfull way to manipulate data with columns and rows.
+ * DataFrame data structure providing an immutable, flexible and powerful way to manipulate data with columns and rows.
  */
 class DataFrame {
     /**

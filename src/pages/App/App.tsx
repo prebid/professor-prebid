@@ -10,8 +10,7 @@ const App: React.FC = () => {
     logger.log('waiting for data from background');
     appHandler.getDataFromBackground((data: AppData) => {
       logger.log('received data from background', data);
-      // TODO -> do something with the data
-      
+        
     });
   }, []);
 
