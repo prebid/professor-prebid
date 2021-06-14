@@ -51,7 +51,7 @@ export const Popup = () => {
   return (
     <div className="popup">
       <header>
-        <h1>Professor Prebid (In-Development)</h1>
+        <h1>Professor Prebid</h1>
       </header>
       <main>
         <aside className="data-info">
@@ -81,8 +81,24 @@ export const Popup = () => {
             <div>Open Console</div>
           </div>
         </aside>
-        <div>{<button onClick={handleOpenMainTab}>open main tab</button>}</div>
+        <div>
+          <button onClick={handleOpenMainTab}>open main tab</button>
+        </div>
       </main>
+        {/* <div className="component-links">
+          <div>
+            <p>Stats</p>
+            <i className="fas fa-camera"></i>
+          </div>
+          <div>
+            <p>Timeline</p>
+            <i className="fas fa-camera"></i>
+          </div>
+          <div>
+            <p>Config</p>
+            <i className="fas fa-camera"></i>
+          </div>
+        </div> */}
     </div>
   );
 };

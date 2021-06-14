@@ -14,7 +14,7 @@ const App: React.FC = () => {
     });
   }, []);
 
-  return <div>Professor Prebid App (In-Development)</div>;
+  return <div>Professor Prebid App</div>;
 };
 
 export default App;
