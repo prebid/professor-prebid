@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { render } from 'react-dom';
+import { PriceGranularity } from './PriceGranularity/priceGranularity'
 import './config.scss';
 
 

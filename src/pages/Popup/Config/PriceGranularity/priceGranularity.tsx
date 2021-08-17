@@ -1,6 +1,6 @@
 import React from "react";
 
-function PriceGranularity() {
+export function PriceGranularity() {
     const [state, setState] = React.useState({
         firstBucketMin: 0,
         firstBucketMax: 3,
