@@ -85,20 +85,20 @@ export const Popup = () => {
           <button onClick={handleOpenMainTab}>open main tab</button>
         </div>
       </main>
-        {/* <div className="component-links">
+        {<div className="component-links">
           <div>
             <p>Stats</p>
-            <i className="fas fa-camera"></i>
+            <i></i>
           </div>
           <div>
             <p>Timeline</p>
-            <i className="fas fa-camera"></i>
+            <i></i>
           </div>
           <div>
             <p>Config</p>
-            <i className="fas fa-camera"></i>
+            <i></i>
           </div>
-        </div> */}
+        </div>}
     </div>
   );
 };
