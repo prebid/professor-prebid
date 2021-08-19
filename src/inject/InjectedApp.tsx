@@ -4,40 +4,13 @@ import './ad-mask.scss';
 import logger from '../logger';
 import constants from '../constants.json';
 import { sendToContentScript } from '../utils';
+import { IMask, IBidder, IAdMaskPortalProps } from '../index.d';
 
-interface IBidder {
-  slotElementId: string;
-  adId: string;
-  dealId: string | null;
-  auction: string;
-  adUnitPath: string;
-  bidder: string;
-  time: number;
-  cpm: number;
-  slotSize: string;
-  netRevenue: boolean;
-  creativeId: string | number;
-  msg: string;
-  nonRenderedHighestCpm: boolean;
-  rendered: boolean;
-  bidRequestTime: number;
-  bidResponseTime: number;
-  created: number;
-  modified: number;
-  type: string;
-}
-
-interface IMask {
-  targetId: string;
-  creativeRenderTime: number;
-  auctionTime: number;
-  bidders: IBidder[];
-}
-
-const InjectedApp: React.FC = () => {
+const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
   const [masks, setMasks] = useState<IMask[]>([]);
 
+  logger.log('[InjectedApp] init', consoleState, masks)
   useEffect(() => {
     // listen from content script
     document.addEventListener(constants.SAVE_MASK, (event) => {
@@ -61,9 +34,8 @@ const InjectedApp: React.FC = () => {
       {consoleState &&
         masks.map((mask) => {
           const container = document.getElementById(mask.targetId);
-
           if (!container) {
-            logger.log('failed to render mask on page, could not find element by targetId', mask);
+            logger.log('[InjectedApp] failed to render mask on page, could not find element by targetId', mask);
             return null;
           }
 
@@ -73,12 +45,7 @@ const InjectedApp: React.FC = () => {
   );
 };
 
-interface AdMaskPortalProps {
-  container: HTMLElement;
-  mask: IMask;
-}
-
-const AdMaskPortal: React.FC<AdMaskPortalProps> = ({ container, mask }) => {
+const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask }) => {
   const el = useRef<HTMLDivElement>(createMaskContainerElement());
 
   useEffect(() => {
@@ -92,17 +59,39 @@ const AdMaskPortal: React.FC<AdMaskPortalProps> = ({ container, mask }) => {
     };
   }, [container]);
 
-  logger.log('rendering mask on page', mask, container, el.current);
-  return ReactDOM.createPortal(<AdMask />, el.current);
+  logger.log('[InjectedApp] rendering mask on page', mask, container, el.current);
+  return ReactDOM.createPortal(<AdMask input={mask} />, el.current);
 };
 
-const AdMask: React.FC = () => {
-  return <div>Professor Prebid - TBD</div>;
+const AdMask = ({ input }: { input: IMask }): JSX.Element => {
+  return (<div>
+    <h2>
+      <strong>
+        Professor Prebid - TBD
+      </strong>
+    </h2>
+    <br />
+    <ul>
+      {
+        Object.entries(input)
+          .filter(([key, value]) => ['auctionTime', 'creativeRenderTime', 'targetId', 'winningBidder', 'winningCPM'].includes(key))
+          .map(([key, value]) => <li key={key}> <strong>{key}: </strong>{value}</li>)
+      }
+      <li key="Bidders">
+        <strong>
+          Bidders:
+        </strong>
+        <ul>
+          {Array.from(new Set(input?.bidders?.map((bidder: IBidder) => bidder.bidder))).map((bidder) => <li key={bidder}>{bidder}</li>)}
+        </ul>
+      </li>
+    </ul>
+  </div>);
 };
 
 // Helpers
 
-function createMaskContainerElement() {
+const createMaskContainerElement = () => {
   const el = document.createElement('div');
   el.classList.add('prpb-mask__overlay');
 
