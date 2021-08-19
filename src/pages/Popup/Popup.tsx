@@ -3,24 +3,14 @@ import './Popup.scss';
 import logger from '../../logger';
 import Switch from 'react-switch';
 import { popupHandler } from './popupHandler';
-
-interface ContentScriptData {
-  adsDetected: number;
-  numOfBidders: number;
-  numOfNoBids: number;
-  timings: {
-    preAuction: number;
-    auction: number;
-    adServer: number;
-  };
-}
-
+import { IContentScriptData, IAuctionData , } from '../../index.d';
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
-  const [data, setData] = useState<ContentScriptData>({
+  const [data, setData] = useState<IContentScriptData>({
     adsDetected: null,
     numOfBidders: null,
     numOfNoBids: null,
+    numOfAvailableBids: null,
     timings: {
       preAuction: null,
       auction: null,
@@ -29,9 +19,21 @@ export const Popup = () => {
   });
 
   useEffect(() => {
-    popupHandler.handleDataFromContentScript((payload: ContentScriptData) => {
-      logger.log('[POPUP] received data from content script', payload);
-      setData(payload);
+    logger.log('[Popup] init()')
+    popupHandler.handleDataFromContentScript((payload: IAuctionData) => {
+      logger.log('[Popup] received data from content script', payload)
+      const newData: IContentScriptData = {
+        adsDetected: payload.dfs.slots.length,
+        numOfBidders: Array.from(new Set(payload.dfs.allBids.map((bid) => bid.bidder))).length,
+        numOfNoBids: Array.from(new Set(payload.dfs.allBids.map((bid) => bid.msg === 'no bid' && bid))).length,
+        numOfAvailableBids: Array.from(new Set(payload.dfs.allBids.map((bid) => bid.msg === 'Bid available' && bid))).length,
+        timings: {
+          preAuction: 0,
+          auction: 0,
+          adServer: 0,
+        },
+      }
+      setData(newData);
     });
 
     popupHandler.getToggleStateFromStorage((checked: boolean) => {
@@ -60,7 +62,8 @@ export const Popup = () => {
               <li>Ads Detected: {data.adsDetected}</li>
               <li>Bidders: {data.numOfBidders}</li>
               <li>
-                No Bid Ratio: {data.numOfNoBids}/{data.numOfBidders}
+                {/* No Bid Ratio: {data.numOfNoBids}/{data.numOfBidders} */}
+                No Bid Ratio: {data.numOfNoBids}/{data.numOfAvailableBids}
               </li>
             </ul>
           </div>
@@ -81,7 +84,10 @@ export const Popup = () => {
             <div>Open Console</div>
           </div>
         </aside>
-        <div>{/* <button onClick={handleOpenMainTab}>open main tab</button> */}</div>
+        <div>
+          <p>{JSON.stringify(data)}</p>
+          <button onClick={handleOpenMainTab}>open main tab</button>
+        </div>
       </main>
     </div>
   );
