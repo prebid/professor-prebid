@@ -7,9 +7,9 @@ interface AppData {}
 
 const App: React.FC = () => {
   useEffect(() => {
-    logger.log('waiting for data from background');
+    logger.log('[App] waiting for data from background');
     appHandler.getDataFromBackground((data: AppData) => {
-      logger.log('received data from background', data);
+      logger.log('[App] received data from background', data);
       // TODO -> do something with the data
     });
   }, []);
