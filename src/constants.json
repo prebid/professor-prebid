@@ -9,9 +9,55 @@
 		"REQUEST_CONSOLE_STATE": "requestConsoleState",
 		"OPEN_DATA_TAB": "openDataTab",
 		"SEND_DATA_TO_BACKGROUND": "sendDataToBackground",
-		"REQUEST_DATA_FROM_BACKGROUND": "requestDataFromBackground"
+		"REQUEST_DATA_FROM_BACKGROUND": "requestDataFromBackground",
+		"EVENT_SEND_AUCTION_DATA_TO_POPUP": "PROFESSOR_PREBID_AUCTION_DATA_FROM_CONTENT"
 	},
 	"CONSOLE_TOGGLE": "PP_CONSOLE_STATE",
 	"SAVE_MASK": "PP_SAVE_MASK",
-	"LOCAL_DATA": "PP_LOCAL_DATA"
+	"LOCAL_DATA": "PP_LOCAL_DATA",
+	"DATAFRAME_COLUMNS": {
+		"bidColumns": [
+			"auction",
+			"adUnitPath",
+			"adId",
+			"creativeId",
+			"bidder",
+			"bidRequestTime",
+			"bidResponseTime",
+			"created",
+			"cpm",
+			"dealId",
+			"modified",
+			"msg",
+			"netRevenue",
+			"nonRenderedHighestCpm",
+			"rendered",
+			"slotElementId",
+			"slotSize",
+			"time",
+			"type"
+		],
+		"auctionColumns": [
+			"auction",
+			"adUnitPath",
+			"endTime",
+			"preAuctionStartTime",
+			"slotElementId",
+			"startTime"
+		],
+		"bidderDoneColumns": [
+			"auction",
+			"adUnitPath",
+			"bidder",
+			"responseTime",
+			"type"
+		],
+		"slotColumns": [
+			"adId",
+			"adUnitPath",
+			"slotElementId",
+			"slotLoadTs",
+			"slotRenderedTs"
+		]
+	}
 }
