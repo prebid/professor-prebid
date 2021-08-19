@@ -27,10 +27,10 @@ var options = {
   entry: {
     app: path.join(__dirname, 'src', 'pages', 'App', 'index.tsx'),
     popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.tsx'),
-    contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.js'),
-    background: path.join(__dirname, 'src', 'background', 'background.js'),
-    inject: path.join(__dirname, 'src', 'inject', 'inject.js'),
-    injected: path.join(__dirname, 'src', 'inject', 'injected.js'),
+    contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.ts'),
+    background: path.join(__dirname, 'src', 'background', 'background.ts'),
+    inject: path.join(__dirname, 'src', 'inject', 'inject.ts'),
+    injected: path.join(__dirname, 'src', 'inject', 'injected.tsx'),
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['contentScript'],

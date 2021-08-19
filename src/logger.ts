@@ -4,29 +4,29 @@ const LOG_PREFIX = '%c[PROFESSOR_PREBID]';
 const LOG_COLOR = 'color: white; background-color: #ff6f00;';
 
 class Logger {
-  enabled = true;
+  enabled = !false;
 
-  log() {
+  log(...args: any[]) {
     if (this.enabled) {
-      console.log(LOG_PREFIX, LOG_COLOR, ...arguments);
+      console.log(LOG_PREFIX, LOG_COLOR, ...args);
     }
   }
 
-  error() {
+  error(...args: any[]) {
     if (this.enabled) {
-      console.error(LOG_PREFIX, LOG_COLOR, ...arguments);
+      console.error(LOG_PREFIX, LOG_COLOR, ...args);
     }
   }
 
-  warn() {
+  warn(...args: any[]) {
     if (this.enabled) {
-      console.warn(LOG_PREFIX, LOG_COLOR, ...arguments);
+      console.warn(LOG_PREFIX, LOG_COLOR, ...args);
     }
   }
 
-  table() {
+  table(...args: any[]) {
     if (this.enabled) {
-      console.table(LOG_PREFIX, LOG_COLOR, ...arguments);
+      console.table(...args);
     }
   }
 }

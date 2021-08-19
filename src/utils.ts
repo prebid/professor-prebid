@@ -1,16 +1,16 @@
 import logger from './logger';
 
-export function sendToContentScript(type, payload = '') {
-  const replacer = (key, value) => (typeof value === 'undefined' ? null : value);
+export const sendToContentScript = (type: string, payload: any = '') => {
+  const replacer = (key: any, value: any) => (typeof value === 'undefined' ? null : value);
 
-  logger.log('postMessage ', type);
+  logger.log('[sendToContentScript] postMessage ', type);
   window.postMessage({
     type,
     payload: JSON.stringify(payload, replacer),
-  });
+  }, undefined);
 }
 
-export function safelyParseJSON(data) {
+export const safelyParseJSON = (data: any): any => {
   if (typeof data === 'object') {
     return data;
   }

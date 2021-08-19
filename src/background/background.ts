@@ -1,22 +1,23 @@
 import constants from '../constants.json';
+import logger from '../logger';
 
-let mainTabId;
+let mainTabId: number;
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   const msgType = message && message.type;
   const payload = message && message.payload;
 
   switch (msgType) {
     case constants.EVENTS.OPEN_DATA_TAB:
       if (mainTabId) {
-        chrome.tabs.update(mainTabId, { active: true, url: `./app.html` }, function (tab) {
+        chrome.tabs.update(mainTabId, { active: true, url: `./app.html` }, (tab) => {
           mainTabId = tab.id;
           sendResponse();
         });
       } else {
-        chrome.tabs.create({ url: `./app.html` }, function (tab) {
+        chrome.tabs.create({ url: `./app.html` }, (tab) => {
           mainTabId = tab.id;
-          console.log('created tab with tabId: ', mainTabId);
+          logger.log('[Background] created tab with tabId: ', mainTabId);
           sendResponse();
         });
       }

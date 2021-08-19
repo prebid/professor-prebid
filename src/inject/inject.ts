@@ -1,7 +1,7 @@
 // This script injects "injected.js" into the active page which
 // which will enable the code to get access to the JS context (namely "pbjs")
 
-function injectScript(file_path, tag) {
+const injectScript = (file_path: string, tag: string) => {
   var node = document.getElementsByTagName(tag)[0];
   var script = document.createElement('script');
   script.setAttribute('type', 'text/javascript');
@@ -9,7 +9,7 @@ function injectScript(file_path, tag) {
   node.appendChild(script);
 }
 
-function checkForDOM() {
+const checkForDOM = () => {
   if (document.head) {
     injectScript(chrome.extension.getURL('./injected.bundle.js'), 'body');
   } else {

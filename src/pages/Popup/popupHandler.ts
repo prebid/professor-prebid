@@ -3,25 +3,27 @@ import constants from '../../constants.json';
 import logger from '../../logger';
 
 class PopupHandler {
-  handleDataFromContentScript(cb) {
+  handleDataFromContentScript(cb: any) {
     try {
       chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         const { type, payload } = safelyParseJSON(request);
-
         if (type === constants.EVENTS.DATA_READY_FROM_CONTENT) {
           cb(payload);
         }
-
+        if (type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
+          cb(payload);
+        }
         sendResponse();
       });
     } catch (e) {}
   }
 
-  onConsoleToggle(checked) {
+  onConsoleToggle(checked: boolean) {
     try {
       chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
         chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
           const tab = tabs[0];
+          logger.log('[PopupHandler] Send onConsoleToggle', {tab}, { type: constants.CONSOLE_TOGGLE, consoleState: checked })
           chrome.tabs.sendMessage(tab.id, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
         });
       });
@@ -30,7 +32,7 @@ class PopupHandler {
     }
   }
 
-  getToggleStateFromStorage(cb) {
+  getToggleStateFromStorage(cb: any) {
     try {
       chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {
         const checked = result ? result[constants.CONSOLE_TOGGLE] : false;

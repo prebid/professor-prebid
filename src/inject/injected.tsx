@@ -10,7 +10,12 @@ import ReactDOM from 'react-dom';
 import logger from '../logger';
 import InjectedApp from './InjectedApp';
 import { gptHandler, prebidHandler } from './handlers';
-
+declare global {
+  interface Window {
+    googletag: any;
+    _pbjsGlobals: any;
+  }
+}
 class Injected {
   init() {
     this.checkDependencies();
@@ -18,7 +23,7 @@ class Injected {
 
   // make sure prebid/gpt exist in page before trying to run
   checkDependencies() {
-    logger.log('checking for prebid & gpt');
+    logger.log('[Injected] checking for prebid & gpt');
     const now = Date.now();
     let hasPrebid = false;
     let hasGPT = false;
@@ -27,13 +32,13 @@ class Injected {
       const globalPbjs = this.isPrebidInPage();
 
       if (!hasPrebid && globalPbjs) {
-        logger.log('prebid found');
+        logger.log('[Injected] prebid found');
         hasPrebid = true;
         prebidHandler.init(globalPbjs, now);
       }
 
       if (!hasGPT && hasPrebid && this.isGPTInPage()) {
-        logger.log('gpt found');
+        logger.log('[Injected] gpt found');
         hasGPT = true;
         gptHandler.init();
       }
@@ -51,9 +56,10 @@ class Injected {
   isPrebidInPage() {
     const pbjsGlobals = window._pbjsGlobals;
     if (pbjsGlobals && pbjsGlobals.length > 0) {
-      const pbjsGlobal = window[pbjsGlobals[0]];
+      const pbjsGlobal: any = window[pbjsGlobals[0]];
 
-      if (pbjsGlobal.libLoaded) {
+      const libLoaded = pbjsGlobal.libLoaded;
+      if (libLoaded) {
         return pbjsGlobal;
       }
     }
