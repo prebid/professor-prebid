@@ -21,7 +21,7 @@ export interface BidderDoneDfRow {
 
 // Globals
 let allBidsDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidColumns);
-let auctionDf = new DataFrame([], constants.DATAFRAME_COLUMNS.auctionColumns);
+let auctionDf: AuctionsDfRow[] = [];
 let bidderDoneDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidderDoneColumns);
 let slotDf: SlotsDfRow[] = [];
 const visibleSlots = new Set();
@@ -50,7 +50,7 @@ class PrebidHandler {
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IAuctionData) => {
       logger.log('[Injected] auctionInit', moment(auctionInitData.timestamp).format('YYYY-MM-DD HH:mm:ss.SSS'));
 
-      const existingRows = auctionDf.find((row: Row) => row.get('auction') == auctionInitData.auctionId);
+      const existingRows = auctionDf.find(row => row.auction == auctionInitData.auctionId);
       if (existingRows) {
         logger.error('[Injected] XXXXXXXXXXXXXXXXXXXX Should not happen!!! XXXXXXXXXXXXXXXXXX');
       } else {
@@ -69,13 +69,13 @@ class PrebidHandler {
       const highestCpmBids = new DataFrame(this._getHighestCpmBids(auctionEndTime), constants.DATAFRAME_COLUMNS.bidColumns);
       const allWinningBids = new DataFrame(this._getAllWinningBids(auctionEndTime), constants.DATAFRAME_COLUMNS.bidColumns);
 
-      const auction: any = auctionDf.findWithIndex((row: Row) => row.get('auction') == auctionEndData.auctionId);
-      if (auction) {
-        auctionDf.setRowInPlace(auction.index, (row: Row) => row.set('startTime', auctionStartTime).set('endTime', auctionEndTime));
+      const auctionIndex = auctionDf.findIndex(row => row.auction == auctionEndData.auctionId);
+      if (auctionIndex !== -1) {
+        auctionDf[auctionIndex] = { ...auctionDf[auctionIndex], endTime: auctionEndTime }
       } else {
-        auctionEndData.adUnitCodes.forEach((aup: string) => updateAuctionDf(auctionEndData.auctionId, aup, this.domFoundTime, auctionStartTime, auctionEndTime));
+        auctionEndData.adUnitCodes.forEach(adUnitPath => updateAuctionDf(auctionEndData.auctionId, adUnitPath, this.domFoundTime, auctionStartTime, auctionEndTime));
       }
-      displayTable(auctionDf.toCollection(), 'auctionDf');
+      displayTable(auctionDf, 'auctionDf');
 
       const createOrUpdateDf = (a: DataFrame, b: DataFrame): DataFrame => { return a ? a.union(b) : b; }
 
@@ -127,7 +127,7 @@ class PrebidHandler {
       // On auctionEnd, let the content script know it happened
       const dfs = {
         allBids: allBidsDf.toCollection(),
-        auction: auctionDf.toCollection(),
+        auction: auctionDf,
         slots: slotDf,
       };
 
@@ -346,12 +346,13 @@ class GPTHandler {
       // update the auction with the slotId
       const bid = allBidsDf.find((bidRow: Row) => bidRow.get('adId') == hbAdId);
       if (bid) {
-        const auction: any = auctionDf.findWithIndex((auctionRow: Row) =>
-          auctionRow.get('auction') === bid.get('auction') && auctionRow.get('adUnitPath') === bid.get('adUnitPath')
+        const auctionIndex = auctionDf.findIndex(auctionRow =>
+          auctionRow.auction === bid.get('auction')
+          && auctionRow.adUnitPath === bid.get('adUnitPath')
         );
 
-        if (auction) {
-          auctionDf.setRowInPlace(auction.index, (auctionRow) => auctionRow.set('slotElementId', slotElementId));
+        if (auctionIndex !== -1) {
+          auctionDf[auctionIndex] = { ...auctionDf[auctionIndex], slotElementId }
         }
       }
 
@@ -360,7 +361,7 @@ class GPTHandler {
         gptTargeting: targetingMap,
         adUnitPath,
         slotElementId,
-        auctionDf: auctionDf.filter((row: Row) => row.get('slotElementId') == event.slot.getSlotElementId()).toCollection(),
+        auctionDf: auctionDf.filter(row => row.slotElementId == event.slot.getSlotElementId()),
       };
 
       sendToContentScript(constants.EVENTS.GPT_SLOTRENDERED, response);
@@ -435,16 +436,15 @@ class GPTHandler {
           .map((row: Row) => row.set('slotElementId', row.get('slotElementId2') ? row.get('slotElementId2') : row.get('slotElementId')))
           .drop('slotElementId2');
 
-        auctionDf = auctionDf.map((row: Row) =>
-          row.set(
-            'slotElementId',
-            row.get('auction') == slotBidsDf.getRow(0).get('auction') && row.get('adUnitPath') == slotBidsDf.getRow(0).get('adUnitPath')
-              ? slotElementId
-              : row.get('slotElementId')
-          )
-        );
+        auctionDf = auctionDf.map(row => ({
+          ...row,
+          slotElementId: (
+            row.auction == slotBidsDf.getRow(0).get('auction')
+            && row.adUnitPath == slotBidsDf.getRow(0).get('adUnitPath')
+          ) ? slotElementId : row.slotElementId
+        }));
 
-        displayTable(auctionDf.toCollection(), 'no auctions');
+        displayTable(auctionDf, 'no auctions');
         displayTable(allBidsDf.toCollection(), 'no bids');
       }
 
@@ -455,9 +455,8 @@ class GPTHandler {
       const response = {
         slotDf: thisSlotDf,
         bidsDf: slotBidsDf.toCollection(),
-        auctionDf: auctionDf.filter((row: Row) => row.get('slotElementId') === slotElementId).toCollection(),
+        auctionDf: auctionDf.filter(row => row.slotElementId === slotElementId),
       };
-
       sendToContentScript(constants.EVENTS.GPT_SLOTLOADED, response);
     });
 
@@ -523,14 +522,14 @@ class GPTHandler {
 
 const updateAuctionDf = (auctionId: string, aup: string, preAuctionStartTime: number, auctionStartTime: number, auctionEndTime: number = undefined) => {
   try {
-    auctionDf = auctionDf.push([
-      auctionId,                   // auction
-      aup,                         // adUnitPath
-      auctionEndTime,              // endTime
-      preAuctionStartTime,         // preAuctionStartTime
-      undefined,                   // slotElementId
-      auctionStartTime,            // startTime
-    ]);
+    auctionDf.push({
+      auction: auctionId,                       // auction
+      adUnitPath: aup,                          // adUnitPath
+      endTime: auctionEndTime,                  // endTime
+      preAuctionStartTime: preAuctionStartTime, // preAuctionStartTime
+      slotElementId: undefined,                 // slotElementId
+      startTime: auctionStartTime,              // startTime
+    });
   } catch (e) {
     logger.log('[Injected] updateAuctionDf failed', e);
   }
