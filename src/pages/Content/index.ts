@@ -2,29 +2,67 @@
 // injected script, build auction data structure. Also listens for
 // (chrome) messages from Popup.js when it runs and responds to it
 // with the auction data it collected so far
-import DataFrame from '../../js/dataframejs/dataframe';
+// import DataFrame from '../../js/dataframejs/dataframe';
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { safelyParseJSON } from '../../utils';
 import { IBidRequest, IBidRequestObj } from '../..';
-import Row from '../../js/dataframejs/row';
 import { displayTable } from '../../debugging';
 
+interface AuctionsDfRow {
+  adUnitPath: string;
+  auction: string;
+  endTime: number;
+  preAuctionStartTime: number;
+  slotElementId: string;
+  startTime: number;
+}
+
+interface BidsDfRow {
+  adId: string;
+  adUnitPath: string;
+  auction: string;
+  bidRequestTime: number;
+  bidResponseTime: number;
+  bidder: string;
+  cpm: number;
+  created: number;
+  creativeId: string
+  dealId: string;
+  modified: number;
+  msg: string;
+  netRevenue: boolean;
+  nonRenderedHighestCpm: boolean;
+  rendered: boolean;
+  slotElementId: string;
+  slotSize: string;
+  time: number;
+  type: string;
+}
+
+interface SlotsDfRow {
+  adId: string[];
+  adUnitPath: string;
+  slotElementId: string;
+  slotLoadTs: number;
+  slotRenderedTs: number;
+}
 
 let prebidConfig = {};
 const bidRequestedObj: IBidRequestObj = {};
 
-let allBidsDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidColumns);
-
-let allAuctionsDf = new DataFrame([], []);
-
-let allSlotsDf = new DataFrame([], []);
+let allBidsDf: BidsDfRow[] = [];
+let allAuctionsDf: AuctionsDfRow[] = [];
+let allSlotsDf: SlotsDfRow[] = [];
 
 class Content {
   init() {
     logger.log('[Content] init()');
     this.listenToInjectedScript();
     this.listenToPopupScript();
+    setInterval(() => {
+      // console.log({ allBidsDf, allAuctionsDf, allSlotsDf })
+    }, 1000)
   }
 
   listenToInjectedScript() {
@@ -50,10 +88,9 @@ class Content {
           // to be sent to the POPUP script when it activates
           if (payloadJson['dfs']) {
             const { allBids, auction, slots } = payloadJson.dfs;
-
-            allBidsDf = new DataFrame(allBids, constants.DATAFRAME_COLUMNS.bidColumns);
-            allAuctionsDf = new DataFrame(auction, constants.DATAFRAME_COLUMNS.auctionColumns);
-            allSlotsDf = new DataFrame(slots, constants.DATAFRAME_COLUMNS.slotColumns);
+            allBidsDf = allBids;
+            allAuctionsDf = auction;
+            allSlotsDf = slots;
           }
 
           // TODO use this info
@@ -68,18 +105,17 @@ class Content {
         case constants.EVENTS.GPT_SLOTRENDERED: {
           const payloadJson = safelyParseJSON(payload);
           logger.log(`[Content] received a ${type} event`, payloadJson);
-          const auctionDf = new DataFrame(payloadJson['auctionDf'], constants.DATAFRAME_COLUMNS.auctionColumns);
-          if (auctionDf.count() > 0) {
-            const auctionRow = auctionDf.getRow(0);
-            const auctionId = auctionRow.get('auction');
-            const adunit = auctionRow.get('adUnitPath');
-            const slotElementId = auctionRow.get('slotElementId');
-            const auction: any = allAuctionsDf.findWithIndex((auctionRow: Row) => auctionRow.get('auction') == auctionId && auctionRow.get('adUnitPath') == adunit);
-
+          const auctionDf: AuctionsDfRow[] = payloadJson['auctionDf'];
+          if (auctionDf.length > 0) {
+            const auctionRow = auctionDf[0];
+            const auctionId = auctionRow.auction;
+            const adunit = auctionRow.adUnitPath;
+            const slotElementId = auctionRow.slotElementId;
+            const auction: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction == auctionId && auctionRow.adUnitPath == adunit);
             if (auction) {
-              allAuctionsDf.setRowInPlace(auction.index, (row) => row?.set('slotElementId', slotElementId));
+              allAuctionsDf[auction].slotElementId = slotElementId;
             } else {
-              logger.warn("[Content] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
+              logger.warn("[Content] slot rendered XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
             }
           }
           break;
@@ -87,45 +123,64 @@ class Content {
 
         case constants.EVENTS.GPT_SLOTLOADED: {
           const payloadJson = safelyParseJSON(payload);
-          logger.log(`[Content] received a ${type} event`, payloadJson);
-          const slotLoadedDf = new DataFrame(payloadJson['slotDf'], constants.DATAFRAME_COLUMNS.slotColumns);
-          //TBC always empty: 
-          const auctionDf = new DataFrame(payloadJson['auctionDf'], constants.DATAFRAME_COLUMNS.auctionColumns);
-          
-          const slotBidsDf = new DataFrame(payloadJson['bidsDf'], constants.DATAFRAME_COLUMNS.bidColumns);
+          logger.log(`[Content] received a ${type} event`, { payloadJson });
+          const slotLoadedDf: SlotsDfRow[] = payloadJson['slotDf'];
 
-          allSlotsDf = allSlotsDf ? allSlotsDf.join(slotLoadedDf, ['slotElementId', 'adUnitPath'], 'outer') : slotLoadedDf;
+          const auctionDf: AuctionsDfRow[] = payloadJson['auctionDf'];
 
-          allBidsDf = allBidsDf
-            ? allBidsDf
-              .diff(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder'])
-              .join(slotBidsDf, ['auction', 'adUnitPath', 'adId', 'bidder'], 'outer')
-            : slotBidsDf;
+          const slotBidsDf: BidsDfRow[] = payloadJson['bidsDf'];
 
-          displayTable(allBidsDf.toCollection(), 'allBidsDf');
-          
-          
-          if (auctionDf.count() === 0) {
+          slotLoadedDf.forEach(slotLoaded => {
+            const exisitingIndex = slotLoadedDf.findIndex(slot =>
+              slot.slotElementId === slotLoaded.slotElementId
+              && slot.adUnitPath === slotLoaded.adUnitPath
+            );
+            if (exisitingIndex !== -1) {
+              allSlotsDf[exisitingIndex] = { ...slotLoaded };
+            } else {
+              allSlotsDf.push(slotLoaded);
+            }
+          })
+
+          allBidsDf.forEach(slotBid => {
+            const exisitingIndex = allBidsDf.findIndex(bid =>
+              bid.auction === slotBid.auction
+              && bid.adUnitPath === slotBid.adUnitPath
+              && bid.adId === slotBid.adId
+              && bid.bidder === slotBid.bidder
+            );
+
+            if (exisitingIndex !== -1) {
+              allBidsDf[exisitingIndex] = { ...slotBid };
+            } else {
+              allBidsDf.push(slotBid);
+            }
+          });
+
+          displayTable(allBidsDf, 'allBidsDf');
+
+
+          if (auctionDf.length === 0) {
             return;
           }
-          
-          displayTable(slotLoadedDf.toCollection(), 'slotLoadedDf');
-          
-          const auctionId = auctionDf.getRow(0).get('auction');
-          const adunit = auctionDf.getRow(0).get('adUnitPath');
-          const slotElementId = slotLoadedDf.getRow(0)?.get('slotElementId');
-          
-          const auction: any = allAuctionsDf.findWithIndex((auctionRow: Row) => auctionRow.get('auction') == auctionId && auctionRow.get('adUnitPath') == adunit);
+
+          displayTable(slotLoadedDf, 'slotLoadedDf');
+
+          const auctionId = auctionDf[0].auction;
+          const adunit = auctionDf[0].adUnitPath;
+          const slotElementId = slotLoadedDf[0].slotElementId;
+
+          const auction: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction == auctionId && auctionRow.adUnitPath == adunit);
 
           if (auction) {
-            allAuctionsDf.setRowInPlace(auction.index, (row) => row?.set('slotElementId', slotElementId));
+            allAuctionsDf[auction].slotElementId = slotElementId;
           } else {
             logger.warn("[Content] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
           }
 
           // update injected
 
-          const mask = this.prepareMaskObject(slotLoadedDf?.getRow(0), slotBidsDf, auctionDf.getRow(0));
+          const mask = this.prepareMaskObject(slotLoadedDf[0], slotBidsDf, auctionDf[0]);
           document.dispatchEvent(new CustomEvent(constants.SAVE_MASK, { detail: mask }));
 
           // update popup
@@ -157,22 +212,22 @@ class Content {
     });
   }
 
-  prepareMaskObject(slotRow: Row, slotBidsDf: DataFrame, auctionRow: Row) {
+  prepareMaskObject(slotRow: SlotsDfRow, slotBidsDf: BidsDfRow[], auctionRow: AuctionsDfRow) {
     logger.log('[Content] preparing mask', { slotRow, slotBidsDf, auctionRow });
-    const targetId = slotRow?.get('slotElementId');
-    const creativeRenderTime = slotRow?.get('slotLoadTs') - slotRow?.get('slotRenderedTs');
-    const auctionTime = auctionRow.get('endTime') - auctionRow?.get('startTime');
+    const targetId = slotRow.slotElementId;
+    const creativeRenderTime = slotRow.slotLoadTs - slotRow.slotRenderedTs;
+    const auctionTime = auctionRow.endTime - auctionRow.startTime;
     // do we have a prebid winner?
-    const sortedSlotBidsDf = slotBidsDf.sortBy('rendered', true); // rendered = true will be first
-    const winner = sortedSlotBidsDf.filter((row: Row) => row.get('rendered') == true);
-    const prebidRenderedAd = winner.dim()[0] ? true : false;
+    const sortedSlotBidsDf = slotBidsDf.sort((x: BidsDfRow, y: BidsDfRow) => (x.rendered === y.rendered) ? 0 : x.rendered ? -1 : 1); // rendered = true will be first
+    const winner = sortedSlotBidsDf.filter(row => row.rendered == true);
+    const prebidRenderedAd = winner[0] ? true : false;
 
     let winningBidder;
     let winningCPM;
     if (prebidRenderedAd) {
-      const winnerRow = winner.getRow(0);
-      winningBidder = winnerRow.get('bidder');
-      winningCPM = winnerRow.get('cpm');
+      const winnerRow = winner[0];
+      winningBidder = winnerRow.bidder;
+      winningCPM = winnerRow.cpm;
     }
 
     const mask = {
@@ -181,7 +236,7 @@ class Content {
       auctionTime,
       winningBidder,
       winningCPM,
-      bidders: sortedSlotBidsDf.toCollection(),
+      bidders: sortedSlotBidsDf,
     };
 
     logger.log('[Content] mask ready', mask);
@@ -192,9 +247,9 @@ class Content {
   getAuctionData() {
     return {
       dfs: {
-        auction: allAuctionsDf.toCollection(),
-        slots: allSlotsDf.toCollection(),
-        allBids: allBidsDf.toCollection(),
+        auction: allAuctionsDf,
+        slots: allSlotsDf,
+        allBids: allBidsDf,
       },
       prebidConfig: JSON.stringify(prebidConfig),
     };
