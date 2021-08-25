@@ -22,7 +22,7 @@ export interface BidderDoneDfRow {
 // Globals
 let allBidsDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidColumns);
 let auctionDf: AuctionsDfRow[] = [];
-let bidderDoneDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidderDoneColumns);
+let bidderDoneDf: BidderDoneDfRow[] = [];
 let slotDf: SlotsDfRow[] = [];
 const visibleSlots = new Set();
 const slotBidsBySlotElementId: { [key: string]: any } = {};
@@ -114,7 +114,7 @@ class PrebidHandler {
 
       // merge in any bidder done data that comes in
       try {
-        allBidsDf = allBidsDf.join(bidderDoneDf, ['auction', 'adUnitPath', 'bidder'], 'left');
+        allBidsDf = allBidsDf.join(new DataFrame( bidderDoneDf, constants.DATAFRAME_COLUMNS.bidderDoneColumns), ['auction', 'adUnitPath', 'bidder'], 'left');
         allBidsDf = allBidsDf
           .map((row: Row) => row.set('time', row.get('time') == undefined ? row.get('responseTime') - auctionStartTime : row.get('time')))
           .drop(['responseTime']);
@@ -538,14 +538,14 @@ const updateAuctionDf = (auctionId: string, aup: string, preAuctionStartTime: nu
 const updateBidderDoneDf = (doneBid: IDoneBid) => {
   const ts = Date.now();
   try {
-    bidderDoneDf = bidderDoneDf.push([
-      doneBid.auctionId,      // auction
-      doneBid.adUnitCode,     // adUnitPath
-      doneBid.advertiserId,   // bidder
-      ts,                     // responseTime
-      // 'timeout',           // responseTime?
-      doneBid.bidder,         // type
-    ]);
+    bidderDoneDf.push({
+      auction: doneBid.auctionId,               // auction
+      adUnitPath: doneBid.adUnitCode,           // adUnitPath
+      bidder: doneBid.advertiserId,             // bidder
+      responseTime: ts,                         // responseTime
+      //responseTime: 'timeout',                // responseTime?
+      type: doneBid.bidder,                     // type
+    });
   } catch (e) {
     logger.log(e);
   }
