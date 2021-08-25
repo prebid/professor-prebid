@@ -6,18 +6,26 @@ import constants from '../constants.json';
 import logger from '../logger';
 import { displayTable } from '../debugging';
 import { IAuction, IAuctionData, IBid, IBidderDoneData, IBidResponseObj, IBidTimeoutData, IBidWonData, IDoneBid, ISlot } from '..';
+
+import { AuctionsDfRow, BidsDfRow, SlotsDfRow } from '../pages/Content/index'
 import Row from '../js/dataframejs/row';
 const DEBUG = 1;
 
-
+export interface BidderDoneDfRow {
+  auction: string;
+  adUnitPath: string;
+  bidder: string;
+  responseTime: number;
+  type: string;
+}
 
 // Globals
 let allBidsDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidColumns);
 let auctionDf = new DataFrame([], constants.DATAFRAME_COLUMNS.auctionColumns);
 let bidderDoneDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidderDoneColumns);
-let slotDf = new DataFrame([], constants.DATAFRAME_COLUMNS.slotColumns);
+let slotDf: SlotsDfRow[] = [];
 const visibleSlots = new Set();
-const slotBidsBySlotElementId: { [key: string]: DataFrame | void } = {};
+const slotBidsBySlotElementId: { [key: string]: any } = {};
 
 // Prebid Events
 
@@ -120,7 +128,7 @@ class PrebidHandler {
       const dfs = {
         allBids: allBidsDf.toCollection(),
         auction: auctionDf.toCollection(),
-        slots: slotDf.toCollection(),
+        slots: slotDf,
       };
 
       const response = {
@@ -324,15 +332,15 @@ class GPTHandler {
       logger.log('[Injected] slotRenderEnded', { slotElementId, slotId: event.slot.getSlotId().getId(), adUnitPath, targetingMap, });
 
       // add it to our slots dataframe
-      const existingRow = slotDf.find((slotRow: Row) => slotRow.get('slotElementId') === slotElementId && slotRow.get('adUnitPath') === adUnitPath);
+      const existingRow = slotDf.find(slotRow => slotRow.slotElementId === slotElementId && slotRow.adUnitPath === adUnitPath);
       if (!existingRow) {
-        slotDf = slotDf.push([
-          hbAdId,               // adId
-          adUnitPath,           // adUnitPath
-          slotElementId,        // slotElementId
-          null,                 // slotLoadTs
-          ts                    // slotRenderedTs
-        ]);
+        slotDf.push({
+          adId: hbAdId,                     // adId
+          adUnitPath: adUnitPath,           // adUnitPath
+          slotElementId: slotElementId,     // slotElementId
+          slotLoadTs: null,                 // slotLoadTs
+          slotRenderedTs: ts                // slotRenderedTs
+        });
       }
 
       // update the auction with the slotId
@@ -374,11 +382,9 @@ class GPTHandler {
       });
 
       // update the slot dataframe with the load timestamp
-      slotDf = slotDf.map((row: Row) =>
-        row.set('slotLoadTs', row.get('slotElementId') == slotElementId && row.get('adUnitPath') == adUnitPath ? ts : row.get('slotLoadTs'))
-      );
+      slotDf = slotDf.map(row => ({ ...row, slotLoadTs: row.slotElementId == slotElementId && row.adUnitPath == adUnitPath ? ts : row.slotLoadTs }));
 
-      displayTable(slotDf.toCollection(), 'slotDf');
+      displayTable(slotDf, 'slotDf');
 
       // we now want to link the bids to this slot.
       // There is no auction id in the slot event. We could use the adUnitPath but multiple auctions can run
@@ -395,13 +401,14 @@ class GPTHandler {
 
       if (slotBidsDf.count() > 0) {
         // multiple slots with same adunitpath?
-        const adUnitSlotsDf = slotDf.filter((row: Row) => row.get('adUnitPath') === adUnitPath);
-        if (adUnitSlotsDf.count() > 1) {
+        const adUnitSlotsDf = slotDf.filter(row => row.adUnitPath === adUnitPath);
+        if (adUnitSlotsDf.length > 1) {
           // mult auctions for this adUnitPath. 
           // find the auction we are looking at from the highest prebid bidder which will have its hb_adid set. 
           // We can then identify the slotElementId for these bids
           const thisSlotBids = this.matchBids(allBidsDf, slotBidsDf, adUnitSlotsDf, event.slot);
           slotBidsBySlotElementId[slotElementId] = thisSlotBids;
+          // @ts-ignore
           slotBidsDf = thisSlotBids;
         } else {
           // we only have one slot for this adUnitPath
@@ -443,10 +450,10 @@ class GPTHandler {
 
       // pull out this slot's data and send the response
 
-      const thisSlotDf = slotDf.filter((row: Row) => row.get('slotElementId') === slotElementId && row.get('adUnitPath') === adUnitPath);
+      const thisSlotDf = slotDf.filter(row => row.slotElementId === slotElementId && row.adUnitPath === adUnitPath);
 
       const response = {
-        slotDf: thisSlotDf.toCollection(),
+        slotDf: thisSlotDf,
         bidsDf: slotBidsDf.toCollection(),
         auctionDf: auctionDf.filter((row: Row) => row.get('slotElementId') === slotElementId).toCollection(),
       };
@@ -467,7 +474,7 @@ class GPTHandler {
 
   // if hb_adid exists then we'll use that, otherwise we'll check if the bids adunitpaths are actually slotelementdids.
   // finally we'll attempt to use time for the case where we have mult auctions on the same adunitpath and diff slot ids
-  matchBids(allBidsDf: DataFrame, slotBidsDf: DataFrame, adUnitSlotsDf: DataFrame, slot: any): DataFrame {
+  matchBids(allBidsDf: DataFrame, slotBidsDf: DataFrame, adUnitSlotsDf: SlotsDfRow[], slot: any): DataFrame | any[] {
     const slotElementId = slot.getSlotElementId();
     const targeting = slot.getTargetingMap();
     const hbAdId = targeting['hb_adid'];
@@ -486,26 +493,27 @@ class GPTHandler {
     return biddersUseSlotIdForAUP.count() > 0 ? biddersUseSlotIdForAUP : this.bidSlotFallbackLinker(adUnitSlotsDf, slotBidsDf, slotElementId);
   }
 
-  bidSlotFallbackLinker(adUnitSlotsDf: DataFrame, slotBidsDf: DataFrame, slotElementId: string): DataFrame {
+  bidSlotFallbackLinker(adUnitSlotsDf: SlotsDfRow[], slotBidsDf: DataFrame, slotElementId: string): any[] {
     // should never happen now that we are using hb_adid
     logger.warn('[Injected] Uh oh, hb_adid is empty. Trying to link using time...');
     // sort by time and for each find the bids that have a response time earlier
     // these are these slots bids. remove them from the total and continue
-    adUnitSlotsDf = adUnitSlotsDf.sortBy('slotRenderedTs');
+    // adUnitSlotsDf = adUnitSlotsDf.sortBy('slotRenderedTs');
+    adUnitSlotsDf = adUnitSlotsDf.sort((x, y) => x.slotRenderedTs - y.slotRenderedTs);
 
-    const extractSlotBids = (slot: Row) => {
-      const thisSlotBids = slotBidsDf.filter((row: Row) => row.get('bidResponseTime') < slot.get('slotRenderedTs'));
+    const extractSlotBids = (slot: SlotsDfRow) => {
+      const thisSlotBids = slotBidsDf.filter((row: Row) => row.get('bidResponseTime') < slot.slotRenderedTs);
       const thisSlotAuction = thisSlotBids.distinct('auction');
       if (thisSlotAuction.count() > 1) {
         logger.error('[Injected] XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?');
       }
-      if (slot.get('slotElementId') == slotElementId) {
+      if (slot.slotElementId == slotElementId) {
         return slotBidsDf;
       } else {
         slotBidsDf = slotBidsDf.diff(thisSlotBids, ['auction']);
       }
     }
-    return adUnitSlotsDf.map((slotDf: Row) => extractSlotBids(slotDf));
+    return adUnitSlotsDf.map(slotDf => extractSlotBids(slotDf));
   }
 }
 
