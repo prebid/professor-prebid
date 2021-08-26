@@ -78,7 +78,18 @@ class PrebidHandler {
       }
       displayTable(auctionDf, 'auctionDf');
 
-      const createOrUpdateDf = (a: IBidsDfRow[], b: IBidsDfRow[]): IBidsDfRow[] => { return a ? a.concat(b) : b; }
+      const createOrUpdateDf = (a: IBidsDfRow[], b: IBidsDfRow[]): IBidsDfRow[] => {
+        if (a) {
+          return Array.from(
+            new Set([
+              ...a.map(el => JSON.stringify(el)),
+              ...b.map(el => JSON.stringify(el))
+            ])
+          ).map(el => JSON.parse(el))
+        } else {
+          return b
+        };
+      }
 
       allBidsDf = createOrUpdateDf(allBidsDf, new_allBidsDf);
       // TODO need to extract this update into a general df func
