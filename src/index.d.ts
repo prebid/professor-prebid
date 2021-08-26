@@ -74,7 +74,7 @@ export interface ISlot {
   slotRenderedTs: number
 }
 
-export interface IAuctionData {
+export interface IDataFromContentScript {
   dfs: {
     auction: Auction[];
     slots: Slot[];
@@ -83,7 +83,7 @@ export interface IAuctionData {
   prebidConfig: string;
 }
 
-export interface IContentScriptData {
+export interface IPopUpState {
   adsDetected: number;
   numOfBidders: number;
   numOfNoBids: number;
@@ -94,27 +94,6 @@ export interface IContentScriptData {
     adServer: number;
   };
 }
-
-export interface IBidderRequest {
-  auctionId: string;
-  auctionStart: number;
-  bidderCode: string;
-  bidderRequestId: string;
-  bids: IBid[];
-  ceh: any;
-  publisherExt: any;
-  refererInfo: {
-    referer: string;
-    reachedTop: boolean;
-    isAmp: boolean;
-    numIframes: number;
-    stack: string[];
-    start: number;
-    timeout: number;
-    userExt: any;
-  }
-}
-
 export interface IBidRequest {
   [key: string]: IBidderRequest;
 }
@@ -131,7 +110,7 @@ export interface IBidRequestObj {
   [key: string]: IBidRequest;
 }
 
-export interface IBidWonData {
+export interface IBidWonEventData {
   ad: string;
   adId: string;
   adUnitCode: string;
@@ -191,17 +170,6 @@ export interface IBidWonData {
   width: number;
 }
 
-export interface IAdUnit {
-  bids: { bidder: string; params: { [key: string]: string } }[];
-  code: string;
-  mediaTypes: {
-    banner: {
-      sizes: number[][];
-    }
-  }
-  sizes: number[][];
-}
-
 export interface IDoneBid {
   adUnitCode: string;
   auctionId: string;
@@ -225,7 +193,7 @@ export interface IDoneBid {
   advertiserId: string;
 }
 
-export interface IAuctionData {
+export interface IDataFromContentScript {
   adUnitCodes: string[];
   adUnits: IAdUnit[];
   auctionEnd: number;
@@ -240,16 +208,7 @@ export interface IAuctionData {
   winningBids: []
 }
 
-export interface IReferrerInfo {
-  canonicalUrl: string;
-  isAmp: boolean;
-  numIframes: number
-  reachedTop: true
-  referer: string;
-  stack: string[];
-}
-
-export interface IBidderDoneData {
+export interface IBidderDonEventData {
   auctionId: string;
   auctionStart: number;
   bidderCode: string;
@@ -262,6 +221,50 @@ export interface IBidderDoneData {
   timeout: number;
 }
 
-export interface IBidTimeoutData {
+export interface IBidTimeoutEventData {
   bids: any[]
+}
+
+export interface IAuctionsDfRow {
+  adUnitPath: string;
+  auction: string;
+  endTime: number;
+  preAuctionStartTime: number;
+  slotElementId: string;
+  startTime: number;
+}
+
+export interface IBidsDfRow {
+  adId: string;
+  adUnitPath: string;
+  auction: string;
+  bidRequestTime: number;
+  bidResponseTime: number;
+  bidder: string;
+  cpm: number;
+  created: number;
+  creativeId: string
+  dealId: string;
+  modified: number;
+  msg: string;
+  netRevenue: boolean;
+  nonRenderedHighestCpm: boolean;
+  rendered: boolean;
+  slotElementId: string;
+  slotSize: string;
+  time: number;
+  type: string;
+  nonRenderedHighestCpm_2?: boolean;
+  modified_2?: number;
+  rendered_2?: boolean;
+  slotElementId2?: string;
+  responseTime?: number;
+}
+
+export interface ISlotsDfRow {
+  adId: string[];
+  adUnitPath: string;
+  slotElementId: string;
+  slotLoadTs: number;
+  slotRenderedTs: number;
 }

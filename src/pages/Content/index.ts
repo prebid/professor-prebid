@@ -5,68 +5,21 @@
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { safelyParseJSON } from '../../utils';
-import { IBidRequest, IBidRequestObj } from '../..';
+import { IBidRequest, IBidRequestObj, IBidsDfRow, IAuctionsDfRow, ISlotsDfRow } from '../..';
 import { displayTable } from '../../debugging';
-
-export interface AuctionsDfRow {
-  adUnitPath: string;
-  auction: string;
-  endTime: number;
-  preAuctionStartTime: number;
-  slotElementId: string;
-  startTime: number;
-}
-
-export interface BidsDfRow {
-  adId: string;
-  adUnitPath: string;
-  auction: string;
-  bidRequestTime: number;
-  bidResponseTime: number;
-  bidder: string;
-  cpm: number;
-  created: number;
-  creativeId: string
-  dealId: string;
-  modified: number;
-  msg: string;
-  netRevenue: boolean;
-  nonRenderedHighestCpm: boolean;
-  rendered: boolean;
-  slotElementId: string;
-  slotSize: string;
-  time: number;
-  type: string;
-  nonRenderedHighestCpm_2?: boolean;
-  modified_2?: number;
-  rendered_2?: boolean;
-  slotElementId2?: string;
-  responseTime?: number;
-}
-
-export interface SlotsDfRow {
-  adId: string[];
-  adUnitPath: string;
-  slotElementId: string;
-  slotLoadTs: number;
-  slotRenderedTs: number;
-}
 
 let prebidConfig = {};
 const bidRequestedObj: IBidRequestObj = {};
 
-let allBidsDf: BidsDfRow[] = [];
-let allAuctionsDf: AuctionsDfRow[] = [];
-let allSlotsDf: SlotsDfRow[] = [];
+let allBidsDf: IBidsDfRow[] = [];
+let allAuctionsDf: IAuctionsDfRow[] = [];
+let allSlotsDf: ISlotsDfRow[] = [];
 
 class Content {
   init() {
     logger.log('[Content] init()');
     this.listenToInjectedScript();
     this.listenToPopupScript();
-    // setInterval(() => {
-    //   console.log({ allBidsDf, allAuctionsDf, allSlotsDf })
-    // }, 1000)
   }
 
   listenToInjectedScript() {
@@ -109,7 +62,7 @@ class Content {
         case constants.EVENTS.GPT_SLOTRENDERED: {
           const payloadJson = safelyParseJSON(payload);
           logger.log(`[Content] received a ${type} event`, payloadJson);
-          const auctionDf: AuctionsDfRow[] = payloadJson['auctionDf'];
+          const auctionDf: IAuctionsDfRow[] = payloadJson['auctionDf'];
           if (auctionDf.length > 0) {
             const auctionRow = auctionDf[0];
             const auctionId = auctionRow.auction;
@@ -128,11 +81,11 @@ class Content {
         case constants.EVENTS.GPT_SLOTLOADED: {
           const payloadJson = safelyParseJSON(payload);
           logger.log(`[Content] received a ${type} event`, { payloadJson });
-          const slotLoadedDf: SlotsDfRow[] = payloadJson['slotDf'];
+          const slotLoadedDf: ISlotsDfRow[] = payloadJson['slotDf'];
 
-          const auctionDf: AuctionsDfRow[] = payloadJson['auctionDf'];
+          const auctionDf: IAuctionsDfRow[] = payloadJson['auctionDf'];
 
-          const slotBidsDf: BidsDfRow[] = payloadJson['bidsDf'];
+          const slotBidsDf: IBidsDfRow[] = payloadJson['bidsDf'];
 
           slotLoadedDf.forEach(slotLoaded => {
             const exisitingIndex = slotLoadedDf.findIndex(slot =>
@@ -216,13 +169,13 @@ class Content {
     });
   }
 
-  prepareMaskObject(slotRow: SlotsDfRow, slotBidsDf: BidsDfRow[], auctionRow: AuctionsDfRow) {
+  prepareMaskObject(slotRow: ISlotsDfRow, slotBidsDf: IBidsDfRow[], auctionRow: IAuctionsDfRow) {
     logger.log('[Content] preparing mask', { slotRow, slotBidsDf, auctionRow });
     const targetId = slotRow.slotElementId;
     const creativeRenderTime = slotRow.slotLoadTs - slotRow.slotRenderedTs;
     const auctionTime = auctionRow.endTime - auctionRow.startTime;
     // do we have a prebid winner?
-    const sortedSlotBidsDf = slotBidsDf.sort((x: BidsDfRow, y: BidsDfRow) => (x.rendered === y.rendered) ? 0 : x.rendered ? -1 : 1); // rendered = true will be first
+    const sortedSlotBidsDf = slotBidsDf.sort((x: IBidsDfRow, y: IBidsDfRow) => (x.rendered === y.rendered) ? 0 : x.rendered ? -1 : 1); // rendered = true will be first
     const winner = sortedSlotBidsDf.filter(row => row.rendered == true);
     const prebidRenderedAd = winner[0] ? true : false;
 
