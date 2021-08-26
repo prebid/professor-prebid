@@ -1,14 +1,13 @@
 import moment from 'moment';
-import DataFrame from '../js/dataframejs/dataframe';
 import '../logger';
 import { sendToContentScript } from '../utils';
 import constants from '../constants.json';
 import logger from '../logger';
 import { displayTable } from '../debugging';
-import { IAuction, IAuctionData, IBid, IBidderDoneData, IBidResponseObj, IBidTimeoutData, IBidWonData, IDoneBid, ISlot } from '..';
+import { IAuctionData, IBidderDoneData, IBidResponseObj, IBidTimeoutData, IBidWonData, IDoneBid, } from '..';
 
 import { AuctionsDfRow, BidsDfRow, SlotsDfRow } from '../pages/Content/index'
-import Row from '../js/dataframejs/row';
+
 const DEBUG = 1;
 
 export interface BidderDoneDfRow {
@@ -19,13 +18,16 @@ export interface BidderDoneDfRow {
   type: string;
 }
 
+interface SlotBidsBySlotElementId {
+  [key: string]: BidsDfRow[]
+}
 // Globals
-let allBidsDf = new DataFrame([], constants.DATAFRAME_COLUMNS.bidColumns);
+let allBidsDf: BidsDfRow[];
 let auctionDf: AuctionsDfRow[] = [];
 let bidderDoneDf: BidderDoneDfRow[] = [];
 let slotDf: SlotsDfRow[] = [];
 const visibleSlots = new Set();
-const slotBidsBySlotElementId: { [key: string]: any } = {};
+const slotBidsBySlotElementId: SlotBidsBySlotElementId = {};
 
 // Prebid Events
 
@@ -65,9 +67,9 @@ class PrebidHandler {
       const auctionStartTime = auctionEndData.timestamp;
       const auctionEndTime = Date.now();
       // get the new data and merge with existing
-      const new_allBidsDf = new DataFrame(this._getAllBids(auctionEndTime), constants.DATAFRAME_COLUMNS.bidColumns);
-      const highestCpmBids = new DataFrame(this._getHighestCpmBids(auctionEndTime), constants.DATAFRAME_COLUMNS.bidColumns);
-      const allWinningBids = new DataFrame(this._getAllWinningBids(auctionEndTime), constants.DATAFRAME_COLUMNS.bidColumns);
+      const new_allBidsDf: BidsDfRow[] = this._getAllBids(auctionEndTime);
+      const highestCpmBids: BidsDfRow[] = this._getHighestCpmBids(auctionEndTime);
+      const allWinningBids: BidsDfRow[] = this._getAllWinningBids(auctionEndTime);
 
       const auctionIndex = auctionDf.findIndex(row => row.auction == auctionEndData.auctionId);
       if (auctionIndex !== -1) {
@@ -77,56 +79,130 @@ class PrebidHandler {
       }
       displayTable(auctionDf, 'auctionDf');
 
-      const createOrUpdateDf = (a: DataFrame, b: DataFrame): DataFrame => { return a ? a.union(b) : b; }
+      const createOrUpdateDf = (a: BidsDfRow[], b: BidsDfRow[]): BidsDfRow[] => { return a ? a.concat(b) : b; }
 
       allBidsDf = createOrUpdateDf(allBidsDf, new_allBidsDf);
       // TODO need to extract this update into a general df func
       // Let's mark the highest cpm bids - these can change if a bidder is selected as a winner
-
-      allBidsDf = allBidsDf.join(highestCpmBids
-        .select('auction', 'adUnitPath', 'adId', 'bidder', 'nonRenderedHighestCpm', 'modified')
-        .rename('nonRenderedHighestCpm', 'nonRenderedHighestCpm_2')
-        .rename('modified', 'modified_2'),
-        ['auction', 'adUnitPath', 'adId', 'bidder'],
-        'outer'
-      );
+      allBidsDf = allBidsDf.map(allBidsDfRow => {
+        const select = highestCpmBids.map(
+          ({ auction, adUnitPath, adId, bidder, nonRenderedHighestCpm, modified }) => ({
+            auction,
+            adUnitPath,
+            adId,
+            bidder,
+            nonRenderedHighestCpm,
+            modified,
+            nonRenderedHighestCpm_2: nonRenderedHighestCpm,
+            modified_2: modified
+          }));
+        const index = select.findIndex(highestCpmBid =>
+          highestCpmBid.auction === allBidsDfRow.auction
+          && highestCpmBid.adUnitPath === allBidsDfRow.adUnitPath
+          && highestCpmBid.adId === allBidsDfRow.adId
+          && highestCpmBid.bidder === allBidsDfRow.bidder)
+        if (index !== -1) {
+          return {
+            ...allBidsDfRow,
+            ...select[index]
+          }
+        } else {
+          return {
+            ...allBidsDfRow
+          }
+        }
+      })
 
       allBidsDf = allBidsDf
-        .map((row: Row) => row.set('nonRenderedHighestCpm', row.get('nonRenderedHighestCpm_2') ? true : false))
-        .drop(['nonRenderedHighestCpm_2', 'modified_2']);
+        .map(row => {
+          const output = {
+            ...row,
+            nonRenderedHighestCpm: row.nonRenderedHighestCpm_2 ? true : false
+          }
+          delete output.nonRenderedHighestCpm_2;
+          delete output.modified_2;
+          return output
+        })
 
       // Let's mark the ad winners
-      allBidsDf = allBidsDf.join(allWinningBids
-        .select('auction', 'adUnitPath', 'adId', 'bidder', 'nonRenderedHighestCpm', 'rendered', 'modified')
-        .rename('nonRenderedHighestCpm', 'nonRenderedHighestCpm_2')
-        .rename('rendered', 'rendered_2')
-        .rename('modified', 'modified_2'),
-        ['auction', 'adUnitPath', 'adId', 'bidder'],
-        'left'
-      );
+      allBidsDf = allBidsDf.map(allBidsDfRow => {
+        const select = allWinningBids
+          .map(({ auction, adUnitPath, adId, bidder, nonRenderedHighestCpm, rendered, modified }) => ({
+            auction,
+            adUnitPath,
+            adId,
+            bidder,
+            nonRenderedHighestCpm,
+            rendered,
+            modified,
+            nonRenderedHighestCpm_2: nonRenderedHighestCpm,
+            rendered_2: rendered,
+            modified_2: modified
+          }));
+        const index = select.findIndex(allWinningBidsRow =>
+          allWinningBidsRow.auction === allBidsDfRow.auction
+          && allWinningBidsRow.adUnitPath === allBidsDfRow.adUnitPath
+          && allWinningBidsRow.adId === allBidsDfRow.adId
+          && allWinningBidsRow.bidder === allBidsDfRow.bidder)
+        if (index !== -1) {
+          return {
+            ...allBidsDfRow,
+            ...select[index]
+          }
+        } else {
+          return {
+            ...allBidsDfRow
+          }
+        }
+      })
+
 
       allBidsDf = allBidsDf
-        .map((row: Row) =>
-          row.set('nonRenderedHighestCpm', row.get('nonRenderedHighestCpm_2') ? true : false) &&
-          row.set('rendered', row.get('rendered_2') ? true : false)
-        )
-        .drop(['nonRenderedHighestCpm_2', 'rendered_2', 'modified_2']);
+        .map(row => {
+          const output = {
+            ...row,
+            nonRenderedHighestCpm: row.nonRenderedHighestCpm_2 ? true : false,
+            rendered: row.rendered_2 ? true : false
+          }
+          delete output.nonRenderedHighestCpm_2;
+          delete output.rendered_2;
+          delete output.modified_2;
+          return output;
+        })
 
       // merge in any bidder done data that comes in
       try {
-        allBidsDf = allBidsDf.join(new DataFrame( bidderDoneDf, constants.DATAFRAME_COLUMNS.bidderDoneColumns), ['auction', 'adUnitPath', 'bidder'], 'left');
-        allBidsDf = allBidsDf
-          .map((row: Row) => row.set('time', row.get('time') == undefined ? row.get('responseTime') - auctionStartTime : row.get('time')))
-          .drop(['responseTime']);
+        allBidsDf = allBidsDf.map(allBidsDfRow => {
+          const index = bidderDoneDf.findIndex(bidderDoneDfRow =>
+            bidderDoneDfRow.auction === allBidsDfRow.auction
+            && bidderDoneDfRow.adUnitPath === allBidsDfRow.adUnitPath
+            && bidderDoneDfRow.bidder === allBidsDfRow.bidder
+          )
+          let output;
+          if (index !== -1) {
+            output = {
+              ...allBidsDfRow,
+              ...bidderDoneDf[index],
+              time: allBidsDfRow.time == undefined ? allBidsDfRow.responseTime - auctionStartTime : allBidsDfRow.time
+            }
+          } else {
+            output = {
+              ...allBidsDfRow,
+              time: allBidsDfRow.time == undefined ? allBidsDfRow.responseTime - auctionStartTime : allBidsDfRow.time
+            }
+          }
+          delete output.responseTime;
+          return output;
+        })
       } catch (e) {
         logger.log(e);
       }
 
-      displayTable(allBidsDf.toCollection(), 'No all bids');
+      displayTable(allBidsDf, 'No all bids');
 
       // On auctionEnd, let the content script know it happened
       const dfs = {
-        allBids: allBidsDf.toCollection(),
+        allBids: allBidsDf,
         auction: auctionDf,
         slots: slotDf,
       };
@@ -147,14 +223,19 @@ class PrebidHandler {
 
       const ts = Date.now();
 
-      const bid: any = allBidsDf.findWithIndex((row: Row) =>
-        row.get('auction') === bidWonData.auctionId &&
-        row.get('adId') === bidWonData.adId &&
-        row.get('bidder') === bidWonData.bidderCode
+      const bidIndex = allBidsDf.findIndex(row =>
+        row.auction === bidWonData.auctionId &&
+        row.adId === bidWonData.adId &&
+        row.bidder === bidWonData.bidderCode
       );
 
-      if (bid) {
-        allBidsDf.setRowInPlace(bid.index, (row) => row.set('rendered', true).set('nonRenderedHighestCpm', false).set('modified', ts));
+      if (bidIndex !== -1) {
+        allBidsDf[bidIndex] = {
+          ...allBidsDf[bidIndex],
+          rendered: true,
+          nonRenderedHighestCpm: false,
+          modified: ts
+        }
       }
     });
 
@@ -189,7 +270,7 @@ class PrebidHandler {
       logger.log('[Injected] num pwinners at ' + moment().format() + ' = ' + pwinners.length);
     }
 
-    const output: any = [];
+    const output: BidsDfRow[] = [];
 
     this._forEachBidResponse(this.globalPbjs.getBidResponses(), (code: any, bid: any) => {
       output.push({
@@ -215,7 +296,7 @@ class PrebidHandler {
         created: ts,
         modified: ts,
         type: 'bid',
-        slotElementId: undefined,
+        slotElementId: undefined
       });
     });
 
@@ -235,13 +316,18 @@ class PrebidHandler {
         modified: ts,
         type: 'noBid',
         slotElementId: undefined,
+        cpm: undefined,
+        creativeId: undefined,
+        dealId: undefined,
+        netRevenue: undefined,
+        time: undefined
       });
     });
     return output;
   }
 
   // For Debugging
-  _getHighestCpmBids(ts: number) {
+  _getHighestCpmBids(ts: number): BidsDfRow[] {
     const output: any = [];
     this.globalPbjs.getHighestCpmBids().forEach((bid: IBidResponseObj) => {
       output.push({
@@ -268,7 +354,7 @@ class PrebidHandler {
   }
 
   // For Debugging
-  _getAllWinningBids(ts: number): any[] {
+  _getAllWinningBids(ts: number): BidsDfRow[] {
     const output: any = [];
     this.globalPbjs.getAllWinningBids().forEach((bid: IBidResponseObj) => {
       output.push({
@@ -344,11 +430,11 @@ class GPTHandler {
       }
 
       // update the auction with the slotId
-      const bid = allBidsDf.find((bidRow: Row) => bidRow.get('adId') == hbAdId);
+      const bid = allBidsDf.find(bidRow => bidRow.adId == hbAdId);
       if (bid) {
         const auctionIndex = auctionDf.findIndex(auctionRow =>
-          auctionRow.auction === bid.get('auction')
-          && auctionRow.adUnitPath === bid.get('adUnitPath')
+          auctionRow.auction === bid.auction
+          && auctionRow.adUnitPath === bid.adUnitPath
         );
 
         if (auctionIndex !== -1) {
@@ -361,7 +447,7 @@ class GPTHandler {
         gptTargeting: targetingMap,
         adUnitPath,
         slotElementId,
-        auctionDf: auctionDf.filter(row => row.slotElementId == event.slot.getSlotElementId()),
+        auctionDf: auctionDf.filter(auctionDfRow => auctionDfRow.slotElementId == event.slot.getSlotElementId()),
       };
 
       sendToContentScript(constants.EVENTS.GPT_SLOTRENDERED, response);
@@ -383,7 +469,10 @@ class GPTHandler {
       });
 
       // update the slot dataframe with the load timestamp
-      slotDf = slotDf.map(row => ({ ...row, slotLoadTs: row.slotElementId == slotElementId && row.adUnitPath == adUnitPath ? ts : row.slotLoadTs }));
+      slotDf = slotDf.map(slotDfRow => ({
+        ...slotDfRow,
+        slotLoadTs: slotDfRow.slotElementId === slotElementId && slotDfRow.adUnitPath === adUnitPath ? ts : slotDfRow.slotLoadTs
+      }));
 
       displayTable(slotDf, 'slotDf');
 
@@ -394,13 +483,13 @@ class GPTHandler {
       // Also some sites have the slot element id in the bidder adunitpath!
 
       let slotBidsDf = allBidsDf.filter(
-        (row: Row) =>
-          (row.get('adUnitPath') == adUnitPath || row.get('adUnitPath') == slotElementId) &&
-          row.get('cpm') != undefined &&
-          row.get('slotElementId') == undefined
+        allBidsDfRow =>
+          (allBidsDfRow.adUnitPath === adUnitPath || allBidsDfRow.adUnitPath === slotElementId)
+          && allBidsDfRow.cpm !== undefined &&
+          allBidsDfRow.slotElementId === undefined
       );
 
-      if (slotBidsDf.count() > 0) {
+      if (slotBidsDf.length > 0) {
         // multiple slots with same adunitpath?
         const adUnitSlotsDf = slotDf.filter(row => row.adUnitPath === adUnitPath);
         if (adUnitSlotsDf.length > 1) {
@@ -409,7 +498,6 @@ class GPTHandler {
           // We can then identify the slotElementId for these bids
           const thisSlotBids = this.matchBids(allBidsDf, slotBidsDf, adUnitSlotsDf, event.slot);
           slotBidsBySlotElementId[slotElementId] = thisSlotBids;
-          // @ts-ignore
           slotBidsDf = thisSlotBids;
         } else {
           // we only have one slot for this adUnitPath
@@ -417,35 +505,65 @@ class GPTHandler {
         }
 
         // We now have the correct set of bids for this slot
-        slotBidsDf = slotBidsDf.replace(undefined, slotElementId, ['slotElementId']);
+        slotBidsDf = slotBidsDf.map(slottbid => {
+          const output = {
+            ...slottbid
+          }
+          if (output.slotElementId === undefined) {
+            output.slotElementId = slotElementId
+          }
+          return output
+        });
       }
 
-      displayTable(slotBidsDf.toCollection(), 'no slot bids');
+      displayTable(slotBidsDf, 'no slot bids');
 
-      if (slotBidsDf.count() > 0) {
+      if (slotBidsDf.length > 0) {
         // lets update the main dataframes - TODO need a nice utiliy func for this
-        allBidsDf = allBidsDf.join(
-          slotBidsDf
-            .select('auction', 'adUnitPath', 'adId', 'bidder', 'slotElementId')
-            .rename('slotElementId', 'slotElementId2'),
-          ['auction', 'adUnitPath', 'adId', 'bidder'],
-          'left'
-        );
+        allBidsDf = allBidsDf.map(allBidsDfRow => {
+          const select = slotBidsDf
+            .map(({ auction, adUnitPath, adId, bidder, slotElementId }) => ({
+              auction,
+              adUnitPath,
+              adId,
+              bidder,
+              slotElementId,
+              slotElementId2: slotElementId
+            }));
+          const index = select.findIndex(slotBidsDfRow =>
+            slotBidsDfRow.auction === allBidsDfRow.auction
+            && slotBidsDfRow.adUnitPath === allBidsDfRow.adUnitPath
+            && slotBidsDfRow.adId === allBidsDfRow.adId
+            && allBidsDfRow.bidder === allBidsDfRow.bidder)
+          if (index !== -1) {
+            return {
+              ...allBidsDfRow,
+              ...select[index]
+            }
+          } else {
+            return {
+              ...allBidsDfRow
+            }
+          }
+        })
 
         allBidsDf = allBidsDf
-          .map((row: Row) => row.set('slotElementId', row.get('slotElementId2') ? row.get('slotElementId2') : row.get('slotElementId')))
-          .drop('slotElementId2');
+          .map(row => {
+            const output = {
+              ...row,
+              slotElementId: row.slotElementId2 ? row.slotElementId2 : row.slotElementId
+            }
+            delete output.slotElementId2;
+            return output;
+          })
 
         auctionDf = auctionDf.map(row => ({
           ...row,
-          slotElementId: (
-            row.auction == slotBidsDf.getRow(0).get('auction')
-            && row.adUnitPath == slotBidsDf.getRow(0).get('adUnitPath')
-          ) ? slotElementId : row.slotElementId
+          slotElementId: row.auction == slotBidsDf[0].auction && row.adUnitPath == slotBidsDf[0].adUnitPath ? slotElementId : row.slotElementId
         }));
 
         displayTable(auctionDf, 'no auctions');
-        displayTable(allBidsDf.toCollection(), 'no bids');
+        displayTable(allBidsDf, 'no bids');
       }
 
       // pull out this slot's data and send the response
@@ -454,7 +572,7 @@ class GPTHandler {
 
       const response = {
         slotDf: thisSlotDf,
-        bidsDf: slotBidsDf.toCollection(),
+        bidsDf: slotBidsDf,
         auctionDf: auctionDf.filter(row => row.slotElementId === slotElementId),
       };
       sendToContentScript(constants.EVENTS.GPT_SLOTLOADED, response);
@@ -473,47 +591,49 @@ class GPTHandler {
 
   // if hb_adid exists then we'll use that, otherwise we'll check if the bids adunitpaths are actually slotelementdids.
   // finally we'll attempt to use time for the case where we have mult auctions on the same adunitpath and diff slot ids
-  matchBids(allBidsDf: DataFrame, slotBidsDf: DataFrame, adUnitSlotsDf: SlotsDfRow[], slot: any): DataFrame | any[] {
+  matchBids(allBidsDf: BidsDfRow[], slotBidsDf: BidsDfRow[], adUnitSlotsDf: SlotsDfRow[], slot: any): BidsDfRow[] {
     const slotElementId = slot.getSlotElementId();
     const targeting = slot.getTargetingMap();
     const hbAdId = targeting['hb_adid'];
 
     if (hbAdId !== undefined) {
-      const bidderWithMatchingTargeting = allBidsDf.filter((row: Row) => row.get('adId') === hbAdId);
-      if (bidderWithMatchingTargeting.count() < 1) {
+      const bidderWithMatchingTargeting = allBidsDf.filter(row => row.adId === hbAdId);
+      if (bidderWithMatchingTargeting.length < 1) {
         logger.error('[Injected] bidderWithMatchingTargeting without rows!');
       } else {
-        const matchingAuction = bidderWithMatchingTargeting.getRow(0).get('auction');
-        return slotBidsDf.filter((row: Row) => row.get('auction') == matchingAuction);
+        const matchingAuction = bidderWithMatchingTargeting[0].auction;
+        return slotBidsDf.filter(row => row.auction == matchingAuction);
       }
     }
 
-    const biddersUseSlotIdForAUP = slotBidsDf.filter((bid: Row) => bid.get('adUnitPath') === slotElementId);
-    return biddersUseSlotIdForAUP.count() > 0 ? biddersUseSlotIdForAUP : this.bidSlotFallbackLinker(adUnitSlotsDf, slotBidsDf, slotElementId);
+    const biddersUseSlotIdForAUP = slotBidsDf.filter(bid => bid.adUnitPath === slotElementId);
+    return biddersUseSlotIdForAUP.length > 0 ? biddersUseSlotIdForAUP : this.bidSlotFallbackLinker(adUnitSlotsDf, slotBidsDf, slotElementId);
   }
 
-  bidSlotFallbackLinker(adUnitSlotsDf: SlotsDfRow[], slotBidsDf: DataFrame, slotElementId: string): any[] {
+  bidSlotFallbackLinker(adUnitSlotsDf: SlotsDfRow[], slotBidsDf: BidsDfRow[], slotElementId: string): BidsDfRow[] {
     // should never happen now that we are using hb_adid
     logger.warn('[Injected] Uh oh, hb_adid is empty. Trying to link using time...');
     // sort by time and for each find the bids that have a response time earlier
     // these are these slots bids. remove them from the total and continue
-    // adUnitSlotsDf = adUnitSlotsDf.sortBy('slotRenderedTs');
     adUnitSlotsDf = adUnitSlotsDf.sort((x, y) => x.slotRenderedTs - y.slotRenderedTs);
 
     const extractSlotBids = (slot: SlotsDfRow) => {
-      const thisSlotBids = slotBidsDf.filter((row: Row) => row.get('bidResponseTime') < slot.slotRenderedTs);
-      const thisSlotAuction = thisSlotBids.distinct('auction');
-      if (thisSlotAuction.count() > 1) {
+      const thisSlotBids = slotBidsDf.filter(row => row.bidResponseTime < slot.slotRenderedTs);
+      const thisSlotAuction = Array.from(new Set(thisSlotBids.map(({ auction }) => auction)));
+
+      if (thisSlotAuction.length > 1) {
         logger.error('[Injected] XXXXXXXXXXXXXXXXXXX Multiple Auctions for same slot with interleaving times?');
       }
       if (slot.slotElementId == slotElementId) {
         return slotBidsDf;
       } else {
-        slotBidsDf = slotBidsDf.diff(thisSlotBids, ['auction']);
+        // slotBidsDf = slotBidsDf.diff(thisSlotBids, ['auction']);
+        slotBidsDf = slotBidsDf.filter(slotBidsDfRow => thisSlotBids.find(thisSlotBidsRow => thisSlotBidsRow.auction !== slotBidsDfRow.auction))
       }
     }
-    return adUnitSlotsDf.map(slotDf => extractSlotBids(slotDf));
+    return adUnitSlotsDf.map(slotDf => extractSlotBids(slotDf)).flat();
   }
+
 }
 
 ////////////////////////////////////
