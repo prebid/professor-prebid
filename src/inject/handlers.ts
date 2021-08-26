@@ -4,13 +4,11 @@ import { sendToContentScript } from '../utils';
 import constants from '../constants.json';
 import logger from '../logger';
 import { displayTable } from '../debugging';
-import { IAuctionData, IBidderDoneData, IBidResponseObj, IBidTimeoutData, IBidWonData, IDoneBid, } from '..';
-
-import { AuctionsDfRow, BidsDfRow, SlotsDfRow } from '../pages/Content/index'
+import { IDataFromContentScript, IBidderDonEventData, IBidResponseObj, IBidTimeoutEventData, IBidWonEventData, IDoneBid, IAuctionsDfRow, IBidsDfRow, ISlotsDfRow} from '..';
 
 const DEBUG = 1;
 
-export interface BidderDoneDfRow {
+interface BidderDoneDfRow {
   auction: string;
   adUnitPath: string;
   bidder: string;
@@ -19,13 +17,14 @@ export interface BidderDoneDfRow {
 }
 
 interface SlotBidsBySlotElementId {
-  [key: string]: BidsDfRow[]
+  [key: string]: IBidsDfRow[]
 }
+
 // Globals
-let allBidsDf: BidsDfRow[];
-let auctionDf: AuctionsDfRow[] = [];
+let allBidsDf: IBidsDfRow[];
+let auctionDf: IAuctionsDfRow[] = [];
 let bidderDoneDf: BidderDoneDfRow[] = [];
-let slotDf: SlotsDfRow[] = [];
+let slotDf: ISlotsDfRow[] = [];
 const visibleSlots = new Set();
 const slotBidsBySlotElementId: SlotBidsBySlotElementId = {};
 
@@ -49,7 +48,7 @@ class PrebidHandler {
 
   handleEvents(): void {
 
-    this.globalPbjs.onEvent('auctionInit', (auctionInitData: IAuctionData) => {
+    this.globalPbjs.onEvent('auctionInit', (auctionInitData: IDataFromContentScript) => {
       logger.log('[Injected] auctionInit', moment(auctionInitData.timestamp).format('YYYY-MM-DD HH:mm:ss.SSS'));
 
       const existingRows = auctionDf.find(row => row.auction == auctionInitData.auctionId);
@@ -63,13 +62,13 @@ class PrebidHandler {
       }
     });
 
-    this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IAuctionData) => {
+    this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IDataFromContentScript) => {
       const auctionStartTime = auctionEndData.timestamp;
       const auctionEndTime = Date.now();
       // get the new data and merge with existing
-      const new_allBidsDf: BidsDfRow[] = this._getAllBids(auctionEndTime);
-      const highestCpmBids: BidsDfRow[] = this._getHighestCpmBids(auctionEndTime);
-      const allWinningBids: BidsDfRow[] = this._getAllWinningBids(auctionEndTime);
+      const new_allBidsDf: IBidsDfRow[] = this._getAllBids(auctionEndTime);
+      const highestCpmBids: IBidsDfRow[] = this._getHighestCpmBids(auctionEndTime);
+      const allWinningBids: IBidsDfRow[] = this._getAllWinningBids(auctionEndTime);
 
       const auctionIndex = auctionDf.findIndex(row => row.auction == auctionEndData.auctionId);
       if (auctionIndex !== -1) {
@@ -79,7 +78,7 @@ class PrebidHandler {
       }
       displayTable(auctionDf, 'auctionDf');
 
-      const createOrUpdateDf = (a: BidsDfRow[], b: BidsDfRow[]): BidsDfRow[] => { return a ? a.concat(b) : b; }
+      const createOrUpdateDf = (a: IBidsDfRow[], b: IBidsDfRow[]): IBidsDfRow[] => { return a ? a.concat(b) : b; }
 
       allBidsDf = createOrUpdateDf(allBidsDf, new_allBidsDf);
       // TODO need to extract this update into a general df func
@@ -218,7 +217,7 @@ class PrebidHandler {
 
     // won the adserver auction
     // capture state change
-    this.globalPbjs.onEvent('bidWon', (bidWonData: IBidWonData) => {
+    this.globalPbjs.onEvent('bidWon', (bidWonData: IBidWonEventData) => {
       logger.log('[Injected] bidWon', { time: moment().format('YYYY-MM-DD HH:mm:ss.SSS'), bidWonData });
 
       const ts = Date.now();
@@ -244,13 +243,13 @@ class PrebidHandler {
       logger.log('[Injected] Ad units were added to Prebid.');
     });
 
-    this.globalPbjs.onEvent('bidderDone', (bidderDoneData: IBidderDoneData) => {
+    this.globalPbjs.onEvent('bidderDone', (bidderDoneData: IBidderDonEventData) => {
       logger.log('[Injected] Bidder Done ' + JSON.stringify(bidderDoneData.bidderCode));
       // update bidderDone with done
       bidderDoneData.bids.forEach((doneBid: IDoneBid) => updateBidderDoneDf(doneBid));
     });
 
-    this.globalPbjs.onEvent('bidTimeout', (bidTimeoutData: IBidTimeoutData) => {
+    this.globalPbjs.onEvent('bidTimeout', (bidTimeoutData: IBidTimeoutEventData) => {
       // update bidderDone with timeout
       bidTimeoutData.bids.forEach((timeoutBid: any) => updateBidderDoneDf(timeoutBid));
 
@@ -270,7 +269,7 @@ class PrebidHandler {
       logger.log('[Injected] num pwinners at ' + moment().format() + ' = ' + pwinners.length);
     }
 
-    const output: BidsDfRow[] = [];
+    const output: IBidsDfRow[] = [];
 
     this._forEachBidResponse(this.globalPbjs.getBidResponses(), (code: any, bid: any) => {
       output.push({
@@ -323,11 +322,12 @@ class PrebidHandler {
         time: undefined
       });
     });
+
     return output;
   }
 
   // For Debugging
-  _getHighestCpmBids(ts: number): BidsDfRow[] {
+  _getHighestCpmBids(ts: number): IBidsDfRow[] {
     const output: any = [];
     this.globalPbjs.getHighestCpmBids().forEach((bid: IBidResponseObj) => {
       output.push({
@@ -354,7 +354,7 @@ class PrebidHandler {
   }
 
   // For Debugging
-  _getAllWinningBids(ts: number): BidsDfRow[] {
+  _getAllWinningBids(ts: number): IBidsDfRow[] {
     const output: any = [];
     this.globalPbjs.getAllWinningBids().forEach((bid: IBidResponseObj) => {
       output.push({
@@ -591,7 +591,7 @@ class GPTHandler {
 
   // if hb_adid exists then we'll use that, otherwise we'll check if the bids adunitpaths are actually slotelementdids.
   // finally we'll attempt to use time for the case where we have mult auctions on the same adunitpath and diff slot ids
-  matchBids(allBidsDf: BidsDfRow[], slotBidsDf: BidsDfRow[], adUnitSlotsDf: SlotsDfRow[], slot: any): BidsDfRow[] {
+  matchBids(allBidsDf: IBidsDfRow[], slotBidsDf: IBidsDfRow[], adUnitSlotsDf: ISlotsDfRow[], slot: any): IBidsDfRow[] {
     const slotElementId = slot.getSlotElementId();
     const targeting = slot.getTargetingMap();
     const hbAdId = targeting['hb_adid'];
@@ -610,14 +610,14 @@ class GPTHandler {
     return biddersUseSlotIdForAUP.length > 0 ? biddersUseSlotIdForAUP : this.bidSlotFallbackLinker(adUnitSlotsDf, slotBidsDf, slotElementId);
   }
 
-  bidSlotFallbackLinker(adUnitSlotsDf: SlotsDfRow[], slotBidsDf: BidsDfRow[], slotElementId: string): BidsDfRow[] {
+  bidSlotFallbackLinker(adUnitSlotsDf: ISlotsDfRow[], slotBidsDf: IBidsDfRow[], slotElementId: string): IBidsDfRow[] {
     // should never happen now that we are using hb_adid
     logger.warn('[Injected] Uh oh, hb_adid is empty. Trying to link using time...');
     // sort by time and for each find the bids that have a response time earlier
     // these are these slots bids. remove them from the total and continue
     adUnitSlotsDf = adUnitSlotsDf.sort((x, y) => x.slotRenderedTs - y.slotRenderedTs);
 
-    const extractSlotBids = (slot: SlotsDfRow) => {
+    const extractSlotBids = (slot: ISlotsDfRow) => {
       const thisSlotBids = slotBidsDf.filter(row => row.bidResponseTime < slot.slotRenderedTs);
       const thisSlotAuction = Array.from(new Set(thisSlotBids.map(({ auction }) => auction)));
 

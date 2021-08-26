@@ -1,6 +1,6 @@
 import logger from './logger';
 
-const ENABLED = false;
+const ENABLED = true;
 
 export const displayTable = (output: any, defaultOutput: any) => {
   if (!ENABLED) return;

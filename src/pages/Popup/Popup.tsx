@@ -3,10 +3,10 @@ import './Popup.scss';
 import logger from '../../logger';
 import Switch from 'react-switch';
 import { popupHandler } from './popupHandler';
-import { IContentScriptData, IAuctionData , } from '../../index.d';
+import { IPopUpState, IDataFromContentScript , } from '../../index.d';
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
-  const [data, setData] = useState<IContentScriptData>({
+  const [data, setPopUpState] = useState<IPopUpState>({
     adsDetected: null,
     numOfBidders: null,
     numOfNoBids: null,
@@ -20,20 +20,20 @@ export const Popup = () => {
 
   useEffect(() => {
     logger.log('[Popup] init()')
-    popupHandler.handleDataFromContentScript((payload: IAuctionData) => {
-      logger.log('[Popup] received data from content script', payload)
-      const newData: IContentScriptData = {
-        adsDetected: payload.dfs.slots.length,
-        numOfBidders: Array.from(new Set(payload.dfs.allBids.map((bid) => bid.bidder))).length,
-        numOfNoBids: Array.from(new Set(payload.dfs.allBids.map((bid) => bid.msg === 'no bid' && bid))).length,
-        numOfAvailableBids: Array.from(new Set(payload.dfs.allBids.map((bid) => bid.msg === 'Bid available' && bid))).length,
+    popupHandler.handleDataFromContentScript((dataFromConetentScript: IDataFromContentScript) => {
+      logger.log('[Popup] received data from content script', dataFromConetentScript)
+      const newData: IPopUpState = {
+        adsDetected: dataFromConetentScript.dfs.slots.length,
+        numOfBidders: Array.from(new Set(dataFromConetentScript.dfs.allBids.map((bid) => bid.bidder))).length,
+        numOfNoBids: Array.from(new Set(dataFromConetentScript.dfs.allBids.map((bid) => bid.msg === 'no bid' && bid))).length,
+        numOfAvailableBids: Array.from(new Set(dataFromConetentScript.dfs.allBids.map((bid) => bid.msg === 'Bid available' && bid))).length,
         timings: {
           preAuction: 0,
           auction: 0,
           adServer: 0,
         },
       }
-      setData(newData);
+      setPopUpState(newData);
     });
 
     popupHandler.getToggleStateFromStorage((checked: boolean) => {
