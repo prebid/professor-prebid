@@ -2,14 +2,13 @@
 // injected script, build auction data structure. Also listens for
 // (chrome) messages from Popup.js when it runs and responds to it
 // with the auction data it collected so far
-// import DataFrame from '../../js/dataframejs/dataframe';
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { safelyParseJSON } from '../../utils';
 import { IBidRequest, IBidRequestObj } from '../..';
 import { displayTable } from '../../debugging';
 
-interface AuctionsDfRow {
+export interface AuctionsDfRow {
   adUnitPath: string;
   auction: string;
   endTime: number;
@@ -18,7 +17,7 @@ interface AuctionsDfRow {
   startTime: number;
 }
 
-interface BidsDfRow {
+export interface BidsDfRow {
   adId: string;
   adUnitPath: string;
   auction: string;
@@ -38,9 +37,14 @@ interface BidsDfRow {
   slotSize: string;
   time: number;
   type: string;
+  nonRenderedHighestCpm_2?: boolean;
+  modified_2?: number;
+  rendered_2?: boolean;
+  slotElementId2?: string;
+  responseTime?: number;
 }
 
-interface SlotsDfRow {
+export interface SlotsDfRow {
   adId: string[];
   adUnitPath: string;
   slotElementId: string;
@@ -60,9 +64,9 @@ class Content {
     logger.log('[Content] init()');
     this.listenToInjectedScript();
     this.listenToPopupScript();
-    setInterval(() => {
-      // console.log({ allBidsDf, allAuctionsDf, allSlotsDf })
-    }, 1000)
+    // setInterval(() => {
+    //   console.log({ allBidsDf, allAuctionsDf, allSlotsDf })
+    // }, 1000)
   }
 
   listenToInjectedScript() {
