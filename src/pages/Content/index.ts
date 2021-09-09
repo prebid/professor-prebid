@@ -68,9 +68,9 @@ class Content {
             const auctionId = auctionRow.auction;
             const adunit = auctionRow.adUnitPath;
             const slotElementId = auctionRow.slotElementId;
-            const auction: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction == auctionId && auctionRow.adUnitPath == adunit);
-            if (auction) {
-              allAuctionsDf[auction].slotElementId = slotElementId;
+            const auctionIndex: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction == auctionId && auctionRow.adUnitPath == adunit);
+            if (auctionIndex !== -1) {
+              allAuctionsDf[auctionIndex].slotElementId = slotElementId;
             } else {
               logger.warn("[Content] slot rendered XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
             }
@@ -127,10 +127,10 @@ class Content {
           const adunit = auctionDf[0].adUnitPath;
           const slotElementId = slotLoadedDf[0].slotElementId;
 
-          const auction: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction == auctionId && auctionRow.adUnitPath == adunit);
+          const auctionIndex: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction === auctionId && auctionRow.adUnitPath === adunit);
 
-          if (auction) {
-            allAuctionsDf[auction].slotElementId = slotElementId;
+          if (auctionIndex !== -1) {
+            allAuctionsDf[auctionIndex].slotElementId = slotElementId;
           } else {
             logger.warn("[Content] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
           }
