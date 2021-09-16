@@ -14,7 +14,7 @@
 		"prettier": "prettier --write '**/*.{js,jsx,css,html}'"
 	},
 	"dependencies": {
-		"@types/doubleclick-gpt": "^2019041801.0.4",
+		"@types/doubleclick-gpt": "^2019111201.0.2",
 		"@types/react-router-dom": "^5.1.8",
 		"@types/requestidlecallback": "^0.3.4",
 		"moment": "^2.29.1",
