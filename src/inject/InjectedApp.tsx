@@ -4,19 +4,25 @@ import './ad-mask.scss';
 import logger from '../logger';
 import constants from '../constants.json';
 import { sendToContentScript } from '../utils';
-import { IMask, IBidder, IAdMaskPortalProps } from '../index.d';
+import { IPrebidBid }  from './scripts/prebid';
 
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
-  const [masks, setMasks] = useState<IMask[]>([]);
-
+  const [masks, setMasks] = useState<IMaskInputData[]>([]);
+  let lastMasksString: string;
   logger.log('[InjectedApp] init', consoleState, masks)
   useEffect(() => {
     // listen from content script
-    document.addEventListener(constants.SAVE_MASK, (event) => {
-      const newMask = (event as CustomEvent).detail;
+    document.addEventListener(constants.SAVE_MASKS, (event: any) => {
+      const customEvent = (event as CustomEvent);
+      const newMasks = customEvent.detail;
+      if (lastMasksString !== JSON.stringify(newMasks)) {
+        Array.isArray(newMasks) && newMasks.forEach((mask: any) => {
+          setMasks((v) => [...v, mask]);
+        })
+      }
 
-      setMasks((v) => [...v, newMask]);
+      lastMasksString = JSON.stringify(newMasks);
     });
 
     // listen from content script
@@ -31,16 +37,14 @@ const InjectedApp = (): JSX.Element => {
 
   return (
     <div>
-      {consoleState &&
-        masks.map((mask) => {
-          const container = document.getElementById(mask.targetId);
-          if (!container) {
-            logger.log('[InjectedApp] failed to render mask on page, could not find element by targetId', mask);
-            return null;
-          }
-
-          return <AdMaskPortal key={mask.targetId} container={container} mask={mask} />;
-        })}
+      {consoleState && masks.map((mask, index) => {
+        const container = document.getElementById(mask.elementId);
+        if (!container) {
+          logger.log('[InjectedApp] failed to render mask on page, could not find element by elementId', mask);
+          return null;
+        }
+        return <AdMaskPortal key={index} container={container} mask={mask} />;
+      })}
     </div>
   );
 };
@@ -50,6 +54,12 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask }) => {
 
   useEffect(() => {
     if (container) {
+      // delete old masks
+      const elements = container.getElementsByClassName('prpb-mask__overlay');
+      while (elements[0]) {
+        elements[0].parentNode.removeChild(elements[0]);
+      }
+
       container.classList.add('prpb-mask--container');
       container.appendChild(el.current);
     }
@@ -60,21 +70,21 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask }) => {
   }, [container]);
 
   logger.log('[InjectedApp] rendering mask on page', mask, container, el.current);
-  return ReactDOM.createPortal(<AdMask input={mask} />, el.current);
+  return ReactDOM.createPortal(<AdMask key={mask.elementId} input={mask} />, el.current);
 };
 
-const AdMask = ({ input }: { input: IMask }): JSX.Element => {
+const AdMask = ({ input }: { input: IMaskInputData }): JSX.Element => {
   return (<div>
-    <h2>
+    <h2 className="prpb-mask__overlay__header">
       <strong>
-        Professor Prebid - TBD
+        Professor Prebid
       </strong>
     </h2>
-    <br />
+    
     <ul>
       {
         Object.entries(input)
-          .filter(([key, value]) => ['auctionTime', 'creativeRenderTime', 'targetId', 'winningBidder', 'winningCPM'].includes(key))
+          .filter(([key, value]) => ['auctionTime', 'creativeRenderTime', 'elementId', 'winningBidder', 'winningCPM'].includes(key))
           .map(([key, value]) => <li key={key}> <strong>{key}: </strong>{value}</li>)
       }
       <li key="Bidders">
@@ -82,7 +92,7 @@ const AdMask = ({ input }: { input: IMask }): JSX.Element => {
           Bidders:
         </strong>
         <ul>
-          {Array.from(new Set(input?.bidders?.map((bidder: IBidder) => bidder.bidder))).map((bidder) => <li key={bidder}>{bidder}</li>)}
+          {Array.from(new Set(input?.bids?.map(bidder => bidder.bidder))).map(bidder => <li key={bidder}>{bidder}</li>)}
         </ul>
       </li>
     </ul>
@@ -99,3 +109,18 @@ const createMaskContainerElement = () => {
 }
 
 export default InjectedApp;
+
+export interface IMaskInputData {
+  elementId: string;
+  creativeRenderTime: number;
+  auctionTime: number;
+  bids: IPrebidBid[];
+  winningBidder: string;
+  winningCPM: number;
+
+}
+
+export interface IAdMaskPortalProps {
+  container: HTMLElement;
+  mask: IMaskInputData;
+}

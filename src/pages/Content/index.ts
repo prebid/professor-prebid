@@ -5,17 +5,16 @@
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { safelyParseJSON } from '../../utils';
-import { IBidRequest, IBidRequestObj, IBidsDfRow, IAuctionsDfRow, ISlotsDfRow } from '../..';
-import { displayTable } from '../../debugging';
-
-let prebidConfig = {};
-const bidRequestedObj: IBidRequestObj = {};
-
-let allBidsDf: IBidsDfRow[] = [];
-let allAuctionsDf: IAuctionsDfRow[] = [];
-let allSlotsDf: ISlotsDfRow[] = [];
+import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
+import { IPrebidDetails, IPrebidBid } from '../../inject/scripts/prebid';
+import { ITcfDetails } from '../../inject/scripts/tcf'
 
 class Content {
+  prebidConfig = {};
+  prebid: IPrebidDetails;
+  googleAdManager: IGoogleAdManagerDetails;
+  tcf: ITcfDetails;
+
   init() {
     logger.log('[Content] init()');
     this.listenToInjectedScript();
@@ -33,124 +32,77 @@ class Content {
         case constants.EVENTS.CONFIG_AVAILABLE: {
           const payloadJson = safelyParseJSON(payload);
           logger.log(`[Content] received a ${type} event`, payloadJson);
-          prebidConfig = payloadJson.prebidConfig;
-          break;
-        }
-
-        case constants.EVENTS.AUCTION_END: {
-          const payloadJson = safelyParseJSON(payload);
-          logger.log(`[Content] received a ${type} event`, payloadJson);
-
-          // When we get AUCTION_END from injected script build data structure
-          // to be sent to the POPUP script when it activates
-          if (payloadJson['dfs']) {
-            const { allBids, auction, slots } = payloadJson.dfs;
-            allBidsDf = allBids;
-            allAuctionsDf = auction;
-            allSlotsDf = slots;
-          }
-
-          // TODO use this info
-          const bidderRequests = payloadJson['bidderRequests'];
-          bidderRequests?.forEach((bidderRequest: IBidRequest) => {
-            const key = bidderRequest.auctionId + '_' + bidderRequest.bidderCode;
-            bidRequestedObj[key] = bidderRequest;
-          });
-          break;
-        }
-
-        case constants.EVENTS.GPT_SLOTRENDERED: {
-          const payloadJson = safelyParseJSON(payload);
-          logger.log(`[Content] received a ${type} event`, payloadJson);
-          const auctionDf: IAuctionsDfRow[] = payloadJson['auctionDf'];
-          if (auctionDf.length > 0) {
-            const auctionRow = auctionDf[0];
-            const auctionId = auctionRow.auction;
-            const adunit = auctionRow.adUnitPath;
-            const slotElementId = auctionRow.slotElementId;
-            const auctionIndex: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction == auctionId && auctionRow.adUnitPath == adunit);
-            if (auctionIndex !== -1) {
-              allAuctionsDf[auctionIndex].slotElementId = slotElementId;
-            } else {
-              logger.warn("[Content] slot rendered XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
-            }
-          }
-          break;
-        }
-
-        case constants.EVENTS.GPT_SLOTLOADED: {
-          const payloadJson = safelyParseJSON(payload);
-          logger.log(`[Content] received a ${type} event`, { payloadJson });
-          const slotLoadedDf: ISlotsDfRow[] = payloadJson['slotDf'];
-
-          const auctionDf: IAuctionsDfRow[] = payloadJson['auctionDf'];
-
-          const slotBidsDf: IBidsDfRow[] = payloadJson['bidsDf'];
-
-          slotLoadedDf.forEach(slotLoaded => {
-            const exisitingIndex = slotLoadedDf.findIndex(slot =>
-              slot.slotElementId === slotLoaded.slotElementId
-              && slot.adUnitPath === slotLoaded.adUnitPath
-            );
-            if (exisitingIndex !== -1) {
-              allSlotsDf[exisitingIndex] = { ...slotLoaded };
-            } else {
-              allSlotsDf.push(slotLoaded);
-            }
-          })
-
-          allBidsDf.forEach(slotBid => {
-            const exisitingIndex = allBidsDf.findIndex(bid =>
-              bid.auction === slotBid.auction
-              && bid.adUnitPath === slotBid.adUnitPath
-              && bid.adId === slotBid.adId
-              && bid.bidder === slotBid.bidder
-            );
-
-            if (exisitingIndex !== -1) {
-              allBidsDf[exisitingIndex] = { ...slotBid };
-            } else {
-              allBidsDf.push(slotBid);
-            }
-          });
-
-          displayTable(allBidsDf, 'allBidsDf');
-
-
-          if (auctionDf.length === 0) {
-            return;
-          }
-
-          displayTable(slotLoadedDf, 'slotLoadedDf');
-
-          const auctionId = auctionDf[0].auction;
-          const adunit = auctionDf[0].adUnitPath;
-          const slotElementId = slotLoadedDf[0].slotElementId;
-
-          const auctionIndex: any = allAuctionsDf.findIndex(auctionRow => auctionRow.auction === auctionId && auctionRow.adUnitPath === adunit);
-
-          if (auctionIndex !== -1) {
-            allAuctionsDf[auctionIndex].slotElementId = slotElementId;
-          } else {
-            logger.warn("[Content] XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX This shouldn't happen !");
-          }
-
-          // update injected
-
-          const mask = this.prepareMaskObject(slotLoadedDf[0], slotBidsDf, auctionDf[0]);
-          document.dispatchEvent(new CustomEvent(constants.SAVE_MASK, { detail: mask }));
-
-          // update popup
-          chrome.runtime.sendMessage({
-            type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
-            payload: this.getAuctionData(),
-          });
+          this.prebidConfig = payloadJson.prebidConfig;
           break;
         }
 
         case constants.EVENTS.REQUEST_CONSOLE_STATE: {
           logger.log(`[Content] received a ${type} event`);
           this.sendConsoleStateToInjected();
+          break;
+        }
+
+        case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND: {
+          this.googleAdManager = JSON.parse(payload);
+
+          // update background page
+          chrome.runtime.sendMessage({
+            type: constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND,
+            payload: JSON.parse(payload)
+          });
+
+          // update injected
+          const masks = this.prepareMaskObjects();
+          document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
+
+          // update popup
+          chrome.runtime.sendMessage({
+            type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
+            payload: { prebid: this.prebid, googleAdManager: this.googleAdManager, tcf: this.tcf },
+          });
+          break;
+        }
+
+        case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND: {
+          this.prebid = JSON.parse(payload);
+
+          // update background page
+          chrome.runtime.sendMessage({
+            type: constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND,
+            payload: JSON.parse(payload)
+          });
+          // update injected
+          const masks = this.prepareMaskObjects();
+          document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
+
+          // update popup
+          chrome.runtime.sendMessage({
+            type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
+            payload: { prebid: this.prebid, googleAdManager: this.googleAdManager, tcf: this.tcf },
+
+          });
+          break;
+        }
+
+        case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND: {
+          this.tcf = JSON.parse(payload);
+
+          // update background page
+          chrome.runtime.sendMessage({
+            type: constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND,
+            payload: JSON.parse(payload)
+          });
+
+          // update injected
+          const masks = this.prepareMaskObjects();
+          document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
+
+          // update popup
+          chrome.runtime.sendMessage({
+            type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
+            payload: { prebid: this.prebid, googleAdManager: this.googleAdManager, tcf: this.tcf },
+
+          });
           break;
         }
       }
@@ -169,47 +121,30 @@ class Content {
     });
   }
 
-  prepareMaskObject(slotRow: ISlotsDfRow, slotBidsDf: IBidsDfRow[], auctionRow: IAuctionsDfRow) {
-    logger.log('[Content] preparing mask', { slotRow, slotBidsDf, auctionRow });
-    const targetId = slotRow.slotElementId;
-    const creativeRenderTime = slotRow.slotLoadTs - slotRow.slotRenderedTs;
-    const auctionTime = auctionRow.endTime - auctionRow.startTime;
-    // do we have a prebid winner?
-    const sortedSlotBidsDf = slotBidsDf.sort((x: IBidsDfRow, y: IBidsDfRow) => (x.rendered === y.rendered) ? 0 : x.rendered ? -1 : 1); // rendered = true will be first
-    const winner = sortedSlotBidsDf.filter(row => row.rendered == true);
-    const prebidRenderedAd = winner[0] ? true : false;
+  prepareMaskObjects() {
+    logger.log('[Content] preparing masks', {});
+    const masks = this.googleAdManager?.slots?.map(slot => {
+      const elementId = slot.elementId;
+      const creativeRenderTime = slot.creativeRenderTime;
+      const auctionTime = this.prebid.events.auctionEndTimestamp - this.prebid.events.auctionStartTimestamp;
+      const bids = this.prebid.bids.filter(bid => bid.adUnitCode === elementId);
+      const winningBid = bids.find(bid => bid.status === 'rendered');
+      const winningBidder = winningBid?.bidder;
+      const winningCPM = winningBid?.cpm;
+      return {
+        elementId,
+        creativeRenderTime,
+        auctionTime,
+        winningBidder,
+        winningCPM,
+        bids
+      };
+    })
 
-    let winningBidder;
-    let winningCPM;
-    if (prebidRenderedAd) {
-      const winnerRow = winner[0];
-      winningBidder = winnerRow.bidder;
-      winningCPM = winnerRow.cpm;
-    }
 
-    const mask = {
-      targetId,
-      creativeRenderTime,
-      auctionTime,
-      winningBidder,
-      winningCPM,
-      bidders: sortedSlotBidsDf,
-    };
+    logger.log('[Content] mask ready', masks);
 
-    logger.log('[Content] mask ready', mask);
-
-    return mask;
-  }
-
-  getAuctionData() {
-    return {
-      dfs: {
-        auction: allAuctionsDf,
-        slots: allSlotsDf,
-        allBids: allBidsDf,
-      },
-      prebidConfig: JSON.stringify(prebidConfig),
-    };
+    return masks;
   }
 
   sendConsoleStateToInjected() {

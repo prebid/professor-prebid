@@ -3,7 +3,11 @@ import './Popup.scss';
 import logger from '../../logger';
 import Switch from 'react-switch';
 import { popupHandler } from './popupHandler';
-import { IPopUpState, IDataFromContentScript , } from '../../index.d';
+import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
+import { ITcfDetails } from '../../inject/scripts/tcf';
+import { IPrebidDetails } from '../../inject/scripts/prebid';
+
+
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
   const [data, setPopUpState] = useState<IPopUpState>({
@@ -23,10 +27,10 @@ export const Popup = () => {
     popupHandler.handleDataFromContentScript((dataFromConetentScript: IDataFromContentScript) => {
       logger.log('[Popup] received data from content script', dataFromConetentScript)
       const newData: IPopUpState = {
-        adsDetected: dataFromConetentScript.dfs.slots.length,
-        numOfBidders: Array.from(new Set(dataFromConetentScript.dfs.allBids.map((bid) => bid.bidder))).length,
-        numOfNoBids: Array.from(new Set(dataFromConetentScript.dfs.allBids.map((bid) => bid.msg === 'no bid' && bid))).length,
-        numOfAvailableBids: Array.from(new Set(dataFromConetentScript.dfs.allBids.map((bid) => bid.msg === 'Bid available' && bid))).length,
+        adsDetected: dataFromConetentScript.googleAdManager.slots.length,
+        numOfBidders: Array.from(new Set(dataFromConetentScript.prebid.bids.map((bid) => bid.bidder))).length,
+        numOfNoBids: Array.from(new Set(dataFromConetentScript.prebid.bids.map((bid) => bid.status === 'no bid' && bid))).length,
+        numOfAvailableBids: Array.from(new Set(dataFromConetentScript.prebid.bids.map((bid) => bid.status === 'Bid available'))).length,
         timings: {
           preAuction: 0,
           auction: 0,
@@ -90,7 +94,7 @@ export const Popup = () => {
         </div>
       </main>
       {/* <div className="component-links">
-        {<div className="component-links">
+        <div className="component-links">
           <div>
             <p>Stats</p>
             <i className="fas fa-camera"></i>
@@ -106,7 +110,28 @@ export const Popup = () => {
             <i className="fas fa-camera"></i>
             <i></i>
           </div>
-        </div> */}
+        </div>
+      </div> */}
+
     </div>
   );
 };
+
+
+export interface IPopUpState {
+  adsDetected: number;
+  numOfBidders: number;
+  numOfNoBids: number;
+  numOfAvailableBids: number;
+  timings: {
+    preAuction: number;
+    auction: number;
+    adServer: number;
+  };
+}
+
+interface IDataFromContentScript {
+  prebid: IPrebidDetails;
+  googleAdManager: IGoogleAdManagerDetails;
+  tcf: ITcfDetails;
+}

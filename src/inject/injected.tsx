@@ -1,19 +1,24 @@
 /**
-	This script is injected into the original page and is the ONLY
-	way to gain access to the JS context of the page (namely pbjs)
-	The only way for an injected script to message to the content.js
-	script is via window.postMessage() 
+  This script is injected into the original page and is the ONLY
+  way to gain access to the JS context of the page (namely pbjs)
+  The only way for an injected script to message to the content.js
+  script is via window.postMessage() 
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import logger from '../logger';
 import InjectedApp from './InjectedApp';
-import { gptHandler, prebidHandler } from './handlers';
+import { googleAdManager } from './scripts/googleAdManager';
+import { preBid } from './scripts/prebid';
+import { iabTcf } from './scripts/tcf'
 declare global {
   interface Window {
     googletag: any;
     _pbjsGlobals: any;
+    PREBID_TIMEOUT: any;
+    __cmp: any;
+    __tcfapi: any;
   }
 }
 class Injected {
@@ -30,21 +35,24 @@ class Injected {
 
     const interval = setInterval(() => {
       const globalPbjs = this.isPrebidInPage();
-
       if (!hasPrebid && globalPbjs) {
         logger.log('[Injected] prebid found');
         hasPrebid = true;
-        prebidHandler.init(globalPbjs, now);
+        preBid.init(globalPbjs);
       }
-
+      
       if (!hasGPT && hasPrebid && this.isGPTInPage()) {
         logger.log('[Injected] gpt found');
         hasGPT = true;
-        gptHandler.init();
+        googleAdManager.init();
       }
-
+      
       if (hasPrebid && hasGPT) {
         clearInterval(interval);
+      }
+      
+      if (this.isTCFInpage()){
+        iabTcf.init();
       }
     }, 50);
 
@@ -67,6 +75,10 @@ class Injected {
 
   isGPTInPage() {
     return window.googletag && window.googletag.pubadsReady && window.googletag.apiReady;
+  }
+
+  isTCFInpage() {
+    return window.__cmp || window.__tcfapi
   }
 }
 
