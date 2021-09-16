@@ -13,7 +13,7 @@ export function PriceGranularity() {
         thirdBucketIncre: .001
     })
 
-    function handleChange(evt) {
+    function handleChange(evt: any) {
         const value = evt.target.value;
         setState({
             ...state,
