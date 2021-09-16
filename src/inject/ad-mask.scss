@@ -4,17 +4,24 @@
 
 .prpb-mask__overlay {
   position: absolute;
+  text-align: left;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 1;
+  z-index: 10;
   display: block;
   overflow: visible;
   padding: 8px 16px;
   box-sizing: border-box;
-  background: #b3c1cc;
-  color: rgb(112, 112, 112);
+  background: #eceeefe0 ;
+  width: 100%;
+  height: 100%;
+  color: #333333;
   font-family: -apple-system, 'Segoe UI', sans-serif;
   font-size: 18px;
+}
+
+.prpb-mask__overlay__header {
+  color: #ff6f00;
 }
