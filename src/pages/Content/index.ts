@@ -6,7 +6,7 @@ import logger from '../../logger';
 import constants from '../../constants.json';
 import { safelyParseJSON } from '../../utils';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
-import { IPrebidDetails, IPrebidBid } from '../../inject/scripts/prebid';
+import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf'
 
 class Content {
@@ -128,7 +128,7 @@ class Content {
       const creativeRenderTime = slot.creativeRenderTime;
       const auctionTime = this.prebid.events.auctionEndTimestamp - this.prebid.events.auctionStartTimestamp;
       const bids = this.prebid.bids.filter(bid => bid.adUnitCode === elementId);
-      const winningBid = bids.find(bid => bid.status === 'rendered');
+      const winningBid = bids.find(bid => bid.status === 'rendered' && bid.adUnitCode === slot.elementId);
       const winningBidder = winningBid?.bidder;
       const winningCPM = winningBid?.cpm;
       return {
