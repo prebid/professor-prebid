@@ -1,48 +1,79 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './Popup.scss';
 import logger from '../../logger';
-import Switch from 'react-switch';
+import ReactSwitch from 'react-switch';
 import { popupHandler } from './popupHandler';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
-
+import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import { appHandler } from '../App/appHandler';
+import Config from './Config';
+import GoogleAdManagerDetailsComponent from '../App/components/GoogleAdManagerDetailsComponent';
+import InfoComponent from '../App/components/InfoComponent';
+import PrebidDetailsComponent from '../App/components/PrebidDetailsComponent';
+import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
+import TimelineComponent from '../App/components/TimelineComponent';
 
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
-  const [data, setPopUpState] = useState<IPopUpState>({
-    adsDetected: null,
-    numOfBidders: null,
-    numOfNoBids: null,
-    numOfAvailableBids: null,
-    timings: {
-      preAuction: null,
-      auction: null,
-      adServer: null,
+
+  const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>({
+    slots: [],
+    sra: false,
+    async: false,
+    fetchBeforeKeyvalue: false,
+    fetchBeforeRefresh: false
+  });
+
+  const [prebid, setPrebidDetails] = useState<IPrebidDetails>({
+    version: null,
+    slots: [],
+    timeout: null,
+    events: {
+      auctionStartTimestamp: null,
+      auctionEndTimestamp: null,
+      bidders: {}
     },
+    config: null,
+    bids: []
+  });
+
+  const [tcf, setTcfDetails] = useState<ITcfDetails>({
+    v1: {
+      cmpLoaded: false,
+      gdprApplies: false,
+      consentData: ''
+    },
+    v2: {
+      cmpLoaded: false,
+      gdprApplies: false,
+      consentData: ''
+    }
   });
 
   useEffect(() => {
     logger.log('[Popup] init()')
-    popupHandler.handleDataFromContentScript((dataFromConetentScript: IDataFromContentScript) => {
-      logger.log('[Popup] received data from content script', dataFromConetentScript)
-      const newData: IPopUpState = {
-        adsDetected: dataFromConetentScript.googleAdManager.slots.length,
-        numOfBidders: Array.from(new Set(dataFromConetentScript.prebid.bids.map((bid) => bid.bidder))).length,
-        numOfNoBids: Array.from(new Set(dataFromConetentScript.prebid.bids.map((bid) => bid.status === 'no bid' && bid))).length,
-        numOfAvailableBids: Array.from(new Set(dataFromConetentScript.prebid.bids.map((bid) => bid.status === 'Bid available'))).length,
-        timings: {
-          preAuction: 0,
-          auction: 0,
-          adServer: 0,
-        },
-      }
-      setPopUpState(newData);
-    });
 
     popupHandler.getToggleStateFromStorage((checked: boolean) => {
       setConsoleState(checked);
     });
+
+    appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
+      logger.log('[App] received Google AdManager Details from background', data);
+      data && setGamDetails(data)
+    });
+
+    appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
+      logger.log('[App] received Prebid Details from background', data);
+      data && setPrebidDetails(data)
+    });
+
+    appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
+      logger.log('[App] received Prebid Details from background', data);
+      data && setTcfDetails(data)
+    });
+
   }, []);
 
   const handleConsoleChange = useCallback((checked: boolean) => {
@@ -50,9 +81,7 @@ export const Popup = () => {
     popupHandler.onConsoleToggle(checked);
   }, []);
 
-  const handleOpenMainTab = useCallback(() => {
-    popupHandler.openMainTab();
-  }, []);
+  const handleOpenDebugTab = useCallback(() => popupHandler.openDebugTab(), []);
 
   return (
     <div className="popup">
@@ -61,18 +90,9 @@ export const Popup = () => {
       </header>
       <main>
         <aside className="data-info">
-          <div>
-            <ul className="stats-list">
-              <li>Ads Detected: {data.adsDetected}</li>
-              <li>Bidders: {data.numOfBidders}</li>
-              <li>
-                {/* No Bid Ratio: {data.numOfNoBids}/{data.numOfBidders} */}
-                No Bid Ratio: {data.numOfNoBids}/{data.numOfAvailableBids}
-              </li>
-            </ul>
-          </div>
+          <InfoComponent prebid={prebid} googleAdManager={googleAdManager}></InfoComponent>
           <div className="console-switch">
-            <Switch
+            <ReactSwitch
               onChange={handleConsoleChange}
               checked={consoleState || false}
               disabled={consoleState === null}
@@ -88,50 +108,45 @@ export const Popup = () => {
             <div>Open Console</div>
           </div>
         </aside>
-        <div>
-          <p>{JSON.stringify(data)}</p>
-          <button onClick={handleOpenMainTab}>open main tab</button>
-        </div>
+        <Router>
+          <div style={{ width: '100%' }}>
+
+            <div className="component-links">
+              <nav>
+                <Link to="/"><button>Home</button></Link>
+                <Link to="/googleAdManager"><button>Stats</button></Link>
+                <Link to="/prebid"><button>Prebid</button></Link>
+                <Link to="/timeline"><button>Timeline</button></Link>
+                <Link to="/config"><button>Config</button></Link>
+                <Link to="/tcf"><button>Tcf</button></Link>
+                <button onClick={handleOpenDebugTab}>Debug</button>
+              </nav>
+            </div>
+
+            <Switch>
+              <Route exact path="/" >
+              </Route>
+              <Route exact path="/googleAdManager">
+                <GoogleAdManagerDetailsComponent googleAdManager={googleAdManager}></GoogleAdManagerDetailsComponent>
+              </Route>
+              <Route exact path="/prebid">
+                <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
+              </Route>
+              <Route exact path="/timeline" >
+                <TimelineComponent prebid={prebid}></TimelineComponent>
+              </Route>
+              <Route exact path="/config">
+                <Config></Config>
+              </Route>
+              <Route exact path="/tcf">
+                <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>
+              </Route>
+            </Switch>
+
+          </div>
+        </Router>
       </main>
-      {/* <div className="component-links">
-        <div className="component-links">
-          <div>
-            <p>Stats</p>
-            <i className="fas fa-camera"></i>
-            <i></i>
-          </div>
-          <div>
-            <p>Timeline</p>
-            <i className="fas fa-camera"></i>
-            <i></i>
-          </div>
-          <div>
-            <p>Config</p>
-            <i className="fas fa-camera"></i>
-            <i></i>
-          </div>
-        </div>
-      </div> */}
 
     </div>
   );
 };
-
-
-export interface IPopUpState {
-  adsDetected: number;
-  numOfBidders: number;
-  numOfNoBids: number;
-  numOfAvailableBids: number;
-  timings: {
-    preAuction: number;
-    auction: number;
-    adServer: number;
-  };
-}
-
-interface IDataFromContentScript {
-  prebid: IPrebidDetails;
-  googleAdManager: IGoogleAdManagerDetails;
-  tcf: ITcfDetails;
-}

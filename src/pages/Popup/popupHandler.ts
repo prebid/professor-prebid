@@ -44,7 +44,7 @@ class PopupHandler {
     }
   }
 
-  openMainTab() {
+  openDebugTab() {
     chrome.runtime.sendMessage({
       type: constants.EVENTS.OPEN_DATA_TAB,
       payload: '',

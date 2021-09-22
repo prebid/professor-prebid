@@ -30,3 +30,5 @@ class Config extends React.Component {
         );
     }
 }
+
+export default Config;
