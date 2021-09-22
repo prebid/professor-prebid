@@ -4,7 +4,7 @@ import './ad-mask.scss';
 import logger from '../logger';
 import constants from '../constants.json';
 import { sendToContentScript } from '../utils';
-import { IPrebidBid }  from './scripts/prebid';
+import { IPrebidBid } from './scripts/prebid';
 
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
@@ -76,11 +76,11 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask }) => {
 const AdMask = ({ input }: { input: IMaskInputData }): JSX.Element => {
   return (<div>
     <h2 className="prpb-mask__overlay__header">
-      <strong>
+      <strong className={(input.winningBidder ? 'green-border' : null)}>
         Professor Prebid
       </strong>
     </h2>
-    
+
     <ul>
       {
         Object.entries(input)
@@ -105,12 +105,10 @@ const createMaskContainerElement = () => {
   const el = document.createElement('div');
   el.classList.add('prpb-mask__overlay');
 
+
   return el;
 }
-
-export default InjectedApp;
-
-export interface IMaskInputData {
+interface IMaskInputData {
   elementId: string;
   creativeRenderTime: number;
   auctionTime: number;
@@ -120,7 +118,9 @@ export interface IMaskInputData {
 
 }
 
-export interface IAdMaskPortalProps {
+interface IAdMaskPortalProps {
   container: HTMLElement;
   mask: IMaskInputData;
 }
+
+export default InjectedApp;
