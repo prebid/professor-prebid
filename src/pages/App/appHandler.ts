@@ -15,6 +15,10 @@ class AppHandler {
   getTcfDetailsFromBackground(cb: any): void {
     chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND }, cb);
   }
+
+  getDebugDetailsFromBackground(cb: any): void {
+    chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND }, cb);
+  }
 }
 
 export const appHandler = new AppHandler();

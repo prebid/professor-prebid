@@ -16,8 +16,8 @@
 		"SEND_PREBID_DETAILS_TO_BACKGROUND": "sendPrebidDetailsToBackground",
 		"REQUEST_PREBID_DETAILS_FROM_BACKGROUND": "RequestPrebidDetailsFromBackground",
 		"SEND_TCF_DETAILS_TO_BACKGROUND": "sendTcfDetailsToBackground",
-		"REQUEST_TCF_DETAILS_FROM_BACKGROUND": "RequestTcfDetailsFromBackground"
-
+		"REQUEST_TCF_DETAILS_FROM_BACKGROUND": "RequestTcfDetailsFromBackground",
+		"REQUEST_DEBUG_DETAILS_FROM_BACKGROUND": "RequestDebugDetailsFromBackground"
 	},
 	"CONSOLE_TOGGLE": "PP_CONSOLE_STATE",
 	"SAVE_MASK": "PP_SAVE_MASK",
