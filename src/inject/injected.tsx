@@ -24,37 +24,36 @@ declare global {
 class Injected {
   init() {
     this.checkDependencies();
+    window.googletag = window.googletag || {}
+    window.googletag.cmd = window.googletag.cmd || []
+    googleAdManager.init();
   }
 
   // make sure prebid/gpt exist in page before trying to run
   checkDependencies() {
     logger.log('[Injected] checking for prebid & gpt');
-    const now = Date.now();
     let hasPrebid = false;
-    let hasGPT = false;
+    let hasTCF = false;
 
     const interval = setInterval(() => {
       const globalPbjs = this.isPrebidInPage();
+
       if (!hasPrebid && globalPbjs) {
         logger.log('[Injected] prebid found');
         hasPrebid = true;
         preBid.init(globalPbjs);
       }
-      
-      if (!hasGPT && hasPrebid && this.isGPTInPage()) {
-        logger.log('[Injected] gpt found');
-        hasGPT = true;
-        googleAdManager.init();
-      }
-      
-      if (hasPrebid && hasGPT) {
-        clearInterval(interval);
-      }
-      
-      if (this.isTCFInpage()){
+
+      if (!hasTCF && this.isTCFInpage()) {
+        hasTCF = true;
         iabTcf.init();
       }
-    }, 50);
+
+      if (hasPrebid && hasTCF) {
+        clearInterval(interval);
+      }
+
+    }, 5);
 
     setTimeout(() => {
       clearInterval(interval);
@@ -85,7 +84,14 @@ class Injected {
 const injected = new Injected();
 injected.init();
 
-const root = document.createElement('div');
-root.id = 'professor_prebid-root';
-document.body.appendChild(root);
-ReactDOM.render(<InjectedApp />, document.getElementById(root.id));
+const injectApp = () => {
+  if (document.body) {
+    const root = document.createElement('div');
+    root.id = 'professor_prebid-root';
+    document.body.appendChild(root);
+    ReactDOM.render(<InjectedApp />, document.getElementById(root.id));
+  } else{
+    injectApp();
+  }
+}
+injectApp()
