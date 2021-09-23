@@ -13,7 +13,7 @@ import GoogleAdManagerDetailsComponent from '../App/components/GoogleAdManagerDe
 import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
-import TimelineComponent from '../App/components/TimelineComponent';
+import TimeLine from '../App/components/TimelineComponent';
 
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
@@ -23,7 +23,10 @@ export const Popup = () => {
     sra: false,
     async: false,
     fetchBeforeKeyvalue: false,
-    fetchBeforeRefresh: false
+    fetchBeforeRefresh: false,
+    slotEvents: {},
+    postAuctionStartTimestamp: null,
+    postAuctionEndTimestamp: null,
   });
 
   const [prebid, setPrebidDetails] = useState<IPrebidDetails>({
@@ -114,7 +117,7 @@ export const Popup = () => {
             <div className="component-links">
               <nav>
                 <Link to="/"><button>Home</button></Link>
-                <Link to="/googleAdManager"><button>Stats</button></Link>
+                <Link to="/googleAdManager"><button>GAM</button></Link>
                 <Link to="/prebid"><button>Prebid</button></Link>
                 <Link to="/timeline"><button>Timeline</button></Link>
                 <Link to="/config"><button>Config</button></Link>
@@ -133,7 +136,7 @@ export const Popup = () => {
                 <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
               </Route>
               <Route exact path="/timeline" >
-                <TimelineComponent prebid={prebid}></TimelineComponent>
+                <TimeLine prebid={prebid} googleAdManager={googleAdManager}></TimeLine>
               </Route>
               <Route exact path="/config">
                 <Config></Config>

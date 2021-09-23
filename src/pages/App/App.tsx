@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './App.scss';
-import TimelineComponent from './components/TimelineComponent'
+import Timeline from './components/TimelineComponent'
 import TcfDetailsComponent from './components/TcfDetailsComponent'
 import PrebidDetailsComponent from './components/PrebidDetailsComponent'
 import GoogleAdManagerDetailsComponent from './components/GoogleAdManagerDetailsComponent';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
-import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
+import { googleAdManager, IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { appHandler } from '../App/appHandler';
 
 const App = () => {
@@ -22,7 +22,7 @@ const App = () => {
         const { prebidDetails, tcfDetails, gamDetails } = debugData[key];
         return <span key={key}>
           <h1>Debug Data for Tab {key} </h1>
-          {prebidDetails && <TimelineComponent prebid={prebidDetails}></TimelineComponent>}
+          {prebidDetails && googleAdManager && <Timeline prebid={prebidDetails} googleAdManager={gamDetails}></Timeline>}
           {prebidDetails && <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent>}
           {tcfDetails && <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent>}
           {gamDetails && <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent>}
