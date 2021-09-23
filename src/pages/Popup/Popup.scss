@@ -1,13 +1,12 @@
 @import '../../styling.scss';
-
+html {
+  background: #eceeef;
+}
 .popup {
   display: flex;
   flex-direction: column;
-  // height: 272px; 
-  height: 544px;
-  // width: 669px;
-  width: 800px;
-  background: #eceeef;
+  height: 272px; 
+  width: 669px;
 
   header {
     display: flex;
