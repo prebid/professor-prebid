@@ -51,7 +51,6 @@ const InjectedApp = (): JSX.Element => {
 
 const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask }) => {
   const el = useRef<HTMLDivElement>(createMaskContainerElement());
-
   useEffect(() => {
     if (container) {
       // delete old masks
@@ -63,10 +62,6 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask }) => {
       container.classList.add('prpb-mask--container');
       container.appendChild(el.current);
     }
-
-    return () => {
-      container.removeChild(el.current);
-    };
   }, [container]);
 
   logger.log('[InjectedApp] rendering mask on page', mask, container, el.current);
