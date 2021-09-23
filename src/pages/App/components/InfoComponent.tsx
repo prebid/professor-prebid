@@ -7,9 +7,9 @@ return (
     <div>
       <ul className="stats-list">
         <li>Ads Detected: {googleAdManager.slots.length}</li>
-        <li>Bidders: {prebid.bids.map(bid=> bid.bidder).length}</li>
+        <li>Bidders: {Array.from(new Set(prebid.bids.map(bid=> bid.bidder))).length}</li>
         <li>
-          No Bid Ratio: {prebid.bids.map(bid=> bid.status === 'no bid').length} / {prebid.bids.map(bid=> bid.status === 'Bid available').length} 
+          No Bid Ratio: {prebid.bids.filter(bid=> bid.statusMessage === 'no bid').length} / {prebid.bids.filter(bid=> bid.statusMessage === 'Bid available').length} 
         </li>
       </ul>
     </div>
