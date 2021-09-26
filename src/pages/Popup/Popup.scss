@@ -13,14 +13,21 @@
     display: flex;
     align-items: center;
     height: 48px;
-    padding: 0 22px;
     background: $primary;
 
     & > h1 {
       margin: 0;
       color: white;
+      padding: 0 22px;
       font-size: 15px;
       font-weight: normal;
+    }
+
+    & > button {
+      color: white;
+      border: none;
+      background-color: $primary;
+      padding: 0 0 0 620px;
     }
   }
 
