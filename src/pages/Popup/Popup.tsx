@@ -123,7 +123,7 @@ export const Popup = () => {
                 <Link to="/"><button>Home</button></Link>
                 <Link to="/googleAdManager"><button>GAM</button></Link>
                 <Link to="/prebid"><button>Prebid</button></Link>
-                <Link to="/timeline"><button>Timeline<FontAwesomeIcon icon={faPollH} /></button></Link>
+                <Link to="/timeline"><button>Timeline</button></Link>
                 <Link to="/config"><button>Config</button></Link>
                 <Link to="/tcf"><button>Tcf</button></Link>
                 <button onClick={handleOpenDebugTab}>Debug</button>

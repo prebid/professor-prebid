@@ -26,13 +26,30 @@ html {
       color: white;
       border: none;
       background-color: $primary;
-      padding: 0 0 0 620px;
+      margin-left: 475px;
     }
   }
 
   main {
     display: flex;
     flex: 1;
+    background-color: #DCDCDC;
+
+    .component-links {
+
+      button {
+        background-color: #DCDCDC;
+        width: 68px;
+        height: 68px;
+        border-width: thin;
+        border-bottom: none;
+        border-top: none;
+      }
+
+      & :last-child {
+        border-right: none;
+      }
+    }
   }
 
   .data-info {
