@@ -14,6 +14,9 @@ import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import TimeLine from '../App/components/TimelineComponent';
+import TimelineComponent from '../App/components/TimelineComponent';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPollH, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
@@ -90,6 +93,7 @@ export const Popup = () => {
     <div className="popup">
       <header>
         <h1>Professor Prebid</h1>
+        <button><FontAwesomeIcon icon={faEllipsisV}/></button>
       </header>
       <main>
         <aside className="data-info">
@@ -119,7 +123,7 @@ export const Popup = () => {
                 <Link to="/"><button>Home</button></Link>
                 <Link to="/googleAdManager"><button>GAM</button></Link>
                 <Link to="/prebid"><button>Prebid</button></Link>
-                <Link to="/timeline"><button>Timeline</button></Link>
+                <Link to="/timeline"><button>Timeline<FontAwesomeIcon icon={faPollH} /></button></Link>
                 <Link to="/config"><button>Config</button></Link>
                 <Link to="/tcf"><button>Tcf</button></Link>
                 <button onClick={handleOpenDebugTab}>Debug</button>
