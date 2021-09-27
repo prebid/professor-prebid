@@ -16,7 +16,8 @@ import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import TimeLine from '../App/components/TimelineComponent';
 import TimelineComponent from '../App/components/TimelineComponent';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPollH, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
+import { faPollH, faEllipsisV , faSlidersH, faHome, faAd, faLaptopCode, faWindowRestore} from '@fortawesome/free-solid-svg-icons'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 
 export const Popup = () => {
   const [consoleState, setConsoleState] = useState(null);
@@ -117,16 +118,15 @@ export const Popup = () => {
         </aside>
         <Router>
           <div style={{ width: '100%' }}>
-
             <div className="component-links">
               <nav>
-                <Link to="/"><button>Home</button></Link>
-                <Link to="/googleAdManager"><button>GAM</button></Link>
-                <Link to="/prebid"><button>Prebid</button></Link>
-                <Link to="/timeline"><button>Timeline</button></Link>
-                <Link to="/config"><button>Config</button></Link>
-                <Link to="/tcf"><button>Tcf</button></Link>
-                <button onClick={handleOpenDebugTab}>Debug</button>
+                <Link to="/"><button><FontAwesomeIcon icon={faHome}/>Home</button></Link>
+                <Link to="/googleAdManager"><button><FontAwesomeIcon icon={faGoogle}/><br></br>GAM</button></Link>
+                <Link to="/prebid"><button><FontAwesomeIcon icon={faAd}/>Prebid</button></Link>
+                <Link to="/timeline"><button><FontAwesomeIcon icon={faPollH}/>Timeline</button></Link>
+                <Link to="/config"><button><FontAwesomeIcon icon={faSlidersH}/>Config</button></Link>
+                <Link to="/tcf"><button><FontAwesomeIcon icon={faWindowRestore}/><br></br>TCF</button></Link>
+                <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode}/>Debug</button>
               </nav>
             </div>
 
