@@ -120,13 +120,13 @@ export const Popup = () => {
           <div style={{ width: '100%' }}>
             <div className="component-links">
               <nav>
-                <Link to="/"><button><FontAwesomeIcon icon={faHome}/>Home</button></Link>
-                <Link to="/googleAdManager"><button><FontAwesomeIcon icon={faGoogle}/><br></br>GAM</button></Link>
-                <Link to="/prebid"><button><FontAwesomeIcon icon={faAd}/>Prebid</button></Link>
-                <Link to="/timeline"><button><FontAwesomeIcon icon={faPollH}/>Timeline</button></Link>
-                <Link to="/config"><button><FontAwesomeIcon icon={faSlidersH}/>Config</button></Link>
-                <Link to="/tcf"><button><FontAwesomeIcon icon={faWindowRestore}/><br></br>TCF</button></Link>
-                <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode}/>Debug</button>
+                <Link to="/"><button><FontAwesomeIcon icon={faHome} size="lg"/>Home</button></Link>
+                <Link to="/googleAdManager"><button><FontAwesomeIcon icon={faGoogle} size="lg"/><br></br>GAM</button></Link>
+                <Link to="/prebid"><button><FontAwesomeIcon icon={faAd} size="lg"/>Prebid</button></Link>
+                <Link to="/timeline"><button><FontAwesomeIcon icon={faPollH} size="lg"/>Timeline</button></Link>
+                <Link to="/config"><button><FontAwesomeIcon icon={faSlidersH} size="lg"/>Config</button></Link>
+                <Link to="/tcf"><button><FontAwesomeIcon icon={faWindowRestore} size="lg"/><br></br>TCF</button></Link>
+                <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} size="lg"/>Debug</button>
               </nav>
             </div>
 
