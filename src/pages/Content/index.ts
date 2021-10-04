@@ -11,7 +11,7 @@ import { ITcfDetails } from '../../inject/scripts/tcf'
 
 class Content {
   prebidConfig = {};
-  prebid: IPrebidDetails;
+  prebid: IPrebidDetails = {} as IPrebidDetails;
   googleAdManager: IGoogleAdManagerDetails;
   tcf: ITcfDetails;
 
@@ -116,31 +116,19 @@ class Content {
       if (request.type === constants.CONSOLE_TOGGLE) {
         document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: request.consoleState }));
       }
-
       sendResponse();
     });
   }
 
   prepareMaskObjects() {
-    logger.log('[Content] preparing masks', {});
+    logger.log('[Content] preparing masks',);
+
     const masks = this.googleAdManager?.slots?.map(slot => {
       const elementId = slot.elementId;
       const creativeRenderTime = slot.creativeRenderTime;
-      const auctionTime = this.prebid.events.auctionEndTimestamp - this.prebid.events.auctionStartTimestamp;
-      const bids = this.prebid.bids.filter(bid => bid.adUnitCode === elementId);
-      const winningBid = bids.find(bid => bid.status === 'rendered' && bid.adUnitCode === slot.elementId);
-      const winningBidder = winningBid?.bidder;
-      const winningCPM = winningBid?.cpm;
-      return {
-        elementId,
-        creativeRenderTime,
-        auctionTime,
-        winningBidder,
-        winningCPM,
-        bids
-      };
+      const prebid = this.prebid;
+      return { elementId, creativeRenderTime, prebid };
     })
-
 
     logger.log('[Content] mask ready', masks);
 
