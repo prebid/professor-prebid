@@ -1,24 +1,28 @@
 import { ITcfDetails } from "../../../inject/scripts/tcf";
 import React from 'react';
+import { TCString, Segment } from '@iabtcf/core';
+
 
 class TcfDetailsComponent extends React.Component<ITcfDetailsComponentComponentProps> {
   state = { count: 0 };
   render() {
-    const {tcf} = this.props;
+    const { tcf } = this.props;
     return (
       <span>
-        <h2>IAB TCF Details</h2>
         {Object.keys(tcf).map((key, index) =>
           <span key={index}>
-            <h3>Version: {key}</h3>
-            <h3>CMP Loaded: {tcf[key].cmpLoaded}</h3>
-            <h3>ConsentData: {tcf[key].consentData}</h3>
+            <p><strong>Version:</strong> {key}</p>
+            <p><strong>CMP Loaded: </strong> {tcf[key].cmpLoaded}</p>
+            <p><strong>Consent Granted: </strong> {
+              <pre>{JSON.stringify(TCString.decode(tcf[key].consentData, null), null, 4)}</pre>
+            }</p>
+            <p><strong>ConsentData:</strong> {tcf[key].consentData}</p>
           </span>
         )}
       </span>
     );
   }
-  
+
 }
 
 interface ITcfDetailsComponentComponentProps {
