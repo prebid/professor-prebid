@@ -1,6 +1,6 @@
 import { ITcfDetails } from "../../../inject/scripts/tcf";
 import React from 'react';
-import { TCString, Segment } from '@iabtcf/core';
+import { TCString } from '@iabtcf/core';
 
 
 class TcfDetailsComponent extends React.Component<ITcfDetailsComponentComponentProps> {
