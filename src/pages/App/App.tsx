@@ -22,9 +22,12 @@ const App = () => {
         const { prebidDetails, tcfDetails, gamDetails } = debugData[key];
         return <span key={key}>
           <h1>Debug Data for Tab {key} </h1>
+          <h2>Prebid Details</h2>
           {prebidDetails && googleAdManager && <Timeline prebid={prebidDetails} googleAdManager={gamDetails}></Timeline>}
           {prebidDetails && <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent>}
+          <h2>IAB TCF Details</h2>
           {tcfDetails && <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent>}
+          <h2>GAM Details</h2>
           {gamDetails && <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent>}
         </span>
       })}
