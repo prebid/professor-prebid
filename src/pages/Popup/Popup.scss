@@ -5,8 +5,8 @@ html {
 .popup {
   display: flex;
   flex-direction: column;
-  height: 272px; 
-  width: 669px;
+  height: 600px; 
+  width: 780px;
 
   header {
     display: flex;
@@ -28,6 +28,14 @@ html {
       background-color: $primary;
       padding: 0 0 0 620px;
     }
+  }
+
+  nav {
+   display: flex;
+   flex-direction: row;
+   justify-content: start;
+   align-items: flex-start;
+   gap: 5px;
   }
 
   main {

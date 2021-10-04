@@ -8,13 +8,12 @@ import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { appHandler } from '../App/appHandler';
-import Config from './Config';
 import GoogleAdManagerDetailsComponent from '../App/components/GoogleAdManagerDetailsComponent';
 import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import TimeLine from '../App/components/TimelineComponent';
-import TimelineComponent from '../App/components/TimelineComponent';
+import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPollH, faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 
@@ -36,13 +35,10 @@ export const Popup = () => {
     version: null,
     slots: [],
     timeout: null,
-    events: {
-      auctionStartTimestamp: null,
-      auctionEndTimestamp: null,
-      bidders: {}
-    },
+    events: [],
     config: null,
-    bids: []
+    bids: [],
+    auctions: {}
   });
 
   const [tcf, setTcfDetails] = useState<ITcfDetails>({
@@ -60,25 +56,28 @@ export const Popup = () => {
 
   useEffect(() => {
     logger.log('[Popup] init()')
+    setInterval(() => {
 
-    popupHandler.getToggleStateFromStorage((checked: boolean) => {
-      setConsoleState(checked);
-    });
+      popupHandler.getToggleStateFromStorage((checked: boolean) => {
+        setConsoleState(checked);
+      });
 
-    appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
-      logger.log('[App] received Google AdManager Details from background', data);
-      data && setGamDetails(data)
-    });
+      appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
+        logger.log('[App] received Google AdManager Details from background', data);
+        data && setGamDetails(data)
+      });
 
-    appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
-      logger.log('[App] received Prebid Details from background', data);
-      data && setPrebidDetails(data)
-    });
+      appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
+        logger.log('[App] received Prebid Details from background', data);
+        data && setPrebidDetails(data)
+      });
 
-    appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
-      logger.log('[App] received Prebid Details from background', data);
-      data && setTcfDetails(data)
-    });
+      appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
+        logger.log('[App] received Prebid Details from background', data);
+        data && setTcfDetails(data)
+      });
+
+    }, 1000)
 
   }, []);
 
@@ -93,7 +92,7 @@ export const Popup = () => {
     <div className="popup">
       <header>
         <h1>Professor Prebid</h1>
-        <button><FontAwesomeIcon icon={faEllipsisV}/></button>
+        <button><FontAwesomeIcon icon={faEllipsisV} /></button>
       </header>
       <main>
         <aside className="data-info">
@@ -142,8 +141,8 @@ export const Popup = () => {
               <Route exact path="/timeline" >
                 <TimeLine prebid={prebid} googleAdManager={googleAdManager}></TimeLine>
               </Route>
-              <Route exact path="/config">
-                <Config></Config>
+              <Route path="/config">
+                <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>
               </Route>
               <Route exact path="/tcf">
                 <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>
