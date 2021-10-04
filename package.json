@@ -15,8 +15,6 @@
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^1.2.36",
-		"@fortawesome/free-solid-svg-icons": "^5.15.4",
-		"@fortawesome/react-fontawesome": "^0.1.15",
 		"@types/doubleclick-gpt": "^2019111201.0.2",
 		"@types/react-router-dom": "^5.1.8",
 		"@types/requestidlecallback": "^0.3.4",
@@ -25,6 +23,7 @@
 		"react": "^17.0.1",
 		"react-dom": "^17.0.1",
 		"react-router-dom": "^5.3.0",
+		"react-select": "^5.0.0",
 		"react-switch": "^6.0.0"
 	},
 	"devDependencies": {
@@ -32,6 +31,8 @@
 		"@babel/plugin-proposal-class-properties": "^7.12.1",
 		"@babel/preset-env": "^7.12.10",
 		"@babel/preset-react": "^7.12.10",
+		"@fortawesome/free-solid-svg-icons": "^5.15.4",
+		"@fortawesome/react-fontawesome": "^0.1.15",
 		"@hot-loader/react-dom": "^17.0.1",
 		"@types/chrome": "0.0.126",
 		"@types/react": "^17.0.0",
