@@ -2,27 +2,50 @@ import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 
+declare global {
+    interface Window {
+        pbjs: any;
+        _pbjsGlobals: string[];
+        PREBID_TIMEOUT: number;
+    }
+}
 class Prebid {
-    globalPbjs: any;
-    events: IPrebidEvents;
+    globalPbjs: any = window.pbjs;
+    // events: IPrebidEvents = {
+    //     auctionStartTimestamp: null,
+    //     auctionEndTimestamp: null,
+    //     bidders: {}
+    // };
     bids: IPrebidBid[];
     slots: IPrebidSlot[];
     config: IPrebidConfig;
 
-    init(globalPbjs: any): void {
-        this.globalPbjs = globalPbjs;
-        // send prebid details to content script 
-        globalPbjs.que.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
+
+    init(): void {
+        let stopLoop = false;
+        setTimeout(() => { stopLoop = true }, 8000);
+        if (this.globalPbjs) {
+            this.globalPbjs.que.push(() =>
+                this.addEventListeners()
+            );
+            this.globalPbjs.que.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
+        } else if (!stopLoop) {
+            this.globalPbjs = this.isPrebidInPage();
+            setTimeout(() => this.init(), 10)
+        }
     }
+
     addEventListeners(): void {
-        this.globalPbjs.onEvent('auctionInit', (auctionInitData: any) => {
+        this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionEventData) => {
             logger.log('[Injected] auctionInit', { auctionInitData });
         });
-        this.globalPbjs.onEvent('auctionEnd', (auctionEndData: any) => {
+
+        this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEventData) => {
             logger.log('[Injected] auctionEnd', { auctionEndData });
-            this.events.auctionEndTimestamp = Date.now();
         });
+        logger.log('[Injected] event listeners added')
     }
+
     getPrebidBids(): IPrebidBid[] {
         const allBidResponses: { [key: string]: IPrebidBid[]; } = this.globalPbjs.getBidResponses();
         const prebidSlots = this.getPrebidSlots();
@@ -59,6 +82,18 @@ class Prebid {
         return this.globalPbjs?.adUnits.slice() || [];
     }
 
+    isPrebidInPage() {
+        const pbjsGlobals = window._pbjsGlobals;
+        if (pbjsGlobals && pbjsGlobals.length > 0) {
+            const pbjsGlobal = window[pbjsGlobals[0] as keyof Window];
+
+            const libLoaded = pbjsGlobal.libLoaded;
+            if (libLoaded) {
+                return pbjsGlobal;
+            }
+        }
+    }
+
     processBids(): void {
         // Process bids
         this.bids.every((bid) => {
@@ -88,71 +123,31 @@ class Prebid {
             });
 
 
-            this.events.bidders[bid.bidderCode] = this.events.bidders[bid.bidderCode] || { requestTimestamp: bid.requestTimestamp };
-
-            if (bid.responseTimestamp) {
-                this.events.bidders[bid.bidderCode].responseTimestamp = this.events.bidders[bid.bidderCode].responseTimestamp || bid.responseTimestamp;
-                if (this.events.bidders[bid.bidderCode].responseTimestamp > bid.responseTimestamp) {
-                    this.events.bidders[bid.bidderCode].responseTimestamp = bid.responseTimestamp;
-                }
-            }
-
-            this.events.bidders[bid.bidderCode].responseTime = this.events.bidders[bid.bidderCode].responseTimestamp - this.events.bidders[bid.bidderCode].requestTimestamp;
-
-            if (bid.requestTimestamp) {
-                this.events.auctionStartTimestamp = this.events.auctionStartTimestamp || bid.requestTimestamp;
-                // lowest bidrequest Timestamp as auctionStartTimestamp
-                if (bid.requestTimestamp < this.events.auctionStartTimestamp) {
-                    this.events.auctionStartTimestamp = bid.requestTimestamp;
-                }
-            }
-            if (bid.responseTimestamp) {
-                this.events.auctionEndTimestamp = this.events.auctionEndTimestamp || bid.responseTimestamp;
-                // highest bidresponse Timestamp as auctionEndTimestamp
-                if (bid.responseTimestamp > this.events.auctionEndTimestamp) {
-                    this.events.auctionEndTimestamp = bid.responseTimestamp;
-                }
-            }
-
             return true
         });
 
-        Object.keys(this.events.bidders).forEach(key => {
-            this.events.bidders[key].requestTimestamp = this.events.bidders[key].requestTimestamp || this.events.auctionStartTimestamp;
-        });
 
         // sort bidders by requestTimestamp
-        const bidderOrders: { [key: string]: number } = {};
-        Object.keys(this.events.bidders).forEach(key => {
-            const bidder = this.events.bidders[key];
-            bidderOrders[key] = bidder.requestTimestamp;
-        });
-        const biddersSorted = Object.keys(bidderOrders).sort((a, b) => (bidderOrders[a] - bidderOrders[b]));
-        const biddersBackup = this.events.bidders;
-        this.events.bidders = {};
-        for (const bidder in biddersSorted) {
-            const tmp = biddersSorted[bidder]
-            this.events.bidders[tmp] = biddersBackup[tmp];
-        }
     }
 
     sendDetailsToContentScript(): void {
         this.bids = this.getPrebidBids();
         this.config = this.globalPbjs.getConfig();
         this.slots = this.getPrebidSlots();
-        this.events = { auctionStartTimestamp: null, auctionEndTimestamp: null, bidders: {} };
         this.processBids();
         const prebidDetail: IPrebidDetails = {
             version: this.globalPbjs.version,
             slots: this.slots,
             timeout: window.PREBID_TIMEOUT || null,
-            events: this.events,
+            events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [],
             config: this.config,
-            bids: this.bids
+            bids: this.bids,
+            auctions: null
         };
         sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     }
 }
+
 export const preBid = new Prebid();
 
 export interface IPrebidBid {
@@ -275,10 +270,12 @@ interface IPrebidSlot {
     mediaTypes: IPrebidMediaType[];
 }
 
-interface IPrebidAdUnit {
+export interface IPrebidAdUnit {
     bids: IPrebidSlotBid[];
     code: string;
     mediaTypes: IPrebidMediaType[];
+    sizes: number[][];
+    transactionId: string
 }
 
 interface IPrebidConfigPriceBucket {
@@ -293,16 +290,45 @@ interface IPrebidConfig {
     bidderTimeout: number;
     publisherDomain: string;
     priceGranularity: string;
+    consentManagement: {
+        allowAuctionWithoutConsent: boolean;
+        defaultGdprScope: string;
+        cmpApi: string;
+        timeout: number;
+        gdpr: {
+            cmpApi: string;
+            defaultGdprScope: boolean;
+            timeout: number;
+        };
+    };
     customPriceBucket: {
         buckets: IPrebidConfigPriceBucket[];
     };
-    mediaTypePriceGranularity: any;
+    mediaTypePriceGranularity: {
+        banner: { buckets: { precision: number, min: number, max: number, increment: number }[] }
+        native: { buckets: { precision: number, min: number, max: number, increment: number }[] }
+        video: { buckets: { precision: number, min: number, max: number, increment: number }[] }
+        'video-outstream': { buckets: { precision: number, min: number, max: number, increment: number }[] }
+        priceGranularity: string;
+        publisherDomain: string;
+    };
+    s2sConfig: {
+        adapter: string;
+        adapterOptions: any;
+        maxBids: number;
+        syncUrlModifier: any;
+        timeout: number;
+    };
+    targetingControls: {
+        allowTargetingKeys: string[];
+        alwaysIncludeDeals: boolean;
+    }
     enableSendAllBids: boolean;
-    useBidCache: false;
-    deviceAccess: true;
+    useBidCache: boolean;
+    deviceAccess: boolean;
     bidderSequence: string;
     timeoutBuffer: number;
-    disableAjaxTimeout: false;
+    disableAjaxTimeout: boolean;
     maxNestedIframes: number;
     auctionOptions: any;
     userSync: {
@@ -323,11 +349,126 @@ interface IPrebidConfig {
     [key: string]: any;
 }
 
+interface IBidderEvent {
+    args: {
+        auctionId: string;
+        bidderCode: string;
+        adUnitCodes: string[];
+        bidder: string;
+        start: number;
+        requestTimestamp: number;
+        responseTimestamp: number;
+        endTimestamp: number;
+        auctionEnd: number;
+        timestamp: number;
+    };
+    eventType: string;
+    id: string;
+    elapsedTime: number;
+}
+
 export interface IPrebidDetails {
     version: string;
     slots: IPrebidSlot[];
     timeout: number;
-    events: IPrebidEvents;
+    events: IBidderEvent[];
     config: IPrebidConfig;
     bids: IPrebidBid[];
+    auctions: IPrebidAuctions;
+}
+
+interface IPrebidAuctionEventData {
+    adUnitCodes: string[];
+    adUnits: IPrebidAdUnit[];
+    auctionEnd: number;
+    auctionId: string;
+    auctionStatus: string
+    bidderRequests: IPrebidBidderRequest[];
+    bidsReceived: IPrebidBid[]
+    labels: any;
+    noBids: IPrebidBid[];
+    timeout: number;
+    timestamp: number;
+    winningBids: any[]
+}
+
+export interface IPrebidBidderRequest {
+    auctionId: string;
+    auctionStart: number;
+    bidderCode: string;
+    bidderRequestId: string;
+    bids: IPrebidBid[];
+    ceh: any;
+    gdprConsent: {
+        consentString: string;
+        vendorData: {
+            addtlConsent: string
+            cmpId: number
+            cmpStatus: string
+            cmpVersion: number
+            eventStatus: string
+            gdprApplies: boolean
+            isServiceSpecific: boolean
+            listenerId: number
+            outOfBand: {
+                allowedVendors: any,
+                disclosedVendors: any
+            }
+            publisher: {
+                consents: {
+                    [key: number]: boolean;
+                },
+                legitimateInterests: {
+                    [key: number]: boolean;
+                },
+                customPurpose: any;
+                restrictions: any;
+            }
+            publisherCC: string;
+            purpose: {
+                consents: {
+                    [key: number]: boolean;
+                },
+                legitimateInterests: {
+                    [key: number]: boolean;
+                }
+            }
+            purposeOneTreatment: boolean;
+            specialFeatureOptins: {
+                [key: number]: boolean;
+            }
+            tcString: string;
+            tcfPolicyVersion: number;
+            useNonStandardStacks: boolean;
+            vendor: {
+                consents: {
+                    [key: number]: boolean;
+                }, legitimateInterests: {
+                    [key: number]: boolean;
+                }
+            }
+
+        },
+        gdprApplies: boolean;
+        addtlConsent: string;
+        apiVersion: number
+    }
+    publisherExt: any;
+    refererInfo: {
+        referer: string;
+        reachedTop: boolean;
+        isAmp: boolean;
+        numIframes: number;
+        stack: string[];
+    }
+    start: number;
+    endTimestamp: number;
+    elapsedTime: number;
+    timeout: number;
+    userExt: any;
+
+}
+
+interface IPrebidAuctions {
+    [key: string]: IPrebidAuctionEventData;
 }
