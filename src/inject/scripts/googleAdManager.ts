@@ -2,16 +2,23 @@ import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 import logger from '../../logger';
 
+declare global {
+  interface Window {
+    googletag: googletag.Googletag;
+  }
+}
 class GoogleAdManager {
   lastMessage: string;
   slotEvents: ISlotEvents = {};
   postAuctionStartTimestamp: number = null;
   postAuctionEndTimestamp: number = null;
-
+  googletag: googletag.Googletag;
   init() {
-    googletag.cmd.push(() => this.addEventListeners());
+    this.googletag = window.googletag || {} as googletag.Googletag;
+    this.googletag.cmd = this.googletag.cmd || [];
+    this.googletag.cmd.push(() => this.addEventListeners());
     // send google ad manager details to content script 
-    googletag.cmd.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
+    this.googletag.cmd.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
   }
 
   updatePostAuctionTimestamps(input: number) {
@@ -25,8 +32,8 @@ class GoogleAdManager {
 
   addEventListeners(): void {
     // 1. Adding an event listener for the PubAdsService
-
-    googletag.pubads().addEventListener('slotRequested', event => {
+    
+    this.googletag.pubads().addEventListener('slotRequested', event => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.updatePostAuctionTimestamps(timestamp);
@@ -37,7 +44,7 @@ class GoogleAdManager {
       logger.log('GPT EVENT: slotRequested', { slotElementId, event });
     });
 
-    googletag.pubads().addEventListener('slotResponseReceived', event => {
+    this.googletag.pubads().addEventListener('slotResponseReceived', event => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.updatePostAuctionTimestamps(timestamp);
@@ -48,10 +55,9 @@ class GoogleAdManager {
       logger.log('GPT EVENT: slotResponseReceived', { slotElementId, event });
     });
 
-    googletag.pubads().addEventListener('slotRenderEnded', event => {
+    this.googletag.pubads().addEventListener('slotRenderEnded', event => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
-      this.updatePostAuctionTimestamps(timestamp);
       this.slotEvents[slotElementId as keyof ISlotEvents] = [
         ...this.slotEvents[slotElementId] || [],
         { type: 'slotRenderEnded', timestamp }
@@ -59,10 +65,9 @@ class GoogleAdManager {
       logger.log('GPT EVENT: slotRenderEnded', { slotElementId, event });
     });
 
-    googletag.pubads().addEventListener('slotOnload', event => {
+    this.googletag.pubads().addEventListener('slotOnload', event => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
-      this.updatePostAuctionTimestamps(timestamp);
       this.slotEvents[slotElementId as keyof ISlotEvents] = [
         ...this.slotEvents[slotElementId] || [],
         { type: 'slotOnload', timestamp }
@@ -70,7 +75,7 @@ class GoogleAdManager {
       logger.log('GPT EVENT: slotOnload', { slotElementId, event });
     });
 
-    googletag.pubads().addEventListener('slotVisibilityChanged', event => {
+    this.googletag.pubads().addEventListener('slotVisibilityChanged', event => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.slotEvents[slotElementId as keyof ISlotEvents] = [
@@ -80,7 +85,7 @@ class GoogleAdManager {
       logger.log('GPT EVENT: slotVisibilityChanged', { slotElementId, event });
     });
 
-    googletag.pubads().addEventListener('impressionViewable', event => {
+    this.googletag.pubads().addEventListener('impressionViewable', event => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.slotEvents[slotElementId as keyof ISlotEvents] = [
@@ -92,7 +97,7 @@ class GoogleAdManager {
   }
 
   getFetchBeforeRefresh(): boolean {
-    const gpt = googletag as any;
+    const gpt = this.googletag as any;
     const events = gpt?.getEventLog()?.getAllEvents() || [];
     let isFetchBeforeRefresh = false;
     let refreshIndex = null;
@@ -118,7 +123,7 @@ class GoogleAdManager {
   }
 
   getFetchBeforeKeyValue(): boolean {
-    const gpt = googletag as any;
+    const gpt = this.googletag as any;
     const events = gpt?.getEventLog()?.getAllEvents() || [];
 
     let isFetchBeforeKeyvalue = false;
@@ -155,7 +160,7 @@ class GoogleAdManager {
   }
 
   getRenderMode(): boolean {
-    const gpt = googletag as any
+    const gpt = this.googletag as any
     const events = gpt?.getEventLog()?.getAllEvents() || [];
     let asyncRendermode = true;
     for (const event of events) {
@@ -178,12 +183,12 @@ class GoogleAdManager {
   }
 
   getRequestMode(): boolean {
-    const gpt = googletag as any
+    const gpt = this.googletag as any
     return gpt?.pubads()?.isSRA() || false;
   }
 
   getSlots(): IGoogleAdManagerSlot[] {
-    const gpt = googletag as any
+    const gpt = this.googletag as any
     const googletagSlots: IGoogleAdManagerSlot[] = [];
     const slots = gpt?.pubads()?.getSlots() || [];
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
