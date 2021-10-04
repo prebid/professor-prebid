@@ -11,11 +11,6 @@ declare global {
 }
 class Prebid {
     globalPbjs: any = window.pbjs;
-    // events: IPrebidEvents = {
-    //     auctionStartTimestamp: null,
-    //     auctionEndTimestamp: null,
-    //     bidders: {}
-    // };
     bids: IPrebidBid[];
     slots: IPrebidSlot[];
     config: IPrebidConfig;
@@ -361,6 +356,9 @@ interface IBidderEvent {
         endTimestamp: number;
         auctionEnd: number;
         timestamp: number;
+        bidderRequests: IPrebidBidderRequest[];
+        bidsReceived: IPrebidBid[];
+        noBids: IPrebidBid[];
     };
     eventType: string;
     id: string;
