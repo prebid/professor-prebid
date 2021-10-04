@@ -6,33 +6,13 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
     const { googleAdManager } = this.props;
     return (
       <span>
-        <h2>GAM Details</h2>
+        <p><strong>Request Mode: </strong>{(googleAdManager.sra) ? 'Single Request Architecture' : 'something else like Multi Request Architecture? '}</p>
+        <p><strong>Render Mode: </strong>{(googleAdManager.async) ? 'Asynchronous' : 'Synchronous'}</p>
+        <p><strong>Fetch Before Request: </strong>{(googleAdManager.fetchBeforeRefresh) ? 'YES' : 'NO'}</p>
+        <p><strong>Fetch Before Key/Value: </strong>{(googleAdManager.fetchBeforeKeyvalue) ? 'YES' : 'NO'}</p>
+
         <table>
           <thead>
-            <tr>
-              <th>Request Mode</th>
-              <th colSpan={4} style={{ textAlign: "left" }}>
-                {(googleAdManager.sra) ? 'Single Request Architecture' : 'something else like Multi Request Architecture? '}
-              </th>
-            </tr>
-            <tr>
-              <th>Render Mode</th>
-              <th colSpan={4} style={{ textAlign: "left" }}>
-                {(googleAdManager.async) ? 'Asynchronous' : 'Synchronous'}
-              </th>
-            </tr>
-            <tr>
-              <th>Fetch Before Request</th>
-              <th colSpan={4} style={{ textAlign: "left" }}>
-                {(googleAdManager.fetchBeforeRefresh) ? 'YES' : 'NO'}
-              </th>
-            </tr>
-            <tr>
-              <th>Fetch Before Key/Value</th>
-              <th colSpan={4} style={{ textAlign: "left" }}>
-                {(googleAdManager.fetchBeforeKeyvalue) ? 'YES' : 'NO'}
-              </th>
-            </tr>
             <tr>
               <th>element_id</th>
               <th>creativeRenderTime</th>
