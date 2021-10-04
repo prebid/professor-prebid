@@ -2,10 +2,22 @@ import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 import logger from '../../logger';
 
+declare global {
+    interface Window {
+        __cmp: any;
+        __tcfapi: any;
+    }
+}
 class IabTcf {
     lastMessage: string;
     init() {
-        setInterval(() => this.sendDetailsToContentScript(), 1000)
+        let stopLoop = false;
+        setTimeout(() => { stopLoop = true }, 8000);
+        if (this.isTCFInpage()) {
+            setInterval(() => this.sendDetailsToContentScript(), 1000)
+        } else if (!stopLoop) {
+            setTimeout(() => this.init(), 1000);
+        }
     }
     criteoVendorId = 91;
 
@@ -77,6 +89,10 @@ class IabTcf {
                 callback.apply(null, [tcData])
             };
         }
+    }
+
+    isTCFInpage() {
+        return window.__cmp || window.__tcfapi
     }
 
     sendDetailsToContentScript() {
