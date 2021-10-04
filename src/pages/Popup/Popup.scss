@@ -26,7 +26,7 @@ html {
       color: white;
       border: none;
       background-color: $primary;
-      padding: 0 0 0 620px;
+      margin-left: 475px;
     }
   }
 
@@ -41,6 +41,26 @@ html {
   main {
     display: flex;
     flex: 1;
+    background-color: #DCDCDC;
+
+    .component-links {
+
+      button {
+        background-color: #DCDCDC;
+        width: 72px;
+        height: 68px;
+        border-width: thin;
+        border-bottom: groove;
+        border-top: none;
+        color: #0E86D4;
+        text-align: center;
+        line-height: 1.6;
+      }
+
+      :last-child {
+        border-right: none;
+      }
+    }
   }
 
   .data-info {
@@ -49,11 +69,11 @@ html {
     justify-content: space-between;
     height: 100%;
     width: 201px;
-    margin: 0 22px;
-    padding: 12px 0;
+    padding: 15px 0;
     text-align: center;
     font-weight: 600;
     box-sizing: border-box;
+    border-right-style: solid;
 
     ul.stats-list {
       margin: 0;
