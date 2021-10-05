@@ -349,6 +349,7 @@ interface IBidderEvent {
         auctionId: string;
         bidderCode: string;
         adUnitCodes: string[];
+        adUnits: IPrebidAdUnit[];
         bidder: string;
         start: number;
         requestTimestamp: number;

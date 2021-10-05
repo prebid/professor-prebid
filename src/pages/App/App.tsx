@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import './App.scss';
 import Timeline from './components/TimelineComponent'
 import TcfDetailsComponent from './components/TcfDetailsComponent'
-import PrebidDetailsComponent from './components/PrebidDetailsComponent'
+import PrebidDetailsComponent from './components/details/PrebidDetailsComponent'
 import GoogleAdManagerDetailsComponent from './components/GoogleAdManagerDetailsComponent';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';

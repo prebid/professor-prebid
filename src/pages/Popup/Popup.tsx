@@ -10,7 +10,7 @@ import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { appHandler } from '../App/appHandler';
 import GoogleAdManagerDetailsComponent from '../App/components/GoogleAdManagerDetailsComponent';
 import InfoComponent from '../App/components/InfoComponent';
-import PrebidDetailsComponent from '../App/components/PrebidDetailsComponent';
+import PrebidDetailsComponent from '../App/components/details/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import TimeLine from '../App/components/TimelineComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
