@@ -1,25 +1,25 @@
-import React, { useCallback, useEffect, useState } from 'react';
 import './Popup.scss';
-import logger from '../../logger';
-import ReactSwitch from 'react-switch';
 import { popupHandler } from './popupHandler';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { appHandler } from '../App/appHandler';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPollH, faEllipsisV, faSlidersH, faHome, faAd, faLaptopCode, faWindowRestore } from '@fortawesome/free-solid-svg-icons'
+import { faGoogle } from '@fortawesome/free-brands-svg-icons'
+import React, { useCallback, useEffect, useState } from 'react';
+import logger from '../../logger';
+import ReactSwitch from 'react-switch';
 import GoogleAdManagerDetailsComponent from '../App/components/GoogleAdManagerDetailsComponent';
 import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/details/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import TimeLine from '../App/components/TimelineComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPollH, faEllipsisV , faSlidersH, faHome, faAd, faLaptopCode, faWindowRestore} from '@fortawesome/free-solid-svg-icons'
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 
-export const Popup = () => {
-  const [consoleState, setConsoleState] = useState(null);
+export const Popup = (): JSX.Element => {
+  const [consoleState, setConsoleState] = useState<boolean>(null);
 
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>({
     slots: [],
@@ -56,35 +56,33 @@ export const Popup = () => {
   });
 
   useEffect(() => {
-    logger.log('[Popup] init()')
     setInterval(() => {
-
       popupHandler.getToggleStateFromStorage((checked: boolean) => {
         setConsoleState(checked);
       });
 
       appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
         logger.log('[App] received Google AdManager Details from background', data);
-        data && setGamDetails(data)
+        setGamDetails(data)
       });
 
       appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
         logger.log('[App] received Prebid Details from background', data);
-        data && setPrebidDetails(data)
+        setPrebidDetails(data)
       });
 
       appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
         logger.log('[App] received Prebid Details from background', data);
-        data && setTcfDetails(data)
+        setTcfDetails(data)
       });
 
     }, 1000)
 
   }, []);
 
-  const handleConsoleChange = useCallback((checked: boolean) => {
-    setConsoleState(checked);
-    popupHandler.onConsoleToggle(checked);
+  const handleConsoleChange = useCallback((nextChecked: boolean) => {
+    setConsoleState(nextChecked);
+    popupHandler.onConsoleToggle(nextChecked);
   }, []);
 
   const handleOpenDebugTab = useCallback(() => popupHandler.openDebugTab(), []);
@@ -119,13 +117,25 @@ export const Popup = () => {
           <div style={{ width: '100%' }}>
             <div className="component-links">
               <nav>
-                <Link to="/"><button><FontAwesomeIcon icon={faHome} size="lg"/>Home</button></Link>
-                <Link to="/googleAdManager"><button><FontAwesomeIcon icon={faGoogle} size="lg"/><br></br>GAM</button></Link>
-                <Link to="/prebid"><button><FontAwesomeIcon icon={faAd} size="lg"/>Prebid</button></Link>
-                <Link to="/timeline"><button><FontAwesomeIcon icon={faPollH} size="lg"/>Timeline</button></Link>
-                <Link to="/config"><button><FontAwesomeIcon icon={faSlidersH} size="lg"/>Config</button></Link>
-                <Link to="/tcf"><button><FontAwesomeIcon icon={faWindowRestore} size="lg"/><br></br>TCF</button></Link>
-                <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} size="lg"/>Debug</button>
+                <Link to="/">
+                  <button><FontAwesomeIcon icon={faHome} size="lg" />Home</button>
+                </Link>
+                <Link to="/googleAdManager">
+                  <button><FontAwesomeIcon icon={faGoogle} size="lg" /><br></br>GAM</button>
+                </Link>
+                <Link to="/prebid">
+                  <button><FontAwesomeIcon icon={faAd} size="lg" />Prebid</button>
+                </Link>
+                <Link to="/timeline">
+                  <button><FontAwesomeIcon icon={faPollH} size="lg" />Timeline</button>
+                </Link>
+                <Link to="/config">
+                  <button><FontAwesomeIcon icon={faSlidersH} size="lg" />Config</button>
+                </Link>
+                <Link to="/tcf">
+                  <button><FontAwesomeIcon icon={faWindowRestore} size="lg" /><br></br>TCF</button>
+                </Link>
+                <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} size="lg" />Debug</button>
               </nav>
             </div>
 
@@ -148,11 +158,9 @@ export const Popup = () => {
                 <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>
               </Route>
             </Switch>
-
           </div>
         </Router>
       </main>
-
     </div>
   );
 };
