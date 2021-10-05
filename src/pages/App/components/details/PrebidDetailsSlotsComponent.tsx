@@ -1,7 +1,7 @@
 import React from 'react';
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
-  const adUnits = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat();
+  const adUnits = prebid?.events?.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
   return <span>
     <h2>Prebid Slots</h2>
     <table>

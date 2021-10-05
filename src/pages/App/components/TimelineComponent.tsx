@@ -30,8 +30,8 @@ class TimeLine extends React.Component<ITimelineComponentProps> {
   generateBidderRows = (prebid: IPrebidDetails) => {
     const allBidderEvents: any[] = [];
     const allEventTimestamps: number[] = [];
-    prebid.events
-      .filter(event => ['bidRequested', 'bidResponse', 'noBid'].includes(event.eventType))
+    prebid?.events
+      ?.filter(event => ['bidRequested', 'bidResponse', 'noBid'].includes(event.eventType))
       .forEach(event => {
         const index: number = allBidderEvents.findIndex(bidderRequest =>
           event.args.auctionId === bidderRequest.args.auctionId

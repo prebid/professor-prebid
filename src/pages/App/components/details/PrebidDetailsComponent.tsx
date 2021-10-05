@@ -5,10 +5,10 @@ import PrebidDetailsBidsComponent from './PrebidDetailsBidsComponent';
 import PrebidDetailsSlotsComponent from './PrebidDetailsSlotsComponent';
 
 const PrebidDetailsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
-  const auctionEndEvents = prebid.events.filter(event => event.eventType === 'auctionEnd');
+  const auctionEndEvents = prebid?.events.filter(event => event.eventType === 'auctionEnd') || [];
   return <span>
-    <p><strong>Version: </strong>{prebid.version}</p>
-    <p><strong>Timeout: </strong>{prebid.config?.timeout}</p>
+    <p><strong>Version: </strong>{prebid?.version}</p>
+    <p><strong>Timeout: </strong>{prebid?.config?.timeout}</p>
     {auctionEndEvents.map((event, index) =>
       <div key={index}>
         <p><strong>Auction Time: </strong>{event.args.auctionEnd - event.args.timestamp} ms</p>
