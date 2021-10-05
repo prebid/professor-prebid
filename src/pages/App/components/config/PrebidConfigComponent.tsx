@@ -1,4 +1,5 @@
 import React from 'react';
+import './PrebidConfigComponent.scss';
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import { HashRouter as Router, Route, Link, Switch, useRouteMatch, useParams } from 'react-router-dom'
 import PrebidConfigPricegranularityComponent from './PrebidConfigPricegranularityComponent';
@@ -14,13 +15,27 @@ const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Ele
     <div>
       <Router>
         <div>
-          <nav>
-            <Link to={`${url}/`}><button>Price Granularity</button></Link>
-            <Link to={`${url}/modules/`}><button>Modules</button></Link>
-            <Link to={`${url}/server`}><button>Server</button></Link>
-            <Link to={`${url}/analytics`}><button>Analytics</button></Link>
-            <Link to={`${url}/privacy`}><button>Privacy</button></Link>
-            <Link to={`${url}/biddersettings`}><button>Bidder Settings</button></Link>
+          <nav >
+            <div className="config-nav">
+              <Link to={`${url}/`}>
+                <button>Price Granularity</button>
+              </Link>
+              <Link to={`${url}/modules/`}>
+                <button>Modules</button>
+              </Link>
+              <Link to={`${url}/server`}>
+                <button>Server</button>
+              </Link>
+              <Link to={`${url}/analytics`}>
+                <button>Analytics</button>
+              </Link>
+              <Link to={`${url}/privacy`}>
+                <button>Privacy</button>
+              </Link>
+              <Link to={`${url}/biddersettings`}>
+                <button>Bidder Settings</button>
+              </Link>
+            </div>
           </nav>
           <Switch>
             <Route exact path={path}>
@@ -44,10 +59,6 @@ const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Ele
           </Switch>
         </div>
       </Router>
-      
-      {/* <pre>
-        {JSON.stringify(prebid.config, null, 4)}
-      </pre> */}
     </div>
   )
 }
