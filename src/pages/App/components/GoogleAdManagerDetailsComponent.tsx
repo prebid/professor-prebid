@@ -6,10 +6,10 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
     const { googleAdManager } = this.props;
     return (
       <span>
-        <p><strong>Request Mode: </strong>{(googleAdManager.sra) ? 'Single Request Architecture' : 'something else like Multi Request Architecture? '}</p>
-        <p><strong>Render Mode: </strong>{(googleAdManager.async) ? 'Asynchronous' : 'Synchronous'}</p>
-        <p><strong>Fetch Before Request: </strong>{(googleAdManager.fetchBeforeRefresh) ? 'YES' : 'NO'}</p>
-        <p><strong>Fetch Before Key/Value: </strong>{(googleAdManager.fetchBeforeKeyvalue) ? 'YES' : 'NO'}</p>
+        <p><strong>Request Mode: </strong>{(googleAdManager?.sra) ? 'Single Request Architecture' : 'something else like Multi Request Architecture? '}</p>
+        <p><strong>Render Mode: </strong>{(googleAdManager?.async) ? 'Asynchronous' : 'Synchronous'}</p>
+        <p><strong>Fetch Before Request: </strong>{(googleAdManager?.fetchBeforeRefresh) ? 'YES' : 'NO'}</p>
+        <p><strong>Fetch Before Key/Value: </strong>{(googleAdManager?.fetchBeforeKeyvalue) ? 'YES' : 'NO'}</p>
 
         <table>
           <thead>
@@ -22,7 +22,7 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
             </tr>
           </thead>
           <tbody>
-            {googleAdManager.slots.map((slot, index) =>
+            {googleAdManager?.slots.map((slot, index) =>
               <tr key={index}>
                 <td>{slot.elementId}</td>
                 <td>{slot.creativeRenderTime}</td>
