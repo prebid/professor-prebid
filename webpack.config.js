@@ -31,6 +31,7 @@ var options = {
     background: path.join(__dirname, 'src', 'background', 'background.ts'),
     inject: path.join(__dirname, 'src', 'inject', 'inject.ts'),
     injected: path.join(__dirname, 'src', 'inject', 'injected.tsx'),
+    openDfpConsole: path.join(__dirname, 'src', 'inject', 'scripts','openDfpConsole.js'),
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['contentScript'],
@@ -91,7 +92,7 @@ var options = {
   },
   resolve: {
     alias: alias,
-    extensions: fileExtensions.map((extension) => '.' + extension).concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
+    extensions: fileExtensions.map(extension => '.' + extension).concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
   },
   plugins: [
     new webpack.ProgressPlugin(),

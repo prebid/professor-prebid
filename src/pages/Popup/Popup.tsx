@@ -87,6 +87,13 @@ export const Popup = (): JSX.Element => {
 
   const handleOpenDebugTab = useCallback(() => popupHandler.openDebugTab(), []);
 
+  const dfp_open_console = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTab = tabs[0];
+      const file = './openDfpConsole.bundle.js';
+      chrome.tabs.executeScript(currentTab.id, { file });
+    });
+  }
   return (
     <div className="popup">
       <header>
@@ -118,12 +125,6 @@ export const Popup = (): JSX.Element => {
             <div className="component-links">
               <nav>
                 <Link to="/">
-                  <button><FontAwesomeIcon icon={faHome} size="lg" />Home</button>
-                </Link>
-                <Link to="/googleAdManager">
-                  <button><FontAwesomeIcon icon={faGoogle} size="lg" /><br></br>GAM</button>
-                </Link>
-                <Link to="/prebid">
                   <button><FontAwesomeIcon icon={faAd} size="lg" />Prebid</button>
                 </Link>
                 <Link to="/timeline">
@@ -136,16 +137,12 @@ export const Popup = (): JSX.Element => {
                   <button><FontAwesomeIcon icon={faWindowRestore} size="lg" /><br></br>TCF</button>
                 </Link>
                 <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} size="lg" />Debug</button>
+                <button onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} size="lg" /><br></br>GAM</button>
               </nav>
             </div>
 
             <Switch>
-              <Route exact path="/" >
-              </Route>
-              <Route exact path="/googleAdManager">
-                <GoogleAdManagerDetailsComponent googleAdManager={googleAdManager}></GoogleAdManagerDetailsComponent>
-              </Route>
-              <Route exact path="/prebid">
+              <Route exact path="/">
                 <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
               </Route>
               <Route exact path="/timeline" >
