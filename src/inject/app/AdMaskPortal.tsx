@@ -25,7 +25,18 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
         }
     }, [container]);
 
-    return ReactDOM.createPortal(<AdMaskComponent key={mask.elementId} input={mask} />, el.current);
+    const { prebid, creativeRenderTime, elementId, winningCPM, winningBidder } = mask;
+    return ReactDOM.createPortal(
+        <AdMaskComponent
+            key={mask.elementId}
+            prebid={prebid}
+            creativeRenderTime={creativeRenderTime}
+            elementId={elementId}
+            winningCPM={winningCPM}
+            winningBidder={winningBidder}
+        />
+        , el.current
+    );
 
 };
 
