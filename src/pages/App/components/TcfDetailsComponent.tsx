@@ -11,12 +11,12 @@ const TcfDetailsComponent = ({ tcf }: ITcfDetailsComponentComponentProps): JSX.E
           <p><strong>Version:</strong> {key}</p>
           <p><strong>CMP Loaded: </strong> {tmpTcf[key].cmpLoaded}</p>
           <p><strong>Consent Data:</strong> {tmpTcf[key].consentData}</p>
-          <p><strong>Decoded Data: </strong> {
+          <p><strong>Decoded Data: </strong></p> {
             tmpTcf[key].consentData ?
               <pre>{JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4)}</pre>
               :
               ''
-          }</p>
+          }
         </span>
       )}
     </span>
