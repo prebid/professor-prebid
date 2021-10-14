@@ -8,6 +8,7 @@ import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { googleAdManager, IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { appHandler } from '../App/appHandler';
+import GanttChartComponent from './components/timeline/GanttChartComponent';
 
 const App = () => {
   const [debugData, setDebugData] = useState<IDebugData[]>([]);
@@ -23,12 +24,13 @@ const App = () => {
         return <span key={key}>
           <h1>Debug Data for Tab {key} </h1>
           <h2>Prebid Details</h2>
-          {prebidDetails && googleAdManager && <Timeline prebid={prebidDetails} googleAdManager={gamDetails}></Timeline>}
-          {prebidDetails && <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent>}
+          {(prebidDetails && googleAdManager) ? <Timeline prebid={prebidDetails} googleAdManager={gamDetails}></Timeline> : ''}
+          {(prebidDetails && googleAdManager) ? <GanttChartComponent prebid={prebidDetails} googleAdManager={gamDetails}></GanttChartComponent> : ''}
+          {prebidDetails ? <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent> : ''}
           <h2>IAB TCF Details</h2>
-          {tcfDetails && <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent>}
+          {tcfDetails ? <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent> : ''}
           <h2>GAM Details</h2>
-          {gamDetails && <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent>}
+          {gamDetails ? <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent> : ''}
         </span>
       })}
     </div >);

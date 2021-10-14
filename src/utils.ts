@@ -22,3 +22,28 @@ export const safelyParseJSON = (data: any): any => {
     return {};
   }
 }
+
+export const createRangeArray = (start: number, end: number, step: number): number[] => {
+  return Array.from(
+    Array.from(
+      Array(
+        Math.ceil((end - start) / step)
+      ).keys()
+    ),
+    x => start + x * step
+  )
+};
+
+export const getMinAndMaxNumber = (timestampArray: number[]) => {
+  let min: number = null;
+  let max: number = null;
+  timestampArray.forEach(timestamp => {
+    if (timestamp < min || min === null) {
+      min = timestamp;
+    }
+    if (timestamp > max || max === null) {
+      max = timestamp;
+    }
+  })
+  return { min, max }
+}

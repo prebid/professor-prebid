@@ -14,8 +14,8 @@ import ReactSwitch from 'react-switch';
 import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/details/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
-import TimeLine from '../App/components/timeline/TimelineComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
+import GanttChartComponent from '../App/components/timeline/GanttChartComponent';
 
 export const Popup = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
@@ -84,7 +84,9 @@ export const Popup = (): JSX.Element => {
     popupHandler.onConsoleToggle(nextChecked);
   }, []);
 
-  const handleOpenDebugTab = useCallback(() => popupHandler.openDebugTab(), []);
+  const handleOpenDebugTab = useCallback(() => {
+    popupHandler.openDebugTab()
+  }, []);
 
   const dfp_open_console = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -93,6 +95,7 @@ export const Popup = (): JSX.Element => {
       chrome.tabs.executeScript(currentTab.id, { file });
     });
   }
+
   return (
     <div className="popup">
       <header>
@@ -145,7 +148,7 @@ export const Popup = (): JSX.Element => {
                 <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
               </Route>
               <Route exact path="/timeline" >
-                <TimeLine prebid={prebid} googleAdManager={googleAdManager}></TimeLine>
+                <GanttChartComponent prebid={prebid} googleAdManager={googleAdManager}></GanttChartComponent>
               </Route>
               <Route path="/config">
                 <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>

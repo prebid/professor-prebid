@@ -1,0 +1,52 @@
+
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    cursor: crosshair;
+}
+
+.chart-wrapper .chart-values {
+    list-style-type: none;
+    padding-left: unset;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    position: absolute;
+    display: flex;
+    align-items: stretch;
+}
+
+.chart-wrapper .chart-bars {
+    list-style-type: none;
+    padding-left: unset;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.chart-wrapper .chart-values li {
+    flex: 1;
+    text-align: start;
+    border-left: 1px dotted lightgrey;
+}
+
+
+.chart-wrapper .chart-bars li {
+    cursor: default;
+    position: relative;
+    color: darkorange;
+    border: darkorange 1px solid;
+    background-color: lightgrey;
+    margin-bottom: 15px;
+    font-size: 14px;
+    border-radius: 10px;
+    padding: 10px 0px;
+    width: 0;
+    height: 10px;
+    opacity: 1;
+    transition: all 0.25s linear 0.2s;
+    div {
+        margin-left: 10px;
+    }
+}
