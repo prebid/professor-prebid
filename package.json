@@ -14,12 +14,16 @@
 		"prettier": "prettier --write '**/*.{js,jsx,css,html}'"
 	},
 	"dependencies": {
+		"@emotion/react": "^11.4.1",
+		"@emotion/styled": "^11.3.0",
 		"@fortawesome/fontawesome-svg-core": "^1.2.36",
 		"@fortawesome/free-brands-svg-icons": "^5.15.4",
 		"@fortawesome/free-regular-svg-icons": "^5.15.4",
 		"@fortawesome/free-solid-svg-icons": "^5.15.4",
 		"@fortawesome/react-fontawesome": "^0.1.15",
 		"@iabtcf/core": "^1.3.1",
+		"@mui/icons-material": "^5.0.3",
+		"@mui/material": "^5.0.3",
 		"@types/doubleclick-gpt": "^2019111201.0.2",
 		"@types/react-router-dom": "^5.1.8",
 		"@types/requestidlecallback": "^0.3.4",
