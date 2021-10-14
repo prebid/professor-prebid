@@ -11,11 +11,10 @@ import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
 import ReactSwitch from 'react-switch';
-import GoogleAdManagerDetailsComponent from '../App/components/GoogleAdManagerDetailsComponent';
 import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/details/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
-import TimeLine from '../App/components/TimelineComponent';
+import TimeLine from '../App/components/timeline/TimelineComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
 
 export const Popup = (): JSX.Element => {
@@ -29,7 +28,7 @@ export const Popup = (): JSX.Element => {
     fetchBeforeRefresh: false,
     slotEvents: {},
     postAuctionStartTimestamp: null,
-    postAuctionEndTimestamp: null,
+    postAuctionEndTimestamp: null
   });
 
   const [prebid, setPrebidDetails] = useState<IPrebidDetails>({

@@ -1,5 +1,5 @@
-import { IPrebidDetails } from "../../../inject/scripts/prebid";
-import { IGoogleAdManagerDetails } from "../../../inject/scripts/googleAdManager";
+import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
 import React from 'react';
 
 
