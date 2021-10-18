@@ -290,9 +290,29 @@ interface IPrebidConfig {
         defaultGdprScope: string;
         cmpApi: string;
         timeout: number;
+        coppa: boolean;
         gdpr: {
             cmpApi: string;
             defaultGdprScope: boolean;
+            timeout: number;
+            allowAuctionWithoutConsent: boolean;
+            consentData: {
+                tcString: string;
+                addtlConsent: string;
+                gdprApplies: boolean;
+            };
+            rules: {
+                purpose: string;
+                enforcePurpose: boolean;
+                enforceVendor: boolean;
+                vendorExceptions: string[];
+            }[]
+        };
+        usp: {
+            cmpApi: string;
+            getUSPData: {
+                uspString: string;
+            }
             timeout: number;
         };
     };
