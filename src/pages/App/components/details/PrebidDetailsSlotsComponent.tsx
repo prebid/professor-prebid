@@ -8,6 +8,9 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Tooltip from '@mui/material/Tooltip';
 
 const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
   const adUnits = prebid?.events?.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
@@ -18,41 +21,39 @@ const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): 
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>code</TableCell>
-              <TableCell align="right">mediaTypes</TableCell>
-              <TableCell align="right">bid</TableCell>
+
+              <TableCell variant="head">Code</TableCell>
+              <TableCell variant="head">Media Types</TableCell>
+              <TableCell variant="head">Bidders</TableCell>
+
             </TableRow>
           </TableHead>
           <TableBody>
-            {adUnits.map((adUnit, index) => (
-              <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell component="th" scope="row">{adUnit.code}</TableCell>
-                <TableCell align="right">{JSON.stringify(adUnit.mediaTypes)}</TableCell>
-                <TableCell align="right">
+            {adUnits.map((adUnit: any, index) => (
 
-                  <table width="100%">
-                    <thead>
-                      <tr>
-                        <th>adId</th>
-                        <th>bidder</th>
-                        <th>cpm</th>
-                        <th>params</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {adUnit.bids.map((bid, index) =>
-                        <tr key={index}>
-                          <td key="adId">{bid.adId}</td>
-                          <td key="bidder">{bid.bidder}</td>
-                          <td key="cpm">{bid.cpm}</td>
-                          <td key="params">{JSON.stringify(bid.params)}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+              <TableRow key={index} sx={{verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
 
+                <TableCell variant="body">{adUnit.code}</TableCell>
+
+                <TableCell variant="body">
+                  <List>
+                    <Typography>Banner Sizes:</Typography>
+                    {adUnit.mediaTypes?.banner?.sizes?.map((size: any) => <ListItem>{size[0]}x{size[1]}</ListItem>)}
+                  </List>
                 </TableCell>
+
+                <TableCell variant="body">
+                  <List>
+                    {adUnit.bids.map((bid: any, index: number) =>
+                      <Tooltip title={JSON.stringify(bid.params, null, 4)} key={index}>
+                        <ListItem>{bid.bidder}</ListItem>
+                      </Tooltip>
+                    )}
+                  </List>
+                </TableCell>
+
               </TableRow>
+
             ))}
           </TableBody>
         </Table>
