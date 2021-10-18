@@ -22,6 +22,8 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
+import PrebidDetailsBidderRequestsComponent from '../App/components/details/PrebidDetailsBidderRequestsComponent';
+import MatSwitch from '@mui/material/Switch';
 
 export const Popup = (): JSX.Element => {
 
@@ -61,10 +63,11 @@ export const Popup = (): JSX.Element => {
     }
   });
 
-  const handleConsoleChange = useCallback((nextChecked: boolean) => {
-    setConsoleState(nextChecked);
-    popupHandler.onConsoleToggle(nextChecked);
-  }, []);
+  const handleConsoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setConsoleState(event.target.checked);
+    popupHandler.onConsoleToggle(event.target.checked);
+  };
+
 
   const handleOpenDebugTab = useCallback(() => {
     popupHandler.openDebugTab()
@@ -106,105 +109,82 @@ export const Popup = (): JSX.Element => {
   return (
 
     <Box className="popup" sx={{ height: '600px', width: '780px' }}>
-
-      <Drawer className="drawer" variant="permanent" anchor="left">
+      <Router>
 
         <AppBar position="static">
+
           <Toolbar className="nav">
-            <h1>Professor Prebid</h1>
-          </Toolbar>
-        </AppBar>
-
-        <InfoComponent prebid={prebid} googleAdManager={googleAdManager}></InfoComponent>
-
-        <Box className="console-switch">
-          <ReactSwitch onChange={handleConsoleChange} checked={consoleState || false} disabled={consoleState === null}
-            checkedIcon={false} uncheckedIcon={false} onColor="#5694cc" onHandleColor="#004E91" activeBoxShadow={null}
-            height={18} width={51} handleDiameter={25} />
-          <div>Open Console</div>
-        </Box>
-
-      </Drawer>
-
-      <Box sx={{ marginLeft: '201px' }}>
-
-        <Router>
-
-          <AppBar position="static">
-
-            <Toolbar className="nav">
-
-              <Link to="/">
-                <IconButton size="small"><FontAwesomeIcon icon={faAd} />
-                  <Typography className="label">
-                    Prebid
-                  </Typography>
-                </IconButton>
-              </Link>
-
-              <Link to="/timeline">
-                <IconButton size="small"><FontAwesomeIcon icon={faPollH} />
-                  <Typography className="label">
-                    Timeline
-                  </Typography>
-                </IconButton>
-              </Link>
-
-              <Link to="/config">
-                <IconButton size="small"><FontAwesomeIcon icon={faSlidersH} />
-                  <Typography className="label">
-                    Config
-                  </Typography>
-                </IconButton>
-              </Link>
-
-              <Link to="/tcf">
-                <IconButton size="small"><FontAwesomeIcon icon={faWindowRestore} />
-                  <Typography className="label">
-                    TCF
-                  </Typography>
-                </IconButton>
-              </Link>
-
-              <IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
-                <div className="label">
-                  Debug
-                </div>
-              </IconButton>
-
-              <IconButton size="small" onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} />
+            <Typography variant="h6">Professor Prebid</Typography>
+            <Link to="/">
+              <IconButton size="small"><FontAwesomeIcon icon={faAd} />
                 <Typography className="label">
-                  GAM
+                  Prebid
                 </Typography>
               </IconButton>
+            </Link>
 
-            </Toolbar>
+            <Link to="/timeline">
+              <IconButton size="small"><FontAwesomeIcon icon={faPollH} />
+                <Typography className="label">
+                  Timeline
+                </Typography>
+              </IconButton>
+            </Link>
 
-          </AppBar>
+            <Link to="/config">
+              <IconButton size="small"><FontAwesomeIcon icon={faSlidersH} />
+                <Typography className="label">
+                  Config
+                </Typography>
+              </IconButton>
+            </Link>
 
-          <Switch>
+            <Link to="/tcf">
+              <IconButton size="small"><FontAwesomeIcon icon={faWindowRestore} />
+                <Typography className="label">
+                  TCF
+                </Typography>
+              </IconButton>
+            </Link>
 
-            <Route exact path="/">
-              <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
-            </Route>
+            <IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
+              <div className="label">
+                Debug
+              </div>
+            </IconButton>
 
-            <Route exact path="/timeline" >
-              <GanttChartComponent prebid={prebid} googleAdManager={googleAdManager}></GanttChartComponent>
-            </Route>
+            <IconButton size="small" onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} />
+              <Typography className="label">
+                GAM
+              </Typography>
+            </IconButton>
+            <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} inputProps={{ 'aria-label': 'controlled' }} sx={{ transform: 'rotate(90deg)' }}></MatSwitch>
+          </Toolbar>
 
-            <Route path="/config">
-              <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>
-            </Route>
+        </AppBar>
 
-            <Route exact path="/tcf">
-              <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>
-            </Route>
+        <Switch>
 
-          </Switch>
+          <Route exact path="/">
+            {prebid && <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>}
+          </Route>
 
-        </Router>
+          <Route exact path="/timeline" >
+            {prebid && <GanttChartComponent prebid={prebid} googleAdManager={googleAdManager}></GanttChartComponent>}
+            {prebid && <PrebidDetailsBidderRequestsComponent prebid={prebid}></PrebidDetailsBidderRequestsComponent>}
+          </Route>
 
-      </Box>
+          <Route path="/config">
+            {prebid && <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>}
+          </Route>
+
+          <Route exact path="/tcf">
+            {tcf && <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>}
+          </Route>
+
+        </Switch>
+
+      </Router>
 
     </Box>
   );
