@@ -17,7 +17,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import Typography from '@mui/material/Typography';
-
+import Stack from '@mui/material/Stack';
 
 const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Element => {
   const { url, path } = useRouteMatch();
@@ -25,7 +25,7 @@ const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Ele
     <Box className="config-wrapper">
       <Router>
         <Box className="row-wrapper">
-          <Box className="config-nav">
+          <Stack direction="column" spacing={0.5}>
             <Link to={`${url}/`}>
               <Button size="small" variant="outlined" startIcon={<EuroSharpIcon />}>
                 <Typography className="label">
@@ -68,25 +68,26 @@ const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Ele
                 </Typography>
               </Button>
             </Link>
-          </Box>
+          </Stack>
+
           <Switch>
             <Route exact path={path}>
               <PrebidConfigPricegranularityComponent prebid={prebid}></PrebidConfigPricegranularityComponent>
             </Route>
             <Route exact path={`${path}/modules/`}>
-              <PrebidConfigModulesComponent prebid={prebid}></PrebidConfigModulesComponent>
+              {prebid.config && <PrebidConfigModulesComponent prebid={prebid}></PrebidConfigModulesComponent>}
             </Route>
             <Route exact path={`${url}/server`} >
-              <PrebidConfigServerComponent prebid={prebid}></PrebidConfigServerComponent>
+              {prebid.config && <PrebidConfigServerComponent prebid={prebid}></PrebidConfigServerComponent>}
             </Route>
             <Route exact path={`${url}/analytics`} >
-              <PrebidConfigAnalyticsComponent prebid={prebid}></PrebidConfigAnalyticsComponent>
+              {prebid.config && <PrebidConfigAnalyticsComponent prebid={prebid}></PrebidConfigAnalyticsComponent>}
             </Route>
             <Route exact path={`${url}/privacy`} >
-              <PrebidConfigPrivacyComponent prebid={prebid}></PrebidConfigPrivacyComponent>
+              {prebid.config && <PrebidConfigPrivacyComponent prebid={prebid}></PrebidConfigPrivacyComponent>}
             </Route>
             <Route exact path={`${url}/biddersettings`} >
-              <PrebidConfigBidderSettingsComponent prebid={prebid}></PrebidConfigBidderSettingsComponent>
+              {prebid.config && <PrebidConfigBidderSettingsComponent prebid={prebid}></PrebidConfigBidderSettingsComponent>}
             </Route>
           </Switch>
         </Box>
