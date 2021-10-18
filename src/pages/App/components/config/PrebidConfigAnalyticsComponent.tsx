@@ -1,12 +1,13 @@
 import React from 'react';
-
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const PrebidConfigAnalyticsComponent = ({ prebid }: PrebidConfigAnalyticsComponentProps): JSX.Element => {
   return (
-    <div>
-      <p><strong>Analytics:</strong>ToDo</p>
-    </div>
+    <Box>
+      <Typography><strong>Analytics:</strong>ToDo</Typography>
+    </Box>
   );
 }
 

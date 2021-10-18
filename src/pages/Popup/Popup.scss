@@ -1,93 +1,45 @@
-@import '../../styling.scss';
+@import "../../styling.scss";
 html {
   background: #eceeef;
 }
 .popup {
-  display: flex;
-  flex-direction: column;
-  height: 600px; 
-  width: 780px;
-
   header {
-    display: flex;
-    align-items: center;
-    height: 48px;
+    height: 62px;
     background: $primary;
+  }
 
-    & > h1 {
-      margin: 0;
-      color: white;
-      padding: 0 22px;
+  .drawer .MuiDrawer-paper {
+    h1 {
       font-size: 15px;
-      font-weight: normal;
     }
-
-    & > button {
-      color: white;
-      border: none;
-      background-color: $primary;
-      margin-left: 475px;
-    }
+    display: flex;
+    width: 201px;
+    background: #eceeef;
+    font-weight: 600;
+    text-align: center;
   }
 
-  nav {
-   display: flex;
-   flex-direction: row;
-   justify-content: start;
-   align-items: flex-start;
-   gap: 5px;
-  }
-
-  main {
+  .nav {
     display: flex;
     flex: 1;
-    background-color: #DCDCDC;
+    flex-direction: row;
+    justify-content: space-between;
 
-    .component-links {
-
-      button {
-        background-color: #DCDCDC;
-        width: 72px;
-        height: 68px;
-        border-width: thin;
-        border-bottom: groove;
-        border-top: none;
-        color: #0E86D4;
-        text-align: center;
-        line-height: 1.6;
-      }
-
-      :last-child {
-        border-right: none;
-      }
+    .label {
+      font-size: 15px;
+      color: #0e86d4;
     }
-  }
 
-  .data-info {
-    display: flex;
-    flex-direction: column;
-    // justify-content: space-between;
-    height: 100%;
-    width: 201px;
-    padding: 15px 0;
-    text-align: center;
-    font-weight: 600;
-    box-sizing: border-box;
-    border-right-style: solid;
-
-    ul.stats-list {
-      margin: 0;
-      list-style-type: none;
-      padding-inline-start: 0;
-
-      li {
-        padding: 8.5px 0;
-        list-style-type: none;
-
-        &:not(:last-child) {
-          border-bottom: 1px solid #cdcfd1;
-        }
-      }
+    button {
+      flex-direction: column;
+      color: #0e86d4;
+      font-size: 25px;
+      width: 72px;
+      height: 52px;
+      text-align: center;
+      line-height: 1.6;
+      border: 2px solid #0e86d4;
+      border-radius: 10%;
     }
   }
 }

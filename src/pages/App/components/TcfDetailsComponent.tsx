@@ -1,17 +1,19 @@
 import { ITcfDetails } from "../../../inject/scripts/tcf";
 import React from 'react';
 import { TCString } from '@iabtcf/core';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const TcfDetailsComponent = ({ tcf }: ITcfDetailsComponentComponentProps): JSX.Element => {
   const tmpTcf = tcf || {};
   return (
-    <span>
+    <Box>
       {Object.keys(tmpTcf).map((key, index) =>
         <span key={index}>
-          <p><strong>Version:</strong> {key}</p>
-          <p><strong>CMP Loaded: </strong> {tmpTcf[key].cmpLoaded}</p>
-          <p><strong>Consent Data:</strong> {tmpTcf[key].consentData}</p>
-          <p><strong>Decoded Data: </strong></p> {
+          <Typography><strong>Version:</strong> {key}</Typography>
+          <Typography><strong>CMP Loaded: </strong> {tmpTcf[key].cmpLoaded}</Typography>
+          <Typography><strong>Consent Data:</strong> {tmpTcf[key].consentData}</Typography>
+          <Typography><strong>Decoded Data: </strong></Typography> {
             tmpTcf[key].consentData ?
               <pre>{JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4)}</pre>
               :
@@ -19,7 +21,7 @@ const TcfDetailsComponent = ({ tcf }: ITcfDetailsComponentComponentProps): JSX.E
           }
         </span>
       )}
-    </span>
+    </Box>
   );
 }
 

@@ -1,20 +1,22 @@
 import React from 'react';
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const PrebidConfigPrivacyComponent = ({ prebid }: PrebidConfigPrivacyComponentProps): JSX.Element => {
   return (
-    <div>
-      <p><strong>Allow Auction Without Consent: </strong>
+    <Box>
+      <Typography><strong>Allow Auction Without Consent: </strong>
         {JSON.stringify(prebid?.config?.consentManagement?.allowAuctionWithoutConsent)}
-      </p>
-      <p><strong>CMP api:</strong> {
+      </Typography>
+      <Typography><strong>CMP api:</strong> {
         prebid?.config?.consentManagement?.cmpApi
           ?
           prebid?.config?.consentManagement?.cmpApi
           :
           prebid?.config?.consentManagement?.gdpr?.cmpApi
-      }</p>
-      <p><strong>Default GDPR Scope:</strong> {
+      }</Typography>
+      <Typography><strong>Default GDPR Scope:</strong> {
         JSON.stringify(
           prebid?.config?.consentManagement?.defaultGdprScope
             ?
@@ -22,15 +24,15 @@ const PrebidConfigPrivacyComponent = ({ prebid }: PrebidConfigPrivacyComponentPr
             :
             prebid?.config?.consentManagement?.gdpr?.defaultGdprScope
         )
-      }</p>
-      <p><strong>Timeout:</strong> {
+      }</Typography>
+      <Typography><strong>Timeout:</strong> {
         prebid?.config?.consentManagement?.timeout
           ?
           prebid?.config?.consentManagement?.timeout
           :
           prebid?.config?.consentManagement?.gdpr.timeout
-      }</p>
-    </div>
+      }</Typography>
+    </Box>
   );
 }
 

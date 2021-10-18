@@ -3,6 +3,10 @@ import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
 import React, { useEffect, useRef } from 'react';
 import { createRangeArray, getMinAndMaxNumber } from '../../../../utils';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Typography from '@mui/material/Typography';
 
 const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentProps): JSX.Element => {
   const gridRef = useRef(null)
@@ -50,7 +54,7 @@ const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentPr
   const createGridBarElements = () => {
     const { min, max } = getMinAndMaxNumber(allEventTimestamps);
     return createRangeArray(min - 50, max + 150, 10)
-      .map((val, index) => <li key={index} {...{ 'data-timestamp': val }}></li>)
+      .map((val, index) => <ListItem key={index} {...{ 'data-timestamp': val }}></ListItem>)
   }
 
   const getGridBarElement = (input: number) => {
@@ -68,9 +72,9 @@ const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentPr
         const endGridBar = getGridBarElement(bidderRequest.args.endTimestamp);
         const left = startGridBar?.offsetLeft;
         const width = endGridBar?.offsetLeft + endGridBar?.offsetWidth - left;
-        return <li key={index} style={{ width: `${width}px`, left: `${left}px` }}>
-          <div>{bidderRequest.args.bidderCode}: {bidderRequest.args.endTimestamp - bidderRequest.args.start}ms</div>
-        </li>
+        return <ListItem key={index} style={{ width: `${width}px`, left: `${left}px` }}>
+          <Typography>{bidderRequest.args.bidderCode}: {bidderRequest.args.endTimestamp - bidderRequest.args.start}ms</Typography>
+        </ListItem>
       }
       );
   }
@@ -86,15 +90,15 @@ const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentPr
   }
 
   return (
-    <div className="chart-wrapper">
-      <ul className="chart-values" ref={gridRef}>
+    <Box className="chart-wrapper">
+      <List className="chart-values" ref={gridRef}>
         {(allBidderEvents.length !== 0) ? createGridBarElements() : ''}
-      </ul>
-      <ul className="chart-bars">
+      </List>
+      <List className="chart-bars">
         {(allBidderEvents.length !== 0) ? createBidderRowElements() : ''}
         {(googleAdManager?.postAuctionStartTimestamp && googleAdManager?.postAuctionEndTimestamp) ? createPostAuctionRow() : ''}
-      </ul>
-    </div>
+      </List>
+    </Box>
   );
 };
 

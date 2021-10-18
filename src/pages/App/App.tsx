@@ -9,6 +9,9 @@ import { ITcfDetails } from '../../inject/scripts/tcf';
 import { googleAdManager, IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { appHandler } from '../App/appHandler';
 import GanttChartComponent from './components/timeline/GanttChartComponent';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+
 
 const App = () => {
   const [debugData, setDebugData] = useState<IDebugData[]>([]);
@@ -18,22 +21,24 @@ const App = () => {
     });
   });
   return (
-    <div>
+    <Box>
       {debugData && Object.keys(debugData)[0] && Object.keys(debugData).map((key: any) => {
         const { prebidDetails, tcfDetails, gamDetails } = debugData[key];
-        return <span key={key}>
-          <h1>Debug Data for Tab {key} </h1>
-          <h2>Prebid Details</h2>
-          {(prebidDetails && googleAdManager) ? <Timeline prebid={prebidDetails} googleAdManager={gamDetails}></Timeline> : ''}
-          {(prebidDetails && googleAdManager) ? <GanttChartComponent prebid={prebidDetails} googleAdManager={gamDetails}></GanttChartComponent> : ''}
-          {prebidDetails ? <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent> : ''}
-          <h2>IAB TCF Details</h2>
-          {tcfDetails ? <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent> : ''}
-          <h2>GAM Details</h2>
-          {gamDetails ? <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent> : ''}
-        </span>
+        return (
+          <Box key={key}>
+            <Typography>Debug Data for Tab {key} </Typography>
+            <Typography>Prebid Details</Typography>
+            {(prebidDetails && googleAdManager) ? <Timeline prebid={prebidDetails} googleAdManager={gamDetails}></Timeline> : ''}
+            {(prebidDetails && googleAdManager) ? <GanttChartComponent prebid={prebidDetails} googleAdManager={gamDetails}></GanttChartComponent> : ''}
+            {prebidDetails ? <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent> : ''}
+            <Typography>IAB TCF Details</Typography>
+            {tcfDetails ? <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent> : ''}
+            <Typography>GAM Details</Typography>
+            {gamDetails ? <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent> : ''}
+          </Box>
+        )
       })}
-    </div >);
+    </Box >);
 };
 
 interface IDebugData {

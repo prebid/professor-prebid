@@ -16,8 +16,15 @@ import PrebidDetailsComponent from '../App/components/details/PrebidDetailsCompo
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
 import GanttChartComponent from '../App/components/timeline/GanttChartComponent';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Drawer from '@mui/material/Drawer';
+import Typography from '@mui/material/Typography';
 
 export const Popup = (): JSX.Element => {
+
   const [consoleState, setConsoleState] = useState<boolean>(null);
 
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>({
@@ -54,6 +61,23 @@ export const Popup = (): JSX.Element => {
     }
   });
 
+  const handleConsoleChange = useCallback((nextChecked: boolean) => {
+    setConsoleState(nextChecked);
+    popupHandler.onConsoleToggle(nextChecked);
+  }, []);
+
+  const handleOpenDebugTab = useCallback(() => {
+    popupHandler.openDebugTab()
+  }, []);
+
+  const dfp_open_console = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTab = tabs[0];
+      const file = './openDfpConsole.bundle.js';
+      chrome.tabs.executeScript(currentTab.id, { file });
+    });
+  }
+
   useEffect(() => {
     setInterval(() => {
       popupHandler.getToggleStateFromStorage((checked: boolean) => {
@@ -79,87 +103,109 @@ export const Popup = (): JSX.Element => {
 
   }, []);
 
-  const handleConsoleChange = useCallback((nextChecked: boolean) => {
-    setConsoleState(nextChecked);
-    popupHandler.onConsoleToggle(nextChecked);
-  }, []);
-
-  const handleOpenDebugTab = useCallback(() => {
-    popupHandler.openDebugTab()
-  }, []);
-
-  const dfp_open_console = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentTab = tabs[0];
-      const file = './openDfpConsole.bundle.js';
-      chrome.tabs.executeScript(currentTab.id, { file });
-    });
-  }
-
   return (
-    <div className="popup">
-      <header>
-        <h1>Professor Prebid</h1>
-        <button><FontAwesomeIcon icon={faEllipsisV} /></button>
-      </header>
-      <main>
-        <aside className="data-info">
-          <InfoComponent prebid={prebid} googleAdManager={googleAdManager}></InfoComponent>
-          <div className="console-switch">
-            <ReactSwitch
-              onChange={handleConsoleChange}
-              checked={consoleState || false}
-              disabled={consoleState === null}
-              checkedIcon={false}
-              uncheckedIcon={false}
-              onColor="#5694cc"
-              onHandleColor="#004E91"
-              activeBoxShadow={null}
-              height={18}
-              width={51}
-              handleDiameter={25}
-            />
-            <div>Open Console</div>
-          </div>
-        </aside>
-        <Router>
-          <div style={{ width: '100%' }}>
-            <div className="component-links">
-              <nav>
-                <Link to="/">
-                  <button><FontAwesomeIcon icon={faAd} size="lg" />Prebid</button>
-                </Link>
-                <Link to="/timeline">
-                  <button><FontAwesomeIcon icon={faPollH} size="lg" />Timeline</button>
-                </Link>
-                <Link to="/config">
-                  <button><FontAwesomeIcon icon={faSlidersH} size="lg" />Config</button>
-                </Link>
-                <Link to="/tcf">
-                  <button><FontAwesomeIcon icon={faWindowRestore} size="lg" /><br></br>TCF</button>
-                </Link>
-                <button onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} size="lg" />Debug</button>
-                <button onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} size="lg" /><br></br>GAM</button>
-              </nav>
-            </div>
 
-            <Switch>
-              <Route exact path="/">
-                <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
-              </Route>
-              <Route exact path="/timeline" >
-                <GanttChartComponent prebid={prebid} googleAdManager={googleAdManager}></GanttChartComponent>
-              </Route>
-              <Route path="/config">
-                <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>
-              </Route>
-              <Route exact path="/tcf">
-                <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>
-              </Route>
-            </Switch>
-          </div>
+    <Box className="popup" sx={{ height: '600px', width: '780px' }}>
+
+      <Drawer className="drawer" variant="permanent" anchor="left">
+
+        <AppBar position="static">
+          <Toolbar className="nav">
+            <h1>Professor Prebid</h1>
+          </Toolbar>
+        </AppBar>
+
+        <InfoComponent prebid={prebid} googleAdManager={googleAdManager}></InfoComponent>
+
+        <Box className="console-switch">
+          <ReactSwitch onChange={handleConsoleChange} checked={consoleState || false} disabled={consoleState === null}
+            checkedIcon={false} uncheckedIcon={false} onColor="#5694cc" onHandleColor="#004E91" activeBoxShadow={null}
+            height={18} width={51} handleDiameter={25} />
+          <div>Open Console</div>
+        </Box>
+
+      </Drawer>
+
+      <Box sx={{ marginLeft: '201px' }}>
+
+        <Router>
+
+          <AppBar position="static">
+
+            <Toolbar className="nav">
+
+              <Link to="/">
+                <IconButton size="small"><FontAwesomeIcon icon={faAd} />
+                  <Typography className="label">
+                    Prebid
+                  </Typography>
+                </IconButton>
+              </Link>
+
+              <Link to="/timeline">
+                <IconButton size="small"><FontAwesomeIcon icon={faPollH} />
+                  <Typography className="label">
+                    Timeline
+                  </Typography>
+                </IconButton>
+              </Link>
+
+              <Link to="/config">
+                <IconButton size="small"><FontAwesomeIcon icon={faSlidersH} />
+                  <Typography className="label">
+                    Config
+                  </Typography>
+                </IconButton>
+              </Link>
+
+              <Link to="/tcf">
+                <IconButton size="small"><FontAwesomeIcon icon={faWindowRestore} />
+                  <Typography className="label">
+                    TCF
+                  </Typography>
+                </IconButton>
+              </Link>
+
+              <IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
+                <div className="label">
+                  Debug
+                </div>
+              </IconButton>
+
+              <IconButton size="small" onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} />
+                <Typography className="label">
+                  GAM
+                </Typography>
+              </IconButton>
+
+            </Toolbar>
+
+          </AppBar>
+
+          <Switch>
+
+            <Route exact path="/">
+              <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>
+            </Route>
+
+            <Route exact path="/timeline" >
+              <GanttChartComponent prebid={prebid} googleAdManager={googleAdManager}></GanttChartComponent>
+            </Route>
+
+            <Route path="/config">
+              <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>
+            </Route>
+
+            <Route exact path="/tcf">
+              <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>
+            </Route>
+
+          </Switch>
+
         </Router>
-      </main>
-    </div>
+
+      </Box>
+
+    </Box>
   );
 };
