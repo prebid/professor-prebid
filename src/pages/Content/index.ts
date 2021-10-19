@@ -122,16 +122,8 @@ class Content {
 
   prepareMaskObjects() {
     logger.log('[Content] preparing masks',);
-
-    const masks = this.googleAdManager?.slots?.map(slot => {
-      const elementId = slot.elementId;
-      const creativeRenderTime = slot.creativeRenderTime;
-      const prebid = this.prebid;
-      return { elementId, creativeRenderTime, prebid };
-    })
-
+    const masks = this.prebid?.slots?.map(slot => ({ elementId: slot.code, prebid: this.prebid }));
     logger.log('[Content] mask ready', masks);
-
     return masks;
   }
 
