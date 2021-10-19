@@ -5,6 +5,7 @@ import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
 import { IPrebidDetails } from '../scripts/prebid';
 import AdMaskPortal from './AdMaskPortal';
+import Box from '@mui/material/Box';
 
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
@@ -37,11 +38,11 @@ const InjectedApp = (): JSX.Element => {
   }, []);
 
   return (
-    <div>
+    <Box>
       {masks.map((mask, index) =>
         <AdMaskPortal key={index} container={document.getElementById(mask.elementId)} mask={mask} consoleState={consoleState} />
       )}
-    </div>
+    </Box>
   );
 };
 

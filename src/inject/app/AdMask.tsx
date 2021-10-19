@@ -1,32 +1,35 @@
 import React from 'react';
 import { IPrebidDetails } from '../scripts/prebid';
-import Select from 'react-select';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 
 const AdMaskComponent = ({ prebid, creativeRenderTime, elementId, winningCPM }: IMaskInputData): JSX.Element => {
 
     const auctionEndEvents = prebid?.events?.filter(event => event.eventType === 'auctionEnd');
     // const options = auctionEndEvents?.map(event => ({ value: event.args.auctionId, label: event.args.timestamp })) || [];
     return (
-        <div>
-            <p> <strong>elementId: </strong>{elementId}</p>
+        <Box>
+            <Typography><strong>selementId: </strong>{elementId}</Typography>
             {/* <Select options={options} /> */}
             {auctionEndEvents?.map(event =>
-                <ul key={event.args.auctionId}>
-                    <li> <strong>auctionId: </strong>{event.args.auctionId}</li>
-                    <li> <strong>auctionTime: </strong>{event.args.auctionEnd - event.args.timestamp}</li>
-                    <li> <strong>creativeRenderTime: </strong>{creativeRenderTime}</li>
-                    <li> <strong>winningCPM: </strong>{winningCPM}</li>
-                    <li key="Bidders">
-                        <strong>Bidders:</strong>
-                        <ul>
+                <List key={event.args.auctionId}>
+                    <ListItem> <strong>auctionId: </strong>{event.args.auctionId}</ListItem>
+                    <ListItem> <strong>auctionTime: </strong>{event.args.auctionEnd - event.args.timestamp}</ListItem>
+                    <ListItem> <strong>creativeRenderTime: </strong>{creativeRenderTime}</ListItem>
+                    <ListItem> <strong>winningCPM: </strong>{winningCPM}</ListItem>
+                    <ListItem key="Bidders">
+                        <Typography><strong>Bidders:</strong></Typography>
+                        <List>
                             {Array.from(new Set(prebid.bids?.map(bidder => bidder.bidder))).map(bidder =>
-                                <li key={bidder as string}>{bidder}</li>
+                                <ListItem key={bidder as string}>{bidder}</ListItem>
                             )}
-                        </ul>
-                    </li>
-                </ul>
+                        </List>
+                    </ListItem>
+                </List>
             )}
-        </div>
+        </Box>
     );
 
 }
