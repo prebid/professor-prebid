@@ -1,6 +1,6 @@
 import React from "react";
 
-export function PriceGranularity() {
+export const PriceGranularity = () => {
     const [state, setState] = React.useState({
         firstBucketMin: 0,
         firstBucketMax: 3,
@@ -13,7 +13,7 @@ export function PriceGranularity() {
         thirdBucketIncre: .001
     })
 
-    function handleChange(evt: any) {
+    const handleChange = (evt: any) => {
         const value = evt.target.value;
         setState({
             ...state,
