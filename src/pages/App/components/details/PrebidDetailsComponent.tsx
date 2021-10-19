@@ -25,16 +25,10 @@ const PrebidDetailsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.E
         </Typography>
         {auctionEndEvents.map((event, index) =>
           <React.Fragment key={index} >
-            <Typography sx={{ fontSize: 14 }}>
+            <Typography>
               <Typography><strong>Auction Start Time: </strong>{new Date(event.args.timestamp).toISOString()}</Typography>
               <Typography><strong>Auction End Time: </strong>{new Date(event.args.auctionEnd).toISOString()}</Typography>
               <Typography><strong>Auction Time: </strong>{event.args.auctionEnd - event.args.timestamp} ms</Typography>
-            </Typography>
-            <Typography variant="h5" component="div">
-            </Typography>
-            <Typography sx={{ mb: 1.5 }} color="text.secondary">
-            </Typography>
-            <Typography variant="body1">
               <Typography><strong>AdUnits Detected: </strong> {allAdUnits.length}</Typography>
               <Typography><strong>Bidders: </strong>{allBidders.length}</Typography>
               <Typography><strong>NoBid / Bid Ratio: </strong>{allNoBids.length} / {allAvailableBids.length}</Typography>
