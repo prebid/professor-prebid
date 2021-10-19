@@ -8,12 +8,12 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import Tooltip from '@mui/material/Tooltip';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 
 const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
-  const adUnits = prebid?.events?.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
+  const adUnits = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
   return (
     <Box>
       <Typography><strong>Prebid Slots</strong></Typography>
@@ -31,25 +31,27 @@ const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): 
           <TableBody>
             {adUnits.map((adUnit: any, index) => (
 
-              <TableRow key={index} sx={{verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
 
                 <TableCell variant="body">{adUnit.code}</TableCell>
 
                 <TableCell variant="body">
-                  <List>
-                    <Typography>Banner Sizes:</Typography>
-                    {adUnit.mediaTypes?.banner?.sizes?.map((size: any) => <ListItem>{size[0]}x{size[1]}</ListItem>)}
-                  </List>
+                  <Typography>Banner Sizes:</Typography>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                    {adUnit.mediaTypes?.banner?.sizes?.map((size: string[], index: number) =>
+                      <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" />
+                    )}
+                  </Stack>
                 </TableCell>
 
                 <TableCell variant="body">
-                  <List>
-                    {adUnit.bids.map((bid: any, index: number) =>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                    {Array.from(new Set(adUnit.bids)).map((bid: any, index: number) =>
                       <Tooltip title={JSON.stringify(bid.params, null, 4)} key={index}>
-                        <ListItem>{bid.bidder}</ListItem>
+                        <Chip size="small" label={bid.bidder} variant="outlined" />
                       </Tooltip>
                     )}
-                  </List>
+                  </Stack>
                 </TableCell>
 
               </TableRow>
