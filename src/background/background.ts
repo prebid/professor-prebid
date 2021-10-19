@@ -64,7 +64,7 @@ class Background {
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
-          console.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
+          logger.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
           sendResponse(this.tabInfo[this.currentActiveTabId].gamDetails);
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
@@ -73,7 +73,7 @@ class Background {
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
-          console.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
+          logger.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
           sendResponse(this.tabInfo[this.currentActiveTabId].prebidDetails);
           break;
         case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
@@ -82,11 +82,11 @@ class Background {
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND:
-          console.log('[Background] send tcf details data:', this.tabInfo, this.currentActiveTabId);
+          logger.log('[Background] send tcf details data:', this.tabInfo, this.currentActiveTabId);
           sendResponse(this.tabInfo[this.currentActiveTabId].tcfDetails);
           break;
         case constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND:
-          console.log('[Background] send debug details data:', this.tabInfo, this.currentActiveTabId);
+          logger.log('[Background] send debug details data:', this.tabInfo, this.currentActiveTabId);
           sendResponse(this.tabInfo);
           break;
         default:
