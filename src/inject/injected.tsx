@@ -23,7 +23,8 @@ const injectApp = () => {
     document.body.appendChild(root);
     ReactDOM.render(<InjectedApp />, document.getElementById(root.id));
   } else {
-    setTimeout(() => injectApp(), 1000)
+    requestIdleCallback(injectApp);
+    // setTimeout(() => injectApp(), 1000)
   }
 }
 injectApp()
