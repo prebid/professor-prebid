@@ -37,15 +37,15 @@ const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): 
 
                 <TableCell variant="body">
                   <Typography>Banner Sizes:</Typography>
-                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                  <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                     {adUnit.mediaTypes?.banner?.sizes?.map((size: string[], index: number) =>
-                      <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" />
+                      <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" sx={{ minWidth: '84px' }} />
                     )}
                   </Stack>
                 </TableCell>
 
                 <TableCell variant="body">
-                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                  <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                     {Array.from(new Set(adUnit.bids)).map((bid: any, index: number) =>
                       <Tooltip title={JSON.stringify(bid.params, null, 4)} key={index}>
                         <Chip size="small" label={bid.bidder} variant="outlined" />
