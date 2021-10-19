@@ -1,7 +1,6 @@
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import React from 'react';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -13,7 +12,6 @@ const PrebidDetailsBidderRequestsComponent = ({ prebid }: IPrebidDetailsComponen
   const auctionEndEvents = prebid?.events.filter(event => event.eventType === 'auctionEnd') || [];
   return (
     <Box>
-      <Typography><strong>Bidder Requests</strong></Typography>
       {auctionEndEvents.map((event, index) =>
         <Box key={index}>
           <TableContainer>
@@ -40,7 +38,7 @@ const PrebidDetailsBidderRequestsComponent = ({ prebid }: IPrebidDetailsComponen
 
                   return (
                     <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell component="th" scope="row">{bidderRequest.bidderCode}</TableCell>
+                      <TableCell align="right">{bidderRequest.bidderCode}</TableCell>
                       <TableCell align="right">{bidderRequest.start}</TableCell>
                       <TableCell align="right">{maxBidReceivedResponseTimestamp}</TableCell>
                       <TableCell align="right">{maxTimeToRespondTimestamp}ms</TableCell>
