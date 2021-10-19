@@ -6,12 +6,10 @@ import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { appHandler } from '../App/appHandler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPollH, faEllipsisV, faSlidersH, faHome, faAd, faLaptopCode, faWindowRestore } from '@fortawesome/free-solid-svg-icons'
+import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore } from '@fortawesome/free-solid-svg-icons'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
-import ReactSwitch from 'react-switch';
-import InfoComponent from '../App/components/InfoComponent';
 import PrebidDetailsComponent from '../App/components/details/PrebidDetailsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
@@ -20,13 +18,13 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import Drawer from '@mui/material/Drawer';
 import Typography from '@mui/material/Typography';
 import PrebidDetailsBidderRequestsComponent from '../App/components/details/PrebidDetailsBidderRequestsComponent';
 import MatSwitch from '@mui/material/Switch';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import TuneIcon from '@mui/icons-material/Tune';
 
 export const Popup = (): JSX.Element => {
-
   const [consoleState, setConsoleState] = useState<boolean>(null);
 
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>({
@@ -82,7 +80,7 @@ export const Popup = (): JSX.Element => {
   }
 
   useEffect(() => {
-    setInterval(() => {
+    const loop = () => {
       popupHandler.getToggleStateFromStorage((checked: boolean) => {
         setConsoleState(checked);
       });
@@ -101,13 +99,12 @@ export const Popup = (): JSX.Element => {
         logger.log('[App] received Prebid Details from background', data);
         setTcfDetails(data)
       });
-
-    }, 1000)
-
+      requestIdleCallback(loop)
+    };
+    loop();
   }, []);
 
   return (
-
     <Box className="popup" sx={{ height: '600px', width: '780px' }}>
       <Router>
 
@@ -116,47 +113,40 @@ export const Popup = (): JSX.Element => {
           <Toolbar className="nav">
             <Typography variant="h6">Professor Prebid</Typography>
             <Link to="/">
-              <IconButton size="small"><FontAwesomeIcon icon={faAd} />
-                <Typography className="label">
-                  Prebid
-                </Typography>
+              <IconButton size="small" >
+                <FontAwesomeIcon icon={faAd} />
+                <Typography className="label">Prebid</Typography>
               </IconButton>
             </Link>
 
             <Link to="/timeline">
-              <IconButton size="small"><FontAwesomeIcon icon={faPollH} />
-                <Typography className="label">
-                  Timeline
-                </Typography>
+              <IconButton size="small" >
+                <FontAwesomeIcon icon={faPollH} />
+                <Typography className="label">Timeline</Typography>
+                {/* <BarChartIcon sx={{ transform: 'rotate(90deg)' }} /> */}
               </IconButton>
             </Link>
 
             <Link to="/config">
-              <IconButton size="small"><FontAwesomeIcon icon={faSlidersH} />
-                <Typography className="label">
-                  Config
-                </Typography>
+              <IconButton size="small">
+                <FontAwesomeIcon icon={faSlidersH} />
+                {/* <TuneIcon sx={{ transform: 'rotate(90deg)' }} /> */}
+                <Typography className="label">Config</Typography>
               </IconButton>
             </Link>
 
             <Link to="/tcf">
               <IconButton size="small"><FontAwesomeIcon icon={faWindowRestore} />
-                <Typography className="label">
-                  TCF
-                </Typography>
+                <Typography className="label">TCF</Typography>
               </IconButton>
             </Link>
 
             <IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
-              <div className="label">
-                Debug
-              </div>
+              <Typography className="label">Debug</Typography>
             </IconButton>
 
             <IconButton size="small" onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} />
-              <Typography className="label">
-                GAM
-              </Typography>
+              <Typography className="label">GAM</Typography>
             </IconButton>
             <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} inputProps={{ 'aria-label': 'controlled' }} sx={{ transform: 'rotate(90deg)' }}></MatSwitch>
           </Toolbar>
@@ -175,7 +165,7 @@ export const Popup = (): JSX.Element => {
           </Route>
 
           <Route path="/config">
-            {prebid && <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>}
+            {prebid?.config && <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>}
           </Route>
 
           <Route exact path="/tcf">
@@ -185,7 +175,7 @@ export const Popup = (): JSX.Element => {
         </Switch>
 
       </Router>
-
     </Box>
+
   );
 };
