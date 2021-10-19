@@ -7,10 +7,13 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 
 const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentProps): JSX.Element => {
   const gridRef = useRef(null)
   const prebidEvents = prebid?.events || [];
+  const gridOffsetPx = 10;
   const allEventTimestamps: number[] = [
     ...prebidEvents
       .filter(event => ['bidRequested', 'bidResponse', 'noBid'].includes(event.eventType))
@@ -53,8 +56,16 @@ const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentPr
 
   const createGridBarElements = () => {
     const { min, max } = getMinAndMaxNumber(allEventTimestamps);
-    return createRangeArray(min - 50, max + 150, 10)
-      .map((val, index) => <ListItem key={index} {...{ 'data-timestamp': val }}></ListItem>)
+    return createRangeArray(min - 50, max + 150, gridOffsetPx)
+      .map((val, index) => <ListItem key={index} {...{ 'data-timestamp': val }}>
+        {/* <Typography sx={{ marginTop: '50px', position: 'absolute' }}>
+          <Tooltip title={index * gridOffsetPx + 'ms'} enterDelay={500} leaveDelay={200}>
+            <Button>
+              |
+            </Button>
+          </Tooltip>
+        </Typography> */}
+      </ListItem>)
   }
 
   const getGridBarElement = (input: number) => {

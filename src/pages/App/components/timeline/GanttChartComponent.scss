@@ -3,7 +3,6 @@
     position: relative;
     width: 100%;
     max-width: 100%;
-    cursor: crosshair;
 }
 
 .chart-wrapper .chart-values {
@@ -30,6 +29,7 @@
     text-align: start;
     border-left: 1px dotted lightgrey;
     padding: 0;
+    align-items: flex-end;
 }
 
 
