@@ -10,25 +10,28 @@ import Box from '@mui/material/Box';
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
   const [masks, setMasks] = useState<IMaskInputData[]>([]);
+  let listenersAdded = false;
 
   logger.log('[InjectedApp] init', consoleState, masks)
 
   const addListeners = () => {
     // listen from content script
-    document.addEventListener(constants.SAVE_MASKS, event => {
-      const customEvent = (event as CustomEvent);
-      const newMasks = customEvent.detail || [];
-      newMasks.forEach((mask: any) => {
-        setMasks((v) => [...v, mask]);
-      })
-    });
+    if (!listenersAdded) {
+      document.addEventListener(constants.SAVE_MASKS, event => {
+        const customEvent = (event as CustomEvent);
+        const newMasks = customEvent.detail || [];
+        newMasks.forEach((mask: any) => {
+          setMasks((v) => [...v, mask]);
+        })
+      });
 
-    // listen from content script
-    document.addEventListener(constants.CONSOLE_TOGGLE, (event) => {
-      const checked = (event as CustomEvent).detail;
-      setConsoleState(checked);
-    });
-
+      // listen from content script
+      document.addEventListener(constants.CONSOLE_TOGGLE, (event) => {
+        const checked = (event as CustomEvent).detail;
+        setConsoleState(checked);
+      });
+      listenersAdded = true;
+    }
   }
 
   useEffect(() => {
