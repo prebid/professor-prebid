@@ -18,15 +18,13 @@ const TcfDetailsComponent = ({ tcf }: ITcfDetailsComponentComponentProps): JSX.E
           <TextField
             label="Consent Data:"
             multiline
-            defaultValue="no consent string found"
-            variant="outlined" value={tmpTcf[key].consentData}
+            variant="outlined" value={tmpTcf[key].consentData ? tmpTcf[key].consentData : "no consent string found"}
             sx={{ width: '100%' }}
           />
           <TextField
             label="Decoded Data: "
             multiline
-            defaultValue="no consent string found" variant="outlined"
-            value={JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4)}
+            value={tmpTcf[key].consentData ? JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4) : "no consent string found"}
             sx={{ width: '100%' }}
           />
         </Box>
