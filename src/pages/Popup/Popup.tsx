@@ -10,17 +10,17 @@ import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore } from '@forta
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
-import PrebidAdUnitsComponent from '../App/components/adUnits/AdUnitsComponent';
-import UserIdsComponent from '../App/components/userIds/TcfDetailsComponent';
-import ConfigComponent from '../App/components/config/ConfigComponent';
-import TimelineComponent from '../App/components/timeline/TimeLineComponent';
+import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
+import UserIdsComponent from './components/userIds/TcfDetailsComponent';
+import ConfigComponent from './components/config/ConfigComponent';
+import TimelineComponent from './components/timeline/TimeLineComponent';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import MatSwitch from '@mui/material/Switch';
-import BidsComponent from '../App/components/bids/BidsComponent';
+import BidsComponent from './components/bids/BidsComponent';
 import MoneyIcon from '@mui/icons-material/Money';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -149,8 +149,8 @@ export const Popup = (): JSX.Element => {
                 <Typography className="label">User ID</Typography>
               </IconButton>
             </Link>
-            {/* 
-            <IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
+
+            {/*<IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
               <Typography className="label">Debug</Typography>
             </IconButton> */}
 

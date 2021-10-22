@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import UserIdsComponent from './components/userIds/TcfDetailsComponent';
-import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
-import GoogleAdManagerDetailsComponent from './components/GoogleAdManagerDetailsComponent';
-import TimeLineComponent from './components/timeline/TimeLineComponent';
+import UserIdsComponent from '../Popup/components/userIds/TcfDetailsComponent';
+import PrebidAdUnitsComponent from '../Popup/components/adUnits/AdUnitsComponent';
+import GoogleAdManagerDetailsComponent from '../Popup/components/GoogleAdManagerDetailsComponent';
+import TimeLineComponent from '../Popup/components/timeline/TimeLineComponent';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
-import { appHandler } from '../App/appHandler';
+import { appHandler } from './appHandler';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 
-const App = () => {
+const DebugComponent = () => {
   const [debugData, setDebugData] = useState<IDebugData[]>([]);
 
   useEffect(() => {
@@ -47,4 +47,4 @@ interface IDebugData {
   gamDetails: IGoogleAdManagerDetails;
 }
 
-export default App;
+export default DebugComponent;
