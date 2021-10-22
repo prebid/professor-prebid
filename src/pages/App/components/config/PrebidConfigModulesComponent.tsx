@@ -14,9 +14,9 @@ const PrebidConfigModulesComponent = ({ prebid }: PrebidConfigModulesComponentPr
         {prebid.config.floors?.data?.skipRate && <Typography><strong>Skip Rate:</strong> {prebid.config?.floors?.data?.skipRate}</Typography>}
         {prebid.config.floors?.data?.currency && <Typography><strong>Currency:</strong> {prebid.config?.floors?.data?.currency}</Typography>}
         {prebid.config.floors?.data?.schema?.fields && <Typography><strong>Schema/Field:</strong></Typography>}
-        {prebid.config.floors?.data?.schema?.fields && <List>{prebid.config.floors.data.schema.fields.map((field: string, index: number) => <ListItem key={index}>{field}</ListItem>)}</List>}
+        {prebid.config.floors?.data?.schema?.fields && <List dense={true}>{prebid.config.floors.data.schema.fields.map((field: string, index: number) => <ListItem key={index}>{field}</ListItem>)}</List>}
         {prebid.config.floors?.data?.values && <Typography><strong>Values:</strong></Typography>}
-        {prebid.config.floors?.data?.values && <List>
+        {prebid.config.floors?.data?.values && <List dense={true}>
           {Object.keys(prebid.config.floors.data.values).map(
             (key: any, index: number) => <ListItem key={index}>{key}: {prebid.config.floors.data.values[key]}</ListItem>
           )}</List>}
@@ -35,13 +35,18 @@ const PrebidConfigModulesComponent = ({ prebid }: PrebidConfigModulesComponentPr
       <Box>
         {/* GDPR Enforcement*/}
         {prebid.config.consentManagement?.gdpr?.rules && <Typography><strong>GDPR Enforcement:</strong></Typography>}
-        {prebid.config.consentManagement?.gdpr?.rules && <Typography><strong>Rules:</strong> {prebid.config.consentManagement.gdpr.cmpApi}</Typography>}
+
         {prebid.config.consentManagement?.gdpr?.rules &&
-          <List>
-            {Object.keys(prebid.config.consentManagement.gdpr.rules).map(
-              (key: any, index: number) => <ListItem key={index}>{key}: {prebid.config.consentManagement.gdpr.rules[key]}</ListItem>
+          <React.Fragment>
+            {prebid.config.consentManagement.gdpr.rules.map((rule: any, index) =>
+              <List dense={true}>
+                <Typography><strong>Rules #{index}</strong></Typography>
+                {Object.keys(rule).map((key: any, index) =>
+                  <ListItem key={index}>{key}: {String(rule[key])}</ListItem>
+                )}
+              </List>
             )}
-          </List>
+          </React.Fragment>
         }
       </Box>
 

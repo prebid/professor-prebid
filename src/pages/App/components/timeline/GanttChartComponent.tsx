@@ -80,8 +80,8 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
           width
         });
         return (
-          <ListItem key={index} style={{ width: `${width}px`, left: `${left}px` }}>
-            <Typography>{bidderRequest.bidderCode}: {endTimestamp - bidderRequest.start}ms</Typography>
+          <ListItem key={index} style={{ width: `${width}px`, left: `${left}px`, whiteSpace: 'nowrap', paddingLeft: '5px' }}>
+            {`${bidderRequest.bidderCode}: ${endTimestamp - bidderRequest.start}ms`}
           </ListItem>
         )
       }
@@ -104,10 +104,10 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
               <TableRow onClick={() => setOpen(!open)}>
                 <TableCell colSpan={3}>
                   <Box className="chart-wrapper">
-                    <List className="chart-values" ref={gridRef}>
+                    <List className="chart-values" ref={gridRef} dense={true}>
                       {createGridBarElements()}
                     </List>
-                    <List className="chart-bars">
+                    <List className="chart-bars" dense={true}>
                       {createBidderRowElements()}
                     </List>
                   </Box>

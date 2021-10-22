@@ -14,7 +14,7 @@ const AdMaskComponent = ({ prebid, creativeRenderTime, elementId, winningCPM }: 
             <Typography><strong>selementId: </strong>{elementId}</Typography>
             {/* <Select options={options} /> */}
             {auctionEndEvents?.map(event =>
-                <List key={event.args.auctionId}>
+                <List key={event.args.auctionId} dense={true}>
                     <ListItem> <strong>auctionId: </strong>{event.args.auctionId}</ListItem>
                     <ListItem> <strong>auctionTime: </strong>{event.args.auctionEnd - event.args.timestamp}</ListItem>
                     <ListItem> <strong>creativeRenderTime: </strong>{creativeRenderTime}</ListItem>

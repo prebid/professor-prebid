@@ -12,7 +12,7 @@ const InfoComponent = ({ prebid, googleAdManager }: IInfoComponentProps): JSX.El
   const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map(event => event?.args.bidder)))
   return (
     <Box>
-      <List>
+      <List dense={true}>
         <ListItem>GAM Slots Detected: {googleAdManager?.slots?.length}</ListItem>
         <ListItem>AdUnits Detected: {allAdUnits.length}</ListItem>
         <ListItem>Bidders: {allBidders.length}</ListItem>

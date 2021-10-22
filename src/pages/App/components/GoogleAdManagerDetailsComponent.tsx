@@ -38,14 +38,14 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
                   <TableCell align="right">{slot.creativeRenderTime}</TableCell>
                   <TableCell align="right">{slot.name}</TableCell>
                   <TableCell align="right">
-                    <List>
+                    <List dense={true}>
                       {slot.sizes.map((size, index) => (
                         <ListItem key={index}>{size}</ListItem>
                       ))}
                     </List>
                   </TableCell>
                   <TableCell align="right">
-                    <List>
+                    <List dense={true}>
                       {slot.targeting.map((targeting, index) => (
                         <ListItem key={index}>
                           <Typography><strong>{targeting.key}: </strong>{targeting.value}</Typography>
