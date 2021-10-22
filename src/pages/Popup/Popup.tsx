@@ -11,7 +11,7 @@ import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from '../App/components/adUnits/AdUnitsComponent';
-import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
+import UserIdsComponent from '../App/components/userIds/TcfDetailsComponent';
 import ConfigComponent from '../App/components/config/ConfigComponent';
 import TimelineComponent from '../App/components/timeline/TimeLineComponent';
 import AppBar from '@mui/material/AppBar';
@@ -22,6 +22,8 @@ import Typography from '@mui/material/Typography';
 import MatSwitch from '@mui/material/Switch';
 import BidsComponent from '../App/components/bids/BidsComponent';
 import MoneyIcon from '@mui/icons-material/Money';
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 export const Popup = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
@@ -127,9 +129,9 @@ export const Popup = (): JSX.Element => {
 
             <Link to="/timeline">
               <IconButton size="small" >
+                {/* <BarChartIcon sx={{ transform: 'rotate(270deg)' }} /> */}
                 <FontAwesomeIcon icon={faPollH} />
                 <Typography className="label">Timeline</Typography>
-                {/* <BarChartIcon sx={{ transform: 'rotate(90deg)' }} /> */}
               </IconButton>
             </Link>
 
@@ -141,9 +143,10 @@ export const Popup = (): JSX.Element => {
               </IconButton>
             </Link>
 
-            <Link to="/tcf">
-              <IconButton size="small"><FontAwesomeIcon icon={faWindowRestore} />
-                <Typography className="label">TCF</Typography>
+            <Link to="/userId">
+              <IconButton size="small" >
+                <PeopleOutlineIcon />
+                <Typography className="label">User ID</Typography>
               </IconButton>
             </Link>
             {/* 
@@ -178,8 +181,8 @@ export const Popup = (): JSX.Element => {
             {prebid?.config && <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>}
           </Route>
 
-          <Route exact path="/tcf">
-            {tcf && <TcfDetailsComponent tcf={tcf}></TcfDetailsComponent>}
+          <Route exact path="/userId">
+            {tcf && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
           </Route>
 
         </Switch>
