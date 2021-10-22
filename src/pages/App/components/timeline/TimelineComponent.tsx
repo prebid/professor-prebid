@@ -1,9 +1,9 @@
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
 import React from 'react';
-import GanttChartComponent from '../timeline/GanttChartComponent';
+import GanttChartComponent from './GanttChartComponent';
 
-const TimeLine = ({ prebid }: ITimelineComponentProps): JSX.Element => {
+const TimeLineComponent = ({ prebid }: ITimeLineComponentProps): JSX.Element => {
   const auctionEndEvents = prebid.events.filter(event => event.eventType === 'auctionEnd') || [];
   return (
     <React.Fragment>
@@ -14,8 +14,8 @@ const TimeLine = ({ prebid }: ITimelineComponentProps): JSX.Element => {
   )
 };
 
-interface ITimelineComponentProps {
+interface ITimeLineComponentProps {
   prebid: IPrebidDetails;
 }
 
-export default TimeLine;
+export default TimeLineComponent;

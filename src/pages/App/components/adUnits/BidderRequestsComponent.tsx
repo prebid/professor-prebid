@@ -8,7 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-const PrebidDetailsBidderRequestsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
+const BidderRequestsComponent = ({ prebid }: IBidderRequestsComponentProps): JSX.Element => {
   const auctionEndEvents = prebid?.events.filter(event => event.eventType === 'auctionEnd') || [];
   return (
     <Box>
@@ -54,8 +54,8 @@ const PrebidDetailsBidderRequestsComponent = ({ prebid }: IPrebidDetailsComponen
     </Box>
   )
 };
-interface IPrebidDetailsComponentProps {
+interface IBidderRequestsComponentProps {
   prebid: IPrebidDetails;
 }
 
-export default PrebidDetailsBidderRequestsComponent;
+export default BidderRequestsComponent;

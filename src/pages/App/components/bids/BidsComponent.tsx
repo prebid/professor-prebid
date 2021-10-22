@@ -119,7 +119,7 @@ const Row = ({ bid }: any) => {
   )
 }
 
-const PrebidDetailsBidsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
+const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   const bidsReceived = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.bidsReceived).flat() || [];
   const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.noBids).flat() || [];
   return (
@@ -176,8 +176,8 @@ const PrebidDetailsBidsComponent = ({ prebid }: IPrebidDetailsComponentProps): J
   )
 };
 
-interface IPrebidDetailsComponentProps {
+interface IBidsComponentProps {
   prebid: IPrebidDetails;
 }
 
-export default PrebidDetailsBidsComponent;
+export default BidsComponent;

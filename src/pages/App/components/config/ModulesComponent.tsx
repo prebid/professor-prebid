@@ -5,9 +5,9 @@ import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 
-const PrebidConfigModulesComponent = ({ prebid }: PrebidConfigModulesComponentProps): JSX.Element => {
+const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
   return (
-    <Box>
+    <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
       <Box>
         {/* Floors  */}
         {prebid.config.floors && <Typography><strong>Floors:</strong></Typography>}
@@ -74,8 +74,8 @@ const PrebidConfigModulesComponent = ({ prebid }: PrebidConfigModulesComponentPr
   );
 }
 
-interface PrebidConfigModulesComponentProps {
+interface IModulesComponentProps {
   prebid: IPrebidDetails
 }
 
-export default PrebidConfigModulesComponent;
+export default ModulesComponent;

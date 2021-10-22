@@ -3,16 +3,16 @@ import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-const PrebidConfigAnalyticsComponent = ({ prebid }: PrebidConfigAnalyticsComponentProps): JSX.Element => {
+const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element => {
   return (
-    <Box>
+    <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
       <Typography><strong>Analytics:</strong>ToDo</Typography>
     </Box>
   );
 }
 
-interface PrebidConfigAnalyticsComponentProps {
+interface InalyticsComponentProps {
   prebid: IPrebidDetails
 }
 
-export default PrebidConfigAnalyticsComponent;
+export default AnalyticsComponent;

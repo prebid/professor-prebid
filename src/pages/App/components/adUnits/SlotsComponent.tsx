@@ -12,7 +12,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 
-const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): JSX.Element => {
+const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
   const adUnits = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
   return (
     <Box>
@@ -56,8 +56,8 @@ const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): 
   )
 };
 
-interface IPrebidDetailsComponentProps {
+interface ISlotsComponentProps {
   prebid: IPrebidDetails;
 }
 
-export default PrebidDetailsSlotsComponent;
+export default SlotsComponent;

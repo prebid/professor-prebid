@@ -1,13 +1,12 @@
 import React from 'react';
-import './PrebidConfigComponent.scss';
 import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import { HashRouter as Router, Route, Link, Switch, useRouteMatch, useParams } from 'react-router-dom'
-import PrebidConfigPricegranularityComponent from './PrebidConfigPricegranularityComponent';
-import PrebidConfigModulesComponent from './PrebidConfigModulesComponent';
-import PrebidConfigServerComponent from './PrebidConfigServerComponent';
-import PrebidConfigAnalyticsComponent from './PrebidConfigAnalyticsComponent';
-import PrebidConfigPrivacyComponent from './PrebidConfigPrivacyComponent';
-import PrebidConfigBidderSettingsComponent from './PrebidConfigBidderSettingsComponent';
+import PriceGranularityComponent from './PriceGranularityComponent';
+import ModulesComponent from './ModulesComponent';
+import Server2ServerComponent from './Server2ServerComponent';
+import AnalyticsComponent from './AnalyticsComponent';
+import PrivacyComponent from './PrivacyComponent';
+import BidderSettingsComponent from './BidderSettingsComponent';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import EuroSharpIcon from '@mui/icons-material/EuroSharp';
@@ -18,76 +17,96 @@ import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import { styled } from '@mui/styles';
+import { ITcfDetails } from "../../../../inject/scripts/tcf";
 
-const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Element => {
+const NaviButton = styled(Button)({
+  display: 'flex',
+  flexDirection: 'column',
+  color: '#0e86d4',
+  border: '1px solid #0e86d4',
+  width: '80px',
+  textAlign: 'center',
+  borderRadius: '10%',
+  fontSize: '20px',
+  '& .label': {
+    fontSize: '10px'
+  }
+});
+
+const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
   const { url, path } = useRouteMatch();
   return (
-    <Box className="config-wrapper">
+    <Box>
       <Router>
-        <Box className="row-wrapper">
+        <Box sx={{
+          padding: '5px 5px 5px 5px',
+          display: 'flex',
+          flexDirection: 'row'
+        }}>
           <Stack direction="column" spacing={0.5}>
             <Link to={`${url}/`}>
-              <Button size="small" variant="outlined" startIcon={<EuroSharpIcon />}>
+              <NaviButton size="small" variant="outlined" startIcon={<EuroSharpIcon />}>
                 <Typography className="label">
                   Price Granularity
                 </Typography>
-              </Button>
+              </NaviButton>
             </Link>
             <Link to={`${url}/modules/`}>
-              <Button variant="outlined" startIcon={<BusinessIcon />}>
+              <NaviButton variant="outlined" startIcon={<BusinessIcon />}>
                 <Typography className="label">
                   Modules
                 </Typography>
-              </Button>
+              </NaviButton>
             </Link>
             <Link to={`${url}/server`}>
-              <Button variant="outlined" startIcon={<DnsIcon />}>
+              <NaviButton variant="outlined" startIcon={<DnsIcon />}>
                 <Typography className="label">
                   Server
                 </Typography>
-              </Button>
+              </NaviButton>
             </Link>
             <Link to={`${url}/analytics`}>
-              <Button variant="outlined" startIcon={<AnalyticsIcon />}>
+              <NaviButton variant="outlined" startIcon={<AnalyticsIcon />}>
                 <Typography className="label">
                   Analytics
                 </Typography>
-              </Button>
+              </NaviButton>
             </Link>
             <Link to={`${url}/privacy`}>
-              <Button variant="outlined" startIcon={<PrivacyTipIcon />}>
+              <NaviButton variant="outlined" startIcon={<PrivacyTipIcon />}>
                 <Typography className="label">
                   Privacy
                 </Typography>
-              </Button>
+              </NaviButton>
             </Link>
             <Link to={`${url}/biddersettings`}>
-              <Button variant="outlined" startIcon={<SettingsApplicationsIcon />}>
+              <NaviButton variant="outlined" startIcon={<SettingsApplicationsIcon />}>
                 <Typography className="label">
                   Bidder Settings
                 </Typography>
-              </Button>
+              </NaviButton>
             </Link>
           </Stack>
 
           <Switch>
             <Route exact path={path}>
-              <PrebidConfigPricegranularityComponent prebid={prebid}></PrebidConfigPricegranularityComponent>
+              <PriceGranularityComponent prebid={prebid}></PriceGranularityComponent>
             </Route>
             <Route exact path={`${path}/modules/`}>
-              {prebid.config && <PrebidConfigModulesComponent prebid={prebid}></PrebidConfigModulesComponent>}
+              {prebid.config && <ModulesComponent prebid={prebid}></ModulesComponent>}
             </Route>
             <Route exact path={`${url}/server`} >
-              {prebid.config && <PrebidConfigServerComponent prebid={prebid}></PrebidConfigServerComponent>}
+              {prebid.config && <Server2ServerComponent prebid={prebid}></Server2ServerComponent>}
             </Route>
             <Route exact path={`${url}/analytics`} >
-              {prebid.config && <PrebidConfigAnalyticsComponent prebid={prebid}></PrebidConfigAnalyticsComponent>}
+              {prebid.config && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>}
             </Route>
             <Route exact path={`${url}/privacy`} >
-              {prebid.config && <PrebidConfigPrivacyComponent prebid={prebid}></PrebidConfigPrivacyComponent>}
+              {prebid.config && <PrivacyComponent prebid={prebid} tcf={tcf}></PrivacyComponent>}
             </Route>
             <Route exact path={`${url}/biddersettings`} >
-              {prebid.config && <PrebidConfigBidderSettingsComponent prebid={prebid}></PrebidConfigBidderSettingsComponent>}
+              {prebid.config && <BidderSettingsComponent prebid={prebid}></BidderSettingsComponent>}
             </Route>
           </Switch>
         </Box>
@@ -96,8 +115,9 @@ const PrebidConfigComponent = ({ prebid }: IPrebidConfigComponentProps): JSX.Ele
   )
 }
 
-interface IPrebidConfigComponentProps {
+interface IConfigComponentProps {
   prebid: IPrebidDetails;
+  tcf: ITcfDetails;
 }
 
-export default PrebidConfigComponent;
+export default ConfigComponent;

@@ -1,12 +1,12 @@
+
 import React from 'react';
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
-import PrebidDetailsBidsComponent from './PrebidDetailsBidsComponent';
-import PrebidDetailsSlotsComponent from './PrebidDetailsSlotsComponent';
+import SlotsComponent from './SlotsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
-const PrebidAdUnitsComponent = ({ prebid }: IPrebidAdUnitsComponentProps): JSX.Element => {
+const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const allAvailableBids = prebid.events.filter(event => event.eventType === 'bidResponse') || [];
   const allNoBids = prebid.events.filter(event => event.eventType === 'noBid') || [];
   const allAdUnits = Array.from(new Set(prebid?.events?.filter(event => event.eventType === 'auctionInit').reduce((previousValue, currentValue) => [].concat(previousValue, currentValue.args.adUnitCodes), [])))
@@ -20,14 +20,14 @@ const PrebidAdUnitsComponent = ({ prebid }: IPrebidAdUnitsComponentProps): JSX.E
         <Typography><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
         <Typography><strong>Bidders:</strong> {allBidders.length}</Typography>
         <Typography><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
-        {prebid.events[0] && <PrebidDetailsSlotsComponent prebid={prebid}></PrebidDetailsSlotsComponent>}
+        {prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}
       </CardContent>
     </Card>
   )
 };
 
-interface IPrebidAdUnitsComponentProps {
+interface IAdUnitsComponentProps {
   prebid: IPrebidDetails;
 }
 
-export default PrebidAdUnitsComponent;
+export default AdUnitsComponent;

@@ -10,17 +10,17 @@ import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore } from '@forta
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
-import PrebidAdUnitsComponent from '../App/components/details/PrebidAdUnitsComponent';
+import PrebidAdUnitsComponent from '../App/components/adUnits/AdUnitsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
-import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
-import TimelineComponent from '../App/components/timeline/TimelineComponent';
+import ConfigComponent from '../App/components/config/ConfigComponent';
+import TimelineComponent from '../App/components/timeline/TimeLineComponent';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import MatSwitch from '@mui/material/Switch';
-import PrebidDetailsBidsComponent from '../App/components/details/PrebidDetailsBidsComponent';
+import BidsComponent from '../App/components/bids/BidsComponent';
 import MoneyIcon from '@mui/icons-material/Money';
 
 export const Popup = (): JSX.Element => {
@@ -167,7 +167,7 @@ export const Popup = (): JSX.Element => {
           </Route>
 
           <Route exact path="/bids">
-            {prebid && <PrebidDetailsBidsComponent prebid={prebid}></PrebidDetailsBidsComponent>}
+            {prebid && <BidsComponent prebid={prebid}></BidsComponent>}
           </Route>
 
           <Route exact path="/timeline">
@@ -175,7 +175,7 @@ export const Popup = (): JSX.Element => {
           </Route>
 
           <Route path="/config">
-            {prebid?.config && <PrebidConfigComponent prebid={prebid}></PrebidConfigComponent>}
+            {prebid?.config && <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>}
           </Route>
 
           <Route exact path="/tcf">

@@ -1,13 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import './App.scss';
 import TcfDetailsComponent from './components/TcfDetailsComponent';
-import PrebidDetailsComponent from './components/details/PrebidDetailsComponent';
+import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import GoogleAdManagerDetailsComponent from './components/GoogleAdManagerDetailsComponent';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { appHandler } from '../App/appHandler';
-import TimelineComponent from './components/timeline/TimelineComponent';
+import TimeLineComponent from './components/timeline/TimeLineComponent';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
@@ -30,8 +29,8 @@ const App = () => {
           <Box key={key}>
             <Typography>Debug Data for Tab {key} </Typography>
             <Typography>Prebid Details</Typography>
-            {prebidDetails && <TimelineComponent prebid={prebidDetails}></TimelineComponent>}
-            {prebidDetails && <PrebidDetailsComponent prebid={prebidDetails}></PrebidDetailsComponent>}
+            {prebidDetails && <TimeLineComponent prebid={prebidDetails}></TimeLineComponent>}
+            {prebidDetails && <PrebidAdUnitsComponent prebid={prebidDetails}></PrebidAdUnitsComponent>}
             <Typography>IAB TCF Details</Typography>
             {tcfDetails && <TcfDetailsComponent tcf={tcfDetails}></TcfDetailsComponent>}
             <Typography>GAM Details</Typography>

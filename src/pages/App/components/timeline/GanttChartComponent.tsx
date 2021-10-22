@@ -1,4 +1,3 @@
-import './GanttChartComponent.scss';
 import { IPrebidDetails, IBidderEvent } from "../../../../inject/scripts/prebid";
 import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
 import React, { useEffect, useRef } from 'react';
@@ -18,8 +17,62 @@ import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { makeStyles } from '@mui/styles';
+
+const useStyles = makeStyles({
+  root: {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '100%',
+    '& .chart-values': {
+      listStyleType: 'none',
+      paddingLeft: 'unset',
+      height: '100%',
+      width: '100%',
+      maxWidth: '100%',
+      position: 'absolute',
+      display: 'flex',
+      alignItems: 'stretch'
+    },
+    '& .chart-bars': {
+      listStyleType: 'none',
+      paddingLeft: 'unset',
+      height: '100 %',
+      width: '100 %',
+      maxWidth: '100%'
+    },
+    '& .chart-values li': {
+      flex: 1,
+      textAlign: 'start',
+      borderLeft: '1px dotted lightgrey',
+      padding: 0,
+      alignItems: 'flex-end'
+    },
+    '& .chart-bars li': {
+      cursor: 'default',
+      position: 'relative',
+      color: 'darkorange',
+      border: 'darkorange 1px solid',
+      backgroundColor: 'lightgrey',
+      marginBottom: '15px',
+      fontSize: '14px',
+      borderRadius: '10px',
+      padding: '10px 0px',
+      width: 0,
+      height: '10px',
+      opacity: 1,
+      transition: ' all 0.25s linear 0.2s',
+      '& div': {
+        marginLeft: '10px'
+      }
+    },
+  }
+});
+
+
 
 const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
+  const classes = useStyles();
   const gridRef = useRef(null)
   const prebidEvents = prebid?.events || [];
   const gridStep = 10;
@@ -103,7 +156,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
             <TableBody>
               <TableRow onClick={() => setOpen(!open)}>
                 <TableCell colSpan={3}>
-                  <Box className="chart-wrapper">
+                  <Box className={classes.root}>
                     <List className="chart-values" ref={gridRef} dense={true}>
                       {createGridBarElements()}
                     </List>

@@ -3,9 +3,9 @@ import { IPrebidDetails } from "../../../../inject/scripts/prebid";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-const PrebidConfigPricegranularityComponent = ({ prebid }: PrebidConfigPricegranularityComponentProps): JSX.Element => {
+const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps): JSX.Element => {
   return (
-    <Box sx={{ width: '100%', textAlign: 'center' }}>
+    <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
       {(() => {
         switch (prebid?.config?.priceGranularity) {
           case 'low':
@@ -58,17 +58,16 @@ const PrebidConfigPricegranularityComponent = ({ prebid }: PrebidConfigPricegran
         }
       })()}
       {prebid?.config?.customPriceBucket?.buckets?.map((bucket, index) =>
-        <Box key={index} sx={{ width: '100%', padding: '5px 5px 5px 5px' }}>
-          <Typography><strong>Bucket #{index}:</strong></Typography>
-          <Typography>Precision: {bucket.precision} | Min: {bucket.min} | Max: {bucket.max} | Increment: {bucket.increment}</Typography>
+        <Box key={index} sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
+          <Typography><strong>Bucket #{index}:</strong>Precision: {bucket.precision} | Min: {bucket.min} | Max: {bucket.max} | Increment: {bucket.increment}</Typography>
         </Box>
       )}
     </Box>
   );
 }
 
-interface PrebidConfigPricegranularityComponentProps {
+interface IPriceGranularityComponentProps {
   prebid: IPrebidDetails
 }
 
-export default PrebidConfigPricegranularityComponent;
+export default PriceGranularityComponent;

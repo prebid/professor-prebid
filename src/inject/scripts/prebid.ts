@@ -328,8 +328,32 @@ interface IPrebidConfig {
         publisherDomain: string;
     };
     s2sConfig: {
+        accountId: string;
         adapter: string;
         adapterOptions: any;
+        app: {
+            bundle: string;
+            id: any;
+            name: string;
+            paid: number;
+            privacypolicy: number;
+            publisher: {
+                domain: string;
+                id: string;
+                name: string;
+            };
+            storeurl: string;
+        };
+        bidders: string[];
+        device: {
+            ifa: string;
+            ifa_type: string;
+            lmt: string;
+            os: string;
+        }
+        enabled: boolean;
+        endpoint: string;
+        syncEndpoint: string;
         maxBids: number;
         syncUrlModifier: any;
         timeout: number;
