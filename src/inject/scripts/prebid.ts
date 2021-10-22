@@ -14,6 +14,7 @@ class Prebid {
     bids: IPrebidBid[];
     slots: IPrebidSlot[];
     config: IPrebidConfig;
+    eids: IPrebidEids[];
 
 
     init(): void {
@@ -62,7 +63,7 @@ class Prebid {
 
         if (!prebidBids[0] && Object.keys(allBidResponses)[0]) {
             Object.keys(allBidResponses).forEach(key => {
-                allBidResponses[key].forEach(bid => {
+                allBidResponses[key][0] && allBidResponses[key].forEach(bid => {
                     prebidBids.push(bid);
                 });
             })
@@ -128,6 +129,7 @@ class Prebid {
     sendDetailsToContentScript(): void {
         this.bids = this.getPrebidBids();
         this.config = this.globalPbjs.getConfig();
+        this.eids = this.globalPbjs?.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
         this.slots = this.getPrebidSlots();
         this.processBids();
         const prebidDetail: IPrebidDetails = {
@@ -137,7 +139,8 @@ class Prebid {
             events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [],
             config: this.config,
             bids: this.bids,
-            auctions: null
+            auctions: null,
+            eids: this.eids
         };
         sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     }
@@ -418,6 +421,7 @@ export interface IPrebidDetails {
     config: IPrebidConfig;
     bids: IPrebidBid[];
     auctions: IPrebidAuctions;
+    eids: IPrebidEids[];
 }
 
 interface IPrebidAuctionEventData {
@@ -514,4 +518,17 @@ export interface IPrebidBidderRequest {
 
 interface IPrebidAuctions {
     [key: string]: IPrebidAuctionEventData;
+}
+
+export interface IPrebidEids {
+    source: string;
+    uids: IUuids[];
+}
+
+interface IUuids {
+    atype: number;
+    id: string;
+    ext: {
+        [key: string]: string;
+    }
 }

@@ -11,7 +11,7 @@ import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
-import UserIdsComponent from './components/userIds/TcfDetailsComponent';
+import UserIdsComponent from './components/userIds/UserIdsComponent';
 import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import AppBar from '@mui/material/AppBar';
@@ -46,7 +46,8 @@ export const Popup = (): JSX.Element => {
     events: [],
     config: null,
     bids: [],
-    auctions: {}
+    auctions: {},
+    eids: null
   });
 
   const [tcf, setTcfDetails] = useState<ITcfDetails>({
@@ -122,7 +123,7 @@ export const Popup = (): JSX.Element => {
 
             <Link to="/bids">
               <IconButton size="small" >
-                <MoneyIcon />
+                <MoneyIcon fontSize="medium" />
                 <Typography className="label">Bids</Typography>
               </IconButton>
             </Link>
@@ -145,7 +146,7 @@ export const Popup = (): JSX.Element => {
 
             <Link to="/userId">
               <IconButton size="small" >
-                <PeopleOutlineIcon />
+                <PeopleOutlineIcon fontSize="medium" />
                 <Typography className="label">User ID</Typography>
               </IconButton>
             </Link>
@@ -154,7 +155,8 @@ export const Popup = (): JSX.Element => {
               <Typography className="label">Debug</Typography>
             </IconButton> */}
 
-            <IconButton size="small" onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} />
+            <IconButton size="small" onClick={dfp_open_console}>
+              <FontAwesomeIcon icon={faGoogle} />
               <Typography className="label">GAM</Typography>
             </IconButton>
 
