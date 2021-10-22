@@ -176,7 +176,7 @@ export interface IPrebidBid {
         clickUrl: string;
     }
     netRevenue: true
-    originalCpm: string;
+    originalCpm: number;
     originalCurrency: string;
     params: {
         publisherId: string;
@@ -364,7 +364,7 @@ interface IPrebidConfig {
     [key: string]: any;
 }
 
-interface IBidderEvent {
+export interface IBidderEvent {
     args: {
         auctionId: string;
         bidderCode: string;
