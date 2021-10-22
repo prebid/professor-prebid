@@ -10,19 +10,18 @@ import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore } from '@forta
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
-import PrebidDetailsComponent from '../App/components/details/PrebidDetailsComponent';
+import PrebidAdUnitsComponent from '../App/components/details/PrebidAdUnitsComponent';
 import TcfDetailsComponent from '../App/components/TcfDetailsComponent';
 import PrebidConfigComponent from '../App/components/config/PrebidConfigComponent';
-import GanttChartComponent from '../App/components/timeline/GanttChartComponent';
+import TimelineComponent from '../App/components/timeline/TimelineComponent';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import PrebidDetailsBidderRequestsComponent from '../App/components/details/PrebidDetailsBidderRequestsComponent';
 import MatSwitch from '@mui/material/Switch';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import TuneIcon from '@mui/icons-material/Tune';
+import PrebidDetailsBidsComponent from '../App/components/details/PrebidDetailsBidsComponent';
+import MoneyIcon from '@mui/icons-material/Money';
 
 export const Popup = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
@@ -65,7 +64,6 @@ export const Popup = (): JSX.Element => {
     setConsoleState(event.target.checked);
     popupHandler.onConsoleToggle(event.target.checked);
   };
-
 
   const handleOpenDebugTab = useCallback(() => {
     popupHandler.openDebugTab()
@@ -111,11 +109,19 @@ export const Popup = (): JSX.Element => {
         <AppBar position="static">
 
           <Toolbar className="nav">
-            <Typography variant="h6">Professor Prebid</Typography>
+            <Typography variant="h6">Prof. Prebid</Typography>
+
             <Link to="/">
               <IconButton size="small" >
                 <FontAwesomeIcon icon={faAd} />
-                <Typography className="label">Prebid</Typography>
+                <Typography className="label">Ad Units</Typography>
+              </IconButton>
+            </Link>
+
+            <Link to="/bids">
+              <IconButton size="small" >
+                <MoneyIcon />
+                <Typography className="label">Bids</Typography>
               </IconButton>
             </Link>
 
@@ -140,14 +146,15 @@ export const Popup = (): JSX.Element => {
                 <Typography className="label">TCF</Typography>
               </IconButton>
             </Link>
-
+            {/* 
             <IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
               <Typography className="label">Debug</Typography>
-            </IconButton>
+            </IconButton> */}
 
             <IconButton size="small" onClick={dfp_open_console}><FontAwesomeIcon icon={faGoogle} />
               <Typography className="label">GAM</Typography>
             </IconButton>
+
             <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} inputProps={{ 'aria-label': 'controlled' }} sx={{ transform: 'rotate(90deg)' }}></MatSwitch>
           </Toolbar>
 
@@ -156,12 +163,15 @@ export const Popup = (): JSX.Element => {
         <Switch>
 
           <Route exact path="/">
-            {prebid && <PrebidDetailsComponent prebid={prebid}></PrebidDetailsComponent>}
+            {prebid && <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>}
           </Route>
 
-          <Route exact path="/timeline" >
-            {prebid && <GanttChartComponent prebid={prebid} googleAdManager={googleAdManager}></GanttChartComponent>}
-            {prebid && <PrebidDetailsBidderRequestsComponent prebid={prebid}></PrebidDetailsBidderRequestsComponent>}
+          <Route exact path="/bids">
+            {prebid && <PrebidDetailsBidsComponent prebid={prebid}></PrebidDetailsBidsComponent>}
+          </Route>
+
+          <Route exact path="/timeline">
+            {prebid && <TimelineComponent prebid={prebid}></TimelineComponent>}
           </Route>
 
           <Route path="/config">
@@ -176,6 +186,5 @@ export const Popup = (): JSX.Element => {
 
       </Router>
     </Box>
-
   );
 };

@@ -16,34 +16,28 @@ const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): 
   const adUnits = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
   return (
     <Box>
-      <Typography><strong>Prebid Slots</strong></Typography>
+      <Typography><strong>Slots</strong></Typography>
       <TableContainer>
-        <Table>
+        <Table size="small">
           <TableHead>
             <TableRow>
-
               <TableCell variant="head">Code</TableCell>
               <TableCell variant="head">Media Types</TableCell>
               <TableCell variant="head">Bidders</TableCell>
-
             </TableRow>
           </TableHead>
           <TableBody>
             {adUnits.map((adUnit: any, index) => (
-
               <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
-
                 <TableCell variant="body">{adUnit.code}</TableCell>
-
                 <TableCell variant="body">
-                  <Typography>Banner Sizes:</Typography>
+                  Banner Sizes:
                   <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                     {adUnit.mediaTypes?.banner?.sizes?.map((size: string[], index: number) =>
                       <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" sx={{ minWidth: '84px' }} />
                     )}
                   </Stack>
                 </TableCell>
-
                 <TableCell variant="body">
                   <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                     {Array.from(new Set(adUnit.bids)).map((bid: any, index: number) =>
@@ -53,9 +47,7 @@ const PrebidDetailsSlotsComponent = ({ prebid }: IPrebidDetailsComponentProps): 
                     )}
                   </Stack>
                 </TableCell>
-
               </TableRow>
-
             ))}
           </TableBody>
         </Table>
