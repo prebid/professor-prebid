@@ -1,5 +1,5 @@
 import './GanttChartComponent.scss';
-import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidDetails, IBidderEvent } from "../../../../inject/scripts/prebid";
 import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
 import React, { useEffect, useRef } from 'react';
 import { createRangeArray, getMinAndMaxNumber } from '../../../../utils';
@@ -7,65 +7,32 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentProps): JSX.Element => {
+const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
   const gridRef = useRef(null)
   const prebidEvents = prebid?.events || [];
-  const gridOffsetPx = 10;
-  const allEventTimestamps: number[] = [
-    ...prebidEvents
-      .filter(event => ['bidRequested', 'bidResponse', 'noBid'].includes(event.eventType))
-      .map(event => [event.args.start, event.args.requestTimestamp, event.args.responseTimestamp])
-      .flat()
-      .filter(el => el)
-      .sort(),
-    googleAdManager?.postAuctionStartTimestamp,
-    googleAdManager?.postAuctionEndTimestamp,
-  ];
-
-  const allBidderEvents =
-    prebidEvents
-      .filter(event => ['bidRequested', 'bidResponse', 'noBid'].includes(event.eventType))
-      .reduce((previousValue, event) => {
-        const tmp = [...previousValue];
-        const index = tmp.findIndex(bidderRequest =>
-          event.args.auctionId === bidderRequest.args.auctionId
-          && (
-            event.args.bidderCode === bidderRequest.args.bidderCode || event.args.bidder === bidderRequest.args.bidderCode
-          )
-        );
-        switch (event.eventType) {
-          case 'bidRequested': {
-            tmp.push(event);
-            break;
-          }
-          case 'bidResponse': {
-            tmp[index].args.endTimestamp = event.args.responseTimestamp;
-            break;
-          }
-          case 'noBid': {
-            tmp[index].args.endTimestamp = Math.floor(tmp[index].args.start + event.elapsedTime - tmp[index].elapsedTime);
-            break
-          }
-        }
-        return tmp;
-      }, []);
-
+  const gridStep = 10;
+  const tableRows: any[] = [];
+  const [open, setOpen] = React.useState(false);
 
   const createGridBarElements = () => {
-    const { min, max } = getMinAndMaxNumber(allEventTimestamps);
-    return createRangeArray(min - 50, max + 150, gridOffsetPx)
-      .map((val, index) => <ListItem key={index} {...{ 'data-timestamp': val }}>
-        {/* <Typography sx={{ marginTop: '50px', position: 'absolute' }}>
-          <Tooltip title={index * gridOffsetPx + 'ms'} enterDelay={500} leaveDelay={200}>
-            <Button>
-              |
-            </Button>
-          </Tooltip>
-        </Typography> */}
-      </ListItem>)
+    const min = auctionEndEvent.args.timestamp;
+    const max = auctionEndEvent.args.auctionEnd;
+    return createRangeArray(min, max, gridStep).map((val, index) =>
+      <ListItem key={index} {...{ 'data-timestamp': val }}>
+      </ListItem>
+    )
   }
 
   const getGridBarElement = (input: number) => {
@@ -76,46 +43,117 @@ const GanttChartComponent = ({ prebid, googleAdManager }: IGanttChartComponentPr
   }
 
   const createBidderRowElements = () => {
-    return allBidderEvents
-      .sort((a, b) => a.args.start - b.args.start)
+    return auctionEndEvent.args.bidderRequests
+      .sort((a, b) => a.start - b.start)
       .map((bidderRequest, index) => {
-        const startGridBar = getGridBarElement(bidderRequest.args.start);
-        const endGridBar = getGridBarElement(bidderRequest.args.endTimestamp);
+        const bidRequestEvent = prebidEvents.find(event =>
+          event.eventType === 'bidRequested'
+          && event.args.auctionId === bidderRequest.auctionId
+          && (
+            event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode
+          ));
+
+        const bidResponseEvent = prebidEvents.find(event =>
+          event.eventType === 'bidResponse'
+          && event.args.auctionId === bidderRequest.auctionId
+          && (
+            event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode
+          ));
+
+        const noBidEvent = prebidEvents.find(event =>
+          event.eventType === 'noBid'
+          && event.args.auctionId === bidderRequest.auctionId
+          && (
+            event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode
+          ));
+
+        const endTimestamp = bidResponseEvent ? bidResponseEvent.args.responseTimestamp : Math.floor(bidderRequest.start + noBidEvent?.elapsedTime - bidRequestEvent?.elapsedTime);
+        const startGridBar = getGridBarElement(bidderRequest.start);
+        const endGridBar = getGridBarElement(endTimestamp);
         const left = startGridBar?.offsetLeft;
         const width = endGridBar?.offsetLeft + endGridBar?.offsetWidth - left;
-        return <ListItem key={index} style={{ width: `${width}px`, left: `${left}px` }}>
-          <Typography>{bidderRequest.args.bidderCode}: {bidderRequest.args.endTimestamp - bidderRequest.args.start}ms</Typography>
-        </ListItem>
+        tableRows.push({
+          bidderCode: bidderRequest.bidderCode,
+          startTimeStamp: bidderRequest.start,
+          endTimestamp,
+          left,
+          width
+        });
+        return (
+          <ListItem key={index} style={{ width: `${width}px`, left: `${left}px` }}>
+            <Typography>{bidderRequest.bidderCode}: {endTimestamp - bidderRequest.start}ms</Typography>
+          </ListItem>
+        )
       }
       );
   }
 
-  const createPostAuctionRow = () => {
-    const startGridBar = getGridBarElement(googleAdManager.postAuctionStartTimestamp);
-    const endGridBar = getGridBarElement(googleAdManager.postAuctionEndTimestamp);
-    const left = startGridBar?.offsetLeft;
-    const width = endGridBar?.offsetLeft + endGridBar?.offsetWidth - left;
-    return <li style={{ width: `${width}px`, left: `${left}px` }} >
-      <div>post-auction: {googleAdManager.postAuctionEndTimestamp - googleAdManager.postAuctionStartTimestamp}ms</div>
-    </li>
-  }
-
   return (
-    <Box className="chart-wrapper">
-      <List className="chart-values" ref={gridRef}>
-        {(allBidderEvents.length !== 0) ? createGridBarElements() : ''}
-      </List>
-      <List className="chart-bars">
-        {(allBidderEvents.length !== 0) ? createBidderRowElements() : ''}
-        {(googleAdManager?.postAuctionStartTimestamp && googleAdManager?.postAuctionEndTimestamp) ? createPostAuctionRow() : ''}
-      </List>
-    </Box>
+    auctionEndEvent.args.bidderRequests[0] ?
+      <React.Fragment>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Auction Start: {new Date(auctionEndEvent.args.timestamp).toISOString()}</TableCell>
+                <TableCell >Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}</TableCell>
+                <TableCell >Auction End: {new Date(auctionEndEvent.args.auctionEnd).toISOString()} </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow onClick={() => setOpen(!open)}>
+                <TableCell colSpan={3}>
+                  <Box className="chart-wrapper">
+                    <List className="chart-values" ref={gridRef}>
+                      {createGridBarElements()}
+                    </List>
+                    <List className="chart-bars">
+                      {createBidderRowElements()}
+                    </List>
+                  </Box>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell colSpan={3}>
+                  <Collapse in={open} timeout="auto" unmountOnExit>
+                    <Box >
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Bidder</TableCell>
+                            <TableCell>Request Timestamp</TableCell>
+                            <TableCell>Response Timestamp</TableCell>
+                            <TableCell>Response Time</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {tableRows.map((row, index) =>
+                            <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                              <TableCell>{row.bidderCode}</TableCell>
+                              <TableCell>{row.startTimeStamp}</TableCell>
+                              <TableCell>{row.endTimestamp}</TableCell>
+                              <TableCell>{row.endTimestamp - row.startTimeStamp}ms</TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </Box>
+                  </Collapse>
+                </TableCell>
+              </TableRow>
+              <TableRow></TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </React.Fragment>
+      :
+      <span></span>
   );
 };
 
 interface IGanttChartComponentProps {
   prebid: IPrebidDetails;
-  googleAdManager: IGoogleAdManagerDetails;
+  auctionEndEvent: IBidderEvent;
 }
 
 export default GanttChartComponent;
