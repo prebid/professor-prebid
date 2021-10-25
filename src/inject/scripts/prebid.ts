@@ -283,6 +283,30 @@ interface IPrebidConfigPriceBucket {
     increment: number;
 }
 
+interface IPrebidConfigUserSync {
+    name: string;
+    storage: {
+        type: string;
+        name: string;
+        expires: number
+    }; params: {
+        [key: string]: string
+    }
+}
+
+interface IPrebidConfigUserSync {
+    syncEnabled: boolean
+    filterSettings: {
+        image: {
+            bidders: string;
+            filter: string;
+        }
+    },
+    syncsPerBidder: number;
+    syncDelay: number;
+    auctionDelay: number;
+    userIds: IPrebidConfigUserSync[];
+}
 interface IPrebidConfig {
     debug: boolean;
     bidderTimeout: number;
@@ -373,18 +397,7 @@ interface IPrebidConfig {
     disableAjaxTimeout: boolean;
     maxNestedIframes: number;
     auctionOptions: any;
-    userSync: {
-        syncEnabled: boolean
-        filterSettings: {
-            image: {
-                bidders: string;
-                filter: string;
-            }
-        },
-        syncsPerBidder: number;
-        syncDelay: number;
-        auctionDelay: number;
-    },
+    userSync: IPrebidConfigUserSync,
     cache: {
         url: string;
     },
