@@ -15,6 +15,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Chip from '@mui/material/Chip';
 import DataTreeView from '../DataTreeViewComponent'
+import Tooltip from '@mui/material/Tooltip';
 
 const Row = ({ bid }: any) => {
   const [open, setOpen] = React.useState(false);
@@ -35,6 +36,7 @@ const Row = ({ bid }: any) => {
         <TableCell>{bid.size}</TableCell>
       </TableRow>
       <TableRow>
+        {/* <TableCell></TableCell> */}
         <TableCell colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Table size="small">
@@ -45,29 +47,10 @@ const Row = ({ bid }: any) => {
                   <TableCell>Org. Currency</TableCell>
                   <TableCell>Time to Respond</TableCell>
                   <TableCell>Status Message</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>MediaType</TableCell>
+                  <TableCell>Media Type</TableCell>
                   <TableCell>Source</TableCell>
-                  <TableCell>Net. Revenue</TableCell>
                   <TableCell>TTL</TableCell>
-                  <TableCell>Meta</TableCell>
                   <TableCell>Adserver Targeting</TableCell>
-                  {/* <TableCell>dealId</TableCell>
-                  <TableCell>Params</TableCell>
-                  <TableCell>adId</TableCell>
-                  <TableCell>requestId</TableCell>
-                  <TableCell>Creative Id</TableCell>
-                  <TableCell>Auction Id</TableCell>
-                  <TableCell>responseTimestamp</TableCell>
-                  <TableCell>requestTimestamp</TableCell>
-                  <TableCell>Ad Url</TableCell>
-                  <TableCell>Ad</TableCell>
-                  <TableCell>pbLg</TableCell>
-                  <TableCell>pbMg</TableCell>
-                  <TableCell>pbHg</TableCell>
-                  <TableCell>pbAg</TableCell>
-                  <TableCell>pbDg</TableCell>
-                  <TableCell>pbCg</TableCell> */}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -77,38 +60,15 @@ const Row = ({ bid }: any) => {
                   <TableCell>{bid.originalCurrency}</TableCell>
                   <TableCell>{bid.timeToRespond}</TableCell>
                   <TableCell>{bid.statusMessage}</TableCell>
-                  <TableCell>{bid.status}</TableCell>
-                  <TableCell>{JSON.stringify(bid.mediaType)}</TableCell>
+                  <TableCell>{bid.mediaType}</TableCell>
                   <TableCell>{bid.source}</TableCell>
-                  <TableCell>{JSON.stringify(bid.netRevenue)}</TableCell>
                   <TableCell>{bid.ttl}</TableCell>
                   <TableCell>
-                    {/* {JSON.stringify(bid.meta)} */}
-                    <DataTreeView treeItems={bid.meta}></DataTreeView>
-                  </TableCell>
-                  <TableCell>{JSON.stringify(bid.params)}</TableCell>
-                  <TableCell>
-                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px', }}>
                       {bid.adserverTargeting && Object.keys(bid.adserverTargeting).map(key =>
-                        <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} variant="outlined" size="small" />
+                        <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} variant="outlined" size="small" sx={{ maxWidth: '110px' }} />
                       )}</Stack>
                   </TableCell>
-                  {/* 
-                  <TableCell>{bid.dealId}</TableCell>
-                  <TableCell>{bid.adId}</TableCell>
-                  <TableCell>{bid.requestId}</TableCell>
-                  <TableCell>{bid.creativeId}</TableCell>
-                  <TableCell>{bid.auctionId}</TableCell>
-                  <TableCell>{bid.responseTimestamp}</TableCell>
-                  <TableCell>{bid.requestTimestamp}</TableCell>
-                  <TableCell><a href={bid.adUrl}>click</a></TableCell>
-                  <TableCell>{bid.ad}</TableCell>
-                  <TableCell>{bid.pbLg}</TableCell>
-                  <TableCell>{bid.pbMg}</TableCell>
-                  <TableCell>{bid.pbHg}</TableCell>
-                  <TableCell>{bid.pbAg}</TableCell>
-                  <TableCell>{bid.pbDg}</TableCell>
-                  <TableCell>{bid.pbCg}</TableCell> */}
                 </TableRow>
               </TableBody>
             </Table>
@@ -125,13 +85,13 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   return (
     <Box>
       <Typography><strong>Received Bids</strong></Typography>
-      <TableContainer sx={{ width: '100%' }}>
+      <TableContainer sx={{ width: '100%', maxWidth: '100%' }}>
         <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell />
               <TableCell>Bidder Code</TableCell>
-              <TableCell>Wwidth</TableCell>
+              <TableCell>Width</TableCell>
               <TableCell>Height</TableCell>
               <TableCell>Cpm</TableCell>
               <TableCell>Currency</TableCell>
