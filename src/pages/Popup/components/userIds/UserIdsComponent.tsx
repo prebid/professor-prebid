@@ -9,38 +9,69 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { maxWidth } from "@mui/system";
 
 const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
+  console.log(prebid.eids)
   return (
-    <div>
-      {prebid.eids?.map((eid, index) =>
-        <Accordion key={index} sx={{backgroundColor: 'unset'}}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-            <Typography>
-              <strong>Source:</strong> &nbsp;{eid.source}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography>
-              <strong>UIds:</strong>
-              <List>
-                {eid?.uids.map((uid, index) =>
-                  <React.Fragment key={'uid' + index}>
-                    <ListItem sx={{ paddingLeft: '15px' }}>{index + 1}: {uid.id} | atype: {uid.atype} </ListItem>
-                    {uid.ext && <ListItem><strong>Ext:</strong></ListItem>}
-                    {uid.ext && Object.keys(uid.ext).map((key, index) =>
-                      <React.Fragment key={'ext' + index}>
-                        <ListItem key={'ext' + index} sx={{ paddingLeft: '30px' }}><strong>{key}:</strong> {uid.ext[key]} </ListItem>
-                      </React.Fragment>
-                    )}
-                  </React.Fragment>
-                )}
-              </List>
-            </Typography>
-          </AccordionDetails>
-        </Accordion>
-      )}
-    </div>
+    <Box>
+      {prebid.eids && prebid.eids[0] && <Typography><strong>User IDs</strong></Typography>}
+      <TableContainer>
+        <Table sx={{ maxWidth: '100%' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Source</TableCell>
+              <TableCell>User ID</TableCell>
+              <TableCell>Atype</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {prebid.eids?.map((eid) => (
+              eid.uids.map((uid, index) => (
+                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell><strong>{eid.source}</strong></TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word', }}>{uid.id}</TableCell>
+                  <TableCell>{uid.atype}</TableCell>
+                </TableRow>
+              ))
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <br />
+      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <Typography><strong>Config</strong></Typography>}
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Storage Type</TableCell>
+              <TableCell>Storage Expires</TableCell>
+              <TableCell>Storage Name</TableCell>
+              <TableCell>Params</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {prebid.config?.userSync?.userIds?.map((userId, index) => (
+              <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}              >
+                <TableCell><strong>{userId.name}</strong></TableCell>
+                <TableCell>{userId.storage?.type}</TableCell>
+                <TableCell>{userId.storage?.expires}</TableCell>
+                <TableCell>{userId.storage?.name}</TableCell>
+                <TableCell>{userId.storage?.name}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box >
   );
 }
 
