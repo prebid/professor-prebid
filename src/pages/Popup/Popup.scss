@@ -5,7 +5,7 @@ html {
 .popup {
   header {
     height: 62px;
-    background: $primary;
+    background: $orange;
   }
 
   .drawer .MuiDrawer-paper {
@@ -14,7 +14,7 @@ html {
     }
     display: flex;
     width: 201px;
-    background: #eceeef;
+    background: $gray;
     font-weight: 600;
     text-align: center;
   }
@@ -27,18 +27,18 @@ html {
 
     .label {
       font-size: 15px;
-      color: #0e86d4;
+      color: $blue;
     }
 
     button {
       flex-direction: column;
-      color: #0e86d4;
+      color: $blue;
       font-size: 25px;
       width: 72px;
       height: 52px;
       text-align: center;
       line-height: 1.6;
-      border: 2px solid #0e86d4;
+      border: 2px solid $blue;
       border-radius: 10%;
     }
   }
