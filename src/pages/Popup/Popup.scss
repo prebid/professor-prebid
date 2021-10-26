@@ -1,6 +1,6 @@
 @import "../../styling.scss";
 html {
-  background: #eceeef;
+  background: $gray;
 }
 .popup {
   header {
@@ -14,7 +14,7 @@ html {
     }
     display: flex;
     width: 201px;
-    background: #eceeef;
+    background: $gray;
     font-weight: 600;
     text-align: center;
   }

@@ -13,7 +13,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map(event => event?.args.bidder)))
 
   return (
-    <Card sx={{ backgroundColor: '#eceeef' }}>
+    <Card sx={{ backgroundColor: '#ecf3f5' }}>
       <CardContent>
         {prebid.version && <Typography><strong>Version: </strong>{prebid.version}</Typography>}
         {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
