@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './ad-mask.scss';
 import logger from '../../logger';
 import constants from '../../constants.json';
@@ -8,37 +8,33 @@ import AdMaskPortal from './AdMaskPortal';
 import Box from '@mui/material/Box';
 
 const InjectedApp = (): JSX.Element => {
+  logger.log('[InjectedApp] init');
+
   const [consoleState, setConsoleState] = useState(false);
-  const [masks, setMasks] = useState<IMaskInputData[]>([]);
-  let listenersAdded = false;
-
-  logger.log('[InjectedApp] init', consoleState, masks)
-
-  const addListeners = () => {
-    // listen from content script
-    if (!listenersAdded) {
-      document.addEventListener(constants.SAVE_MASKS, event => {
-        const customEvent = (event as CustomEvent);
-        const newMasks = customEvent.detail || [];
-        newMasks.forEach((mask: any) => {
-          setMasks((v) => [...v, mask]);
-        })
-      });
-
-      // listen from content script
-      document.addEventListener(constants.CONSOLE_TOGGLE, (event) => {
-        const checked = (event as CustomEvent).detail;
-        setConsoleState(checked);
-      });
-      listenersAdded = true;
-    }
-  }
-
+  const handleConsoleStateChange = useCallback(event => {
+    const checked = (event as CustomEvent).detail;
+    setConsoleState(checked);
+  }, [])
   useEffect(() => {
-    addListeners();
-    // request initial console state
-    sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
+    document.addEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
+    return () => {
+      document.removeEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
+    }
+  }, [handleConsoleStateChange]);
+  sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
+
+  const [masks, setMasks] = useState<IMaskInputData[]>([]);
+  const handleNewMasks = useCallback(event => {
+    const customEvent = (event as CustomEvent);
+    const newMasks = customEvent.detail || [];
+    setMasks(newMasks);
   }, []);
+  useEffect(() => {
+    document.addEventListener(constants.SAVE_MASKS, handleNewMasks);
+    return () => {
+      document.removeEventListener(constants.SAVE_MASKS, handleNewMasks);
+    }
+  },[handleNewMasks]);
 
   return (
     <Box>
