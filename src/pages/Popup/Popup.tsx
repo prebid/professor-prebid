@@ -6,7 +6,7 @@ import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { appHandler } from '../App/appHandler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore } from '@fortawesome/free-solid-svg-icons'
+import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore, faMoneyBill, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import { faGoogle } from '@fortawesome/free-brands-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
@@ -21,12 +21,15 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import MatSwitch from '@mui/material/Switch';
 import BidsComponent from './components/bids/BidsComponent';
-import MoneyIcon from '@mui/icons-material/Money';
-import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import BarChartIcon from '@mui/icons-material/BarChart';
+
 
 export const Popup = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
+  useEffect(() => {
+    popupHandler.getToggleStateFromStorage((checked: boolean) => {
+      setConsoleState(checked);
+    });
+  }, [consoleState]);
 
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>({
     slots: [],
@@ -38,6 +41,12 @@ export const Popup = (): JSX.Element => {
     postAuctionStartTimestamp: null,
     postAuctionEndTimestamp: null
   });
+  useEffect(() => {
+    appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
+      logger.log('[App] received Google AdManager Details from background', data);
+      setGamDetails(data)
+    });
+  }, [googleAdManager]);
 
   const [prebid, setPrebidDetails] = useState<IPrebidDetails>({
     version: null,
@@ -49,6 +58,12 @@ export const Popup = (): JSX.Element => {
     auctions: {},
     eids: null
   });
+  useEffect(() => {
+    appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
+      logger.log('[App] received Prebid Details from background', data);
+      setPrebidDetails(data)
+    });
+  }, [prebid]);
 
   const [tcf, setTcfDetails] = useState<ITcfDetails>({
     v1: {
@@ -62,6 +77,12 @@ export const Popup = (): JSX.Element => {
       consentData: ''
     }
   });
+  useEffect(() => {
+    appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
+      logger.log('[App] received Prebid Details from background', data);
+      setTcfDetails(data)
+    });
+  }, [tcf]);
 
   const handleConsoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setConsoleState(event.target.checked);
@@ -79,31 +100,6 @@ export const Popup = (): JSX.Element => {
       chrome.tabs.executeScript(currentTab.id, { file });
     });
   }
-
-  useEffect(() => {
-    const loop = () => {
-      popupHandler.getToggleStateFromStorage((checked: boolean) => {
-        setConsoleState(checked);
-      });
-
-      appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
-        logger.log('[App] received Google AdManager Details from background', data);
-        setGamDetails(data)
-      });
-
-      appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
-        logger.log('[App] received Prebid Details from background', data);
-        setPrebidDetails(data)
-      });
-
-      appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
-        logger.log('[App] received Prebid Details from background', data);
-        setTcfDetails(data)
-      });
-      requestIdleCallback(loop)
-    };
-    loop();
-  }, []);
 
   return (
     <Box className="popup" sx={{ height: '600px', width: '780px' }}>
@@ -123,14 +119,13 @@ export const Popup = (): JSX.Element => {
 
             <Link to="/bids">
               <IconButton size="small" >
-                <MoneyIcon fontSize="medium" />
+                <FontAwesomeIcon icon={faCoins} />
                 <Typography className="label">Bids</Typography>
               </IconButton>
             </Link>
 
             <Link to="/timeline">
               <IconButton size="small" >
-                {/* <BarChartIcon sx={{ transform: 'rotate(270deg)' }} /> */}
                 <FontAwesomeIcon icon={faPollH} />
                 <Typography className="label">Timeline</Typography>
               </IconButton>
@@ -139,14 +134,13 @@ export const Popup = (): JSX.Element => {
             <Link to="/config">
               <IconButton size="small">
                 <FontAwesomeIcon icon={faSlidersH} />
-                {/* <TuneIcon sx={{ transform: 'rotate(90deg)' }} /> */}
                 <Typography className="label">Config</Typography>
               </IconButton>
             </Link>
 
             <Link to="/userId">
               <IconButton size="small" >
-                <PeopleOutlineIcon fontSize="medium" />
+                <FontAwesomeIcon icon={faUserFriends} />
                 <Typography className="label">User ID</Typography>
               </IconButton>
             </Link>
