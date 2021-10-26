@@ -1,6 +1,6 @@
 @import "../../styling.scss";
 html {
-  background: #eceeef;
+  background: $gray;
 }
 .popup {
   header {
@@ -27,18 +27,22 @@ html {
 
     .label {
       font-size: 15px;
-      color: $blue;
+      color: #000000;
+    }
+
+    a:link {
+      text-decoration: none;
     }
 
     button {
       flex-direction: column;
-      color: $blue;
+      color: #000000;
       font-size: 25px;
       width: 72px;
       height: 52px;
       text-align: center;
       line-height: 1.6;
-      border: 2px solid $blue;
+      border: 2px solid #000000;
       border-radius: 10%;
     }
   }
