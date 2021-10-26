@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import UserIdsComponent from '../Popup/components/userIds/UserIdsComponent';
 import PrebidAdUnitsComponent from '../Popup/components/adUnits/AdUnitsComponent';
-import GoogleAdManagerDetailsComponent from '../Popup/components/GoogleAdManagerDetailsComponent';
+import GoogleAdManagerDetailsComponent from '../Popup/components/googleAdmanager/GoogleAdManagerDetailsComponent';
 import TimeLineComponent from '../Popup/components/timeline/TimeLineComponent';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
