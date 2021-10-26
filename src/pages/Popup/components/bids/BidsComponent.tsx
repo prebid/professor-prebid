@@ -14,8 +14,6 @@ import Stack from '@mui/material/Stack';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Chip from '@mui/material/Chip';
-import DataTreeView from '../DataTreeViewComponent'
-import Tooltip from '@mui/material/Tooltip';
 
 const Row = ({ bid }: any) => {
   const [open, setOpen] = React.useState(false);
