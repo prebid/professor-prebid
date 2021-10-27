@@ -129,7 +129,7 @@ class Prebid {
     sendDetailsToContentScript(): void {
         this.bids = this.getPrebidBids();
         this.config = this.globalPbjs.getConfig();
-        this.eids = this.globalPbjs?.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
+        this.eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
         this.slots = this.getPrebidSlots();
         this.processBids();
         const prebidDetail: IPrebidDetails = {

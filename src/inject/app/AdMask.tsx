@@ -4,15 +4,34 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent as SelectAuctionEvent } from '@mui/material/Select';
+
 
 const AdMaskComponent = ({ prebid, creativeRenderTime, elementId, winningCPM }: IMaskInputData): JSX.Element => {
-
     const auctionEndEvents = prebid?.events?.filter(event => event.eventType === 'auctionEnd');
-    // const options = auctionEndEvents?.map(event => ({ value: event.args.auctionId, label: event.args.timestamp })) || [];
+    const auctionIds = auctionEndEvents?.map(event => ({ value: event.args.auctionId, label: event.args.timestamp })) || [];
+
+    const [auctionId, setAuctionIds] = React.useState(auctionIds[0].value);
+
+    const handleChange = (event: SelectAuctionEvent) => {
+        console.log({ event })
+        setAuctionIds(event.target.value as any);
+    };
+
     return (
         <Box>
+            {/* <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                <Select value={auctionId} label="Auction Id " onChange={handleChange}>
+                    {auctionIds.map((auctionId, key) =>
+                        <MenuItem key={key} value={auctionId.value}>{auctionId.value} ({auctionId.label})</MenuItem>
+                    )}
+                </Select>
+            </FormControl> */}
             <Typography><strong>selementId: </strong>{elementId}</Typography>
-            {/* <Select options={options} /> */}
             {auctionEndEvents?.map(event =>
                 <List key={event.args.auctionId} dense={true}>
                     <ListItem> <strong>auctionId: </strong>{event.args.auctionId}</ListItem>
