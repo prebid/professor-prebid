@@ -130,4 +130,5 @@ interface ITabInfo {
 };
 
 const background = new Background();
+(window as any).tabInfo = background.tabInfo;
 background.init();
