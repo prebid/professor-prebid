@@ -127,6 +127,15 @@ class Prebid {
     }
 
     sendDetailsToContentScript(): void {
+        const filterEvent = (event: any) => {
+            return (
+                event.eventType === 'bidRequested'
+                || event.eventType === 'bidResponse'
+                || event.eventType === 'noBid'
+                || event.eventType === 'auctionEnd'
+                || event.eventType === 'auctionInit'
+            )
+        };
         this.bids = this.getPrebidBids();
         this.config = this.globalPbjs.getConfig();
         this.eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
@@ -136,7 +145,7 @@ class Prebid {
             version: this.globalPbjs.version,
             slots: this.slots,
             timeout: window.PREBID_TIMEOUT || null,
-            events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [],
+            events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents().filter((event: any) => filterEvent(event)) : [],
             config: this.config,
             bids: this.bids,
             auctions: null,
