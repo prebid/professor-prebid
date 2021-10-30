@@ -14,7 +14,7 @@ const AdMaskComponent = ({ prebid, creativeRenderTime, elementId, winningCPM }: 
     const auctionEndEvents = prebid?.events?.filter(event => event.eventType === 'auctionEnd');
     const auctionIds = auctionEndEvents?.map(event => ({ value: event.args.auctionId, label: event.args.timestamp })) || [];
 
-    const [auctionId, setAuctionIds] = React.useState(auctionIds[0].value);
+    const [auctionId, setAuctionIds] = React.useState(auctionIds[0]?.value || []);
 
     const handleChange = (event: SelectAuctionEvent) => {
         console.log({ event })
