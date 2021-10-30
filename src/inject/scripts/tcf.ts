@@ -10,16 +10,21 @@ declare global {
 }
 class IabTcf {
     lastMessage: string;
+    stopLoop: boolean = false;
+    criteoVendorId: number = 91;
     init() {
-        let stopLoop = false;
-        setTimeout(() => { stopLoop = true }, 8000);
+        setTimeout(() => { this.stopLoop = true }, 8000);
+        this.loop();
+    }
+
+    loop() {
         if (this.isTCFInpage()) {
             setInterval(() => this.sendDetailsToContentScript(), 1000)
-        } else if (!stopLoop) {
-            setTimeout(() => this.init(), 1000);
+        } else if (!this.stopLoop) {
+            setTimeout(() => this.loop(), 1000);
+            // requestIdleCallback(() => this.loop());
         }
     }
-    criteoVendorId = 91;
 
     pingV1(callback: any) {
         let cmpLoaded = false;

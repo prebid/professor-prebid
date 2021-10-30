@@ -15,21 +15,25 @@ class Prebid {
     slots: IPrebidSlot[];
     config: IPrebidConfig;
     eids: IPrebidEids[];
+    stopLoop: boolean = false;
 
 
     init(): void {
-        let stopLoop = false;
-        setTimeout(() => { stopLoop = true }, 8000);
+        setTimeout(() => { this.stopLoop = true }, 8000);
+        this.loop();
+    }
+
+    loop(): void {
         if (this.globalPbjs) {
-            this.globalPbjs.que.push(() =>
-                this.addEventListeners()
-            );
+            this.globalPbjs.que.push(() => this.addEventListeners());
             this.globalPbjs.que.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
-        } else if (!stopLoop) {
+        } else if (!this.stopLoop) {
             this.globalPbjs = this.isPrebidInPage();
-            setTimeout(() => this.init(), 10)
+            requestIdleCallback(() => this.loop());
+            // setTimeout(() => this.loop(), 1000);
         }
     }
+
 
     addEventListeners(): void {
         this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionEventData) => {
