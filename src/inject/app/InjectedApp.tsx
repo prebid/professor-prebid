@@ -20,7 +20,7 @@ const InjectedApp = (): JSX.Element => {
     return () => {
       document.removeEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
     }
-  }, [handleConsoleStateChange]);
+  }, []);
   sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
 
   const [masks, setMasks] = useState<IMaskInputData[]>([]);
@@ -34,7 +34,7 @@ const InjectedApp = (): JSX.Element => {
     return () => {
       document.removeEventListener(constants.SAVE_MASKS, handleNewMasks);
     }
-  },[handleNewMasks]);
+  },[]);
 
   return (
     <Box>
