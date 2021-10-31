@@ -5,6 +5,8 @@ import SlotsComponent from './SlotsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import Paper from '@mui/material/Paper'
+import Grid from '@mui/material/Grid'
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const allAvailableBids = prebid.events.filter(event => event.eventType === 'bidResponse') || [];
@@ -15,13 +17,26 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   return (
     <Card sx={{ backgroundColor: '#ecf3f5' }}>
       <CardContent>
-        {prebid.version && <Typography><strong>Version: </strong>{prebid.version}</Typography>}
-        {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
-        <Typography><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
-        <Typography><strong>Bidders:</strong> {allBidders.length}</Typography>
-        <Typography><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
-        {prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-around"
+          alignItems="baseline"
+          >
+          <Grid item>
+            {prebid.version && <Typography><strong>Version: </strong>{prebid.version}</Typography>}
+            {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
+          <Typography><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
+          </Grid>
+          <Grid item>
+            <Typography><strong>Bidders:</strong> {allBidders.length}</Typography>
+            <Typography><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
+          </Grid>
+        </Grid>
       </CardContent>
+      <Paper elevation={2}>
+        {prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}
+      </Paper>
     </Card>
   )
 };

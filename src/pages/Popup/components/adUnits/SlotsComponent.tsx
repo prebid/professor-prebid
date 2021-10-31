@@ -25,12 +25,12 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
         <TableBody>
           {adUnits.map((adUnit: any, index) => (
             <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
-              <TableCell variant="body">{adUnit.code}</TableCell>
+              <TableCell variant="body"><strong>{adUnit.code}</strong></TableCell>
               <TableCell variant="body">
                 Banner Sizes:
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {adUnit.mediaTypes?.banner?.sizes?.map((size: string[], index: number) =>
-                    <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" sx={{ minWidth: '84px' }} />
+                    <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" color="primary" sx={{ minWidth: '84px' }} />
                   )}
                 </Stack>
               </TableCell>
@@ -38,7 +38,7 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {Array.from(new Set(adUnit.bids)).map((bid: any, index: number) =>
                     <Tooltip title={JSON.stringify(bid.params, null, 4)} key={index}>
-                      <Chip size="small" label={bid.bidder} variant="outlined" />
+                      <Chip size="small" label={bid.bidder} />
                     </Tooltip>
                   )}
                 </Stack>
