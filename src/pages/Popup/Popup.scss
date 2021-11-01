@@ -3,6 +3,7 @@ html {
   background: $gray;
 }
 .popup {
+  overflow-x: scroll;
   header {
     height: 62px;
     background: $primary;
