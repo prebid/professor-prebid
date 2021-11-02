@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
@@ -14,25 +14,41 @@ import Stack from '@mui/material/Stack';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Chip from '@mui/material/Chip';
+import { styled } from '@mui/material/styles';
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.body}`]: {
+    backgroundColor: '#6689CC',
+    color: theme.palette.common.white,
+    margin: 1,
+    padding: 1
+  }
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:hover": {
+    backgroundColor: theme.palette.primary.light
+  }
+}));
 
 const Row = ({ bid }: any) => {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
+      <StyledTableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <StyledTableCell>
           <IconButton size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
-        </TableCell>
-        <TableCell>{bid.bidderCode}</TableCell>
-        <TableCell>{bid.width}</TableCell>
-        <TableCell>{bid.height}</TableCell>
-        <TableCell>{bid.cpm ? (Math.floor(bid.cpm * 100) / 100) : bid.cpm}</TableCell>
-        <TableCell>{bid.currency}</TableCell>
-        <TableCell>{bid.adUnitCode}</TableCell>
-        <TableCell>{bid.size}</TableCell>
-      </TableRow>
+        </StyledTableCell>
+        <StyledTableCell>{bid.bidderCode}</StyledTableCell>
+        <StyledTableCell>{bid.width}</StyledTableCell>
+        <StyledTableCell>{bid.height}</StyledTableCell>
+        <StyledTableCell>{bid.cpm ? (Math.floor(bid.cpm * 100) / 100) : bid.cpm}</StyledTableCell>
+        <StyledTableCell>{bid.currency}</StyledTableCell>
+        <StyledTableCell>{bid.adUnitCode}</StyledTableCell>
+        <StyledTableCell>{bid.size}</StyledTableCell>
+      </StyledTableRow>
       <TableRow>
         {/* <TableCell></TableCell> */}
         <TableCell colSpan={8}>
@@ -64,7 +80,7 @@ const Row = ({ bid }: any) => {
                   <TableCell>
                     <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px', }}>
                       {bid.adserverTargeting && Object.keys(bid.adserverTargeting).map(key =>
-                        <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} variant="outlined" size="small" sx={{ maxWidth: '110px' }} />
+                        <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '110px' }} />
                       )}</Stack>
                   </TableCell>
                 </TableRow>
