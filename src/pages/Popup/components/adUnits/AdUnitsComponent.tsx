@@ -21,16 +21,19 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           container
           direction="row"
           justifyContent="space-around"
-          alignItems="baseline"
           >
           <Grid item>
-            {prebid.version && <Typography><strong>Version: </strong>{prebid.version}</Typography>}
-            {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
-          <Typography><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
+            <Paper variant="outlined">
+              {prebid.version && <Typography variant="subtitle1"><strong>Version: </strong>{prebid.version}</Typography>}
+              {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
+              <Typography variant="subtitle1"><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
+            </Paper>
           </Grid>
           <Grid item>
-            <Typography><strong>Bidders:</strong> {allBidders.length}</Typography>
-            <Typography><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
+            <Paper variant="outlined">
+              <Typography variant="subtitle1"><strong>Bidders:</strong> {allBidders.length}</Typography>
+              <Typography variant="subtitle1"><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
+            </Paper>
           </Grid>
         </Grid>
       </CardContent>
