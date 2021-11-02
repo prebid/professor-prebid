@@ -122,7 +122,7 @@ class Content {
 
   prepareMaskObjects() {
     logger.log('[Content] preparing masks',);
-    const masks = this.prebid?.slots?.map(slot => ({ elementId: slot.code, prebid: this.prebid }));
+    const masks = this.prebid?.slots?.map(slot => ({ elementId: slot.code, prebid: {} })); // do not pass this.prebid here -> many masks many data -> memory issues 02.7rb 
     logger.log('[Content] mask ready', masks);
     return masks;
   }
