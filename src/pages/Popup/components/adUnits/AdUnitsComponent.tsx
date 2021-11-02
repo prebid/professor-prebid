@@ -7,6 +7,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
+import Divider from '@mui/material/Divider';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const allAvailableBids = prebid.events.filter(event => event.eventType === 'bidResponse') || [];
@@ -26,6 +27,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           <Grid item>
             <Paper variant="outlined" sx={{width: 200}}>
               {prebid.version && <Typography variant="subtitle1"><strong>Version: </strong>{prebid.version}</Typography>}
+              <Divider></Divider>
               {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
               <Typography variant="subtitle1"><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
             </Paper>
@@ -33,6 +35,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           <Grid item>
             <Paper variant="outlined" sx={{width: 200}}>
               <Typography variant="subtitle1"><strong>Bidders:</strong> {allBidders.length}</Typography>
+              <Divider></Divider>
               <Typography variant="subtitle1"><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
             </Paper>
           </Grid>
