@@ -1,4 +1,3 @@
-import './Popup.scss';
 import { popupHandler } from './popupHandler';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { ITcfDetails } from '../../inject/scripts/tcf';
@@ -16,12 +15,28 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import Typography, { TypographyProps } from '@mui/material/Typography';
 import MatSwitch from '@mui/material/Switch';
 import BidsComponent from './components/bids/BidsComponent';
+import { styled } from '@mui/material/styles';
 
+const StyledIconButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
+  flexDirection: 'column',
+  color: '#000000',
+  fontSize: '25px',
+  width: '72px',
+  height: '52px',
+  textAlign: 'center',
+  lineHeight: '1.6',
+  border: '2px solid #000000',
+  borderRadius: '10%',
+}));
+
+const StyledTypo = styled(Typography)<TypographyProps>(({ theme }) => ({
+  'fontSize': '15px',
+  'color': '#000000'
+}));
 
 export const Popup = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
@@ -89,10 +104,6 @@ export const Popup = (): JSX.Element => {
     popupHandler.onConsoleToggle(event.target.checked);
   };
 
-  const handleOpenDebugTab = useCallback(() => {
-    popupHandler.openDebugTab()
-  }, []);
-
   const dfp_open_console = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0];
@@ -102,60 +113,68 @@ export const Popup = (): JSX.Element => {
   }
 
   return (
-    <Box className="popup" sx={{ height: '600px', width: '780px' }}>
+    <Box className="popup" sx={{ height: '600px', width: '780px', overflowX: 'scroll' }}>
       <Router>
 
-        <AppBar position="static">
+        <AppBar position="sticky" sx={{
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          height: '62px',
+          background: '#F99B0C',
+          '& a:link': {
+            textDecoration: 'none'
+          }
+        }}>
 
-          <Toolbar className="nav">
-            <Typography variant="h6">Prof. Prebid</Typography>
+          <Typography variant="h6">Prof. Prebid</Typography>
 
-            <Link to="/">
-              <IconButton size="small" >
-                <FontAwesomeIcon icon={faAd} />
-                <Typography className="label">Ad Units</Typography>
-              </IconButton>
-            </Link>
+          <Link to="/">
+            <StyledIconButton size="small">
+              <FontAwesomeIcon icon={faAd} />
+              <StyledTypo>Ad Units</StyledTypo>
+            </StyledIconButton>
+          </Link>
 
-            <Link to="/bids">
-              <IconButton size="small" >
-                <FontAwesomeIcon icon={faCoins} />
-                <Typography className="label">Bids</Typography>
-              </IconButton>
-            </Link>
+          <Link to="/bids">
+            <StyledIconButton size="small" >
+              <FontAwesomeIcon icon={faCoins} />
+              <StyledTypo>Bids</StyledTypo>
+            </StyledIconButton>
+          </Link>
 
-            <Link to="/timeline">
-              <IconButton size="small" >
-                <FontAwesomeIcon icon={faPollH} />
-                <Typography className="label">Timeline</Typography>
-              </IconButton>
-            </Link>
+          <Link to="/timeline">
+            <StyledIconButton size="small" >
+              <FontAwesomeIcon icon={faPollH} />
+              <StyledTypo>Timeline</StyledTypo>
+            </StyledIconButton>
+          </Link>
 
-            <Link to="/config">
-              <IconButton size="small">
-                <FontAwesomeIcon icon={faSlidersH} />
-                <Typography className="label">Config</Typography>
-              </IconButton>
-            </Link>
+          <Link to="/config">
+            <StyledIconButton size="small">
+              <FontAwesomeIcon icon={faSlidersH} />
+              <StyledTypo>Config</StyledTypo>
+            </StyledIconButton>
+          </Link>
 
-            <Link to="/userId">
-              <IconButton size="small" >
-                <FontAwesomeIcon icon={faUserFriends} />
-                <Typography className="label">User ID</Typography>
-              </IconButton>
-            </Link>
+          <Link to="/userId">
+            <StyledIconButton size="small" >
+              <FontAwesomeIcon icon={faUserFriends} />
+              <StyledTypo>User ID</StyledTypo>
+            </StyledIconButton>
+          </Link>
 
-            {/*<IconButton size="small" onClick={handleOpenDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
-              <Typography className="label">Debug</Typography>
-            </IconButton> */}
+          {/* <StyledIconButton size="small" onClick={popupHandler.openDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
+            <Typography className="label">Debug</Typography>
+          </StyledIconButton> */}
 
-            <IconButton size="small" onClick={dfp_open_console}>
-              <FontAwesomeIcon icon={faGoogle} />
-              <Typography className="label">GAM</Typography>
-            </IconButton>
+          <StyledIconButton size="small" onClick={dfp_open_console}>
+            <FontAwesomeIcon icon={faGoogle} />
+            <StyledTypo>GAM</StyledTypo>
+          </StyledIconButton>
 
-            <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} inputProps={{ 'aria-label': 'controlled' }} sx={{ transform: 'rotate(90deg)' }}></MatSwitch>
-          </Toolbar>
+          <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} sx={{ transform: 'rotate(90deg)', width: '52px' }}></MatSwitch>
 
         </AppBar>
 

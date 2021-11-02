@@ -7,12 +7,26 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
     const el = useRef<HTMLDivElement>(
         (() => {
             const el = document.createElement('div');
+            const width = container?.offsetWidth || container?.clientWidth;
+            const height = container?.offsetHeight || container?.clientHeight;
+            el.style.width = `${(width)}px`;
+            el.style.height = `${height}px`;
+            el.style.display = height < 100 ? 'inline-block' : 'block';
+            el.style.opacity = '0.8';
+            el.style.position = 'absolute';
+            el.style.top = '0';
+            el.style.bottom = '0';
+            el.style.left = '0';
+            el.style.right = '0';
+            el.style.zIndex = '100000000';
+            el.style.padding = '4px 8px';
             el.classList.add('prpb-mask__overlay');
             return el;
         })()
     );
 
     useEffect(() => {
+        console.log('test draw masks');
         container?.classList.add('prpb-mask--container');
         // delete old masks
         const elements = container?.getElementsByClassName('prpb-mask__overlay');
@@ -23,7 +37,7 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
         if (consoleState) {
             container?.appendChild(el.current);
         }
-    }, [container]);
+    }, [container, consoleState]);
 
     const { prebid, creativeRenderTime, elementId, winningCPM, winningBidder } = mask;
     return ReactDOM.createPortal(
