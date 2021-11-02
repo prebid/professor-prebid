@@ -21,16 +21,17 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           container
           direction="row"
           justifyContent="space-around"
+          alignItems="center"
           >
           <Grid item>
-            <Paper variant="outlined">
+            <Paper variant="outlined" sx={{width: 200}}>
               {prebid.version && <Typography variant="subtitle1"><strong>Version: </strong>{prebid.version}</Typography>}
               {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
               <Typography variant="subtitle1"><strong>AdUnits Detected:</strong> {allAdUnits.length}</Typography>
             </Paper>
           </Grid>
           <Grid item>
-            <Paper variant="outlined">
+            <Paper variant="outlined" sx={{width: 200}}>
               <Typography variant="subtitle1"><strong>Bidders:</strong> {allBidders.length}</Typography>
               <Typography variant="subtitle1"><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
             </Paper>
