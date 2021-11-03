@@ -37,7 +37,12 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
               <TableCell variant="body">
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {Array.from(new Set(adUnit.bids)).map((bid: any, index: number) =>
-                    <Tooltip title={JSON.stringify(bid.params, null, 4)} key={index}>
+                    <Tooltip
+                      PopperProps={{ disablePortal: true, }}
+                      leaveDelay={0}
+                      enterDelay={0}
+                      title={JSON.stringify(bid.params, null, 4)}
+                      key={index} >
                       <Chip size="small" label={bid.bidder} />
                     </Tooltip>
                   )}
@@ -47,7 +52,7 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
           ))}
         </TableBody>
       </Table>
-    </TableContainer>
+    </TableContainer >
   )
 };
 
