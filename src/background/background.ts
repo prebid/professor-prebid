@@ -27,6 +27,16 @@ class Background {
     }, 30000);
   }
 
+  updateBadge() {
+    if (this.tabInfo[this.currentActiveTabId]?.prebidDetails) {
+      chrome.browserAction.setBadgeBackgroundColor({ color: '#F99B0C' });
+      chrome.browserAction.setBadgeText({ text: "pbJs" });
+    } else {
+      chrome.browserAction.setBadgeBackgroundColor({ color: '#ecf3f5' });
+      chrome.browserAction.setBadgeText({ text: "" });
+    }
+  }
+
   addEventListeners() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const msgType = message && message.type;
@@ -61,15 +71,18 @@ class Background {
         case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received gam details data:', payload);
           this.tabInfo[tabId].gamDetails = { ...payload };
+          this.updateBadge();
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
+          this.updateBadge();
           sendResponse(this.tabInfo[this.currentActiveTabId].gamDetails);
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received prebid details data:', payload);
           this.tabInfo[tabId].prebidDetails = { ...payload };
+          this.updateBadge();
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
@@ -108,6 +121,11 @@ class Background {
     chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
       logger.log('[Background]', tabId, 'is removed', removeInfo);
       this.removeInfoForTabId(tabId);
+    });
+
+    chrome.tabs.onActivated.addListener((activeInfo) => {
+      this.currentActiveTabId = activeInfo.tabId
+      this.updateBadge();
     });
 
   }
