@@ -46,16 +46,7 @@ export const Popup = (): JSX.Element => {
     });
   }, [consoleState]);
 
-  const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>({
-    slots: [],
-    sra: false,
-    async: false,
-    fetchBeforeKeyvalue: false,
-    fetchBeforeRefresh: false,
-    slotEvents: {},
-    postAuctionStartTimestamp: null,
-    postAuctionEndTimestamp: null
-  });
+  const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
@@ -63,16 +54,7 @@ export const Popup = (): JSX.Element => {
     });
   }, [googleAdManager]);
 
-  const [prebid, setPrebidDetails] = useState<IPrebidDetails>({
-    version: null,
-    slots: [],
-    timeout: null,
-    events: [],
-    config: null,
-    bids: [],
-    auctions: {},
-    eids: null
-  });
+  const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
   useEffect(() => {
     appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
@@ -80,18 +62,7 @@ export const Popup = (): JSX.Element => {
     });
   }, [prebid]);
 
-  const [tcf, setTcfDetails] = useState<ITcfDetails>({
-    v1: {
-      cmpLoaded: false,
-      gdprApplies: false,
-      consentData: ''
-    },
-    v2: {
-      cmpLoaded: false,
-      gdprApplies: false,
-      consentData: ''
-    }
-  });
+  const [tcf, setTcfDetails] = useState<ITcfDetails>();
   useEffect(() => {
     appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
       logger.log('[App] received Prebid Details from background', data);
