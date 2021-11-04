@@ -35,6 +35,9 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
             slotMaskElement.style.width = `${container?.offsetWidth || container?.clientWidth}px`
             slotMaskElement.style.height = `${container?.offsetHeight || container?.clientHeight}px`
         }
+        if (!consoleState) {
+            slotMaskElement?.parentNode.removeChild(slotMaskElement);
+        }
     }, [container, mask, consoleState,]);
 
     const { creativeRenderTime, elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;

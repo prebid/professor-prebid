@@ -88,6 +88,7 @@ export const Popup = (): JSX.Element => {
       <Router>
 
         <AppBar position="sticky" sx={{
+          alignItems: 'center',
           display: 'flex',
           flex: 1,
           flexDirection: 'row',
@@ -99,56 +100,65 @@ export const Popup = (): JSX.Element => {
           }
         }}>
 
-          <Typography variant="h6">Prof. Prebid</Typography>
+          <Typography variant="h6" sx={{
+            flex: 0.2,
+          }}>Prof. Prebid</Typography>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: 'row-reverse',
+            flex: 0.8,
+            justifyContent: 'space-around'
+          }}>
+            <Box sx={{ paddingTop: '10px' }}>
+              <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} sx={{ transform: 'rotate(90deg)', width: '62px' }}></MatSwitch>
+            </Box>
 
-          <Link to="/">
-            <StyledIconButton size="small">
-              <FontAwesomeIcon icon={faAd} />
-              <StyledTypo>Ad Units</StyledTypo>
+            <StyledIconButton size="small" onClick={dfp_open_console}>
+              <FontAwesomeIcon icon={faGoogle} />
+              <StyledTypo>GAM</StyledTypo>
             </StyledIconButton>
-          </Link>
 
-          <Link to="/bids">
-            <StyledIconButton size="small" >
-              <FontAwesomeIcon icon={faCoins} />
-              <StyledTypo>Bids</StyledTypo>
-            </StyledIconButton>
-          </Link>
+            <Link to="/userId">
+              <StyledIconButton size="small" >
+                <FontAwesomeIcon icon={faUserFriends} />
+                <StyledTypo>User ID</StyledTypo>
+              </StyledIconButton>
+            </Link>
 
-          <Link to="/timeline">
-            <StyledIconButton size="small" >
-              <FontAwesomeIcon icon={faPollH} />
-              <StyledTypo>Timeline</StyledTypo>
-            </StyledIconButton>
-          </Link>
+            <Link to="/config">
+              <StyledIconButton size="small">
+                <FontAwesomeIcon icon={faSlidersH} />
+                <StyledTypo>Config</StyledTypo>
+              </StyledIconButton>
+            </Link>
 
-          <Link to="/config">
-            <StyledIconButton size="small">
-              <FontAwesomeIcon icon={faSlidersH} />
-              <StyledTypo>Config</StyledTypo>
-            </StyledIconButton>
-          </Link>
+            <Link to="/timeline">
+              <StyledIconButton size="small" >
+                <FontAwesomeIcon icon={faPollH} />
+                <StyledTypo>Timeline</StyledTypo>
+              </StyledIconButton>
+            </Link>
 
-          <Link to="/userId">
-            <StyledIconButton size="small" >
-              <FontAwesomeIcon icon={faUserFriends} />
-              <StyledTypo>User ID</StyledTypo>
-            </StyledIconButton>
-          </Link>
+            <Link to="/bids">
+              <StyledIconButton size="small" >
+                <FontAwesomeIcon icon={faCoins} />
+                <StyledTypo>Bids</StyledTypo>
+              </StyledIconButton>
+            </Link>
 
-          {/* <StyledIconButton size="small" onClick={popupHandler.openDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
+            <Link to="/">
+              <StyledIconButton size="small">
+                <FontAwesomeIcon icon={faAd} />
+                <StyledTypo>Ad Units</StyledTypo>
+              </StyledIconButton>
+            </Link>
+
+            {/* <StyledIconButton size="small" onClick={popupHandler.openDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
             <Typography className="label">Debug</Typography>
           </StyledIconButton> */}
 
-          <StyledIconButton size="small" onClick={dfp_open_console}>
-            <FontAwesomeIcon icon={faGoogle} />
-            <StyledTypo>GAM</StyledTypo>
-          </StyledIconButton>
-
-          <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} sx={{ transform: 'rotate(90deg)', width: '52px' }}></MatSwitch>
-
+          </Box>
         </AppBar>
-
         <Switch>
 
           <Route exact path="/">
