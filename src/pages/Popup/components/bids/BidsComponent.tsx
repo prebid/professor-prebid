@@ -15,6 +15,43 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Chip from '@mui/material/Chip';
 import { styled } from '@mui/material/styles';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 , padding: 0}}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
@@ -94,58 +131,72 @@ const Row = ({ bid }: any) => {
 }
 
 const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
+  const [value, setValue] = React.useState(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
   const bidsReceived = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.bidsReceived).flat() || [];
   const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.noBids).flat() || [];
   return (
     <Box>
-      <Typography><strong>Received Bids</strong></Typography>
-      <TableContainer sx={{ width: '100%', maxWidth: '100%' }}>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>Bidder Code</TableCell>
-              <TableCell>Width</TableCell>
-              <TableCell>Height</TableCell>
-              <TableCell>Cpm</TableCell>
-              <TableCell>Currency</TableCell>
-              <TableCell>AdUnit Code</TableCell>
-              <TableCell>Size</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {bidsReceived.map((bid, index) =>
-              <Row key={index} bid={bid} />
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Typography><strong>No Bids</strong></Typography>
-      <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>auctionId</TableCell>
-              <TableCell>bidder</TableCell>
-              <TableCell>adUnitCode</TableCell>
-              <TableCell>params</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {noBids.map((bid, index) => (
-              <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell component="th" scope="row">{bid.auctionId}</TableCell>
-                <TableCell>{bid.bidder}</TableCell>
-                <TableCell>{bid.adUnitCode}</TableCell>
-                <TableCell><Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {bid.params && Object.keys(bid.params).map((key: any) =>
-                    <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} variant="outlined" size="small" />
-                  )}</Stack></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+            <Tab label="Received Bids" {...a11yProps(0)} />
+            <Tab label="No Bids" {...a11yProps(1)} />
+          </Tabs>
+        </Box>
+        <TabPanel value={value} index={0}>
+          <TableContainer sx={{ width: '100%', maxWidth: '100%' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>Bidder Code</TableCell>
+                  <TableCell>Width</TableCell>
+                  <TableCell>Height</TableCell>
+                  <TableCell>Cpm</TableCell>
+                  <TableCell>Currency</TableCell>
+                  <TableCell>AdUnit Code</TableCell>
+                  <TableCell>Size</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {bidsReceived.map((bid, index) =>
+                  <Row key={index} bid={bid} />
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>auctionId</TableCell>
+                  <TableCell>bidder</TableCell>
+                  <TableCell>adUnitCode</TableCell>
+                  <TableCell>params</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {noBids.map((bid, index) => (
+                  <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableCell component="th" scope="row">{bid.auctionId}</TableCell>
+                    <TableCell>{bid.bidder}</TableCell>
+                    <TableCell>{bid.adUnitCode}</TableCell>
+                    <TableCell><Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                      {bid.params && Object.keys(bid.params).map((key: any) =>
+                        <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} variant="outlined" size="small" />
+                      )}</Stack></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </TabPanel>
+      </Box>
     </Box>
   )
 };
