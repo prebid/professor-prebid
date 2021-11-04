@@ -26,8 +26,8 @@ class Content {
       if (event.source != window) {
         return;
       }
-
       const { type, payload } = event.data;
+
       switch (type) {
         case constants.EVENTS.CONFIG_AVAILABLE: {
           const payloadJson = safelyParseJSON(payload);
@@ -121,8 +121,18 @@ class Content {
   }
 
   prepareMaskObjects() {
-    logger.log('[Content] preparing masks',);
-    const masks = this.prebid?.slots?.map(slot => ({ elementId: slot.code, prebid: {} })); // do not pass this.prebid here -> many masks many data -> memory issues 02.7rb 
+    logger.log('[Content] preparing masks');
+    const masks = this.prebid?.slots?.map(slot => {
+      const slotsBidWonEvent = this.prebid?.events.find(event => event.eventType === 'bidWon' && event.args.adUnitCode === slot.code);
+      return {
+        elementId: slot.code,
+        creativeRenderTime: Date.now(),
+        winningCPM: slotsBidWonEvent?.args.cpm ? Math.round(slotsBidWonEvent?.args.cpm * 100) / 100 : undefined,
+        winningBidder: slotsBidWonEvent?.args.bidder || slotsBidWonEvent?.args.bidderCode,
+        currency: slotsBidWonEvent?.args.currency,
+        timeToRespond: slotsBidWonEvent?.args.timeToRespond,
+      }
+    });
     logger.log('[Content] mask ready', masks);
     return masks;
   }
