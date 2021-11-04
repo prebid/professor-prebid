@@ -26,7 +26,7 @@ class Prebid {
     loop(): void {
         if (this.globalPbjs) {
             this.globalPbjs.que.push(() => this.addEventListeners());
-            this.globalPbjs.que.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
+            // this.globalPbjs.que.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
         } else if (!this.stopLoop) {
             this.globalPbjs = this.isPrebidInPage();
             requestIdleCallback(() => this.loop());
@@ -34,14 +34,30 @@ class Prebid {
         }
     }
 
-
     addEventListeners(): void {
         this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionEventData) => {
             logger.log('[Injected] auctionInit', { auctionInitData });
+            this.sendDetailsToContentScript()
         });
 
         this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEventData) => {
             logger.log('[Injected] auctionEnd', { auctionEndData });
+            this.sendDetailsToContentScript()
+        });
+        
+        this.globalPbjs.onEvent('bidRequested', (bidRequested: IPrebidAuctionEventData) => {
+            logger.log('[Injected] bidRequested', { bidRequested });
+            this.sendDetailsToContentScript()
+        });
+        
+        this.globalPbjs.onEvent('noBid', (noBid: IPrebidAuctionEventData) => {
+            logger.log('[Injected] noBid', { noBid });
+            this.sendDetailsToContentScript()
+        });
+        
+        this.globalPbjs.onEvent('bidWon', (bidWon: IPrebidAuctionEventData) => {
+            logger.log('[Injected] bidWon', { bidWon });
+            this.sendDetailsToContentScript()
         });
         logger.log('[Injected] event listeners added')
     }
@@ -138,6 +154,7 @@ class Prebid {
                 || event.eventType === 'noBid'
                 || event.eventType === 'auctionEnd'
                 || event.eventType === 'auctionInit'
+                || event.eventType === 'bidWon'
             )
         };
         this.bids = this.getPrebidBids();
@@ -421,6 +438,7 @@ export interface IBidderEvent {
     args: {
         auctionId: string;
         bidderCode: string;
+        adUnitCode: string;
         adUnitCodes: string[];
         adUnits: IPrebidAdUnit[];
         bidder: string;
@@ -433,6 +451,9 @@ export interface IBidderEvent {
         bidderRequests: IPrebidBidderRequest[];
         bidsReceived: IPrebidBid[];
         noBids: IPrebidBid[];
+        cpm: number;
+        currency: string;
+        timeToRespond: number;
     };
     eventType: string;
     id: string;

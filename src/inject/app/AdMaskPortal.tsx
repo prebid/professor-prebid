@@ -4,50 +4,49 @@ import ReactDOM from 'react-dom';
 import AdMaskComponent from './AdMask'
 
 const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleState }) => {
-    const el = useRef<HTMLDivElement>(
-        (() => {
-            const el = document.createElement('div');
-            const width = container?.offsetWidth || container?.clientWidth;
-            const height = container?.offsetHeight || container?.clientHeight;
-            el.style.width = `${(width)}px`;
-            el.style.height = `${height}px`;
-            el.style.display = height < 100 ? 'inline-block' : 'block';
-            el.style.opacity = '0.8';
-            el.style.position = 'absolute';
-            el.style.top = '0';
-            el.style.bottom = '0';
-            el.style.left = '0';
-            el.style.right = '0';
-            el.style.zIndex = '100000000';
-            el.style.padding = '4px 8px';
-            el.classList.add('prpb-mask__overlay');
-            return el;
-        })()
-    );
+    const el = useRef<HTMLDivElement>((() => {
+        const el = document.createElement('div');
+        const width = container?.offsetWidth || container?.clientWidth;
+        const height = container?.offsetHeight || container?.clientHeight;
+        el.style.width = `${(width)}px`;
+        el.style.height = `${height}px`;
+        el.style.display = height < 100 ? 'inline-block' : 'block';
+        el.style.opacity = '0.9';
+        el.style.position = 'absolute';
+        el.style.top = '0';
+        el.style.bottom = '0';
+        el.style.left = '0';
+        el.style.right = '0';
+        el.style.zIndex = '100000000';
+        el.style.padding = '4px 8px';
+        el.classList.add('prpb-mask__overlay');
+        el.id = `prpb-mask--container-${mask.elementId}`
+        return el;
+    })());
 
     useEffect(() => {
-        console.log('test draw masks');
         container?.classList.add('prpb-mask--container');
-        // delete old masks
-        const elements = container?.getElementsByClassName('prpb-mask__overlay');
-        while (elements && elements[0]) {
-            elements[0].parentNode.removeChild(elements[0]);
-        }
-
-        if (consoleState) {
+        const slotMaskElement = document.getElementById(`prpb-mask--container-${mask.elementId}`) as HTMLDivElement;
+        if (consoleState && !slotMaskElement) {
             container?.appendChild(el.current);
         }
-    }, [container, consoleState]);
+        if (consoleState && slotMaskElement) {
+            // update height & width 
+            slotMaskElement.style.width = `${container?.offsetWidth || container?.clientWidth}px`
+            slotMaskElement.style.height = `${container?.offsetHeight || container?.clientHeight}px`
+        }
+    }, [container, mask, consoleState,]);
 
-    const { prebid, creativeRenderTime, elementId, winningCPM, winningBidder } = mask;
+    const { creativeRenderTime, elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
     return ReactDOM.createPortal(
         <AdMaskComponent
             key={mask.elementId}
-            prebid={prebid}
             creativeRenderTime={creativeRenderTime}
             elementId={elementId}
             winningCPM={winningCPM}
             winningBidder={winningBidder}
+            currency={currency}
+            timeToRespond={timeToRespond}
         />
         , el.current
     );
@@ -65,7 +64,8 @@ interface IMaskInputData {
     creativeRenderTime: number;
     winningBidder: string;
     winningCPM: number;
-    prebid: IPrebidDetails
+    currency: string;
+    timeToRespond: number;
 }
 
 export default AdMaskPortal;

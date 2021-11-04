@@ -18,7 +18,7 @@ class GoogleAdManager {
     this.googletag.cmd = this.googletag.cmd || [];
     this.googletag.cmd.push(() => this.addEventListeners());
     // send google ad manager details to content script 
-    this.googletag.cmd.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
+    // this.googletag.cmd.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
   }
 
   updatePostAuctionTimestamps(input: number) {
@@ -42,6 +42,7 @@ class GoogleAdManager {
         { type: 'slotRequested', timestamp }
       ]
       logger.log('GPT EVENT: slotRequested', { slotElementId, event });
+      // this.sendDetailsToContentScript()
     });
 
     this.googletag.pubads().addEventListener('slotResponseReceived', event => {
@@ -53,6 +54,7 @@ class GoogleAdManager {
         { type: 'slotResponseReceived', timestamp }
       ]
       logger.log('GPT EVENT: slotResponseReceived', { slotElementId, event });
+      this.sendDetailsToContentScript()
     });
 
     this.googletag.pubads().addEventListener('slotRenderEnded', event => {
@@ -63,6 +65,7 @@ class GoogleAdManager {
         { type: 'slotRenderEnded', timestamp }
       ];
       logger.log('GPT EVENT: slotRenderEnded', { slotElementId, event });
+      // this.sendDetailsToContentScript()
     });
 
     this.googletag.pubads().addEventListener('slotOnload', event => {
@@ -73,6 +76,7 @@ class GoogleAdManager {
         { type: 'slotOnload', timestamp }
       ];
       logger.log('GPT EVENT: slotOnload', { slotElementId, event });
+      // this.sendDetailsToContentScript()
     });
 
     this.googletag.pubads().addEventListener('slotVisibilityChanged', event => {
@@ -83,6 +87,7 @@ class GoogleAdManager {
         { type: 'slotVisibilityChanged', timestamp }
       ];
       logger.log('GPT EVENT: slotVisibilityChanged', { slotElementId, event });
+      // this.sendDetailsToContentScript()
     });
 
     this.googletag.pubads().addEventListener('impressionViewable', event => {
@@ -93,6 +98,7 @@ class GoogleAdManager {
         { type: 'impressionViewable', timestamp }
       ];
       logger.log('GPT EVENT: impressionViewable', { slotElementId, event });
+      this.sendDetailsToContentScript()
     });
   }
 

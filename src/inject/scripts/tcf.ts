@@ -19,7 +19,8 @@ class IabTcf {
 
     loop() {
         if (this.isTCFInpage()) {
-            setInterval(() => this.sendDetailsToContentScript(), 1000)
+            // setInterval(() => this.sendDetailsToContentScript(), 1000)
+            this.sendDetailsToContentScript()
         } else if (!this.stopLoop) {
             setTimeout(() => this.loop(), 1000);
             // requestIdleCallback(() => this.loop());
