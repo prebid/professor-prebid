@@ -3,7 +3,6 @@ import './ad-mask.scss';
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
-import { IPrebidDetails } from '../scripts/prebid';
 import AdMaskPortal from './AdMaskPortal';
 import Box from '@mui/material/Box';
 
@@ -50,7 +49,8 @@ interface IMaskInputData {
   creativeRenderTime: number;
   winningBidder: string;
   winningCPM: number;
-  prebid: IPrebidDetails;
+  currency: string;
+  timeToRespond: number;
 }
 
 export default InjectedApp;
