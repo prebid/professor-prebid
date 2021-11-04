@@ -30,10 +30,10 @@ class Background {
   updateBadge() {
     if (this.tabInfo[this.currentActiveTabId]?.prebidDetails) {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#F99B0C' });
-      chrome.browserAction.setBadgeText({ text: "pbJs" });
+      chrome.browserAction.setBadgeText({ text: `✓` });
     } else {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#ecf3f5' });
-      chrome.browserAction.setBadgeText({ text: "" });
+      chrome.browserAction.setBadgeText({ text: `` });
     }
   }
 
