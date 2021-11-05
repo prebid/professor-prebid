@@ -1,73 +1,67 @@
-import React from 'react';
-import { IPrebidDetails } from "../../../../inject/scripts/prebid";
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import React, { useEffect } from 'react';
+import { IPrebidDetails, preBid } from "../../../../inject/scripts/prebid";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 
-const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps): JSX.Element => {
+const defaultBuckets: IDefaultBuckets = {
+  low: [{ precision: 2, min: 0, max: 5, increment: 0.50 }],
+  medium: [{ precision: 2, min: 0, max: 20, increment: 0.10 }],
+  high: [{ precision: 2, min: 0, max: 20, increment: 0.01 }],
+  auto: [
+    { precision: 2, min: 0, max: 5, increment: 0.05 },
+    { precision: 2, min: 5, max: 10, increment: 0.10 },
+    { precision: 2, min: 10, max: 20, increment: 0.50 },
+  ],
+  dense: [
+    { precision: 2, min: 0, max: 3, increment: 0.01 },
+    { precision: 2, min: 3, max: 8, increment: 0.05 },
+    { precision: 2, min: 8, max: 20, increment: 0.50 },
+  ],
+};
+
+const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps) => {
+  const type = prebid.config.priceGranularity;
+  const rows = defaultBuckets[type] || prebid.config?.customPriceBucket?.buckets || [];
   return (
-    <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
-      {(() => {
-        switch (prebid?.config?.priceGranularity) {
-          case 'low':
-            return (
-              <Box sx={{ width: '100%' }}>
-                <Typography><strong>low:</strong></Typography>
-                <Typography>Precision: 2 | Min: 0 | Max: 5 | Increment: 0.50</Typography>
-              </Box>
-            );
-          case 'medium':
-            return (
-              <Box sx={{ width: '100%' }}>
-                <Typography><strong>medium:</strong></Typography>
-                <Typography>Precision: 2 | Min: 0 | Max: 20 | Increment: 0.10</Typography>
-              </Box>
-            );
-          case 'high':
-            return (
-              <Box sx={{ width: '100%' }}>
-                <Typography><strong>high:</strong></Typography>
-                <Typography>Precision: 2 | Min: 0 | Max: 20 | Increment: 0.01</Typography>
-              </Box>
-            );
-          case 'auto':
-            return (
-              <Box sx={{ width: '100%', padding: '5px 5px 5px 5px' }}>
-                <Typography><strong>auto:</strong></Typography>
-                <Typography><strong>Bucket #1:</strong></Typography>
-                <Typography>Precision: 2 | Min: 0 | Max: 5 | Increment: 0.05</Typography>
-                <Typography><strong>Bucket #2:</strong></Typography>
-                <Typography>Precision: 2 | Min: 5 | Max: 10 | Increment: 0.10</Typography>
-                <Typography><strong>Bucket #3:</strong></Typography>
-                <Typography>Precision: 2 | Min: 10 | Max: 20 | Increment: 0.50</Typography>
-              </Box>
-            );
-          case 'dense':
-            return (
-              <Box sx={{ width: '100%', padding: '5px 5px 5px 5px' }}>
-                <Typography><strong>dense:</strong></Typography>
-                <Typography><strong>Bucket #1:</strong></Typography>
-                <Typography>Precision: 2 | Min: 0 | Max: 5 | Increment: 0.05</Typography>
-                <Typography><strong>Bucket #2:</strong></Typography>
-                <Typography>Precision: 2 | Min: 5 | Max: 10 | Increment: 0.10</Typography>
-                <Typography><strong>Bucket #3:</strong></Typography>
-                <Typography>Precision: 2 | Min: 10 | Max: 20 | Increment: 0.50</Typography>
-              </Box>
-            );
-          default:
-            break;
-        }
-      })()}
-      {prebid?.config?.customPriceBucket?.buckets?.map((bucket, index) =>
-        <Box key={index} sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
-          <Typography><strong>Bucket #{index}:</strong>Precision: {bucket.precision} | Min: {bucket.min} | Max: {bucket.max} | Increment: {bucket.increment}</Typography>
-        </Box>
-      )}
-    </Box>
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell align="left">Bucket</TableCell>
+          <TableCell align="left">Precision</TableCell>
+          <TableCell align="left">Min</TableCell>
+          <TableCell align="left">Max</TableCell>
+          <TableCell align="left">Increment</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {rows.map((row, index) => {
+          return <TableRow key={index + 1} sx={{ verticalAlign: 'top' }} >
+            <TableCell align="left" sx={{ width: '40%' }}>{type} #{index + 1}</TableCell>
+            <TableCell align="left" sx={{ width: '15%' }}>{row.precision}</TableCell>
+            <TableCell align="left" sx={{ width: '15%' }}>{row.min}</TableCell>
+            <TableCell align="left" sx={{ width: '15%' }}>{row.max}</TableCell>
+            <TableCell align="left" sx={{ width: '15%' }}>{row.increment}</TableCell>
+          </TableRow>
+        })}
+      </TableBody>
+    </Table >
   );
 }
 
 interface IPriceGranularityComponentProps {
   prebid: IPrebidDetails
+}
+
+interface IDefaultBuckets {
+  [key: string]: {
+    precision: number;
+    min: number;
+    max: number;
+    increment: number;
+  }[]
 }
 
 export default PriceGranularityComponent;
