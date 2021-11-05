@@ -61,6 +61,13 @@ export const Popup = (): JSX.Element => {
       setPrebidDetails(data)
     });
   }, [prebid]);
+  useEffect(() => {
+    // listen for update message from background script
+    appHandler.handlePopUpUpdate((data: IPrebidDetails) => {
+      logger.log('[App] received Prebid Details from background', data);
+      setPrebidDetails(data)
+    });
+  }, []);
 
   const [tcf, setTcfDetails] = useState<ITcfDetails>();
   useEffect(() => {

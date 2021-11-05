@@ -15,8 +15,6 @@ class Background {
     setInterval(() => {
       chrome.tabs.query({}, (tabs) => {
         let activeTabIds = tabs.map(tab => tab.id)
-
-
         for (let t in this.tabInfo) {
           if (activeTabIds.includes(parseInt(t))) {
           } else {
@@ -35,6 +33,14 @@ class Background {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#ecf3f5' });
       chrome.browserAction.setBadgeText({ text: `` });
     }
+  }
+
+  updatePopUp(currentActiveTabId: number) {
+    chrome.runtime.sendMessage({
+      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
+      payload:this.tabInfo[currentActiveTabId] || {},
+    });
+    
   }
 
   addEventListeners() {
@@ -77,7 +83,7 @@ class Background {
         case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
           this.updateBadge();
-          sendResponse(this.tabInfo[this.currentActiveTabId].gamDetails);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.gamDetails);
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received prebid details data:', payload);
@@ -87,7 +93,7 @@ class Background {
           break;
         case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId].prebidDetails);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.prebidDetails);
           break;
         case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received tcf details data:', payload);
@@ -96,7 +102,7 @@ class Background {
           break;
         case constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send tcf details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId].tcfDetails);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.tcfDetails);
           break;
         case constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send debug details data:', this.tabInfo, this.currentActiveTabId);
@@ -110,11 +116,11 @@ class Background {
     chrome.webNavigation.onBeforeNavigate.addListener(web_navigation => {
       const tabId = web_navigation.tabId;
       const frameId = web_navigation.frameId;
-
       if (frameId == 0) {
         logger.warn('[Background]', tabId, 'RESET');
         this.tabInfo[tabId] = { gamDetails: null, prebidDetails: null, tcfDetails: null, url: null };
         this.tabInfo[tabId]['url'] = web_navigation.url;
+        this.updatePopUp(tabId);
       }
     });
 
