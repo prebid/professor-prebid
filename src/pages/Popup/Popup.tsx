@@ -178,7 +178,7 @@ export const Popup = (): JSX.Element => {
           </Route>
 
           <Route exact path="/userId">
-            {tcf && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
+            {prebid && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
           </Route>
 
         </Switch>
