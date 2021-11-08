@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAuctionEndEventData, IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidBid } from "../../../../inject/scripts/prebid";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -36,7 +36,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 , padding: 0}}>
+        <Box sx={{ p: 3, padding: 0 }}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -68,7 +68,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   }
 }));
 
-const Row = ({ bid }: any) => {
+const Row = ({ bid }: IRowComponentProps) => {
   const [open, setOpen] = React.useState(false);
   return (
     <React.Fragment>
@@ -187,8 +187,11 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                     <TableCell>{bid.bidder}</TableCell>
                     <TableCell>{bid.adUnitCode}</TableCell>
                     <TableCell><Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                      {bid.params && Object.keys(bid.params).map((key: any) =>
-                        <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} variant="outlined" size="small" />
+                      {bid.params && Object.keys(bid.params).map(key =>
+                        <Chip key={key}
+                          label={key + ': ' + JSON.stringify(bid.params[key])}
+                          variant="outlined"
+                          size="small" />
                       )}</Stack></TableCell>
                   </TableRow>
                 ))}
@@ -203,6 +206,10 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
 
 interface IBidsComponentProps {
   prebid: IPrebidDetails;
+}
+
+interface IRowComponentProps {
+  bid: IPrebidBid;
 }
 
 export default BidsComponent;

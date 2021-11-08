@@ -6,7 +6,6 @@ import { ITcfDetails } from '../inject/scripts/tcf';
 
 class Background {
   mainTabId: number;
-  appData: any;
   tabInfo: ITabInfo = {};
   currentActiveTabId: number;
 
@@ -18,7 +17,7 @@ class Background {
         for (let t in this.tabInfo) {
           if (activeTabIds.includes(parseInt(t))) {
           } else {
-            this.removeInfoForTabId(t);
+            this.removeInfoForTabId(parseInt(t));
           }
         }
       });
@@ -136,7 +135,7 @@ class Background {
 
   }
 
-  removeInfoForTabId(tabId: any) {
+  removeInfoForTabId(tabId: number) {
     logger.log('[Background] Removing info for tabId ' + tabId);
     if (this.tabInfo[tabId])
       delete this.tabInfo[tabId];

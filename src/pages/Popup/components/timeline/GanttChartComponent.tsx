@@ -76,7 +76,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
   const gridRef = useRef(null)
   const prebidEvents = prebid?.events || [];
   const gridStep = 10;
-  const tableRows: any[] = [];
+  const tableRows: ITableRow[] = [];
   const [open, setOpen] = React.useState(false);
 
   const createGridBarElements = () => {
@@ -89,9 +89,9 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
   }
 
   const getGridBarElement = (input: number) => {
-    const allGridBarsCollection = gridRef?.current?.children as HTMLCollection;
-    const allGridBarsArray = Array.from(allGridBarsCollection || []);
-    const nearestGridBar = allGridBarsArray.sort((a: any, b: any) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input))[0] as HTMLElement;
+    const allGridBarsCollection = gridRef?.current?.children;
+    const allGridBarsArray = (Array.from(allGridBarsCollection || [])) as HTMLLIElement[];
+    const nearestGridBar = allGridBarsArray.sort((a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input))[0] as HTMLElement;
     return nearestGridBar;
   }
 
@@ -207,6 +207,14 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
 interface IGanttChartComponentProps {
   prebid: IPrebidDetails;
   auctionEndEvent: IPrebidAuctionEndEventData;
+}
+
+interface ITableRow {
+  bidderCode: string;
+  startTimeStamp: number;
+  endTimestamp: number;
+  left: number;
+  width: number;
 }
 
 export default GanttChartComponent;

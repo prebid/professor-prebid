@@ -16,10 +16,7 @@ const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
         {prebid.config.floors?.data?.schema?.fields && <Typography><strong>Schema/Field:</strong></Typography>}
         {prebid.config.floors?.data?.schema?.fields && <List dense={true}>{prebid.config.floors.data.schema.fields.map((field: string, index: number) => <ListItem key={index}>{field}</ListItem>)}</List>}
         {prebid.config.floors?.data?.values && <Typography><strong>Values:</strong></Typography>}
-        {prebid.config.floors?.data?.values && <List dense={true}>
-          {Object.keys(prebid.config.floors.data.values).map(
-            (key: any, index: number) => <ListItem key={index}>{key}: {prebid.config.floors.data.values[key]}</ListItem>
-          )}</List>}
+        {prebid.config.floors?.data?.values && <List dense={true}>{Object.keys(prebid.config.floors.data.values).map((key, index) => <ListItem key={index}>{key}: {prebid.config.floors.data.values[key]}</ListItem>)}</List>}
         {prebid.config.floors?.floorsSchemaVersion && <Typography><strong>floorsSchemaVersion:</strong> {prebid.config?.floors?.floorsSchemaVersion}</Typography>}
       </Box>
 
@@ -41,7 +38,7 @@ const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
             {prebid.config.consentManagement.gdpr.rules.map((rule: any, index) =>
               <List dense={true}>
                 <Typography><strong>Rules #{index}</strong></Typography>
-                {Object.keys(rule).map((key: any, index) =>
+                {Object.keys(rule).map((key, index) =>
                   <ListItem key={index}>{key}: {String(rule[key])}</ListItem>
                 )}
               </List>

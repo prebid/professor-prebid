@@ -23,20 +23,20 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {adUnits.map((adUnit: any, index) => (
+          {adUnits.map((adUnit, index) => (
             <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell variant="body"><strong>{adUnit.code}</strong></TableCell>
               <TableCell variant="body">
                 Banner Sizes:
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {adUnit.mediaTypes?.banner?.sizes?.map((size: string[], index: number) =>
+                  {adUnit.mediaTypes?.banner?.sizes?.map((size: number[], index: number) =>
                     <Chip size="small" key={index} label={size[0] + 'x' + size[1]} variant="outlined" color="primary" sx={{ minWidth: '84px' }} />
                   )}
                 </Stack>
               </TableCell>
               <TableCell variant="body">
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {Array.from(new Set(adUnit.bids)).map((bid: any, index: number) =>
+                  {Array.from(new Set(adUnit.bids)).map((bid, index) =>
                     <Tooltip
                       PopperProps={{ disablePortal: true, }}
                       leaveDelay={0}

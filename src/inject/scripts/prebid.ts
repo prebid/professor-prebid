@@ -78,7 +78,7 @@ class Prebid {
     }
 
     sendDetailsToContentScript(): void {
-        const filterEvent = (event: any) => {
+        const filterEvent = (event: (IPrebidAuctionInitEventData | IPrebidAuctionEndEventData | IPrebidBidRequestedEventData | IPrebidNoBidEventData | IPrebidBidWonEventData)) => {
             return (
                 event.eventType === 'bidRequested'
                 || event.eventType === 'bidResponse'
@@ -93,17 +93,24 @@ class Prebid {
         const prebidDetail: IPrebidDetails = {
             version: this.globalPbjs.version,
             timeout: window.PREBID_TIMEOUT || null,
-            events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents().filter((event: any) => filterEvent(event)) : [],
+            events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents().filter((event: (IPrebidAuctionInitEventData | IPrebidAuctionEndEventData | IPrebidBidRequestedEventData | IPrebidNoBidEventData | IPrebidBidWonEventData)) => filterEvent(event)) : [],
             config: this.config,
             eids: this.eids
         };
+        console.log({ prebidDetail });
         sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     }
 }
 
 export const prebid = new Prebid();
 
-interface IPrebidBid {
+export interface IPrebidBidParams {
+    publisherId: string;
+    adSlot: string;
+    [key: string]: string | number;
+};
+
+export interface IPrebidBid {
     ad: string;
     adId: string;
     adUnitCode: string;
@@ -123,8 +130,8 @@ interface IPrebidBid {
     creativeId: string;
     currency: string;
     dealId: string;
-    getSize: any
-    getStatusCode: any
+    getSize: { (): boolean; };
+    getStatusCode: { (): boolean; };
     height: number;
     mediaType: string;
     meta: {
@@ -136,11 +143,7 @@ interface IPrebidBid {
     netRevenue: true
     originalCpm: number;
     originalCurrency: string;
-    params: {
-        publisherId: string;
-        adSlot: string;
-        [key: string]: string | number;
-    }[]
+    params: IPrebidBidParams
     partnerImpId: string;
     pbAg: string;
     pbCg: string;
@@ -196,7 +199,7 @@ interface IPrebidAdUnitMediaTypes {
 interface IPrebidAdUnit {
     bids: IPrebidBid[];
     code: string;
-    mediaTypes: IPrebidAdUnitMediaTypes[];
+    mediaTypes: IPrebidAdUnitMediaTypes;
     sizes: number[][];
     transactionId: string
 }
@@ -272,10 +275,10 @@ interface IPrebidConfig {
         buckets: IPrebidConfigPriceBucket[];
     };
     mediaTypePriceGranularity: {
-        banner: { buckets: { precision: number, min: number, max: number, increment: number }[] }
-        native: { buckets: { precision: number, min: number, max: number, increment: number }[] }
-        video: { buckets: { precision: number, min: number, max: number, increment: number }[] }
-        'video-outstream': { buckets: { precision: number, min: number, max: number, increment: number }[] }
+        banner: { buckets: { precision: number, min: number, max: number, increment: number }[] };
+        native: { buckets: { precision: number, min: number, max: number, increment: number }[] };
+        video: { buckets: { precision: number, min: number, max: number, increment: number }[] };
+        'video-outstream': { buckets: { precision: number, min: number, max: number, increment: number }[] };
         priceGranularity: string;
         publisherDomain: string;
     };
@@ -285,7 +288,7 @@ interface IPrebidConfig {
         adapterOptions: any;
         app: {
             bundle: string;
-            id: any;
+            id: string;
             name: string;
             paid: number;
             privacypolicy: number;
@@ -322,7 +325,7 @@ interface IPrebidConfig {
     disableAjaxTimeout: boolean;
     maxNestedIframes: number;
     auctionOptions: any;
-    userSync: IPrebidConfigUserSync,
+    userSync: IPrebidConfigUserSync;
     cache: {
         url: string;
     },
@@ -346,11 +349,11 @@ export interface IPrebidAuctionInitEventData {
         auctionStatus: string
         bidderRequests: IPrebidBidderRequest[];
         bidsReceived: IPrebidBid[]
-        labels: any;
+        labels: [];
         noBids: IPrebidBid[];
         timeout: number;
         timestamp: number;
-        winningBids: any[]
+        winningBids: [];
     };
     elapsedTime: number;
     eventType: string;
@@ -363,14 +366,14 @@ export interface IPrebidAuctionEndEventData {
         adUnits: IPrebidAdUnit[];
         auctionEnd: number;
         auctionId: string;
-        auctionStatus: string
+        auctionStatus: string;
         bidderRequests: IPrebidBidderRequest[];
-        bidsReceived: IPrebidBid[]
+        bidsReceived: IPrebidBid[];
         labels: any;
         noBids: IPrebidBid[];
         timeout: number;
         timestamp: number;
-        winningBids: any[]
+        winningBids: IPrebidBid[];
     };
     elapsedTime: number;
     eventType: string;
@@ -403,7 +406,7 @@ export interface IPrebidNoBidEventData {
         bidderRequestsCount: number;
         bidderWinsCount: number;
         mediaTypes: IPrebidAdUnitMediaTypes;
-        params: any;
+        params: { [key: string]: string };
         sizes: number[][];
         src: string;
         transactionId: string;
@@ -423,17 +426,17 @@ export interface IPrebidBidWonEventData {
 interface IPrebidGdprConsent {
     consentString: string;
     vendorData: {
-        addtlConsent: string
-        cmpId: number
-        cmpStatus: string
-        cmpVersion: number
-        eventStatus: string
-        gdprApplies: boolean
-        isServiceSpecific: boolean
-        listenerId: number
+        addtlConsent: string;
+        cmpId: number;
+        cmpStatus: string;
+        cmpVersion: number;
+        eventStatus: string;
+        gdprApplies: boolean;
+        isServiceSpecific: boolean;
+        listenerId: number;
         outOfBand: {
-            allowedVendors: any,
-            disclosedVendors: any
+            allowedVendors: any;
+            disclosedVendors: any;
         }
         publisher: {
             consents: {
@@ -472,7 +475,7 @@ interface IPrebidGdprConsent {
     },
     gdprApplies: boolean;
     addtlConsent: string;
-    apiVersion: number
+    apiVersion: number;
 }
 
 interface IPrebidBidderRequest {
@@ -483,7 +486,7 @@ interface IPrebidBidderRequest {
     bidderRequestId: string;
     bids: IPrebidBid[];
     ceh: any;
-    gdprConsent: IPrebidGdprConsent
+    gdprConsent: IPrebidGdprConsent;
     publisherExt: any;
     refererInfo: {
         referer: string;

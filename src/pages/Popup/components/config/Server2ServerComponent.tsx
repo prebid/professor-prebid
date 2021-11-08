@@ -12,7 +12,7 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
       {prebid.config.s2sConfig?.app &&
         <List dense={true}>
           <Typography><strong>App</strong> </Typography>
-          {Object.keys(prebid.config.s2sConfig?.app).map((key: any, index) => {
+          {Object.keys(prebid.config.s2sConfig?.app).map(key => {
             const value = prebid.config.s2sConfig?.app[key as keyof typeof prebid.config.s2sConfig.app];
             if (value) {
               return <ListItem key={key}>{key}: {String(value)}</ListItem>
