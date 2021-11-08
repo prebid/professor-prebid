@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidAuctionEndEventData, IPrebidDetails } from "../../../../inject/scripts/prebid";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -135,8 +135,8 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  const bidsReceived = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.bidsReceived).flat() || [];
-  const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.noBids).flat() || [];
+  const bidsReceived = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.bidsReceived).flat() || [];
+  const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.noBids).flat() || [];
   return (
     <Box>
       <Box sx={{ width: '100%' }}>

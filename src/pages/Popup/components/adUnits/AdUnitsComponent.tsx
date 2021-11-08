@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidAuctionInitEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -12,7 +12,7 @@ import Divider from '@mui/material/Divider';
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const allAvailableBids = prebid.events.filter(event => event.eventType === 'bidResponse') || [];
   const allNoBids = prebid.events.filter(event => event.eventType === 'noBid') || [];
-  const allAdUnits = Array.from(new Set(prebid?.events?.filter(event => event.eventType === 'auctionInit').reduce((previousValue, currentValue) => [].concat(previousValue, currentValue.args.adUnitCodes), [])))
+  const allAdUnits = Array.from(new Set(prebid?.events?.filter(event => event.eventType === 'auctionInit').reduce((previousValue, currentValue) => [].concat(previousValue, (currentValue as IPrebidAuctionInitEventData).args.adUnitCodes), [])))
   const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map(event => event?.args.bidder)))
 
   return (

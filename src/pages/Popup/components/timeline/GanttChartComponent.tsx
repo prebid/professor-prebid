@@ -1,4 +1,4 @@
-import { IPrebidDetails, IBidderEvent } from "../../../../inject/scripts/prebid";
+import { IPrebidDetails, IPrebidBidRequestedEventData, IPrebidAuctionEndEventData, IPrebidBidResponseEventData, IPrebidNoBidEventData } from "../../../../inject/scripts/prebid";
 import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
 import React, { useEffect, useRef } from 'react';
 import { createRangeArray, getMinAndMaxNumber } from '../../../../utils';
@@ -96,28 +96,28 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
   }
 
   const createBidderRowElements = () => {
-    return auctionEndEvent.args.bidderRequests
+    return (auctionEndEvent as IPrebidAuctionEndEventData).args.bidderRequests
       .sort((a, b) => a.start - b.start)
       .map((bidderRequest, index) => {
         const bidRequestEvent = prebidEvents.find(event =>
           event.eventType === 'bidRequested'
           && event.args.auctionId === bidderRequest.auctionId
           && (
-            event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode
+            (event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode || (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode
           ));
 
         const bidResponseEvent = prebidEvents.find(event =>
           event.eventType === 'bidResponse'
           && event.args.auctionId === bidderRequest.auctionId
           && (
-            event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode
-          ));
+            (event as IPrebidBidResponseEventData).args.bidderCode === bidderRequest.bidderCode || (event as IPrebidBidResponseEventData).args.bidder === bidderRequest.bidderCode
+          )) as IPrebidBidResponseEventData;
 
         const noBidEvent = prebidEvents.find(event =>
           event.eventType === 'noBid'
           && event.args.auctionId === bidderRequest.auctionId
           && (
-            event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode
+            (event as IPrebidNoBidEventData).args.bidderCode === bidderRequest.bidderCode || (event as IPrebidNoBidEventData).args.bidder === bidderRequest.bidderCode
           ));
 
         const endTimestamp = bidResponseEvent ? bidResponseEvent.args.responseTimestamp : Math.floor(bidderRequest.start + noBidEvent?.elapsedTime - bidRequestEvent?.elapsedTime);
@@ -206,7 +206,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
 
 interface IGanttChartComponentProps {
   prebid: IPrebidDetails;
-  auctionEndEvent: IBidderEvent;
+  auctionEndEvent: IPrebidAuctionEndEventData;
 }
 
 export default GanttChartComponent;

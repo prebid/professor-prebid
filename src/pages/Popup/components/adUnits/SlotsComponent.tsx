@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidAuctionEndEventData, IPrebidDetails } from "../../../../inject/scripts/prebid";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,7 +11,7 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 
 const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
-  const adUnits = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => event.args.adUnits).flat() || [];
+  const adUnits = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.adUnits).flat() || [];
   return (
     <TableContainer>
       <Table size="small">

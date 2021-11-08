@@ -6,7 +6,7 @@ import logger from '../../logger';
 import constants from '../../constants.json';
 import { safelyParseJSON } from '../../utils';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
-import { IPrebidDetails } from '../../inject/scripts/prebid';
+import { IPrebidDetails, IPrebidBidWonEventData, IPrebidAuctionEndEventData } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf'
 
 class Content {
@@ -122,11 +122,15 @@ class Content {
 
   prepareMaskObjects() {
     logger.log('[Content] preparing masks');
-    const masks = this.prebid?.slots?.map(slot => {
-      const slotsBidWonEvent = this.prebid?.events.find(event => event.eventType === 'bidWon' && event.args.adUnitCode === slot.code);
+    const lastAuctionEndEvent = (this.prebid.events as IPrebidAuctionEndEventData[])
+      .filter(event => event.eventType === 'auctionEnd')
+      .sort((a, b) => a.args.timestamp > b.args.timestamp ? 1 : -1)
+      .pop();
+    const masks = lastAuctionEndEvent?.args?.adUnits.map(slot => {
+      const slotsBidWonEvent = <IPrebidBidWonEventData>this.prebid?.events.find((event) => event.eventType === 'bidWon' && (event as IPrebidBidWonEventData).args.adUnitCode === slot.code);
       return {
         elementId: slot.code,
-        creativeRenderTime: Date.now(),
+        creativeRenderTime: Date.now(), // TODO - get creative render time from prebid
         winningCPM: slotsBidWonEvent?.args.cpm ? Math.round(slotsBidWonEvent?.args.cpm * 100) / 100 : undefined,
         winningBidder: slotsBidWonEvent?.args.bidder || slotsBidWonEvent?.args.bidderCode,
         currency: slotsBidWonEvent?.args.currency,
