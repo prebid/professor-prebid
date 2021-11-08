@@ -1,4 +1,4 @@
-const inject: any = () => {
+const inject = () => {
   const script = document.createElement('script');
   script.src = chrome.extension.getURL('/injected.bundle.js');
   script.id = 'professor prebid injected bundle';
