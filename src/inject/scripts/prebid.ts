@@ -97,7 +97,6 @@ class Prebid {
             config: this.config,
             eids: this.eids
         };
-        console.log({ prebidDetail });
         sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     }
 }

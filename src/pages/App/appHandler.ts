@@ -22,7 +22,6 @@ class AppHandler {
 
   handlePopUpUpdate(cb: any): void {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-      console.log('update popup',   request);
       if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
         cb(request.data);
       }
