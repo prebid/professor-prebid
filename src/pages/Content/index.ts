@@ -122,7 +122,7 @@ class Content {
 
   prepareMaskObjects() {
     logger.log('[Content] preparing masks');
-    const lastAuctionEndEvent = (this.prebid.events as IPrebidAuctionEndEventData[])
+    const lastAuctionEndEvent = ((this.prebid.events || []) as IPrebidAuctionEndEventData[])
       .filter(event => event.eventType === 'auctionEnd')
       .sort((a, b) => a.args.timestamp > b.args.timestamp ? 1 : -1)
       .pop();
