@@ -31,9 +31,8 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
     }
 
     return (
-        <Box>
-            <Button size="small" onClick={dfp_open_console}>
-                <FontAwesomeIcon icon={faGoogle} />
+        <Box sx={{padding: '5px'}}>
+            <Button variant="outlined" size="small" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
                 open google AdManager console
             </Button>
             <FormGroup>
