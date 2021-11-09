@@ -119,7 +119,6 @@ class Background {
         logger.warn('[Background]', tabId, 'RESET');
         this.tabInfo[tabId] = { gamDetails: null, prebidDetails: null, tcfDetails: null, url: null };
         this.tabInfo[tabId]['url'] = web_navigation.url;
-        this.updatePopUp(tabId);
       }
     });
 
@@ -131,6 +130,7 @@ class Background {
     chrome.tabs.onActivated.addListener((activeInfo) => {
       this.currentActiveTabId = activeInfo.tabId
       this.updateBadge();
+      // this.updatePopUp(this.currentActiveTabId);
     });
 
   }

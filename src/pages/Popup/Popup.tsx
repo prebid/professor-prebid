@@ -1,12 +1,10 @@
-import { popupHandler } from './popupHandler';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import { appHandler } from '../App/appHandler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPollH, faSlidersH, faAd, faLaptopCode, faWindowRestore, faMoneyBill, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons'
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'
+import { faPollH, faSlidersH, faAd, faTools, faWindowRestore, faMoneyBill, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
@@ -17,8 +15,8 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Typography, { TypographyProps } from '@mui/material/Typography';
-import MatSwitch from '@mui/material/Switch';
 import BidsComponent from './components/bids/BidsComponent';
+import ToolsComponent from './components/tools/ToolsComponent';
 import { styled } from '@mui/material/styles';
 
 const StyledIconButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
@@ -39,18 +37,12 @@ const StyledTypo = styled(Typography)<TypographyProps>(({ theme }) => ({
 }));
 
 export const Popup = (): JSX.Element => {
-  const [consoleState, setConsoleState] = useState<boolean>(null);
-  useEffect(() => {
-    popupHandler.getToggleStateFromStorage((checked: boolean) => {
-      setConsoleState(checked);
-    });
-  }, [consoleState]);
 
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
-      setGamDetails(data)
+      setGamDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
     });
   }, [googleAdManager]);
 
@@ -58,14 +50,14 @@ export const Popup = (): JSX.Element => {
   useEffect(() => {
     appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails(data)
+      setPrebidDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
     });
   }, [prebid]);
   useEffect(() => {
     // listen for update message from background script
     appHandler.handlePopUpUpdate((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails(data)
+      setPrebidDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
     });
   }, []);
 
@@ -73,22 +65,11 @@ export const Popup = (): JSX.Element => {
   useEffect(() => {
     appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setTcfDetails(data)
+      setTcfDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
     });
   }, [tcf]);
 
-  const handleConsoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setConsoleState(event.target.checked);
-    popupHandler.onConsoleToggle(event.target.checked);
-  };
 
-  const dfp_open_console = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentTab = tabs[0];
-      const file = './openDfpConsole.bundle.js';
-      chrome.tabs.executeScript(currentTab.id, { file });
-    });
-  }
 
   return (
     <Box className="popup" sx={{ height: '600px', width: '780px', overflowX: 'scroll' }}>
@@ -112,37 +93,16 @@ export const Popup = (): JSX.Element => {
           }}>Prof. Prebid</Typography>
           <Box sx={{
             display: 'flex',
-            flexDirection: 'row-reverse',
+            flexDirection: 'row',
             flex: 0.8,
             justifyContent: 'space-around'
           }}>
-            <Box sx={{ paddingTop: '10px' }}>
-              <MatSwitch checked={consoleState || false} onChange={handleConsoleChange} sx={{ transform: 'rotate(90deg)', width: '62px' }}></MatSwitch>
-            </Box>
 
-            <StyledIconButton size="small" onClick={dfp_open_console}>
-              <FontAwesomeIcon icon={faGoogle} />
-              <StyledTypo>GAM</StyledTypo>
-            </StyledIconButton>
 
-            <Link to="/userId">
-              <StyledIconButton size="small" >
-                <FontAwesomeIcon icon={faUserFriends} />
-                <StyledTypo>User ID</StyledTypo>
-              </StyledIconButton>
-            </Link>
-
-            <Link to="/config">
+            <Link to="/">
               <StyledIconButton size="small">
-                <FontAwesomeIcon icon={faSlidersH} />
-                <StyledTypo>Config</StyledTypo>
-              </StyledIconButton>
-            </Link>
-
-            <Link to="/timeline">
-              <StyledIconButton size="small" >
-                <FontAwesomeIcon icon={faPollH} />
-                <StyledTypo>Timeline</StyledTypo>
+                <FontAwesomeIcon icon={faAd} />
+                <StyledTypo>Ad Units</StyledTypo>
               </StyledIconButton>
             </Link>
 
@@ -153,16 +113,33 @@ export const Popup = (): JSX.Element => {
               </StyledIconButton>
             </Link>
 
-            <Link to="/">
-              <StyledIconButton size="small">
-                <FontAwesomeIcon icon={faAd} />
-                <StyledTypo>Ad Units</StyledTypo>
+            <Link to="/timeline">
+              <StyledIconButton size="small" >
+                <FontAwesomeIcon icon={faPollH} />
+                <StyledTypo>Timeline</StyledTypo>
               </StyledIconButton>
             </Link>
 
-            {/* <StyledIconButton size="small" onClick={popupHandler.openDebugTab}><FontAwesomeIcon icon={faLaptopCode} />
-            <Typography className="label">Debug</Typography>
-          </StyledIconButton> */}
+            <Link to="/config">
+              <StyledIconButton size="small">
+                <FontAwesomeIcon icon={faSlidersH} />
+                <StyledTypo>Config</StyledTypo>
+              </StyledIconButton>
+            </Link>
+
+            <Link to="/userId">
+              <StyledIconButton size="small" >
+                <FontAwesomeIcon icon={faUserFriends} />
+                <StyledTypo>User ID</StyledTypo>
+              </StyledIconButton>
+            </Link>
+
+            <Link to="/tools">
+              <StyledIconButton size="small">
+                <FontAwesomeIcon icon={faTools} />
+                <StyledTypo>Tools</StyledTypo>
+              </StyledIconButton>
+            </Link>
 
           </Box>
         </AppBar>
@@ -186,6 +163,10 @@ export const Popup = (): JSX.Element => {
 
           <Route exact path="/userId">
             {prebid && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
+          </Route>
+
+          <Route exact path="/tools">
+            {prebid && <ToolsComponent prebid={prebid}></ToolsComponent>}
           </Route>
 
         </Switch>
