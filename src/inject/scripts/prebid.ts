@@ -77,6 +77,15 @@ class Prebid {
         }
     }
 
+    getPbjsDebugConfig() {
+        const pbjsDebugString = window.sessionStorage.getItem('pbjs:debugging');
+        try {
+            return JSON.parse(pbjsDebugString);
+        } catch (e) {
+            // return pbjsDebugString;
+        }
+    }
+
     sendDetailsToContentScript(): void {
         const filterEvent = (event: (IPrebidAuctionInitEventData | IPrebidAuctionEndEventData | IPrebidBidRequestedEventData | IPrebidNoBidEventData | IPrebidBidWonEventData)) => {
             return (
@@ -95,7 +104,8 @@ class Prebid {
             timeout: window.PREBID_TIMEOUT || null,
             events: this.globalPbjs?.getEvents ? this.globalPbjs.getEvents().filter((event: (IPrebidAuctionInitEventData | IPrebidAuctionEndEventData | IPrebidBidRequestedEventData | IPrebidNoBidEventData | IPrebidBidWonEventData)) => filterEvent(event)) : [],
             config: this.config,
-            eids: this.eids
+            eids: this.eids,
+            debug: this.getPbjsDebugConfig()
         };
         sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     }
@@ -331,12 +341,18 @@ interface IPrebidConfig {
     [key: string]: any;
 }
 
+export interface IPrebidDebugConfig {
+    enabled?: boolean;
+    bids?: { cpm: number }[];
+    bidders?: string[];
+}
 export interface IPrebidDetails {
     version: string;
     timeout: number;
     events: Array<IPrebidAuctionInitEventData | IPrebidAuctionEndEventData | IPrebidBidRequestedEventData | IPrebidNoBidEventData | IPrebidBidWonEventData>;
     config: IPrebidConfig;
     eids: IPrebidEids[];
+    debug: IPrebidDebugConfig;
 }
 
 export interface IPrebidAuctionInitEventData {
