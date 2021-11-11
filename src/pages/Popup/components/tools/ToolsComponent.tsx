@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-const ToolsComponent = ({ prebid, onStateChange }: ToolsComponentProps): JSX.Element => {
+const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
     const dfp_open_console = () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const currentTab = tabs[0];
@@ -46,7 +46,6 @@ const ToolsComponent = ({ prebid, onStateChange }: ToolsComponentProps): JSX.Ele
 
 interface ToolsComponentProps {
     prebid: IPrebidDetails;
-    onStateChange: (state: IPrebidDetails) => void;
 }
 
 export default ToolsComponent;
