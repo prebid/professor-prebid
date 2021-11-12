@@ -12,6 +12,12 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
+const truncateString = (str: string, num: number) => {
+  if (str.length <= num) {
+    return str
+  }
+  return str.slice(0, num) + '...'
+}
 const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Element => {
   return <Box>
     {Object.keys(mediaTypes).map((mediaType, index) => (
@@ -24,27 +30,31 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
           switch (typeof value) {
             case 'object': {
               if (Array.isArray(value)) {
-                return <Chip key={mediaTypeKey + subIndex}
-                  size="small"
-                  label={`${mediaTypeKey}: [${(value as []).map((v: any) => {
-                    switch (typeof v) {
-                      case 'object': {
-                        return `${JSON.stringify(v)}`
-                      }
-                      case 'string': {
-                        return `"${v}"`
-                      }
-                      case 'number': {
-                        return v
-                      }
-                      default: {
-                        return `${v} (${typeof (v)})`
-                      }
+                const valStr = `${mediaTypeKey}: [${(value as []).map((v: any) => {
+                  switch (typeof v) {
+                    case 'object': {
+                      return `${JSON.stringify(v)}`
                     }
-                  })}]`}
-                  variant="outlined"
-                  color="primary"
-                />
+                    case 'string': {
+                      return `"${truncateString(value, 34)}"`
+                    }
+                    case 'number': {
+                      return v
+                    }
+                    default: {
+                      return `${v} (${typeof (v)})`
+                    }
+                  }
+                })}]`;
+                return <Tooltip title={valStr}>
+                  <Chip key={mediaTypeKey + subIndex}
+                    size="small"
+                    label={truncateString(valStr, 34)}
+                    variant="outlined"
+                    color="primary"
+                    sx={{ overflowWrap: 'break-word', whiteSpace: 'normal', textOverflow: 'clip' }}
+                  />
+                </Tooltip>
               } else {
                 return Object.keys(value).map((valueKey, vkIndex) =>
                   <Chip key={vkIndex}
@@ -66,10 +76,21 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
               />
             }
             case 'string': {
+              return <Tooltip title={value}>
+                <Chip
+                  size="small"
+                  key={keyOfMediaType}
+                  label={`${keyOfMediaType}: "${truncateString(value, 34)}"`}
+                  variant="outlined"
+                  color="primary"
+                />
+              </Tooltip>
+            }
+            case 'boolean': {
               return <Chip
                 size="small"
                 key={keyOfMediaType}
-                label={`${keyOfMediaType}: "${value}"`}
+                label={`${keyOfMediaType}: ${value}`}
                 variant="outlined"
                 color="primary"
               />
@@ -98,9 +119,9 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell variant="head" sx={{width: '33%'}}>Code</TableCell>
-            <TableCell variant="head" sx={{width: '33%'}}>Media Types</TableCell>
-            <TableCell variant="head" sx={{width: '34%'}}>Bidders</TableCell>
+            <TableCell variant="head" sx={{ width: '33%' }}>Code</TableCell>
+            <TableCell variant="head" sx={{ width: '33%' }}>Media Types</TableCell>
+            <TableCell variant="head" sx={{ width: '34%' }}>Bidders</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
