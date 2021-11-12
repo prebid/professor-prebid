@@ -14,36 +14,40 @@ import Chip from '@mui/material/Chip';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-    PaperProps: {
-        style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: 250,
-        },
-    },
-};
+const MenuProps = { PaperProps: { style: { maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP, width: 250, }, }, };
+const getStyles = (name: string, selectedBidders: string[], theme: Theme) => ({
+    fontWeight: selectedBidders?.indexOf(name) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium
+});
 
-const getStyles = (name: string, selectedBidders: string[], theme: Theme) => {
-    return { fontWeight: selectedBidders?.indexOf(name) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium, };
-};
-
-const BidderFilterComponent = ({ prebid, setDebugConfigState }: BidderFilterComponentProps): JSX.Element => {
+const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }: BidderFilterComponentProps): JSX.Element => {
+    debugConfigState = debugConfigState || {};
     const theme = useTheme();
     const [bidderNames, setBidderNames] = useState<string[]>([]);
-    const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(false);
-    const [selectedBidders, setSelectedBidders] = React.useState<string[]>([]);
+    const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(!!(debugConfigState.bidders?.length > 0));
+    const [selectedBidders, setSelectedBidders] = React.useState<string[]>(debugConfigState.bidders || []);
 
     const handleSelectionChange = (event: SelectChangeEvent<string[]>) => {
-        const tmp = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-        setSelectedBidders(() => [...tmp]);
-        setBidderFilterEnabled(tmp.length > 0 ? true : false);
-        setDebugConfigState({ enabled: true, bidders: tmp });
+        const biddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
+        setSelectedBidders(() => [...biddersArray]);
+        setBidderFilterEnabled(true);
+        if (biddersArray.length === 0) {
+            delete debugConfigState.bidders;
+        } else {
+            debugConfigState.bidders = biddersArray;
+        }
+        setDebugConfigState({ ...debugConfigState });
     };
 
     const handleBidderFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setBidderFilterEnabled(event.target.checked);
-        setDebugConfigState({ bidders: !bidderFilterEnabled ? selectedBidders : undefined });
+        debugConfigState.bidders = (event.target.checked) ? selectedBidders : undefined;
+        setDebugConfigState({ ...debugConfigState });
     };
+
+    useEffect(() => {
+        setBidderFilterEnabled(!!(Array.isArray(debugConfigState.bidders)));
+        setSelectedBidders(debugConfigState.bidders || []);
+    }, [debugConfigState]);
 
     useEffect(() => {
         const events = prebid.events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType));
@@ -57,25 +61,36 @@ const BidderFilterComponent = ({ prebid, setDebugConfigState }: BidderFilterComp
 
     return (
         <FormGroup>
-            <FormControlLabel name="bidders" control={<Switch name="bidders" checked={bidderFilterEnabled} onChange={handleBidderFilterEnabledChange} />} label="Filter Bidders" />
+            <FormControlLabel
+                label="Filter Bidders"
+                name="bidders"
+                control={
+                    <Switch name="bidders"
+                        checked={bidderFilterEnabled}
+                        onChange={handleBidderFilterEnabledChange}
+                        disabled={!!!debugConfigState.enabled}
+                    />
+                }
+            />
             <FormControl>
-                <InputLabel id="demo-multiple-chip-label">Filter Bidder(s)</InputLabel>
+                <InputLabel>Filter Bidder(s)</InputLabel>
                 <Select
                     name="bidders"
-                    labelId="demo-multiple-chip-label"
-                    id="demo-multiple-chip"
                     multiple
                     value={selectedBidders}
                     onChange={handleSelectionChange}
-                    input={<OutlinedInput id="select-multiple-chip" label="Detected Bidders" />}
+                    input={<OutlinedInput label="Detected Bidders" />}
                     renderValue={selected => (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {selected.map(value => <Chip key={value} label={value} />)}
                         </Box>
                     )}
                     MenuProps={MenuProps}
+                    disabled={!!!debugConfigState.enabled}
                 >
-                    {bidderNames.map(name => <MenuItem key={name} value={name} style={getStyles(name, selectedBidders, theme)}>{name}</MenuItem>)}
+                    {bidderNames.map(name =>
+                        <MenuItem key={name} value={name} style={getStyles(name, selectedBidders, theme)}>{name}</MenuItem>
+                    )}
                 </Select>
             </FormControl>
         </FormGroup>
@@ -84,8 +99,8 @@ const BidderFilterComponent = ({ prebid, setDebugConfigState }: BidderFilterComp
 
 interface BidderFilterComponentProps {
     prebid: IPrebidDetails;
-    setDebugConfigState: (event: any) => void;
+    debugConfigState: IPrebidDebugConfig;
+    setDebugConfigState: (debugConfigState: any) => void;
 }
 
 export default BidderFilterComponent;
-
