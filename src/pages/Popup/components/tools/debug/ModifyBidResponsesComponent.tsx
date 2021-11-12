@@ -59,6 +59,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
                 {prebid &&
                     <BidderFilterComponent
                         prebid={prebid}
+                        debugConfigState={debugConfgigState}
                         setDebugConfigState={handleChange}
                     />}
                 <FormHelperText>
