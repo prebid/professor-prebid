@@ -366,7 +366,7 @@ interface IPrebidConfig {
 
 export interface IPrebidDebugConfig {
     enabled?: boolean;
-    bids?: { cpm: number }[];
+    bids?: { cpm?: number; bidder?: string; adUnitCode?: string; }[];
     bidders?: string[];
 }
 export interface IPrebidDetails {
