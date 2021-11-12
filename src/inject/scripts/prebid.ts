@@ -175,7 +175,7 @@ export interface IPrebidBid {
     width: number;
 }
 
-interface IPrebidAdUnitMediaTypes {
+export interface IPrebidAdUnitMediaTypes {
     banner: {
         sizes: number[][]
     };
@@ -196,13 +196,36 @@ interface IPrebidAdUnitMediaTypes {
         }
     };
     video: {
-        sizes: number[][];
-        playerSize: number[][];
+        pos: number;
         context: string;
-        mimes: string[];
-        maxduration: number;
+        placement: number;
+        playerSize: number[][];
         api: number[];
+        mimes: string[];
         protocols: number[];
+        playbackmethod: number[];
+        minduration: number;
+        maxduration: number;
+        w: number;
+        h: number;
+        startdelay: number;
+        linearity: number;
+        skip: number;
+        skipmin: number;
+        skipafter: number;
+        minbitrate: number;
+        maxbitrate: number;
+        delivery: number[];
+        playbackend: number;
+        adPodDurationSec: number;
+        durationRangeSec: number[];
+        requireExactDuration: boolean;
+        tvSeriesName: string;
+        tvEpisodeName: string;
+        tvSeasonNumber: number;
+        tvEpisodeNumber: number;
+        contentLengthSec: number;
+        contentMode: string;
     }
 }
 interface IPrebidAdUnit {
