@@ -46,8 +46,8 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                     }
                   }
                 })}]`;
-                return <Tooltip title={valStr}>
-                  <Chip key={mediaTypeKey + subIndex}
+                return <Tooltip title={valStr} key={mediaTypeKey + subIndex}>
+                  <Chip
                     size="small"
                     label={truncateString(valStr, 34)}
                     variant="outlined"
@@ -76,10 +76,9 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
               />
             }
             case 'string': {
-              return <Tooltip title={value}>
+              return <Tooltip title={value} key={keyOfMediaType}>
                 <Chip
                   size="small"
-                  key={keyOfMediaType}
                   label={`${keyOfMediaType}: "${truncateString(value, 34)}"`}
                   variant="outlined"
                   color="primary"
