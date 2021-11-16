@@ -21,6 +21,7 @@ import { styled } from '@mui/material/styles';
 
 const StyledIconButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   flexDirection: 'column',
+  backgroundColor: '#ecf3f5',
   color: '#0096FF',
   fontSize: '25px',
   width: '72px',

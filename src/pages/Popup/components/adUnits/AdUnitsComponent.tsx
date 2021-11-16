@@ -41,7 +41,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           </Grid>
         </Grid>
       </CardContent>
-      <Paper elevation={2} sx={{ backgroundColor: '#d4dbde' }}>
+      <Paper elevation={4}>
         {prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}
       </Paper>
     </Card>
