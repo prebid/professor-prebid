@@ -91,8 +91,8 @@ export const Popup = (): JSX.Element => {
           <Box sx={{
             display: 'flex',
             flexDirection: 'row',
-            flex: 0.8,
-            justifyContent: 'space-around'
+            flex: 1,
+            justifyContent: 'space-evenly'
           }}>
 
             <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" alt="logo" width="150" height="50"/>
