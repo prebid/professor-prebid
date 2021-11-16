@@ -25,7 +25,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           alignItems="center"
           >
           <Grid item>
-            <Paper variant="outlined" sx={{width: 200}}>
+            <Paper variant="outlined" sx={{width: 200, backgroundColor: '#a3b2b8'}}>
               {prebid.version && <Typography variant="subtitle1"><strong>Version: </strong>{prebid.version}</Typography>}
               <Divider></Divider>
               {prebid.config?.timeout && <Typography><strong>Timeout: </strong>{prebid.config.timeout}</Typography>}
@@ -33,7 +33,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Paper>
           </Grid>
           <Grid item>
-            <Paper variant="outlined" sx={{width: 200}}>
+            <Paper variant="outlined" sx={{width: 200, backgroundColor: '#a3b2b8'}}>
               <Typography variant="subtitle1"><strong>Bidders:</strong> {allBidders.length}</Typography>
               <Divider></Divider>
               <Typography variant="subtitle1"><strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}</Typography>
@@ -41,7 +41,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           </Grid>
         </Grid>
       </CardContent>
-      <Paper elevation={2}>
+      <Paper elevation={2} sx={{ backgroundColor: '#d4dbde' }}>
         {prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}
       </Paper>
     </Card>

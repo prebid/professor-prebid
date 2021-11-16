@@ -17,6 +17,7 @@ import Chip from '@mui/material/Chip';
 import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Grid from '@mui/material/Grid'
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -55,7 +56,7 @@ function a11yProps(index: number) {
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
-    backgroundColor: '#6689CC',
+    backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
     margin: 1,
     padding: 1
@@ -139,7 +140,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.noBids).flat() || [];
   return (
     <Box>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%'}}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Received Bids" {...a11yProps(0)} />
@@ -190,6 +191,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                       {bid.params && Object.keys(bid.params).map(key =>
                         <Chip key={key}
                           label={key + ': ' + JSON.stringify(bid.params[key])}
+                          color="primary"
                           variant="outlined"
                           size="small" />
                       )}</Stack></TableCell>

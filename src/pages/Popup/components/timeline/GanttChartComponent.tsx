@@ -148,9 +148,9 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Auction Start: {new Date(auctionEndEvent.args.timestamp).toISOString()}</TableCell>
-                <TableCell >Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}</TableCell>
-                <TableCell >Auction End: {new Date(auctionEndEvent.args.auctionEnd).toISOString()} </TableCell>
+                <TableCell><Paper variant="outlined" sx={{backgroundColor: '#a3b2b8'}}>Auction Start: {new Date(auctionEndEvent.args.timestamp).toISOString()}</Paper></TableCell>
+                <TableCell><Paper variant="outlined" sx={{backgroundColor: '#a3b2b8'}}>Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}</Paper></TableCell>
+                <TableCell><Paper variant="outlined" sx={{backgroundColor: '#a3b2b8'}}>Auction End: {new Date(auctionEndEvent.args.auctionEnd).toISOString()} </Paper></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

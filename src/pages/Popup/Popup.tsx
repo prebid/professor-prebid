@@ -21,13 +21,13 @@ import { styled } from '@mui/material/styles';
 
 const StyledIconButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   flexDirection: 'column',
-  color: '#000000',
+  color: '#0096FF',
   fontSize: '25px',
   width: '72px',
   height: '52px',
   textAlign: 'center',
   lineHeight: '1.6',
-  border: '2px solid #000000',
+  border: '2px solid #F99B0C',
   borderRadius: '10%',
 }));
 
@@ -82,15 +82,12 @@ export const Popup = (): JSX.Element => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           height: '62px',
-          background: '#F99B0C',
+          background: '#f5f5f5',
           '& a:link': {
             textDecoration: 'none'
           }
         }}>
 
-          <Typography variant="h6" sx={{
-            flex: 0.2,
-          }}>Prof. Prebid</Typography>
           <Box sx={{
             display: 'flex',
             flexDirection: 'row',
@@ -98,7 +95,7 @@ export const Popup = (): JSX.Element => {
             justifyContent: 'space-around'
           }}>
 
-
+            <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" alt="logo" width="150" height="50"/>
             <Link to="/">
               <StyledIconButton size="small">
                 <FontAwesomeIcon icon={faAd} />
