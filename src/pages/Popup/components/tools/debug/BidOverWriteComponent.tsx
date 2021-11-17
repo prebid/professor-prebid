@@ -82,7 +82,6 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
                             <Switch
                                 checked={bidsFilterEnabled}
                                 onChange={handleBidsFilterEnabledChange}
-                                disabled={!!!debugConfigState.enabled}
                             />
                         }
                     />
@@ -97,7 +96,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
                 width: 0.8,
             }}>
 
-                <FormControl sx={{ width: 0.1, maxWidth: 0.1, }}>
+                <FormControl sx={{ width: 0.11, maxWidth: 0.11, }}>
                     <Box
                         component="form"
                         noValidate
@@ -110,13 +109,14 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
                             value={cpm}
                             onChange={handleCpmChange}
                             variant="outlined"
-                            sx={{ width: 1 }}
+                            sx={{ width: 1, '& .MuiOutlinedInput-root': { height: 56 } }}
+                            disabled={!bidsFilterEnabled}
                         />
                     </Box>
                 </FormControl>
 
-                <FormControl sx={{ width: 0.89, maxWidth: 0.89, }}>
-                    <InputLabel>Filter Bidder(s)</InputLabel>
+                <FormControl sx={{ width: 0.88, maxWidth: 0.88, }}>
+                    <InputLabel>Select Bidder(s)</InputLabel>
                     <Select
                         multiple
                         value={selectedBids.map(selectedBid => selectedBid.bidder)}
@@ -128,7 +128,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
                             </Box>
                         )}
                         MenuProps={MenuProps}
-                        disabled={!!!debugConfigState.enabled}
+                        disabled={!bidsFilterEnabled}
                     >
                         {bidderNames.map(name =>
                             <MenuItem

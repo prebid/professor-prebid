@@ -46,7 +46,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
     useEffect(() => {
         setBidderFilterEnabled(!!(Array.isArray(debugConfigState.bidders)));
         setSelectedBidders(debugConfigState.bidders || []);
-    }, [debugConfigState]);
+    }, [debugConfigState.bidders]);
 
     useEffect(() => {
         const events = prebid.events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType));
@@ -73,7 +73,6 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
                         <Switch
                             checked={bidderFilterEnabled}
                             onChange={handleBidderFilterEnabledChange}
-                            disabled={!!!debugConfigState.enabled}
                         />
                     }
                 />
@@ -98,7 +97,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
                         </Box>
                     )}
                     MenuProps={MenuProps}
-                    disabled={!!!debugConfigState.enabled}
+                    disabled={!bidderFilterEnabled}
                     sx={{ width: 1 }}
                 >
                     {bidderNames.map(name =>
