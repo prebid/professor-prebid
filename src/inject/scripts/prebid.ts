@@ -364,9 +364,13 @@ interface IPrebidConfig {
     [key: string]: any;
 }
 
+export interface IPrebidDebugConfigBid {
+    cpm?: number; bidder?: string; adUnitCode?: string; 
+}
+
 export interface IPrebidDebugConfig {
     enabled?: boolean;
-    bids?: { cpm?: number; bidder?: string; adUnitCode?: string; }[];
+    bids?: IPrebidDebugConfigBid[];
     bidders?: string[];
 }
 export interface IPrebidDetails {
