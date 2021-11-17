@@ -4,11 +4,8 @@ import BidOverWriteComponent from './BidOverWriteComponent';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-import FormHelperText from '@mui/material/FormHelperText';
+import Divider from '@mui/material/Divider';
 
 const inject = (code: string, callback: (result: any) => void) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
@@ -54,14 +51,13 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
             justifyContent: 'flexStart',
             alignItems: 'start',
             alignContent: 'center',
-            rowGap: '10px',
-            columnGap: '20px',
+            rowGap: 2
         }}>
             <FormControlLabel
-                name="enabled"
                 control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
                 label="Enable Debugging"
             />
+             <Divider sx={{color: 'rgba(0, 0, 0, 0.38)'}} >Modify Bid-Responses</Divider>
             {prebid &&
                 <BidderFilterComponent
                     prebid={prebid}

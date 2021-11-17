@@ -30,7 +30,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
 
     const handleSelectionChange = (event: SelectChangeEvent<string[]>) => {
         const biddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-        setSelectedBids(() => [...biddersArray.map((bidder: string) => ({ bidder, cpm: 655 }))]);
+        setSelectedBids(() => [...biddersArray.map((bidder: string) => ({ bidder, cpm }))]);
         setBidsFilterEnabled(true);
         if (biddersArray.length === 0) {
             delete debugConfigState.bids;
@@ -71,13 +71,12 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
             display: 'flex',
             flexDirection: 'row',
             flexWrap: 'nowrap',
-            width: 1
+            width: 1,
         }}>
             <Box sx={{ width: 0.2 }}>
                 <FormControl>
                     <FormControlLabel
                         label="Overwrite CPM"
-                        labelPlacement="bottom"
                         control={
                             <Switch
                                 checked={bidsFilterEnabled}
@@ -115,7 +114,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
                     </Box>
                 </FormControl>
 
-                <FormControl sx={{ width: 0.88, maxWidth: 0.88, }}>
+                <FormControl sx={{ width: 0.88, maxWidth: 0.88 }} >
                     <InputLabel>Select Bidder(s)</InputLabel>
                     <Select
                         multiple

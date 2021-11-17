@@ -68,7 +68,6 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
             <FormControl sx={{ width: 0.2 }}>
                 <FormControlLabel
                     label="Filter Bidders"
-                    labelPlacement="bottom"
                     control={
                         <Switch
                             checked={bidderFilterEnabled}

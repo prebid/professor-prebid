@@ -32,7 +32,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
     };
 
     return (
-        <Box>
+        <Box sx={{ m: 1 }}>
             <Button variant="outlined" size="small" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
                 open google AdManager console
             </Button>
