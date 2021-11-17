@@ -26,7 +26,6 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
         {Object.keys(mediaTypes[mediaType as keyof IPrebidAdUnitMediaTypes]).map((mediaTypeKey, subIndex) => {
           const keyOfMediaType = mediaTypeKey as keyof IPrebidAdUnitMediaTypes[keyof IPrebidAdUnitMediaTypes];
           const value = mediaTypes[mediaType as keyof IPrebidAdUnitMediaTypes][keyOfMediaType];
-
           switch (typeof value) {
             case 'object': {
               if (Array.isArray(value)) {
@@ -36,7 +35,8 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                       return `${JSON.stringify(v)}`
                     }
                     case 'string': {
-                      return `"${truncateString(value, 34)}"`
+                      // return `"${truncateString(value, 34)}"`
+                      return value
                     }
                     case 'number': {
                       return v
@@ -46,13 +46,19 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                     }
                   }
                 })}]`;
-                return <Tooltip title={valStr} key={mediaTypeKey + subIndex}>
+                return <Tooltip
+                  title={valStr}
+                  key={mediaTypeKey + subIndex}
+                  PopperProps={{ disablePortal: true, }}
+                  leaveDelay={0}
+                  enterDelay={0}
+                >
                   <Chip
                     size="small"
-                    label={truncateString(valStr, 34)}
+                    label={<Box sx={{ whiteSpace: 'break-spaces' }}>{valStr}</Box>}
                     variant="outlined"
                     color="primary"
-                    sx={{ overflowWrap: 'break-word', whiteSpace: 'normal', textOverflow: 'clip' }}
+                    sx={{ height: 'unset' }}
                   />
                 </Tooltip>
               } else {
@@ -76,12 +82,17 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
               />
             }
             case 'string': {
-              return <Tooltip title={value} key={keyOfMediaType}>
+              return <Tooltip title={value} key={keyOfMediaType} PopperProps={{ disablePortal: true, }} leaveDelay={0} enterDelay={0}>
                 <Chip
                   size="small"
-                  label={`${keyOfMediaType}: "${truncateString(value, 34)}"`}
+                  label={
+                    <Box id="floTest" sx={{ whiteSpace: 'break-spaces' }}>
+                      {`${mediaTypeKey}: ${(mediaTypeKey === 'adTemplate') ? truncateString((value as string).trim().replace('\n', ''), 15) : value}`}
+                    </Box>
+                  }
                   variant="outlined"
                   color="primary"
+                  sx={{ height: 'unset' }}
                 />
               </Tooltip>
             }
