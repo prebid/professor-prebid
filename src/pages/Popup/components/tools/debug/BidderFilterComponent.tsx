@@ -2,7 +2,6 @@ import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidDebugConfig } from "
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { Theme, useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -60,22 +59,35 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
     }, [prebid.events]);
 
     return (
-        <FormGroup>
-            <FormControlLabel
-                label="Filter Bidders"
-                name="bidders"
-                control={
-                    <Switch name="bidders"
-                        checked={bidderFilterEnabled}
-                        onChange={handleBidderFilterEnabledChange}
-                        disabled={!!!debugConfigState.enabled}
-                    />
-                }
-            />
-            <FormControl>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'nowrap',
+            width: 1,
+        }}>
+            <FormControl sx={{ width: 0.2 }}>
+                <FormControlLabel
+                    label="Filter Bidders"
+                    labelPlacement="bottom"
+                    control={
+                        <Switch
+                            checked={bidderFilterEnabled}
+                            onChange={handleBidderFilterEnabledChange}
+                            disabled={!!!debugConfigState.enabled}
+                        />
+                    }
+                />
+            </FormControl>
+
+            <FormControl sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'nowrap',
+                justifyContent: 'space-between',
+                width: 0.8,
+            }}>
                 <InputLabel>Filter Bidder(s)</InputLabel>
                 <Select
-                    name="bidders"
                     multiple
                     value={selectedBidders}
                     onChange={handleSelectionChange}
@@ -87,13 +99,14 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
                     )}
                     MenuProps={MenuProps}
                     disabled={!!!debugConfigState.enabled}
+                    sx={{ width: 1 }}
                 >
                     {bidderNames.map(name =>
                         <MenuItem key={name} value={name} style={getStyles(name, selectedBidders, theme)}>{name}</MenuItem>
                     )}
                 </Select>
             </FormControl>
-        </FormGroup>
+        </Box>
     );
 }
 

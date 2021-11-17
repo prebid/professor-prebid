@@ -1,5 +1,6 @@
 import { IPrebidDetails, IPrebidDebugConfig } from "../../../../../inject/scripts/prebid";
 import BidderFilterComponent from './BidderFilterComponent';
+import BidOverWriteComponent from './BidOverWriteComponent';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
@@ -46,27 +47,37 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
     }, [])
 
     return (
-        <Box sx={{ padding: '5px' }}>
-            <FormControl component="fieldset" variant="standard">
-                <FormLabel component="legend">Debugging</FormLabel>
-                <FormGroup>
-                    <FormControlLabel
-                        name="enabled"
-                        control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
-                        label="Enable Debugging"
-                    />
-                </FormGroup>
-                {prebid &&
-                    <BidderFilterComponent
-                        prebid={prebid}
-                        debugConfigState={debugConfgigState}
-                        setDebugConfigState={handleChange}
-                    />}
-                <FormHelperText>
-                    For more detaits see <a target="_blank" href="https://docs.prebid.org/troubleshooting/troubleshooting-guide.html#modify-bid-responses-for-testing">prebidb docs</a>
-                </FormHelperText>
-                {/* <pre>{JSON.stringify({ ...debugConfgigState }, null, 2)}</pre> */}
-            </FormControl>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexWrap: 'nowrap',
+            justifyContent: 'flexStart',
+            alignItems: 'start',
+            alignContent: 'center',
+            rowGap: '10px',
+            columnGap: '20px',
+        }}>
+            <FormControlLabel
+                name="enabled"
+                control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
+                label="Enable Debugging"
+            />
+            {prebid &&
+                <BidderFilterComponent
+                    prebid={prebid}
+                    debugConfigState={debugConfgigState}
+                    setDebugConfigState={handleChange}
+                />
+            }
+
+            {prebid &&
+                <BidOverWriteComponent
+                    prebid={prebid}
+                    debugConfigState={debugConfgigState}
+                    setDebugConfigState={handleChange}
+                />
+            }
+
         </Box>
     );
 }

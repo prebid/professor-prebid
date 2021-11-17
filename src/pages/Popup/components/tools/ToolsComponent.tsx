@@ -32,12 +32,19 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
     };
 
     return (
-        <Box sx={{ padding: '5px' }}>
+        <Box>
             <Button variant="outlined" size="small" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
                 open google AdManager console
             </Button>
             <FormGroup>
-                <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="Show AdUnit Info Overlay" />
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={consoleState || false}
+                            onChange={handleConsoleChange} />
+                    }
+                    label="Show AdUnit Info Overlay"
+                />
             </FormGroup>
             {prebid && <DebugComponent prebid={prebid} />}
         </Box>
