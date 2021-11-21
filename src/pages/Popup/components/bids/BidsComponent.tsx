@@ -17,7 +17,6 @@ import Chip from '@mui/material/Chip';
 import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Grid from '@mui/material/Grid'
 
 interface TabPanelProps {
   children?: React.ReactNode;
