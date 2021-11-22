@@ -6,12 +6,10 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
-import { AdUnits, Opacity } from '@mui/icons-material';
 
 // Styles
-const paperElevation = 1;
+const paperElevation = 2;
 const StyledPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: '#FFF',
   width: '115%',

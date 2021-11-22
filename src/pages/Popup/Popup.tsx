@@ -18,30 +18,10 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import StyledTypography from '../Popup/components/adUnits/AdUnitsComponent';
-
-// fortawesome
-//import { FontAwesomeIcon } from '@FontAwesomeIcon'
-import {
-  faPollH,
-  faSlidersH,
-  faAd,
-  faLaptopCode,
-  faWindowRestore,
-  faTools,
-  faMoneyBill,
-  faCoins,
-  faUserFriends,
-} from '@fortawesome/free-solid-svg-icons';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 // Material-UI
-//import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-//import { ClassNames } from '@emotion/react';
 import { styled } from '@mui/material/styles';
 import Typography, { TypographyProps } from '@mui/material/Typography';
-import MatSwitch from '@mui/material/Switch';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';

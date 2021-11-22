@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidBid } from "../../../../inject/scripts/prebid";
+import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidBid } from '../../../../inject/scripts/prebid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -13,10 +13,12 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import AppsIcon from '@mui/icons-material/Apps';
 import Chip from '@mui/material/Chip';
 import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Paper from '@mui/material/Paper';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -28,13 +30,7 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       {value === index && (
         <Box sx={{ p: 3, padding: 0 }}>
           <Typography component="div">{children}</Typography>
@@ -51,21 +47,20 @@ function a11yProps(index: number) {
   };
 }
 
-
-
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.common.white,
-    margin: 1,
-    padding: 1
-  }
+    backgroundColor: '#FFF', //theme.palette.primary.contrastText,
+    color: theme.palette.common.black,
+    margin: 0,
+    padding: 0,
+    textAlign: 'left',
+  },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:hover": {
-    backgroundColor: theme.palette.primary.light
-  }
+  '&:hover': {
+    backgroundColor: theme.palette.primary.dark,
+  },
 }));
 
 const Row = ({ bid }: IRowComponentProps) => {
@@ -83,63 +78,97 @@ const Row = ({ bid }: IRowComponentProps) => {
         <StyledTableCell>{bid.height}</StyledTableCell>
         <StyledTableCell>{bid.cpm ? (Math.floor(bid.cpm * 100) / 100) : bid.cpm}</StyledTableCell>
         <StyledTableCell>{bid.currency}</StyledTableCell>
-        <StyledTableCell>{bid.adUnitCode}</StyledTableCell>
+        <StyledTableCell>{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0,15)+'...' : bid.adUnitCode }</StyledTableCell>
         <StyledTableCell>{bid.size}</StyledTableCell>
       </StyledTableRow>
-      <TableRow>
-        {/* <TableCell></TableCell> */}
+      <TableRow sx={{ backgroundColor: '#87CEEB' }}>
         <TableCell colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Table size="small">
-              <TableHead>
+            <Paper elevation={5} sx={{ margin: '3% 5% 3% 5%', borderRadius: 4, maxWidth: '100%' }}>
+              <Table>
+                <TableRow>
+                  <TableCell>Media Type</TableCell>
+                  <TableCell>{bid.mediaType}</TableCell>
+                </TableRow>
                 <TableRow>
                   <TableCell>Bidder</TableCell>
-                  <TableCell>Org. Cpm</TableCell>
-                  <TableCell>Org. Currency</TableCell>
-                  <TableCell>Time to Respond</TableCell>
-                  <TableCell>Status Message</TableCell>
-                  <TableCell>Media Type</TableCell>
-                  <TableCell>Source</TableCell>
-                  <TableCell>TTL</TableCell>
-                  <TableCell>Adserver Targeting</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>{bid.bidder}</TableCell>
-                  <TableCell>{Math.floor(bid.originalCpm * 100) / 100}</TableCell>
-                  <TableCell>{bid.originalCurrency}</TableCell>
-                  <TableCell>{bid.timeToRespond}</TableCell>
-                  <TableCell>{bid.statusMessage}</TableCell>
-                  <TableCell>{bid.mediaType}</TableCell>
-                  <TableCell>{bid.source}</TableCell>
-                  <TableCell>{bid.ttl}</TableCell>
                   <TableCell>
-                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px', }}>
-                      {bid.adserverTargeting && Object.keys(bid.adserverTargeting).map(key =>
-                        <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '110px' }} />
-                      )}</Stack>
+                    {open}
+                    {bid.bidder}
                   </TableCell>
                 </TableRow>
-              </TableBody>
-            </Table>
+                <TableRow>
+                  <TableCell>Size</TableCell>
+                  <TableCell>
+                    {bid.width} x {bid.height}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Org. Cpm</TableCell>
+                  <TableCell>{Math.floor(bid.originalCpm * 100) / 100}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Org. Currency</TableCell>
+                  <TableCell>{bid.originalCurrency}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Time to Respond</TableCell>
+                  <TableCell>{bid.timeToRespond}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Status Message</TableCell>
+                  <TableCell>{bid.statusMessage}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>AdUnit Code</TableCell>
+                  <TableCell>{bid.adUnitCode}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Source</TableCell>
+                  <TableCell>{bid.source}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>TTL</TableCell>
+                  <TableCell>{bid.ttl}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Adserver Targeting</TableCell>
+                  <TableCell>
+                    <Stack direction="column" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                      {bid.adserverTargeting &&
+                        Object.keys(bid.adserverTargeting).map((key) => (
+                          <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '300px' }} />
+                        ))}
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              </Table>
+            </Paper>
           </Collapse>
         </TableCell>
       </TableRow>
     </React.Fragment>
-  )
-}
+  );
+};
 
 const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  const bidsReceived = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.bidsReceived).flat() || [];
-  const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.noBids).flat() || [];
+  const bidsReceived =
+    prebid.events
+      .filter((event) => event.eventType === 'auctionEnd')
+      .map((event) => (event as IPrebidAuctionEndEventData).args.bidsReceived)
+      .flat() || [];
+  const noBids =
+    prebid.events
+      .filter((event) => event.eventType === 'auctionEnd')
+      .map((event) => (event as IPrebidAuctionEndEventData).args.noBids)
+      .flat() || [];
   return (
     <Box>
-      <Box sx={{ width: '100%'}}>
+      <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Received Bids" {...a11yProps(0)} />
@@ -147,11 +176,13 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <TableContainer sx={{ width: '100%', maxWidth: '100%' }}>
+          <TableContainer sx={{ maxWidth: '100%', backgroundColor: '#87CEEB' }}>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell />
+                  <IconButton size="small">
+                    <AppsIcon />
+                  </IconButton>
                   <TableCell>Bidder Code</TableCell>
                   <TableCell>Width</TableCell>
                   <TableCell>Height</TableCell>
@@ -162,9 +193,9 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {bidsReceived.map((bid, index) =>
+                {bidsReceived.map((bid, index) => (
                   <Row key={index} bid={bid} />
-                )}
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -183,17 +214,19 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableBody>
                 {noBids.map((bid, index) => (
                   <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">{bid.auctionId}</TableCell>
+                    <TableCell component="th" scope="row">
+                      {bid.auctionId}
+                    </TableCell>
                     <TableCell>{bid.bidder}</TableCell>
                     <TableCell>{bid.adUnitCode}</TableCell>
-                    <TableCell><Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                      {bid.params && Object.keys(bid.params).map(key =>
-                        <Chip key={key}
-                          label={key + ': ' + JSON.stringify(bid.params[key])}
-                          color="primary"
-                          variant="outlined"
-                          size="small" />
-                      )}</Stack></TableCell>
+                    <TableCell>
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                        {bid.params &&
+                          Object.keys(bid.params).map((key) => (
+                            <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} color="primary" variant="outlined" size="small" />
+                          ))}
+                      </Stack>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -202,7 +235,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
         </TabPanel>
       </Box>
     </Box>
-  )
+  );
 };
 
 interface IBidsComponentProps {
