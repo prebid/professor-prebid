@@ -39,19 +39,23 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
           <Typography>
             <strong>CMP Loaded: </strong> <Checkbox checked={tmpTcf[key].cmpLoaded}></Checkbox>
           </Typography>
-          <TextField
-            label="Consent Data:"
-            multiline
-            variant="outlined"
-            value={tmpTcf[key].consentData ? tmpTcf[key].consentData : 'no consent string found'}
-            sx={{ width: '100%' }}
-          />
-          <TextField
-            label="Decoded Data: "
-            multiline
-            value={tmpTcf[key].consentData ? JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4) : 'no consent string found'}
-            sx={{ width: '100%' }}
-          />
+          <Box sx={{ paddingBottom: 1 }}>
+            <TextField
+              label="Consent Data:"
+              multiline
+              variant="outlined"
+              value={tmpTcf[key].consentData ? tmpTcf[key].consentData : 'no consent string found'}
+              sx={{ width: 1 }}
+            />
+          </Box>
+          <Box sx={{ paddingBottom: 1 }}>
+            <TextField
+              label="Decoded Data: "
+              multiline
+              value={tmpTcf[key].consentData ? JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4) : 'no consent string found'}
+              sx={{ width: 1 }}
+            />
+          </Box>
         </Box>
       ))}
     </Box>
