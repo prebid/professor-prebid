@@ -29,7 +29,7 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
       </Typography>
       <Typography>
         <strong>Timeout:</strong>
-        {prebid?.config?.consentManagement?.timeout ? prebid?.config?.consentManagement?.timeout : prebid?.config?.consentManagement?.gdpr.timeout}
+        {prebid?.config?.consentManagement?.timeout ? prebid?.config?.consentManagement?.timeout : prebid?.config?.consentManagement?.gdpr?.timeout}
       </Typography>
       {Object.keys(tmpTcf).map((key, index) => (
         <Box key={index}>
