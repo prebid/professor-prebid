@@ -4,69 +4,119 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardHeader from '@mui/material/CardHeader';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
   return (
-    <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
-      <Box>
-        {/* Floors  */}
-        {prebid.config.floors && <Typography><strong>Floors:</strong></Typography>}
-        {prebid.config.floors?.data?.skipRate && <Typography><strong>Skip Rate:</strong> {prebid.config?.floors?.data?.skipRate}</Typography>}
-        {prebid.config.floors?.data?.currency && <Typography><strong>Currency:</strong> {prebid.config?.floors?.data?.currency}</Typography>}
-        {prebid.config.floors?.data?.schema?.fields && <Typography><strong>Schema/Field:</strong></Typography>}
-        {prebid.config.floors?.data?.schema?.fields && <List dense={true}>{prebid.config.floors.data.schema.fields.map((field: string, index: number) => <ListItem key={index}>{field}</ListItem>)}</List>}
-        {prebid.config.floors?.data?.values && <Typography><strong>Values:</strong></Typography>}
-        {prebid.config.floors?.data?.values && <List dense={true}>{Object.keys(prebid.config.floors.data.values).map((key, index) => <ListItem key={index}>{key}: {prebid.config.floors.data.values[key]}</ListItem>)}</List>}
-        {prebid.config.floors?.floorsSchemaVersion && <Typography><strong>floorsSchemaVersion:</strong> {prebid.config?.floors?.floorsSchemaVersion}</Typography>}
-      </Box>
+    <Box sx={{ display: 'flex', flexDirection: 'row', columnGap: '5px', rowGap: '5px', flexWrap: 'wrap', paddingLeft: '5px' }}>
 
-      <Box>
-        {/* GDPR*/}
-        {prebid.config.consentManagement?.gdpr && <Typography><strong>GDPR:</strong></Typography>}
-        {prebid.config.consentManagement?.gdpr?.cmpApi && <Typography><strong>CmpApi:</strong> {prebid.config.consentManagement.gdpr.cmpApi}</Typography>}
-        {prebid.config.consentManagement?.gdpr?.timeout && <Typography><strong>Timeout:</strong> {prebid.config.consentManagement.gdpr.timeout}</Typography>}
-        {prebid.config.consentManagement?.gdpr?.defaultGdprScope && <Typography><strong>defaultGdprScope:</strong> {JSON.stringify(prebid.config.consentManagement.gdpr.defaultGdprScope)}</Typography>}
-        {prebid.config.consentManagement?.gdpr?.allowAuctionWithoutConsent && <Typography><strong>allowAuctionWithoutConsent:</strong> {prebid.config.consentManagement.gdpr.allowAuctionWithoutConsent}</Typography>}
-      </Box>
+      {prebid.config.floors && <Card sx={{ minWidth: '200px' }}>
+        <CardHeader title="Floors" />
+        <CardContent>
+          {prebid.config.floors?.skipRate && <Typography><strong>Skip Rate:</strong> {prebid.config?.floors?.skipRate}</Typography>}
+          {prebid.config.floors?.currency && <Typography><strong>Currency:</strong> {prebid.config?.floors?.currency}</Typography>}
+          {prebid.config.floors?.schema?.fields && <Typography><strong>Schema/Field:</strong></Typography>}
+          {prebid.config.floors?.schema?.fields && <List dense={true}>{prebid.config.floors.schema.fields.map((field: string, index: number) => <ListItem key={index}>{field}</ListItem>)}</List>}
+          {prebid.config.floors?.values && <Typography><strong>Values:</strong></Typography>}
+          {prebid.config.floors?.values && <List dense={true}>{Object.keys(prebid.config.floors.values).map((key, index) => <ListItem key={index}>{key}: {prebid.config.floors.values[key]}</ListItem>)}</List>}
+          {prebid.config.floors?.floorsSchemaVersion && <Typography><strong>floorsSchemaVersion:</strong> {prebid.config?.floors?.floorsSchemaVersion}</Typography>}
+        </CardContent>
+      </Card>
+      }
 
-      <Box>
-        {/* GDPR Enforcement*/}
-        {prebid.config.consentManagement?.gdpr?.rules && <Typography><strong>GDPR Enforcement:</strong></Typography>}
+      {prebid.config.consentManagement?.gdpr && <Card sx={{ maxWidth: '200px' }}>
+        <CardHeader title="GDPR" />
+        <CardContent>
+          {prebid.config.consentManagement?.gdpr?.cmpApi && <Typography><strong>CmpApi:</strong> {prebid.config.consentManagement.gdpr.cmpApi}</Typography>}
+          {prebid.config.consentManagement?.gdpr?.timeout && <Typography><strong>Timeout:</strong> {prebid.config.consentManagement.gdpr.timeout}</Typography>}
+          {prebid.config.consentManagement?.gdpr?.defaultGdprScope && <Typography><strong>defaultGdprScope:</strong> {JSON.stringify(prebid.config.consentManagement.gdpr.defaultGdprScope)}</Typography>}
+          {prebid.config.consentManagement?.gdpr?.allowAuctionWithoutConsent && <Typography><strong>allowAuctionWithoutConsent:</strong> {prebid.config.consentManagement.gdpr.allowAuctionWithoutConsent}</Typography>}
+        </CardContent>
+      </Card>
+      }
 
-        {prebid.config.consentManagement?.gdpr?.rules &&
-          <React.Fragment>
-            {prebid.config.consentManagement.gdpr.rules.map((rule: any, index) =>
-              <List dense={true}>
-                <Typography><strong>Rules #{index}</strong></Typography>
-                {Object.keys(rule).map((key, index) =>
-                  <ListItem key={index}>{key}: {String(rule[key])}</ListItem>
-                )}
-              </List>
-            )}
-          </React.Fragment>
-        }
-      </Box>
+      {prebid.config.consentManagement?.gdpr?.rules && <Card sx={{ maxWidth: '200px' }}>
+        <CardHeader title="GDPR Enforcement" />
+        <CardContent>
+          {prebid.config.consentManagement?.gdpr?.rules &&
+            <React.Fragment>
+              {prebid.config.consentManagement.gdpr.rules.map((rule: any, index) =>
+                <List dense={true}>
+                  <Typography><strong>Rules #{index}</strong></Typography>
+                  {Object.keys(rule).map((key, index) =>
+                    <ListItem key={index}>{key}: {String(rule[key])}</ListItem>
+                  )}
+                </List>
+              )}
+            </React.Fragment>
+          }
+        </CardContent>
+      </Card>
+      }
 
-      <Box>
-        {/* US Privacy*/}
-        {prebid.config.consentManagement?.usp && <Typography><strong>USP:</strong></Typography>}
-        {prebid.config.consentManagement?.usp?.cmpApi && <Typography><strong>CmpApi:</strong> {prebid.config.consentManagement.usp.cmpApi}</Typography>}
-        {prebid.config.consentManagement?.usp?.timeout && <Typography><strong>Timeout:</strong> {prebid.config.consentManagement.usp.timeout}</Typography>}
-      </Box>
+      {prebid.config.consentManagement?.usp && <Card sx={{ maxWidth: '200px' }}>
+        <CardHeader title="USP" />
+        <CardContent>
+          {prebid.config.consentManagement?.usp?.cmpApi && <Typography><strong>CmpApi:</strong> {prebid.config.consentManagement.usp.cmpApi}</Typography>}
+          {prebid.config.consentManagement?.usp?.timeout && <Typography><strong>Timeout:</strong> {prebid.config.consentManagement.usp.timeout}</Typography>}
+        </CardContent>
+      </Card>
+      }
 
-      <Box>
-        {/* First Party Data Enrichment Module */}
-        {prebid.config.firstPartyData && <Typography><strong>firstPartyData:</strong></Typography>}
-        {prebid.config.firstPartyData?.skipEnrichments && <Typography><strong>skipEnrichments:</strong> {JSON.stringify(prebid.config.firstPartyData.skipEnrichments)}</Typography>}
-      </Box>
+      {prebid.config.firstPartyData && <Card sx={{ maxWidth: '200px' }}>
+        <CardHeader title="First Party Data Enrichment" />
+        <CardContent>
+          {prebid.config.firstPartyData?.skipEnrichments && <Typography><strong>skipEnrichments: </strong> {JSON.stringify(prebid.config.firstPartyData.skipEnrichments)}</Typography>}
+        </CardContent>
+      </Card>}
 
-      <Box>
-        {/* GPT Pre-Auction Module */}
-        {prebid.config.gptPreAuction && <Typography><strong>gptPreAuction:</strong></Typography>}
-        {prebid.config.gptPreAuction?.enabled && <Typography><strong>enabled:</strong> {JSON.stringify(prebid.config.gptPreAuction.enabled)}</Typography>}
-        {prebid.config.gptPreAuction?.mcmEnabled && <Typography><strong>mcmEnabled:</strong> {JSON.stringify(prebid.config.gptPreAuction.mcmEnabled)}</Typography>}
-      </Box>
+      {prebid.config.gptPreAuction && <Card sx={{ maxWidth: '200px' }}>
+        <CardHeader title="GPT Pre-Auction" />
+        <CardContent>
+          {prebid.config.gptPreAuction?.enabled && <Typography><strong>enabled: </strong> {JSON.stringify(prebid.config.gptPreAuction.enabled)}</Typography>}
+          {prebid.config.gptPreAuction?.mcmEnabled && <Typography><strong>mcmEnabled: </strong> {JSON.stringify(prebid.config.gptPreAuction.mcmEnabled)}</Typography>}
+        </CardContent>
+      </Card>
+      }
 
+      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] &&
+        <Card sx={{ maxWidth: '200px' }}>
+          <CardHeader title="User Ids" />
+          <CardContent>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Storage Type</TableCell>
+                    <TableCell>Storage Expires</TableCell>
+                    <TableCell>Storage Name</TableCell>
+                    <TableCell>Params</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {prebid.config?.userSync?.userIds?.map((userId, index) => (
+                    <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell><strong>{userId.name}</strong></TableCell>
+                      <TableCell>{userId.storage?.type}</TableCell>
+                      <TableCell>{userId.storage?.expires}</TableCell>
+                      <TableCell>{userId.storage?.name}</TableCell>
+                      <TableCell>{userId.storage?.name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      }
     </Box>
   );
 }
