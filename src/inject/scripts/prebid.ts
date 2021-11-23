@@ -249,7 +249,8 @@ interface IPrebidConfigUserSync {
         type: string;
         name: string;
         expires: number
-    }; params: {
+    };
+    params: {
         [key: string]: string
     }
 }
@@ -365,7 +366,7 @@ interface IPrebidConfig {
 }
 
 export interface IPrebidDebugConfigBid {
-    cpm?: number; bidder?: string; adUnitCode?: string; 
+    cpm?: number; bidder?: string; adUnitCode?: string;
 }
 
 export interface IPrebidDebugConfig {
