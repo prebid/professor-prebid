@@ -73,7 +73,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                 <TableCell>{userId.storage?.type}</TableCell>
                 <TableCell>{userId.storage?.expires}</TableCell>
                 <TableCell>{userId.storage?.name}</TableCell>
-                <TableCell>{userId.storage?.name}</TableCell>
+                <TableCell><pre>{JSON.stringify(userId.params, null, 4)}</pre></TableCell>
               </TableRow>
             ))}
           </TableBody>
