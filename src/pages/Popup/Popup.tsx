@@ -1,10 +1,10 @@
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
-import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { appHandler } from '../App/appHandler';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPollH, faSlidersH, faAd, faTools, faWindowRestore, faMoneyBill, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPollH, faSlidersH, faAd, faTools, faWindowRestore, faMoneyBill, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
@@ -33,17 +33,16 @@ const StyledIconButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
 }));
 
 const StyledTypo = styled(Typography)<TypographyProps>(({ theme }) => ({
-  'fontSize': '15px',
-  'color': '#000000'
+  fontSize: '15px',
+  color: '#000000',
 }));
 
 export const Popup = (): JSX.Element => {
-
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
-      setGamDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
+      setGamDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
     });
   }, [googleAdManager]);
 
@@ -51,14 +50,14 @@ export const Popup = (): JSX.Element => {
   useEffect(() => {
     appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
+      setPrebidDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
     });
   }, [prebid]);
   useEffect(() => {
     // listen for update message from background script
     appHandler.handlePopUpUpdate((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
+      setPrebidDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
     });
   }, []);
 
@@ -66,37 +65,37 @@ export const Popup = (): JSX.Element => {
   useEffect(() => {
     appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setTcfDetails((previousData) => previousData ? ({ ...previousData, ...data }) : data);
+      setTcfDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
     });
   }, [tcf]);
-
-
 
   return (
     <Box className="popup" sx={{ height: '600px', width: '780px', overflowX: 'scroll' }}>
       <Router>
-
-        <AppBar position="sticky" sx={{
-          alignItems: 'center',
-          display: 'flex',
-          flex: 1,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          height: '62px',
-          background: '#f5f5f5',
-          '& a:link': {
-            textDecoration: 'none'
-          }
-        }}>
-
-          <Box sx={{
+        <AppBar
+          position="sticky"
+          sx={{
+            alignItems: 'center',
             display: 'flex',
-            flexDirection: 'row',
             flex: 1,
-            justifyContent: 'space-evenly'
-          }}>
-
-            <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" alt="logo" width="150" height="50"/>
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            height: '62px',
+            background: '#f5f5f5',
+            '& a:link': {
+              textDecoration: 'none',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              flex: 1,
+              justifyContent: 'space-evenly',
+            }}
+          >
+            <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" alt="logo" width="150" height="50" />
             <Link to="/">
               <StyledIconButton size="small">
                 <FontAwesomeIcon icon={faAd} />
@@ -105,14 +104,14 @@ export const Popup = (): JSX.Element => {
             </Link>
 
             <Link to="/bids">
-              <StyledIconButton size="small" >
+              <StyledIconButton size="small">
                 <FontAwesomeIcon icon={faCoins} />
                 <StyledTypo>Bids</StyledTypo>
               </StyledIconButton>
             </Link>
 
             <Link to="/timeline">
-              <StyledIconButton size="small" >
+              <StyledIconButton size="small">
                 <FontAwesomeIcon icon={faPollH} />
                 <StyledTypo>Timeline</StyledTypo>
               </StyledIconButton>
@@ -126,7 +125,7 @@ export const Popup = (): JSX.Element => {
             </Link>
 
             <Link to="/userId">
-              <StyledIconButton size="small" >
+              <StyledIconButton size="small">
                 <FontAwesomeIcon icon={faUserFriends} />
                 <StyledTypo>User ID</StyledTypo>
               </StyledIconButton>
@@ -138,11 +137,9 @@ export const Popup = (): JSX.Element => {
                 <StyledTypo>Tools</StyledTypo>
               </StyledIconButton>
             </Link>
-
           </Box>
         </AppBar>
         <Switch>
-
           <Route exact path="/">
             {prebid && <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>}
           </Route>
@@ -155,9 +152,7 @@ export const Popup = (): JSX.Element => {
             {prebid && <TimelineComponent prebid={prebid}></TimelineComponent>}
           </Route>
 
-          <Route path="/config">
-            {prebid?.config && <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>}
-          </Route>
+          <Route path="/config">{prebid?.config && <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>}</Route>
 
           <Route exact path="/userId">
             {prebid && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
@@ -166,9 +161,7 @@ export const Popup = (): JSX.Element => {
           <Route exact path="/tools">
             {prebid && <ToolsComponent prebid={prebid}></ToolsComponent>}
           </Route>
-
         </Switch>
-
       </Router>
     </Box>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidBid } from "../../../../inject/scripts/prebid";
+import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidBid } from '../../../../inject/scripts/prebid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
@@ -17,7 +17,7 @@ import Chip from '@mui/material/Chip';
 import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Grid from '@mui/material/Grid'
+import Grid from '@mui/material/Grid';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -29,13 +29,7 @@ function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       {value === index && (
         <Box sx={{ p: 3, padding: 0 }}>
           <Typography component="div">{children}</Typography>
@@ -52,21 +46,19 @@ function a11yProps(index: number) {
   };
 }
 
-
-
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.common.white,
     margin: 1,
-    padding: 1
-  }
+    padding: 1,
+  },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:hover": {
-    backgroundColor: theme.palette.primary.light
-  }
+  '&:hover': {
+    backgroundColor: theme.palette.primary.light,
+  },
 }));
 
 const Row = ({ bid }: IRowComponentProps) => {
@@ -82,7 +74,7 @@ const Row = ({ bid }: IRowComponentProps) => {
         <StyledTableCell>{bid.bidderCode}</StyledTableCell>
         <StyledTableCell>{bid.width}</StyledTableCell>
         <StyledTableCell>{bid.height}</StyledTableCell>
-        <StyledTableCell>{bid.cpm ? (Math.floor(bid.cpm * 100) / 100) : bid.cpm}</StyledTableCell>
+        <StyledTableCell>{bid.cpm ? Math.floor(bid.cpm * 100) / 100 : bid.cpm}</StyledTableCell>
         <StyledTableCell>{bid.currency}</StyledTableCell>
         <StyledTableCell>{bid.adUnitCode}</StyledTableCell>
         <StyledTableCell>{bid.size}</StyledTableCell>
@@ -116,10 +108,12 @@ const Row = ({ bid }: IRowComponentProps) => {
                   <TableCell>{bid.source}</TableCell>
                   <TableCell>{bid.ttl}</TableCell>
                   <TableCell>
-                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px', }}>
-                      {bid.adserverTargeting && Object.keys(bid.adserverTargeting).map(key =>
-                        <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '110px' }} />
-                      )}</Stack>
+                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                      {bid.adserverTargeting &&
+                        Object.keys(bid.adserverTargeting).map((key) => (
+                          <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '110px' }} />
+                        ))}
+                    </Stack>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -128,19 +122,27 @@ const Row = ({ bid }: IRowComponentProps) => {
         </TableCell>
       </TableRow>
     </React.Fragment>
-  )
-}
+  );
+};
 
 const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  const bidsReceived = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.bidsReceived).flat() || [];
-  const noBids = prebid.events.filter(event => event.eventType === 'auctionEnd').map(event => (event as IPrebidAuctionEndEventData).args.noBids).flat() || [];
+  const bidsReceived =
+    prebid.events
+      .filter((event) => event.eventType === 'auctionEnd')
+      .map((event) => (event as IPrebidAuctionEndEventData).args.bidsReceived)
+      .flat() || [];
+  const noBids =
+    prebid.events
+      .filter((event) => event.eventType === 'auctionEnd')
+      .map((event) => (event as IPrebidAuctionEndEventData).args.noBids)
+      .flat() || [];
   return (
     <Box>
-      <Box sx={{ width: '100%'}}>
+      <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Received Bids" {...a11yProps(0)} />
@@ -163,9 +165,9 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {bidsReceived.map((bid, index) =>
+                {bidsReceived.map((bid, index) => (
                   <Row key={index} bid={bid} />
-                )}
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -184,17 +186,19 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableBody>
                 {noBids.map((bid, index) => (
                   <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell component="th" scope="row">{bid.auctionId}</TableCell>
+                    <TableCell component="th" scope="row">
+                      {bid.auctionId}
+                    </TableCell>
                     <TableCell>{bid.bidder}</TableCell>
                     <TableCell>{bid.adUnitCode}</TableCell>
-                    <TableCell><Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                      {bid.params && Object.keys(bid.params).map(key =>
-                        <Chip key={key}
-                          label={key + ': ' + JSON.stringify(bid.params[key])}
-                          color="primary"
-                          variant="outlined"
-                          size="small" />
-                      )}</Stack></TableCell>
+                    <TableCell>
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                        {bid.params &&
+                          Object.keys(bid.params).map((key) => (
+                            <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} color="primary" variant="outlined" size="small" />
+                          ))}
+                      </Stack>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -203,7 +207,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
         </TabPanel>
       </Box>
     </Box>
-  )
+  );
 };
 
 interface IBidsComponentProps {

@@ -1,4 +1,4 @@
-import { IGoogleAdManagerDetails } from "../../../../inject/scripts/googleAdManager";
+import { IGoogleAdManagerDetails } from '../../../../inject/scripts/googleAdManager';
 import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -16,10 +16,22 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
     const { googleAdManager } = this.props;
     return (
       <Box>
-        <Typography><strong>Request Mode: </strong>{(googleAdManager?.sra) ? 'Single Request Architecture' : 'something else like Multi Request Architecture? '}</Typography>
-        <Typography><strong>Render Mode: </strong>{(googleAdManager?.async) ? 'Asynchronous' : 'Synchronous'}</Typography>
-        <Typography><strong>Fetch Before Request: </strong>{(googleAdManager?.fetchBeforeRefresh) ? 'YES' : 'NO'}</Typography>
-        <Typography><strong>Fetch Before Key/Value: </strong>{(googleAdManager?.fetchBeforeKeyvalue) ? 'YES' : 'NO'}</Typography>
+        <Typography>
+          <strong>Request Mode: </strong>
+          {googleAdManager?.sra ? 'Single Request Architecture' : 'something else like Multi Request Architecture? '}
+        </Typography>
+        <Typography>
+          <strong>Render Mode: </strong>
+          {googleAdManager?.async ? 'Asynchronous' : 'Synchronous'}
+        </Typography>
+        <Typography>
+          <strong>Fetch Before Request: </strong>
+          {googleAdManager?.fetchBeforeRefresh ? 'YES' : 'NO'}
+        </Typography>
+        <Typography>
+          <strong>Fetch Before Key/Value: </strong>
+          {googleAdManager?.fetchBeforeKeyvalue ? 'YES' : 'NO'}
+        </Typography>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
@@ -33,8 +45,10 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
             </TableHead>
             <TableBody>
               {googleAdManager?.slots.map((slot, index) => (
-                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }} >
-                  <TableCell component="th" scope="row">{slot.elementId}</TableCell>
+                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell component="th" scope="row">
+                    {slot.elementId}
+                  </TableCell>
                   <TableCell align="right">{slot.creativeRenderTime}</TableCell>
                   <TableCell align="right">{slot.name}</TableCell>
                   <TableCell align="right">
@@ -48,7 +62,10 @@ class GoogleAdManagerDetailsComponent extends React.Component<IGoogleAdManagerDe
                     <List dense={true}>
                       {slot.targeting.map((targeting, index) => (
                         <ListItem key={index}>
-                          <Typography><strong>{targeting.key}: </strong>{targeting.value}</Typography>
+                          <Typography>
+                            <strong>{targeting.key}: </strong>
+                            {targeting.value}
+                          </Typography>
                         </ListItem>
                       ))}
                     </List>

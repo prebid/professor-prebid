@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import InjectedApp from './app/InjectedApp';
 import { googleAdManager } from './scripts/googleAdManager';
 import { prebid } from './scripts/prebid';
-import { iabTcf } from './scripts/tcf'
+import { iabTcf } from './scripts/tcf';
 
 googleAdManager.init();
 prebid.init();
@@ -26,5 +26,5 @@ const injectApp = () => {
     requestIdleCallback(injectApp);
     // setTimeout(() => injectApp(), 1000)
   }
-}
-injectApp()
+};
+injectApp();

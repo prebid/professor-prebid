@@ -10,21 +10,21 @@ const InjectedApp = (): JSX.Element => {
   logger.log('[InjectedApp] init');
   let findContainerCount = 0;
   const [consoleState, setConsoleState] = useState(false);
-  const handleConsoleStateChange = useCallback(event => {
+  const handleConsoleStateChange = useCallback((event) => {
     const checked = (event as CustomEvent).detail;
     setConsoleState(checked);
-  }, [])
+  }, []);
   useEffect(() => {
     document.addEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
     return () => {
       document.removeEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
-    }
+    };
   }, []);
   sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
 
   const [masks, setMasks] = useState<IMaskInputData[]>([]);
-  const handleNewMasks = useCallback(event => {
-    const customEvent = (event as CustomEvent);
+  const handleNewMasks = useCallback((event) => {
+    const customEvent = event as CustomEvent;
     const newMasks = customEvent.detail || [];
     setMasks(newMasks);
   }, []);
@@ -32,7 +32,7 @@ const InjectedApp = (): JSX.Element => {
     document.addEventListener(constants.SAVE_MASKS, handleNewMasks);
     return () => {
       document.removeEventListener(constants.SAVE_MASKS, handleNewMasks);
-    }
+    };
   }, []);
 
   const findContainerElement = (id: string) => {
@@ -52,12 +52,14 @@ const InjectedApp = (): JSX.Element => {
       });
     }
     return null;
-  }
+  };
 
   return (
     <Box>
       {masks.map((mask, index) => {
-        return <AdMaskPortal key={index} container={findContainerElement(mask.elementId) as HTMLDivElement} mask={mask} consoleState={consoleState} />
+        return (
+          <AdMaskPortal key={index} container={findContainerElement(mask.elementId) as HTMLDivElement} mask={mask} consoleState={consoleState} />
+        );
       })}
     </Box>
   );

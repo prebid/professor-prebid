@@ -1,4 +1,4 @@
-import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -18,7 +18,11 @@ import TableRow from '@mui/material/TableRow';
 const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
   return (
     <Box>
-      {prebid.eids && prebid.eids[0] && <Typography><strong>User IDs</strong></Typography>}
+      {prebid.eids && prebid.eids[0] && (
+        <Typography>
+          <strong>User IDs</strong>
+        </Typography>
+      )}
       <TableContainer>
         <Table sx={{ maxWidth: '100%' }}>
           <TableHead>
@@ -29,20 +33,26 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {prebid.eids?.map((eid) => (
+            {prebid.eids?.map((eid) =>
               eid.uids.map((uid, index) => (
                 <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell><strong>{eid.source}</strong></TableCell>
-                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word', }}>{uid.id}</TableCell>
+                  <TableCell>
+                    <strong>{eid.source}</strong>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{uid.id}</TableCell>
                   <TableCell>{uid.atype}</TableCell>
                 </TableRow>
               ))
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
       <br />
-      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <Typography><strong>Config</strong></Typography>}
+      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
+        <Typography>
+          <strong>Config</strong>
+        </Typography>
+      )}
       <TableContainer>
         <Table>
           <TableHead>
@@ -57,7 +67,9 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           <TableBody>
             {prebid.config?.userSync?.userIds?.map((userId, index) => (
               <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell><strong>{userId.name}</strong></TableCell>
+                <TableCell>
+                  <strong>{userId.name}</strong>
+                </TableCell>
                 <TableCell>{userId.storage?.type}</TableCell>
                 <TableCell>{userId.storage?.expires}</TableCell>
                 <TableCell>{userId.storage?.name}</TableCell>
@@ -67,9 +79,9 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           </TableBody>
         </Table>
       </TableContainer>
-    </Box >
+    </Box>
   );
-}
+};
 
 interface IUserIdsComponentProps {
   prebid: IPrebidDetails;
