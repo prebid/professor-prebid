@@ -167,7 +167,7 @@ const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
       )}
 
       {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
-        <Card sx={{ maxWidth: '200px' }}>
+        <Card sx={{ maxWidth: '100%' }}>
           <CardHeader title="User Ids" />
           <CardContent>
             <TableContainer>
@@ -190,7 +190,7 @@ const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
                       <TableCell>{userId.storage?.type}</TableCell>
                       <TableCell>{userId.storage?.expires}</TableCell>
                       <TableCell>{userId.storage?.name}</TableCell>
-                      <TableCell>{userId.storage?.name}</TableCell>
+                      <TableCell><pre>{JSON.stringify(userId.params, null,4)}</pre></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
