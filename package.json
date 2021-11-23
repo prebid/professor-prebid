@@ -11,7 +11,7 @@
 	"scripts": {
 		"build": "node scripts/build.js",
 		"start": "node scripts/webserver.js",
-		"prettier": "prettier --write '**/*.{js,jsx,css,html}'"
+		"prettier": "prettier --write '**/*.{js,jsx,css,html,tsx}'"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.4.1",
