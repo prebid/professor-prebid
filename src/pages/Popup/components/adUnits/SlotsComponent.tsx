@@ -13,7 +13,7 @@ import Box from '@mui/material/Box';
 import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 
-const ChipComponent = ({ input, label, showInputInChip }: any): JSX.Element => {
+const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip }: any): JSX.Element => {
   let json: { [key: string]: any } = {};
   if (typeof input !== 'object') {
     json[label] = input;
@@ -22,13 +22,10 @@ const ChipComponent = ({ input, label, showInputInChip }: any): JSX.Element => {
   }
 
   const labelText = showInputInChip ? `${label}: ${JSON.stringify(input)}` : `${label}`;
-
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
@@ -87,10 +84,11 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                 <Typography variant="subtitle2">Video:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {Object.keys(mediaTypes[mediaType]).map((key, index) => (
-                    <ChipComponent
+                    <ChipWithPopOverOnClickComponent
                       input={mediaTypes[mediaType][key as keyof IPrebidAdUnitMediaTypes['video']]}
-                      label={`${key}: ${JSON.stringify(mediaTypes[mediaType][key as keyof IPrebidAdUnitMediaTypes['video']])}`}
-                      key={key}
+                      showInputInChip={true}
+                      label={key}
+                      key={index}
                     />
                   ))}
                 </Stack>
@@ -103,7 +101,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                 <Typography variant="subtitle2">Native:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {Object.keys(mediaTypes[mediaType]).map((key, index) => (
-                    <ChipComponent
+                    <ChipWithPopOverOnClickComponent
                       input={mediaTypes[mediaType][key as keyof IPrebidAdUnitMediaTypes['native']]}
                       showInputInChip={true}
                       label={key}
@@ -154,7 +152,7 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
               <TableCell variant="body">
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {Array.from(new Set(adUnit.bids)).map((bid, index) => (
-                    <ChipComponent input={bid.params} label={bid.bidder} key={index} />
+                    <ChipWithPopOverOnClickComponent input={bid.params} label={bid.bidder} key={index} />
                   ))}
                 </Stack>
               </TableCell>
