@@ -13,6 +13,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import ReactJson from 'react-json-view';
+
 const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', columnGap: '5px', rowGap: '5px', flexWrap: 'wrap', paddingLeft: '5px' }}>
@@ -190,7 +192,18 @@ const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
                       <TableCell>{userId.storage?.type}</TableCell>
                       <TableCell>{userId.storage?.expires}</TableCell>
                       <TableCell>{userId.storage?.name}</TableCell>
-                      <TableCell><pre>{JSON.stringify(userId.params, null,4)}</pre></TableCell>
+                      <TableCell>
+                        <ReactJson 
+                        src={userId.params} 
+                        name={false}
+                        collapsed={1}
+                        enableClipboard={false}
+                        displayObjectSize={false}
+                        displayDataTypes={false}
+                        sortKeys={false}
+                        quotesOnKeys={false}
+                        />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
