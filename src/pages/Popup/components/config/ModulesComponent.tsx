@@ -193,15 +193,15 @@ const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
                       <TableCell>{userId.storage?.expires}</TableCell>
                       <TableCell>{userId.storage?.name}</TableCell>
                       <TableCell>
-                        <ReactJson 
-                        src={userId.params} 
-                        name={false}
-                        collapsed={1}
-                        enableClipboard={false}
-                        displayObjectSize={false}
-                        displayDataTypes={false}
-                        sortKeys={false}
-                        quotesOnKeys={false}
+                        <ReactJson
+                          src={userId.params}
+                          name={false}
+                          collapsed={1}
+                          enableClipboard={false}
+                          displayObjectSize={false}
+                          displayDataTypes={false}
+                          sortKeys={false}
+                          quotesOnKeys={false}
                         />
                       </TableCell>
                     </TableRow>

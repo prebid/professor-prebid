@@ -1,12 +1,7 @@
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Divider from '@mui/material/Divider';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+import ReactJson from 'react-json-view';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -73,7 +68,21 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                 <TableCell>{userId.storage?.type}</TableCell>
                 <TableCell>{userId.storage?.expires}</TableCell>
                 <TableCell>{userId.storage?.name}</TableCell>
-                <TableCell><pre>{JSON.stringify(userId.params, null, 4)}</pre></TableCell>
+                <TableCell>
+                  <ReactJson
+                    src={userId.params}
+                    name={false}
+                    collapsed={false}
+                    enableClipboard={false}
+                    displayObjectSize={false}
+                    displayDataTypes={false}
+                    sortKeys={false}
+                    quotesOnKeys={false}
+                    indentWidth={2}
+                    collapseStringsAfterLength={100}
+                    style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
