@@ -194,6 +194,9 @@ export interface IPrebidAdUnitMediaTypes {
             required: boolean;
             len: number;
         }
+        body: {
+            required: boolean
+        }
     };
     video: {
         pos: number;
