@@ -18,11 +18,11 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
         <strong> Send All Bids:</strong> {JSON.stringify(prebid?.config?.enableSendAllBids)}
       </Typography>
       <Typography>
-        <strong> Max Nested Iframes:</strong> {JSON.stringify(prebid?.config?.maxNestedIframes)}
+        <strong> Max Nested Iframes:</strong> {prebid?.config?.maxNestedIframes}
       </Typography>
       <Typography>
         <strong> Timeout Buffer: </strong>
-        {JSON.stringify(prebid?.config?.timeoutBuffer)}
+        {prebid?.config?.timeoutBuffer}
       </Typography>
       <Typography>
         <strong> Use Bid Cache:</strong> {JSON.stringify(prebid?.config?.useBidCache)}
