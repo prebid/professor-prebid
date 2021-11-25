@@ -4,11 +4,10 @@ import {
   IPrebidAuctionEndEventData,
   IPrebidBidResponseEventData,
   IPrebidNoBidEventData,
+  IPrebidBidderRequest,
 } from '../../../../inject/scripts/prebid';
-import { IGoogleAdManagerDetails } from '../../../../inject/scripts/googleAdManager';
 import React, { useEffect, useRef } from 'react';
-import { createRangeArray, getMinAndMaxNumber } from '../../../../utils';
-import Box from '@mui/material/Box';
+import { createRangeArray } from '../../../../utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
@@ -19,11 +18,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Collapse from '@mui/material/Collapse';
-import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { makeStyles } from '@mui/styles';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Box from '@mui/material/Box';
 
 const useStyles = makeStyles({
   root: {
@@ -33,6 +32,7 @@ const useStyles = makeStyles({
     '& .chart-values': {
       listStyleType: 'none',
       paddingLeft: 'unset',
+      paddingTop: 'unset',
       height: '100%',
       width: '100%',
       maxWidth: '100%',
@@ -43,8 +43,8 @@ const useStyles = makeStyles({
     '& .chart-bars': {
       listStyleType: 'none',
       paddingLeft: 'unset',
-      height: '100 %',
-      width: '100 %',
+      height: '100%',
+      width: '100%',
       maxWidth: '100%',
     },
     '& .chart-values li': {
@@ -57,9 +57,9 @@ const useStyles = makeStyles({
     '& .chart-bars li': {
       cursor: 'default',
       position: 'relative',
-      color: 'darkorange',
-      border: 'darkorange 1px solid',
-      backgroundColor: 'lightgrey',
+      color: 'rgb(25, 118, 210)',
+      border: 'rgb(25, 118, 210) 1px solid',
+      backgroundColor: 'white',
       marginBottom: '15px',
       fontSize: '14px',
       borderRadius: '10px',
@@ -75,150 +75,120 @@ const useStyles = makeStyles({
   },
 });
 
+const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<any>) => {
+  const allGridBarsCollection = gridRef?.current?.children;
+  const allGridBarsArray = Array.from(allGridBarsCollection || []) as HTMLLIElement[];
+  const nearestGridBar = allGridBarsArray.sort(
+    (a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input)
+  )[0] as HTMLElement;
+  return nearestGridBar;
+};
+
+const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (
+  event: IPrebidBidRequestedEventData | IPrebidAuctionEndEventData | IPrebidBidResponseEventData | IPrebidNoBidEventData
+) => {
+  return (
+    event.eventType === eventType &&
+    event.args.auctionId === bidderRequest.auctionId &&
+    ((event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode ||
+      (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode)
+  );
+};
+
 const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
+  const prebidEvents = prebid.events || [];
+  const gridStep =  (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / 50;
   const classes = useStyles();
   const gridRef = useRef(null);
-  const prebidEvents = prebid?.events || [];
-  const gridStep = 10;
-  const tableRows: ITableRow[] = [];
-  const [open, setOpen] = React.useState(false);
+  const [bidderArray, setBidderArray] = React.useState<ITableRow[]>([]);
+  const [rangeArray, setRangeArray] = React.useState<number[]>([]);
+  const [expanded, setExpanded] = React.useState(false);
 
-  const createGridBarElements = () => {
-    const min = auctionEndEvent.args.timestamp;
-    const max = auctionEndEvent.args.auctionEnd;
-    return createRangeArray(min, max, gridStep).map((val, index) => <ListItem key={index} {...{ 'data-timestamp': val }}></ListItem>);
-  };
+  useEffect(() => {
+    setRangeArray(createRangeArray(auctionEndEvent.args.timestamp, auctionEndEvent.args.auctionEnd, gridStep));
+  }, []);
+  
+  useEffect(() => {
+    setBidderArray(
+      auctionEndEvent.args.bidderRequests
+        .sort((a, b) => a.start - b.start)
+        .map((bidderRequest) => {
+          const bidRequestEvent = prebidEvents.find(findEvent(bidderRequest, 'bidRequested')) as IPrebidBidRequestedEventData;
+          const bidResponseEvent = prebidEvents.find(findEvent(bidderRequest, 'bidResponse')) as IPrebidBidResponseEventData;
+          const noBidEvent = prebidEvents.find(findEvent(bidderRequest, 'noBid')) as IPrebidNoBidEventData;
+          const end = bidResponseEvent
+            ? bidResponseEvent.args.responseTimestamp
+            : Math.floor(bidderRequest.start + noBidEvent?.elapsedTime - bidRequestEvent?.elapsedTime);
+          const startGridBar = getNearestGridBarElement(bidderRequest.start, gridRef);
+          const endGridBar = getNearestGridBarElement(end, gridRef);
+          const left = startGridBar?.offsetLeft;
+          const width = endGridBar?.offsetLeft + endGridBar?.offsetWidth - left;
+          const { bidderCode, start } = bidderRequest;
+          return { bidderCode, left, width, start, end };
+        })
+    );
+  }, [auctionEndEvent.args.bidderRequests]);
 
-  const getGridBarElement = (input: number) => {
-    const allGridBarsCollection = gridRef?.current?.children;
-    const allGridBarsArray = Array.from(allGridBarsCollection || []) as HTMLLIElement[];
-    const nearestGridBar = allGridBarsArray.sort(
-      (a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input)
-    )[0] as HTMLElement;
-    return nearestGridBar;
-  };
+  return (
+    <Card sx={{ width: 1, maxWidth: 1 }}>
+      <CardContent>
+        <Box
+          sx={{
+            color: 'rgb(25, 118, 210) ',
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+          }}
+        >
+          <Typography variant="subtitle1">Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}</Typography>
+          <Typography variant="subtitle1">Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}</Typography>
+          <Typography variant="subtitle1">Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()} </Typography>
+        </Box>
+        <Box className={classes.root} onClick={() => setExpanded(!expanded)}>
+          <List className="chart-values" ref={gridRef} dense={true}>
+            {rangeArray.map((val, index) => (
+              <ListItem key={index} {...{ 'data-timestamp': val }}></ListItem>
+            ))}
+          </List>
+          <List className="chart-bars" dense={true}>
+            {bidderArray.map((item, index) => (
+              <ListItem style={{ width: `${item.width}px`, left: `${item.left}px`, whiteSpace: 'nowrap', paddingLeft: '5px' }} key={index}>
+                {`${item.bidderCode}: ${item.end - item.start}ms`}
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </CardContent>
 
-  const createBidderRowElements = () => {
-    return (auctionEndEvent as IPrebidAuctionEndEventData).args.bidderRequests
-      .sort((a, b) => a.start - b.start)
-      .map((bidderRequest, index) => {
-        const bidRequestEvent = prebidEvents.find(
-          (event) =>
-            event.eventType === 'bidRequested' &&
-            event.args.auctionId === bidderRequest.auctionId &&
-            ((event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode ||
-              (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode)
-        );
-
-        const bidResponseEvent = prebidEvents.find(
-          (event) =>
-            event.eventType === 'bidResponse' &&
-            event.args.auctionId === bidderRequest.auctionId &&
-            ((event as IPrebidBidResponseEventData).args.bidderCode === bidderRequest.bidderCode ||
-              (event as IPrebidBidResponseEventData).args.bidder === bidderRequest.bidderCode)
-        ) as IPrebidBidResponseEventData;
-
-        const noBidEvent = prebidEvents.find(
-          (event) =>
-            event.eventType === 'noBid' &&
-            event.args.auctionId === bidderRequest.auctionId &&
-            ((event as IPrebidNoBidEventData).args.bidderCode === bidderRequest.bidderCode ||
-              (event as IPrebidNoBidEventData).args.bidder === bidderRequest.bidderCode)
-        );
-
-        const endTimestamp = bidResponseEvent
-          ? bidResponseEvent.args.responseTimestamp
-          : Math.floor(bidderRequest.start + noBidEvent?.elapsedTime - bidRequestEvent?.elapsedTime);
-        const startGridBar = getGridBarElement(bidderRequest.start);
-        const endGridBar = getGridBarElement(endTimestamp);
-        const left = startGridBar?.offsetLeft;
-        const width = endGridBar?.offsetLeft + endGridBar?.offsetWidth - left;
-        tableRows.push({
-          bidderCode: bidderRequest.bidderCode,
-          startTimeStamp: bidderRequest.start,
-          endTimestamp,
-          left,
-          width,
-        });
-        return (
-          <ListItem key={index} style={{ width: `${width}px`, left: `${left}px`, whiteSpace: 'nowrap', paddingLeft: '5px' }}>
-            {`${bidderRequest.bidderCode}: ${endTimestamp - bidderRequest.start}ms`}
-          </ListItem>
-        );
-      });
-  };
-
-  return auctionEndEvent.args.bidderRequests[0] ? (
-    <React.Fragment>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <Paper variant="outlined" sx={{ backgroundColor: '#a3b2b8' }}>
-                  Auction Start: {new Date(auctionEndEvent.args.timestamp).toISOString()}
-                </Paper>
-              </TableCell>
-              <TableCell>
-                <Paper variant="outlined" sx={{ backgroundColor: '#a3b2b8' }}>
-                  Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}
-                </Paper>
-              </TableCell>
-              <TableCell>
-                <Paper variant="outlined" sx={{ backgroundColor: '#a3b2b8' }}>
-                  Auction End: {new Date(auctionEndEvent.args.auctionEnd).toISOString()}{' '}
-                </Paper>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow onClick={() => setOpen(!open)}>
-              <TableCell colSpan={3}>
-                <Box className={classes.root}>
-                  <List className="chart-values" ref={gridRef} dense={true}>
-                    {createGridBarElements()}
-                  </List>
-                  <List className="chart-bars" dense={true}>
-                    {createBidderRowElements()}
-                  </List>
-                </Box>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3}>
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                  <Box>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Bidder</TableCell>
-                          <TableCell>Request Timestamp</TableCell>
-                          <TableCell>Response Timestamp</TableCell>
-                          <TableCell>Response Time</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {tableRows.map((row, index) => (
-                          <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell>{row.bidderCode}</TableCell>
-                            <TableCell>{row.startTimeStamp}</TableCell>
-                            <TableCell>{row.endTimestamp}</TableCell>
-                            <TableCell>{row.endTimestamp - row.startTimeStamp}ms</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Box>
-                </Collapse>
-              </TableCell>
-            </TableRow>
-            <TableRow></TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </React.Fragment>
-  ) : (
-    <span></span>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent>
+          <TableContainer>
+            <Paper>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Bidder</TableCell>
+                    <TableCell>Request Timestamp</TableCell>
+                    <TableCell>Response Timestamp</TableCell>
+                    <TableCell>Response Time</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {bidderArray.map((item, index) => (
+                    <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell>{item.bidderCode}</TableCell>
+                      <TableCell>{item.start}</TableCell>
+                      <TableCell>{item.end}</TableCell>
+                      <TableCell>{item.end - item.start}ms</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Paper>
+          </TableContainer>
+        </CardContent>
+      </Collapse>
+    </Card>
   );
 };
 
@@ -229,8 +199,8 @@ interface IGanttChartComponentProps {
 
 interface ITableRow {
   bidderCode: string;
-  startTimeStamp: number;
-  endTimestamp: number;
+  start: number;
+  end: number;
   left: number;
   width: number;
 }
