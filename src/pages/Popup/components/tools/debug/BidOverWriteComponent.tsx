@@ -41,6 +41,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
   };
 
   const handleBidsFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log({event})
     setBidsFilterEnabled(event.target.checked);
     debugConfigState.bids = event.target.checked ? selectedBids : undefined;
     setDebugConfigState({ ...debugConfigState });
@@ -53,7 +54,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
   useEffect(() => {
     setBidsFilterEnabled(!!Array.isArray(debugConfigState.bids));
     setSelectedBids(debugConfigState.bids || []);
-  }, [debugConfigState]);
+  }, [debugConfigState.bids]);
 
   useEffect(() => {
     const events = prebid.events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType));
