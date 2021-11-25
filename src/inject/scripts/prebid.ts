@@ -524,7 +524,7 @@ interface IPrebidGdprConsent {
     apiVersion: number;
 }
 
-interface IPrebidBidderRequest {
+export interface IPrebidBidderRequest {
     auctionId: string;
     auctionStart: number;
     bidder: string;
