@@ -4,13 +4,11 @@
 // with the auction data it collected so far
 import logger from '../../logger';
 import constants from '../../constants.json';
-import { safelyParseJSON } from '../../utils';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { IPrebidDetails, IPrebidBidWonEventData, IPrebidAuctionEndEventData } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 
 class Content {
-  prebidConfig = {};
   prebid: IPrebidDetails = {} as IPrebidDetails;
   googleAdManager: IGoogleAdManagerDetails;
   tcf: ITcfDetails;
@@ -31,16 +29,10 @@ class Content {
         const { type, payload } = event.data;
 
         switch (type) {
-          case constants.EVENTS.CONFIG_AVAILABLE: {
-            const payloadJson = safelyParseJSON(payload);
-            logger.log(`[Content] received a ${type} event`, payloadJson);
-            this.prebidConfig = payloadJson.prebidConfig;
-            break;
-          }
-
           case constants.EVENTS.REQUEST_CONSOLE_STATE: {
-            logger.log(`[Content] received a ${type} event`);
+            // update injected
             this.sendConsoleStateToInjected();
+
             break;
           }
 
@@ -48,14 +40,11 @@ class Content {
             this.googleAdManager = JSON.parse(payload);
 
             // update background page
-            chrome.runtime.sendMessage({
-              type: constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND,
-              payload: JSON.parse(payload),
-            });
+            this.updateBackgroundPage(constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, this.googleAdManager);
 
             // update injected
-            const masks = this.prepareMaskObjects();
-            document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
+            this.updateMasks();
+
             break;
           }
 
@@ -63,29 +52,21 @@ class Content {
             this.prebid = JSON.parse(payload);
 
             // update background page
-            chrome.runtime.sendMessage({
-              type: constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND,
-              payload: JSON.parse(payload),
-            });
+            this.updateBackgroundPage(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, this.prebid);
 
             // update injected
-            const masks = this.prepareMaskObjects();
-            document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
+            this.updateMasks();
+
             break;
           }
 
           case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND: {
             this.tcf = JSON.parse(payload);
-
             // update background page
-            chrome.runtime.sendMessage({
-              type: constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND,
-              payload: JSON.parse(payload),
-            });
+            this.updateBackgroundPage(constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, this.tcf);
 
             // update injected
-            const masks = this.prepareMaskObjects();
-            document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
+            this.updateMasks();
 
             break;
           }
@@ -130,14 +111,20 @@ class Content {
   sendConsoleStateToInjected() {
     chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {
       const checked = result ? result[constants.CONSOLE_TOGGLE] : false;
-
       document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: checked }));
     });
   }
 
-  sendBidRequestedObjToBackground() {
-    logger.log('[Content] sendBidRequestedObjToBackground');
-    document.dispatchEvent(new CustomEvent(constants.EVENTS.SEND_DATA_TO_BACKGROUND));
+  updateBackgroundPage(type: string, payload: any) {
+    chrome.runtime.sendMessage({
+      type,
+      payload,
+    });
+  }
+
+  updateMasks() {
+    const masks = this.prepareMaskObjects();
+    document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
   }
 }
 
