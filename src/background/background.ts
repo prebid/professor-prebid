@@ -25,7 +25,7 @@ class Background {
   }
 
   updateBadge() {
-    if (this.tabInfo[this.currentActiveTabId]?.prebidDetails) {
+    if (this.tabInfo[this.currentActiveTabId]?.prebid) {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#F99B0C' });
       chrome.browserAction.setBadgeText({ text: `✓` });
     } else {
@@ -75,33 +75,34 @@ class Background {
           break;
         case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received gam details data:', payload);
-          this.tabInfo[tabId].gamDetails = { ...payload };
+          this.tabInfo[tabId].googleAdManager = { ...payload };
           this.updateBadge();
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
           this.updateBadge();
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.gamDetails);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.googleAdManager);
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received prebid details data:', payload);
-          this.tabInfo[tabId].prebidDetails = { ...payload };
+          this.tabInfo[tabId].prebid = { ...payload };
           this.updateBadge();
+          this.updatePopUp(this.currentActiveTabId);
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.prebidDetails);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.prebid);
           break;
         case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received tcf details data:', payload);
-          this.tabInfo[tabId].tcfDetails = { ...payload };
+          this.tabInfo[tabId].tcf = { ...payload };
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send tcf details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.tcfDetails);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.tcf);
           break;
         case constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send debug details data:', this.tabInfo, this.currentActiveTabId);
@@ -117,7 +118,7 @@ class Background {
       const frameId = web_navigation.frameId;
       if (frameId == 0) {
         logger.warn('[Background]', tabId, 'RESET');
-        this.tabInfo[tabId] = { gamDetails: null, prebidDetails: null, tcfDetails: null, url: null };
+        this.tabInfo[tabId] = { googleAdManager: null, prebid: null, tcf: null, url: null };
         this.tabInfo[tabId]['url'] = web_navigation.url;
       }
     });
@@ -142,11 +143,11 @@ class Background {
   }
 }
 
-interface ITabInfo {
+export interface ITabInfo {
   [key: number]: {
-    gamDetails?: IGoogleAdManagerDetails;
-    prebidDetails?: IPrebidDetails;
-    tcfDetails?: ITcfDetails;
+    googleAdManager?: IGoogleAdManagerDetails;
+    prebid?: IPrebidDetails;
+    tcf?: ITcfDetails;
     url?: string;
   },
   [key: string]: any
