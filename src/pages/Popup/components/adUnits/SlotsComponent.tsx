@@ -1,5 +1,5 @@
-import React from 'react';
-import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
+import React, { useEffect } from 'react';
+import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidAdUnitMediaTypes, IPrebidAdUnit } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -119,11 +119,16 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
 };
 
 const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
-  const adUnits =
-    prebid.events
-      .filter((event) => event.eventType === 'auctionEnd')
-      .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
-      .flat() || [];
+  const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
+  useEffect(() => {
+    const adUnits =
+      prebid.events
+        .filter((event) => event.eventType === 'auctionEnd')
+        .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
+        .flat()
+        .sort((a, b) => a.code > b.code ? 1 : -1);
+    setAdUnits(adUnits);
+  }, [prebid.events]);
   return (
     <TableContainer>
       <Table size="small">
