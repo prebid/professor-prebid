@@ -231,7 +231,7 @@ export interface IPrebidAdUnitMediaTypes {
         contentMode: string;
     }
 }
-interface IPrebidAdUnit {
+export interface IPrebidAdUnit {
     bids: IPrebidBid[];
     code: string;
     mediaTypes: IPrebidAdUnitMediaTypes;
