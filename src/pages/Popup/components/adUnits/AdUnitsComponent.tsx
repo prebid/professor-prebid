@@ -9,16 +9,17 @@ import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
-  const allAvailableBids = prebid.events.filter((event) => event.eventType === 'bidResponse') || [];
-  const allNoBids = prebid.events.filter((event) => event.eventType === 'noBid') || [];
+  const allAvailableBids = prebid.events?.filter((event) => event.eventType === 'bidResponse') || [];
+  const allNoBids = prebid.events?.filter((event) => event.eventType === 'noBid') || [];
+  const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map((event) => event?.args.bidder)));
   const allAdUnits = Array.from(
     new Set(
       prebid?.events
         ?.filter((event) => event.eventType === 'auctionInit')
-        .reduce((previousValue, currentValue) => [].concat(previousValue, (currentValue as IPrebidAuctionInitEventData).args.adUnitCodes), [])
+        .map((event) => (event as IPrebidAuctionInitEventData).args.adUnitCodes)
+        .flat()
     )
   );
-  const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map((event) => event?.args.bidder)));
 
   return (
     <Card sx={{ backgroundColor: '#ecf3f5' }}>
