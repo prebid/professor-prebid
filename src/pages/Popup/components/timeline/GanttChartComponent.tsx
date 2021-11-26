@@ -97,7 +97,7 @@ const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (
 
 const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
   const prebidEvents = prebid.events || [];
-  const gridStep =  (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / 50;
+  const gridStep = (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / 100;
   const classes = useStyles();
   const gridRef = useRef(null);
   const [bidderArray, setBidderArray] = React.useState<ITableRow[]>([]);
@@ -106,13 +106,11 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
 
   useEffect(() => {
     setRangeArray(createRangeArray(auctionEndEvent.args.timestamp, auctionEndEvent.args.auctionEnd, gridStep));
-  }, []);
-  
-  useEffect(() => {
     setBidderArray(
       auctionEndEvent.args.bidderRequests
         .sort((a, b) => a.start - b.start)
         .map((bidderRequest) => {
+          const { bidderCode, start } = bidderRequest;
           const bidRequestEvent = prebidEvents.find(findEvent(bidderRequest, 'bidRequested')) as IPrebidBidRequestedEventData;
           const bidResponseEvent = prebidEvents.find(findEvent(bidderRequest, 'bidResponse')) as IPrebidBidResponseEventData;
           const noBidEvent = prebidEvents.find(findEvent(bidderRequest, 'noBid')) as IPrebidNoBidEventData;
@@ -123,11 +121,12 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
           const endGridBar = getNearestGridBarElement(end, gridRef);
           const left = startGridBar?.offsetLeft;
           const width = endGridBar?.offsetLeft + endGridBar?.offsetWidth - left;
-          const { bidderCode, start } = bidderRequest;
           return { bidderCode, left, width, start, end };
         })
     );
-  }, [auctionEndEvent.args.bidderRequests]);
+  }
+  , [auctionEndEvent.args.bidderRequests, gridRef.current?.children]
+  );
 
   return (
     <Card sx={{ width: 1, maxWidth: 1 }}>
