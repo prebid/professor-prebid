@@ -20,7 +20,6 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         .flat()
     )
   );
-
   return (
     <Card sx={{ backgroundColor: '#ecf3f5' }}>
       <CardContent>
