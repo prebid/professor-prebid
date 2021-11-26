@@ -13,7 +13,7 @@ class Background {
     this.addEventListeners();
     setInterval(() => {
       chrome.tabs.query({}, (tabs) => {
-        let activeTabIds = tabs.map(tab => tab.id)
+        let activeTabIds = tabs.map((tab) => tab.id);
         for (let t in this.tabInfo) {
           if (activeTabIds.includes(parseInt(t))) {
           } else {
@@ -37,9 +37,8 @@ class Background {
   updatePopUp(currentActiveTabId: number) {
     chrome.runtime.sendMessage({
       type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
-      payload:this.tabInfo[currentActiveTabId] || {},
+      payload: this.tabInfo[currentActiveTabId] || {},
     });
-    
   }
 
   addEventListeners() {
@@ -47,8 +46,8 @@ class Background {
       const msgType = message && message.type;
       const payload = message && message.payload;
 
-      const tabId = sender.tab?.id
-      chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+      const tabId = sender.tab?.id;
+      chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
         const currTab = tabs[0];
         if (currTab) {
           this.currentActiveTabId = currTab.id;
@@ -60,13 +59,13 @@ class Background {
       switch (msgType) {
         case constants.EVENTS.OPEN_DATA_TAB:
           if (this.mainTabId) {
-            chrome.tabs.update(this.mainTabId, { active: true, url: `./app.html` }, tab => {
+            chrome.tabs.update(this.mainTabId, { active: true, url: `./app.html` }, (tab) => {
               this.mainTabId = tab?.id;
               logger.log('[Background] update tab with tabId: ', this.mainTabId);
               sendResponse();
             });
           } else {
-            chrome.tabs.create({ url: `./app.html` }, tab => {
+            chrome.tabs.create({ url: `./app.html` }, (tab) => {
               this.mainTabId = tab.id;
               logger.log('[Background] created tab with tabId: ', this.mainTabId);
               sendResponse();
@@ -113,7 +112,7 @@ class Background {
       }
     });
 
-    chrome.webNavigation.onBeforeNavigate.addListener(web_navigation => {
+    chrome.webNavigation.onBeforeNavigate.addListener((web_navigation) => {
       const tabId = web_navigation.tabId;
       const frameId = web_navigation.frameId;
       if (frameId == 0) {
@@ -129,17 +128,15 @@ class Background {
     });
 
     chrome.tabs.onActivated.addListener((activeInfo) => {
-      this.currentActiveTabId = activeInfo.tabId
+      this.currentActiveTabId = activeInfo.tabId;
       this.updateBadge();
       // this.updatePopUp(this.currentActiveTabId);
     });
-
   }
 
   removeInfoForTabId(tabId: number) {
     logger.log('[Background] Removing info for tabId ' + tabId);
-    if (this.tabInfo[tabId])
-      delete this.tabInfo[tabId];
+    if (this.tabInfo[tabId]) delete this.tabInfo[tabId];
   }
 }
 
@@ -149,9 +146,9 @@ export interface ITabInfo {
     prebid?: IPrebidDetails;
     tcf?: ITcfDetails;
     url?: string;
-  },
-  [key: string]: any
-};
+  };
+  [key: string]: any;
+}
 
 const background = new Background();
 (window as any).tabInfo = background.tabInfo;
