@@ -4,8 +4,8 @@ import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { appHandler } from '../App/appHandler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPollH, faSlidersH, faAd, faTools, faWindowRestore, faMoneyBill, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons';
-import React, { useCallback, useEffect, useState } from 'react';
+import { faPollH, faSlidersH, faAd, faTools, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useState } from 'react';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
@@ -18,6 +18,7 @@ import Typography, { TypographyProps } from '@mui/material/Typography';
 import BidsComponent from './components/bids/BidsComponent';
 import ToolsComponent from './components/tools/ToolsComponent';
 import { styled } from '@mui/material/styles';
+import { ITabInfo } from '../../background/background';
 
 const StyledIconButton = styled(IconButton)<IconButtonProps>(({ theme }) => ({
   flexDirection: 'column',
@@ -39,35 +40,51 @@ const StyledTypo = styled(Typography)<TypographyProps>(({ theme }) => ({
 
 export const Popup = (): JSX.Element => {
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
+  const [tcf, setTcfDetails] = useState<ITcfDetails>();
+  const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
+
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
-      setGamDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
+      setGamDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+      });
     });
-  }, [googleAdManager]);
-
-  const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
-  useEffect(() => {
     appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
+      setPrebidDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+      });
     });
-  }, [prebid]);
-  useEffect(() => {
-    // listen for update message from background script
-    appHandler.handlePopUpUpdate((data: IPrebidDetails) => {
-      logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
-    });
-  }, []);
-
-  const [tcf, setTcfDetails] = useState<ITcfDetails>();
-  useEffect(() => {
     appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setTcfDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
+      setTcfDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+      });
     });
-  }, [tcf]);
+  }, []); // get states on mount in case there is no more update when pop up is opened
+
+  useEffect(() => {
+    appHandler.handlePopUpUpdate((data: ITabInfo) => {
+      logger.log('[App] received update message from background', data);
+      const { prebid, tcf, googleAdManager } = data;
+      if (prebid) {
+        setPrebidDetails((previousData) => {
+          return JSON.stringify(previousData) === JSON.stringify(prebid) ? previousData : prebid;
+        });
+      }
+      if (tcf) {
+        setTcfDetails((previousData) => {
+          return JSON.stringify(previousData) === JSON.stringify(tcf) ? previousData : tcf;
+        });
+      }
+      if (googleAdManager) {
+        setGamDetails((previousData) => {
+          return JSON.stringify(previousData) === JSON.stringify(googleAdManager) ? previousData : googleAdManager;
+        });
+      }
+    });
+  }, []); // register event listener for update message from background script
 
   return (
     <Box className="popup" sx={{ height: '600px', width: '780px', overflowX: 'scroll' }}>
