@@ -124,9 +124,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
           return { bidderCode, left, width, start, end };
         })
     );
-  }
-  , [auctionEndEvent.args.bidderRequests, gridRef.current?.children]
-  );
+  }, [auctionEndEvent.args.bidderRequests, gridRef.current?.children]);
 
   return (
     <Card sx={{ width: 1, maxWidth: 1 }}>

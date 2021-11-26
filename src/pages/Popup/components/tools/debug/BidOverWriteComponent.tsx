@@ -41,7 +41,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
   };
 
   const handleBidsFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log({event})
+    console.log({ event });
     setBidsFilterEnabled(event.target.checked);
     debugConfigState.bids = event.target.checked ? selectedBids : undefined;
     setDebugConfigState({ ...debugConfigState });
