@@ -6,6 +6,7 @@ import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
+import logger from '../../../../../logger';
 
 const inject = (code: string, callback: (result: any) => void) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
@@ -43,6 +44,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
     });
   }, []);
 
+  logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (
     <Box
       sx={{

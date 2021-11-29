@@ -19,6 +19,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/styles';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
+import logger from '../../../../logger';
 
 const NaviButton = styled(Button)({
   display: 'flex',
@@ -35,6 +36,7 @@ const NaviButton = styled(Button)({
 });
 
 const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
+  logger.log(`[PopUp][BidderSettingsComponent]: render `);
   const { url, path } = useRouteMatch();
   return (
     <Box>

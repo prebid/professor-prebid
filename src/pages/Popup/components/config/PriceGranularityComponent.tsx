@@ -5,6 +5,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import logger from '../../../../logger';
 
 const defaultBuckets: IDefaultBuckets = {
   low: [{ precision: 2, min: 0, max: 5, increment: 0.5 }],
@@ -25,6 +26,7 @@ const defaultBuckets: IDefaultBuckets = {
 const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps) => {
   const type = prebid.config.priceGranularity;
   const rows = defaultBuckets[type] || prebid.config?.customPriceBucket?.buckets || [];
+  logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (
     <Table size="small">
       <TableHead>

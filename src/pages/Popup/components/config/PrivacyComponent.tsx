@@ -6,9 +6,11 @@ import { ITcfDetails } from '../../../../inject/scripts/tcf';
 import { TCString } from '@iabtcf/core';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
+import logger from '../../../../logger';
 
 const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element => {
-  const tmpTcf = tcf || {};
+  tcf = tcf || {};
+  logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
   return (
     <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
       <Typography>
@@ -31,20 +33,20 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
         <strong>Timeout:</strong>
         {prebid?.config?.consentManagement?.timeout ? prebid?.config?.consentManagement?.timeout : prebid?.config?.consentManagement?.gdpr?.timeout}
       </Typography>
-      {Object.keys(tmpTcf).map((key, index) => (
+      {Object.keys(tcf).map((key, index) => (
         <Box key={index}>
           <Typography>
             <strong>Version:</strong> {key}
           </Typography>
           <Typography>
-            <strong>CMP Loaded: </strong> <Checkbox checked={tmpTcf[key].cmpLoaded}></Checkbox>
+            <strong>CMP Loaded: </strong> <Checkbox checked={tcf[key].cmpLoaded}></Checkbox>
           </Typography>
           <Box sx={{ paddingBottom: 1 }}>
             <TextField
               label="Consent Data:"
               multiline
               variant="outlined"
-              value={tmpTcf[key].consentData ? tmpTcf[key].consentData : 'no consent string found'}
+              value={tcf[key].consentData ? tcf[key].consentData : 'no consent string found'}
               sx={{ width: 1 }}
             />
           </Box>
@@ -52,7 +54,7 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
             <TextField
               label="Decoded Data: "
               multiline
-              value={tmpTcf[key].consentData ? JSON.stringify(TCString.decode(tmpTcf[key].consentData, null), null, 4) : 'no consent string found'}
+              value={tcf[key].consentData ? JSON.stringify(TCString.decode(tcf[key].consentData, null), null, 4) : 'no consent string found'}
               sx={{ width: 1 }}
             />
           </Box>

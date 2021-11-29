@@ -9,6 +9,7 @@ import { popupHandler } from '../../popupHandler';
 import React, { useEffect, useState } from 'react';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import logger from '../../../../logger';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = () => {
@@ -30,7 +31,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
     setConsoleState(event.target.checked);
     popupHandler.onConsoleToggle(event.target.checked);
   };
-
+  logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
     <Box sx={{ m: 1 }}>
       <Button variant="outlined" size="small" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>

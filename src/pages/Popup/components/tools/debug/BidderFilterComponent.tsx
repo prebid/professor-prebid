@@ -10,6 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
+import logger from '../../../../../logger';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -57,7 +58,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
     }, new Set<string>());
     setBidderNames(Array.from(bidderNamesSet));
   }, [prebid.events]);
-
+  logger.log(`[PopUp][BidderFilterComponent]: render `, bidderNames, bidderFilterEnabled, selectedBidders);
   return (
     <Box
       sx={{

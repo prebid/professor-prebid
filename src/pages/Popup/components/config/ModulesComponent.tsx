@@ -14,8 +14,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import ReactJson from 'react-json-view';
+import logger from '../../../../logger';
 
 const ModulesComponent = ({ prebid }: IModulesComponentProps): JSX.Element => {
+  logger.log(`[PopUp][ModulesComponent]: render `);
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', columnGap: '5px', rowGap: '5px', flexWrap: 'wrap', paddingLeft: '5px' }}>
       {prebid.config.floors && (

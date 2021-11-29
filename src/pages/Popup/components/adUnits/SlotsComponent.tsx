@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
+import logger from '../../../../logger';
 
 const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip }: any): JSX.Element => {
   let json: { [key: string]: any } = {};
@@ -124,7 +125,7 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
     .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
     .flat()
     .sort((a, b) => (a.code > b.code ? 1 : -1));
-
+  logger.log(`[PopUp][SlotComponent]: render `, adUnits);
   return (
     <TableContainer>
       <Table size="small">

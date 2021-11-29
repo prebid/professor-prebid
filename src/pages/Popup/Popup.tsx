@@ -86,6 +86,7 @@ export const Popup = (): JSX.Element => {
     });
   }, []); // register event listener for update message from background script
 
+  logger.log(`[PopUp]: render `, tcf, prebid, googleAdManager);
   return (
     <Box className="popup" sx={{ height: '600px', width: '780px', overflowX: 'scroll' }}>
       <Router>

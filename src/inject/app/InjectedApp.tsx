@@ -7,7 +7,6 @@ import AdMaskPortal from './AdMaskPortal';
 import Box from '@mui/material/Box';
 
 const InjectedApp = (): JSX.Element => {
-  logger.log('[InjectedApp] init');
   let findContainerCount = 0;
   const [consoleState, setConsoleState] = useState(false);
   const handleConsoleStateChange = useCallback((event) => {
@@ -54,6 +53,7 @@ const InjectedApp = (): JSX.Element => {
     return null;
   };
 
+  logger.log(`[InjectedApp][InjectedApp] render:`, {consoleState, masks});
   return (
     <Box>
       {masks.map((mask, index) => {

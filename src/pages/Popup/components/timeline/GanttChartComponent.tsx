@@ -23,6 +23,7 @@ import { makeStyles } from '@mui/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
+import logger from '../../../../logger';
 
 const useStyles = makeStyles({
   root: {
@@ -103,7 +104,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
   const [bidderArray, setBidderArray] = React.useState<ITableRow[]>([]);
   const [rangeArray, setRangeArray] = React.useState<number[]>([]);
   const [expanded, setExpanded] = React.useState(false);
-
+  logger.log(`[PopUp][GanttChartComponent]: render `, prebidEvents, gridStep, bidderArray, rangeArray, expanded);
   useEffect(() => {
     setRangeArray(createRangeArray(auctionEndEvent.args.timestamp, auctionEndEvent.args.auctionEnd, gridStep));
     setBidderArray(

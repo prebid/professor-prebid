@@ -4,8 +4,10 @@ import Box from '@mui/material/Box';
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
+import logger from '../../../../logger';
 
 const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.Element => {
+  logger.log(`[PopUp][Server2ServerComponent]: render `);
   return (
     <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>
       {prebid.config.s2sConfig?.accountId && (

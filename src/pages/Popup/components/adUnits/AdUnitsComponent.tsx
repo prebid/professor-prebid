@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
+import logger from '../../../../logger';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const allAvailableBids = prebid.events?.filter((event) => event.eventType === 'bidResponse') || [];
@@ -20,6 +21,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         .flat()
     )
   );
+  logger.log(`[PopUp][AdUnitsComponent]: render `, allAvailableBids, allNoBids, allBidders, allAdUnits);
   return (
     <Card sx={{ backgroundColor: '#ecf3f5' }}>
       <CardContent>

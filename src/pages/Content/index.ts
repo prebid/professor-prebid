@@ -124,6 +124,7 @@ class Content {
 
   updateMasks() {
     const masks = this.prepareMaskObjects();
+    logger.log('[Content] update masks', masks);
     document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: masks }));
   }
 }
