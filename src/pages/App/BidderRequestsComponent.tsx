@@ -1,4 +1,4 @@
-import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../inject/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -7,8 +7,10 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import logger from '../../logger';
 
 const BidderRequestsComponent = ({ prebid }: IBidderRequestsComponentProps): JSX.Element => {
+  console.log(`[PopUp] render AdUnitsComponent`);
   const auctionEndEvents = (prebid?.events.filter((event) => event.eventType === 'auctionEnd') || []) as IPrebidAuctionEndEventData[];
   return (
     <Box>
