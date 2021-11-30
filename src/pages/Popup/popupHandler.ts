@@ -16,7 +16,7 @@ class PopupHandler {
         }
         sendResponse();
       });
-    } catch (e) { }
+    } catch (e) {}
   }
 
   onConsoleToggle(checked: boolean) {
@@ -24,7 +24,7 @@ class PopupHandler {
       chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
         chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
           const tab = tabs[0];
-          logger.log('[PopupHandler] Send onConsoleToggle', { tab }, { type: constants.CONSOLE_TOGGLE, consoleState: checked })
+          logger.log('[PopupHandler] Send onConsoleToggle', { tab }, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
           chrome.tabs.sendMessage(tab.id, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
         });
       });

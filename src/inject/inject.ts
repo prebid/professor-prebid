@@ -4,10 +4,12 @@ const inject = () => {
   script.id = 'professor prebid injected bundle';
   if (document.head || document.documentElement) {
     (document.head || document.documentElement).appendChild(script);
-    script.onload = () => { script.remove(); };
+    script.onload = () => {
+      script.remove();
+    };
   } else {
-    requestIdleCallback(inject)
+    requestIdleCallback(inject);
     // setTimeout(() => inject(), 10)
   }
-}
+};
 inject();

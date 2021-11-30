@@ -1,12 +1,7 @@
-import { IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import Divider from '@mui/material/Divider';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+import ReactJson from 'react-json-view';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -14,11 +9,17 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import logger from '../../../../logger';
 
 const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
+  logger.log(`[PopUp][UserIdsComponent]: render `);
   return (
     <Box>
-      {prebid.eids && prebid.eids[0] && <Typography><strong>User IDs</strong></Typography>}
+      {prebid.eids && prebid.eids[0] && (
+        <Typography>
+          <strong>User IDs</strong>
+        </Typography>
+      )}
       <TableContainer>
         <Table sx={{ maxWidth: '100%' }}>
           <TableHead>
@@ -29,20 +30,26 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {prebid.eids?.map((eid) => (
+            {prebid.eids?.map((eid) =>
               eid.uids.map((uid, index) => (
                 <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell><strong>{eid.source}</strong></TableCell>
-                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word', }}>{uid.id}</TableCell>
+                  <TableCell>
+                    <strong>{eid.source}</strong>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{uid.id}</TableCell>
                   <TableCell>{uid.atype}</TableCell>
                 </TableRow>
               ))
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
       <br />
-      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <Typography><strong>Config</strong></Typography>}
+      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
+        <Typography>
+          <strong>Config</strong>
+        </Typography>
+      )}
       <TableContainer>
         <Table>
           <TableHead>
@@ -57,19 +64,35 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           <TableBody>
             {prebid.config?.userSync?.userIds?.map((userId, index) => (
               <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell><strong>{userId.name}</strong></TableCell>
+                <TableCell>
+                  <strong>{userId.name}</strong>
+                </TableCell>
                 <TableCell>{userId.storage?.type}</TableCell>
                 <TableCell>{userId.storage?.expires}</TableCell>
                 <TableCell>{userId.storage?.name}</TableCell>
-                <TableCell>{userId.storage?.name}</TableCell>
+                <TableCell>
+                  <ReactJson
+                    src={userId.params}
+                    name={false}
+                    collapsed={false}
+                    enableClipboard={false}
+                    displayObjectSize={false}
+                    displayDataTypes={false}
+                    sortKeys={false}
+                    quotesOnKeys={false}
+                    indentWidth={2}
+                    collapseStringsAfterLength={100}
+                    style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-    </Box >
+    </Box>
   );
-}
+};
 
 interface IUserIdsComponentProps {
   prebid: IPrebidDetails;

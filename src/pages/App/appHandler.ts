@@ -23,7 +23,7 @@ class AppHandler {
   handlePopUpUpdate(cb: any): void {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
-        cb(request.data);
+        cb(request.payload);
       }
     });
   }

@@ -8,4 +8,6 @@ script.innerHTML = `
 	});
 `;
 (document.head || document.documentElement).appendChild(script);
-script.onload = () => { script.remove(); };
+script.onload = () => {
+  script.remove();
+};

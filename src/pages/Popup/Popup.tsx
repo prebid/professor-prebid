@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch, useLocation } from 'react-router-dom';
-
 // Custom files
+import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
+import { ITcfDetails } from '../../inject/scripts/tcf';
+import { IPrebidDetails } from '../../inject/scripts/prebid';
+import { appHandler } from '../App/appHandler';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPollH, faSlidersH, faAd, faTools, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
@@ -9,16 +14,12 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
 import { popupHandler } from './popupHandler';
-import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
-import { ITcfDetails } from '../../inject/scripts/tcf';
-import { IPrebidDetails } from '../../inject/scripts/prebid';
-import { appHandler } from '../App/appHandler';
 import ToolsComponent from './components/tools/ToolsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-
+import { ITabInfo } from '../../background/background';
 // Material-UI
 import { styled } from '@mui/material/styles';
 import Typography, { TypographyProps } from '@mui/material/Typography';
@@ -32,48 +33,38 @@ import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
 import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
-
 // Styles
 const StyledButton = styled(Button)(({ theme }) => ({
   textDecoration: 'none',
 }));
-
 const StyledLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
 }));
-
 // Functions
 export const Popup = (): JSX.Element => {
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
+  const [tcf, setTcfDetails] = useState<ITcfDetails>();
+  const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
-      setGamDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
+      setGamDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+      });
     });
-  }, [googleAdManager]);
-
-  const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
-  useEffect(() => {
     appHandler.getPrebidDetailsFromBackground((data: IPrebidDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
+      setPrebidDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+      });
     });
-  }, [prebid]);
-  useEffect(() => {
-    // listen for update message from background script
-    appHandler.handlePopUpUpdate((data: IPrebidDetails) => {
-      logger.log('[App] received Prebid Details from background', data);
-      setPrebidDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
-    });
-  }, []);
-
-  const [tcf, setTcfDetails] = useState<ITcfDetails>();
-  useEffect(() => {
     appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
       logger.log('[App] received Prebid Details from background', data);
-      setTcfDetails((previousData) => (previousData ? { ...previousData, ...data } : data));
+      setTcfDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+      });
     });
-  }, [tcf]);
+  }, []); // get states on mount in case there is no more update when pop up is opened
 
   // Blue current path button
   const currentPath = (a: string) => {
@@ -81,6 +72,26 @@ export const Popup = (): JSX.Element => {
     const isActive = cropped_href === a ? 'contained' : 'outlined';
     return isActive;
   };
+  appHandler.handlePopUpUpdate((data: ITabInfo) => {
+    logger.log('[App] received update message from background', data);
+    const { prebid, tcf, googleAdManager } = data;
+    if (prebid) {
+      setPrebidDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(prebid) ? previousData : prebid;
+      });
+    }
+    if (tcf) {
+      setTcfDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(tcf) ? previousData : tcf;
+      });
+    }
+    if (googleAdManager) {
+      setGamDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(googleAdManager) ? previousData : googleAdManager;
+      });
+    }
+  });
+  logger.log(`[PopUp]: render `, tcf, prebid, googleAdManager);
 
   return (
     <Box
@@ -120,32 +131,32 @@ export const Popup = (): JSX.Element => {
             <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
               <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width="14%" />
               <StyledLink to="/">
-                <StyledButton size='small'variant={currentPath('/')} startIcon={<AdUnitsOutlinedIcon />}>
+                <StyledButton size="small" variant={currentPath('/')} startIcon={<AdUnitsOutlinedIcon />}>
                   AdUnits
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/bids">
-                <StyledButton size='small'variant={currentPath('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
+                <StyledButton size="small" variant={currentPath('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
                   Bids
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/timeline">
-                <StyledButton size='small'variant={currentPath('/timeline')} startIcon={<TimelineOutlinedIcon />}>
+                <StyledButton size="small" variant={currentPath('/timeline')} startIcon={<TimelineOutlinedIcon />}>
                   Timeline
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/config">
-                <StyledButton size='small'variant={currentPath('/config')} startIcon={<SettingsOutlinedIcon />}>
+                <StyledButton size="small" variant={currentPath('/config')} startIcon={<SettingsOutlinedIcon />}>
                   Config
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/userId">
-                <StyledButton size='small'variant={currentPath('/userId')} startIcon={<ContactPageOutlinedIcon />}>
+                <StyledButton size="small" variant={currentPath('/userId')} startIcon={<ContactPageOutlinedIcon />}>
                   UserID
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/tools">
-                <StyledButton size='small'variant={currentPath('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
+                <StyledButton size="small" variant={currentPath('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
                   Tools
                 </StyledButton>
               </StyledLink>
@@ -183,21 +194,16 @@ export const Popup = (): JSX.Element => {
               </Card>
             )}
           </Route>
-
           <Route exact path="/bids">
             {prebid && <BidsComponent prebid={prebid}></BidsComponent>}
           </Route>
-
           <Route exact path="/timeline">
             {prebid && <TimelineComponent prebid={prebid}></TimelineComponent>}
           </Route>
-
           <Route path="/config">{prebid?.config && <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>}</Route>
-
           <Route exact path="/userId">
             {prebid && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
           </Route>
-
           <Route exact path="/tools">
             {prebid && <ToolsComponent prebid={prebid}></ToolsComponent>}
           </Route>

@@ -1,4 +1,4 @@
-import { IPrebidAuctionEndEventData, IPrebidDetails } from "../../../../inject/scripts/prebid";
+import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../inject/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -7,12 +7,14 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import logger from '../../logger';
 
 const BidderRequestsComponent = ({ prebid }: IBidderRequestsComponentProps): JSX.Element => {
-  const auctionEndEvents = (prebid?.events.filter(event => event.eventType === 'auctionEnd') || []) as IPrebidAuctionEndEventData[];
+  console.log(`[PopUp] render AdUnitsComponent`);
+  const auctionEndEvents = (prebid?.events.filter((event) => event.eventType === 'auctionEnd') || []) as IPrebidAuctionEndEventData[];
   return (
     <Box>
-      {auctionEndEvents.map((event, index) =>
+      {auctionEndEvents.map((event, index) => (
         <Box key={index}>
           <TableContainer>
             <Table>
@@ -27,14 +29,14 @@ const BidderRequestsComponent = ({ prebid }: IBidderRequestsComponentProps): JSX
               <TableBody>
                 {event.args.bidderRequests.map((bidderRequest, index) => {
                   const maxBidReceivedResponseTimestamp = event.args.bidsReceived
-                    .filter(bid => bid.bidderCode === bidderRequest.bidderCode)
-                    .map(bid => bid.responseTimestamp)
-                    .reduce((previous, value) => previous > value ? previous : value, 0);
+                    .filter((bid) => bid.bidderCode === bidderRequest.bidderCode)
+                    .map((bid) => bid.responseTimestamp)
+                    .reduce((previous, value) => (previous > value ? previous : value), 0);
 
                   const maxTimeToRespondTimestamp = event.args.bidsReceived
-                    .filter(bid => bid.bidderCode === bidderRequest.bidderCode)
-                    .map(bid => bid.timeToRespond)
-                    .reduce((previous, value) => previous > value ? previous : value, 0);
+                    .filter((bid) => bid.bidderCode === bidderRequest.bidderCode)
+                    .map((bid) => bid.timeToRespond)
+                    .reduce((previous, value) => (previous > value ? previous : value), 0);
 
                   return (
                     <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
@@ -43,16 +45,15 @@ const BidderRequestsComponent = ({ prebid }: IBidderRequestsComponentProps): JSX
                       <TableCell align="right">{maxBidReceivedResponseTimestamp}</TableCell>
                       <TableCell align="right">{maxTimeToRespondTimestamp}ms</TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
           </TableContainer>
-
         </Box>
-      )}
+      ))}
     </Box>
-  )
+  );
 };
 interface IBidderRequestsComponentProps {
   prebid: IPrebidDetails;

@@ -11,7 +11,7 @@
 	"scripts": {
 		"build": "node scripts/build.js",
 		"start": "node scripts/webserver.js",
-		"prettier": "prettier --write '**/*.{js,jsx,css,html}'"
+		"prettier": "prettier --write '**/*.{js,ts,jsx,css,html,tsx}'"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.4.1",
@@ -33,6 +33,7 @@
 		"normalize.css": "^8.0.1",
 		"react": "^17.0.1",
 		"react-dom": "^17.0.1",
+		"react-json-view": "^1.21.3",
 		"react-router-dom": "^5.3.0",
 		"react-select": "^5.0.0",
 		"react-switch": "^6.0.0"

@@ -1,5 +1,5 @@
-import React from 'react';
-import { IPrebidAuctionInitEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
+import React, { useEffect } from 'react';
+import { IPrebidAuctionInitEventData, IPrebidDetails, IPrebidNoBidEventData, IPrebidBidResponseEventData } from '../../../../inject/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';

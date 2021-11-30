@@ -17,4 +17,4 @@ export const displayTable = (output: any, defaultOutput: any) => {
   } else {
     logger.warn(defaultOutput);
   }
-}
+};
