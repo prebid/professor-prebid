@@ -105,50 +105,47 @@ export const Popup = (): JSX.Element => {
             sx={{
               color: '#4285F4',
               textAlign: 'center',
-              paddingTop: '2%',
+              paddingTop: '1%',
               //justifyContent: 'center',
               // paddingLeft: '2%',
-              paddingBottom: '2%',
             }}
-          >
-            <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width="20%" />
-          </Box>
+          ></Box>
           <Box
             sx={{
               display: 'flex',
               flex: 0.8,
               justifyContent: 'space-around',
-              paddingBottom: '1%',
             }}
           >
-            <Stack spacing={2} direction="row">
+            <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
+              <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width="14%" />
               <StyledLink to="/">
-                <StyledButton variant={currentPath('/')} startIcon={<AdUnitsOutlinedIcon />}>
+                <StyledButton size='small'variant={currentPath('/')} startIcon={<AdUnitsOutlinedIcon />}>
                   AdUnits
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/bids">
-                <StyledButton variant={currentPath('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
+                <StyledButton size='small'variant={currentPath('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
                   Bids
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/timeline">
-                <StyledButton variant={currentPath('/timeline')} startIcon={<TimelineOutlinedIcon />}>
+                <StyledButton size='small'variant={currentPath('/timeline')} startIcon={<TimelineOutlinedIcon />}>
                   Timeline
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/config">
-                <StyledButton variant={currentPath('/config')} startIcon={<SettingsOutlinedIcon />}>
+                <StyledButton size='small'variant={currentPath('/config')} startIcon={<SettingsOutlinedIcon />}>
                   Config
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/userId">
-                <StyledButton variant={currentPath('/userId')} startIcon={<ContactPageOutlinedIcon />}>
+                <StyledButton size='small'variant={currentPath('/userId')} startIcon={<ContactPageOutlinedIcon />}>
                   UserID
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/tools">
-                <StyledButton variant={currentPath('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
+                <StyledButton size='small'variant={currentPath('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
                   Tools
                 </StyledButton>
               </StyledLink>
@@ -157,7 +154,31 @@ export const Popup = (): JSX.Element => {
         </AppBar>
         <Switch>
           <Route exact path="/">
-            {prebid ? (<PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>) : (<Card><CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}><Grid container justifyContent="center"><Grid item><Paper elevation={4} sx={{   backgroundColor: '#FFF', width: '105%', height: '120%', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', }}><Typography   sx={{ fontSize: '18px', fontWeight: 'bold' }}>There is no Prebid adapter on this page. Scroll down or refresh the page</Typography></Paper></Grid></Grid>
+            {prebid ? (
+              <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
+            ) : (
+              <Card>
+                <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
+                  <Grid container justifyContent="center">
+                    <Grid item>
+                      <Paper
+                        elevation={4}
+                        sx={{
+                          backgroundColor: '#FFF',
+                          width: '105%',
+                          height: '120%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
+                          There is no Prebid adapter on this page. Scroll down or refresh the page
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  </Grid>
                 </CardContent>
               </Card>
             )}
