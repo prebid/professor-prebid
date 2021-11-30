@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidDetails, IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -24,8 +24,15 @@ const defaultBuckets: IDefaultBuckets = {
 };
 
 const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps) => {
-  const type = prebid.config.priceGranularity;
-  const rows = defaultBuckets[type] || prebid.config?.customPriceBucket?.buckets || [];
+  const [type, setType] = React.useState<string>();
+  const [rows, setRows] = React.useState<IPrebidConfigPriceBucket[]>([]);
+  useEffect(() => {
+    const type = prebid.config.priceGranularity;
+    setType(type);
+    const rows = defaultBuckets[type] || prebid.config?.customPriceBucket?.buckets || [];
+    setRows(rows);
+  }, [prebid.config.priceGranularity]);
+
   logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (
     <Table size="small">

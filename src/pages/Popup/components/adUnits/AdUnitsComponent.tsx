@@ -1,5 +1,5 @@
-import React from 'react';
-import { IPrebidAuctionInitEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
+import React, { useEffect } from 'react';
+import { IPrebidAuctionInitEventData, IPrebidDetails, IPrebidNoBidEventData, IPrebidBidResponseEventData } from '../../../../inject/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -10,18 +10,30 @@ import Divider from '@mui/material/Divider';
 import logger from '../../../../logger';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
-  const allAvailableBids = prebid.events?.filter((event) => event.eventType === 'bidResponse') || [];
-  const allNoBids = prebid.events?.filter((event) => event.eventType === 'noBid') || [];
-  const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map((event) => event?.args.bidder)));
-  const allAdUnits = Array.from(
-    new Set(
-      prebid?.events
-        ?.filter((event) => event.eventType === 'auctionInit')
-        .map((event) => (event as IPrebidAuctionInitEventData).args.adUnitCodes)
-        .flat()
-    )
-  );
-  logger.log(`[PopUp][AdUnitsComponent]: render `, allAvailableBids, allNoBids, allBidders, allAdUnits);
+  const [allBidResponseEvents, setAllBidResponseEvents] = React.useState<IPrebidBidResponseEventData[]>([]);
+  const [allNoBidEvents, setAllNoBidEvents] = React.useState<IPrebidNoBidEventData[]>([]);
+  const [allBidderEvents, setAllBidderEvents] = React.useState<any[]>([]);
+  const [allAdUnits, setAllAdUnits] = React.useState<string[]>([]);
+
+  useEffect(() => {
+    const allBidResponseEvents = (prebid.events?.filter((event) => event.eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
+    const allNoBidEvents = (prebid.events?.filter((event) => event.eventType === 'noBid') || []) as IPrebidNoBidEventData[];
+    const allBidderEvents = Array.from(new Set([].concat(allBidResponseEvents, allNoBidEvents).map((event) => event?.args.bidder)));
+    const allAdUnits = Array.from(
+      new Set(
+        prebid?.events
+          ?.filter((event) => event.eventType === 'auctionInit')
+          .map((event) => (event as IPrebidAuctionInitEventData).args.adUnitCodes)
+          .flat()
+      )
+    );
+    setAllBidResponseEvents(allBidResponseEvents);
+    setAllNoBidEvents(allNoBidEvents);
+    setAllBidderEvents(allBidderEvents);
+    setAllAdUnits(allAdUnits);
+  }, [prebid.events]);
+
+  logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnits);
   return (
     <Card sx={{ backgroundColor: '#ecf3f5' }}>
       <CardContent>
@@ -49,11 +61,11 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           <Grid item>
             <Paper variant="outlined" sx={{ width: 200, backgroundColor: '#a3b2b8' }}>
               <Typography variant="subtitle1">
-                <strong>Bidders:</strong> {allBidders.length}
+                <strong>Bidders:</strong> {allBidderEvents.length}
               </Typography>
               <Divider></Divider>
               <Typography variant="subtitle1">
-                <strong>NoBid / Bid Ratio:</strong> {allNoBids.length} / {allAvailableBids.length}
+                <strong>NoBid / Bid Ratio:</strong> {allNoBidEvents.length} / {allBidResponseEvents.length}
               </Typography>
             </Paper>
           </Grid>
