@@ -256,7 +256,7 @@ export interface IPrebidAdUnit {
   transactionId: string;
 }
 
-interface IPrebidConfigPriceBucket {
+export interface IPrebidConfigPriceBucket {
   precision: number;
   min: number;
   max: number;
@@ -399,9 +399,14 @@ export interface IPrebidDebugConfig {
 export interface IPrebidDetails {
   version: string;
   timeout: number;
-  events: Array<
-    IPrebidAuctionInitEventData | IPrebidAuctionEndEventData | IPrebidBidRequestedEventData | IPrebidNoBidEventData | IPrebidBidWonEventData
-  >;
+  events: (
+    | IPrebidAuctionInitEventData
+    | IPrebidAuctionEndEventData
+    | IPrebidBidRequestedEventData
+    | IPrebidNoBidEventData
+    | IPrebidBidWonEventData
+    | IPrebidBidResponseEventData
+  )[];
   config: IPrebidConfig;
   eids: IPrebidEids[];
   debug: IPrebidDebugConfig;
