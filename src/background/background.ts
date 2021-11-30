@@ -5,7 +5,6 @@ import { IPrebidDetails } from '../inject/scripts/prebid';
 import { ITcfDetails } from '../inject/scripts/tcf';
 
 class Background {
-  mainTabId: number;
   tabInfo: ITabInfo = {};
   currentActiveTabId: number;
 
@@ -58,16 +57,16 @@ class Background {
 
       switch (msgType) {
         case constants.EVENTS.OPEN_DATA_TAB:
-          if (this.mainTabId) {
-            chrome.tabs.update(this.mainTabId, { active: true, url: `./app.html` }, (tab) => {
-              this.mainTabId = tab?.id;
-              logger.log('[Background] update tab with tabId: ', this.mainTabId);
+          if (this.currentActiveTabId) {
+            chrome.tabs.update(this.currentActiveTabId, { active: true, url: `./app.html` }, (tab) => {
+              this.currentActiveTabId = tab?.id;
+              logger.log('[Background] update tab with tabId: ', this.currentActiveTabId);
               sendResponse();
             });
           } else {
             chrome.tabs.create({ url: `./app.html` }, (tab) => {
-              this.mainTabId = tab.id;
-              logger.log('[Background] created tab with tabId: ', this.mainTabId);
+              this.currentActiveTabId = tab.id;
+              logger.log('[Background] created tab with tabId: ', this.currentActiveTabId);
               sendResponse();
             });
           }
@@ -151,5 +150,4 @@ export interface ITabInfo {
 }
 
 const background = new Background();
-(window as any).tabInfo = background.tabInfo;
 background.init();
