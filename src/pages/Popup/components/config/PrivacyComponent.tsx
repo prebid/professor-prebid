@@ -9,7 +9,6 @@ import Checkbox from '@mui/material/Checkbox';
 import logger from '../../../../logger';
 
 const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element => {
-  tcf = tcf || {};
   logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
   return (
     <Box sx={{ width: '100%', padding: '5px 5px 5px 25px' }}>

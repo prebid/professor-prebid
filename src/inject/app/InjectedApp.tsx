@@ -6,54 +6,54 @@ import { sendToContentScript } from '../../utils';
 import AdMaskPortal from './AdMaskPortal';
 import Box from '@mui/material/Box';
 
+let findContainerCount = 0;
+const findContainerElement = (id: string) => {
+  const container = document.getElementById(id);
+  const elementsWithIdSubstring = document.querySelectorAll(`[id*="${id}"]`);
+  if (container) {
+    logger.log(`[InjectedApp] Found container element with id ${id}.`);
+    return container;
+  }
+  if (elementsWithIdSubstring.length > 0) {
+    logger.log(`[InjectedApp] Found container element with id as substring in ${id}.`);
+    return elementsWithIdSubstring[0];
+  }
+  if (findContainerCount > 10) {
+    logger.log(`[InjectedApp] Could not find container element with id ${id}. Retry #${findContainerCount}/10`);
+    requestIdleCallback(() => {
+      findContainerElement(id);
+      findContainerCount += 1;
+    });
+  }
+  return null;
+};
+
 const InjectedApp = (): JSX.Element => {
-  let findContainerCount = 0;
   const [consoleState, setConsoleState] = useState(false);
-  const handleConsoleStateChange = useCallback((event) => {
+  const [masks, setMasks] = useState<IMaskInputData[]>([]);
+
+  const handleConsoleStateChange = (event: Event) => {
     const checked = (event as CustomEvent).detail;
     setConsoleState(checked);
-  }, []);
-  useEffect(() => {
-    document.addEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
-    return () => {
-      document.removeEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
-    };
-  }, []);
-  sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
+  };
 
-  const [masks, setMasks] = useState<IMaskInputData[]>([]);
-  const handleNewMasks = useCallback((event) => {
+  const handleNewMasks = (event: Event) => {
     const customEvent = event as CustomEvent;
     const newMasks = customEvent.detail || [];
     setMasks(newMasks);
-  }, []);
+  };
+
   useEffect(() => {
+    sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
+    document.addEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
     document.addEventListener(constants.SAVE_MASKS, handleNewMasks);
     return () => {
+      document.removeEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
       document.removeEventListener(constants.SAVE_MASKS, handleNewMasks);
     };
   }, []);
 
-  const findContainerElement = (id: string) => {
-    const container = document.getElementById(id);
-    const elementsWithIdSubstring = document.querySelectorAll(`[id*="${id}"]`);
-    if (container) {
-      return container;
-    }
-    if (elementsWithIdSubstring.length > 0) {
-      return elementsWithIdSubstring[0];
-    }
-    if (findContainerCount > 10) {
-      logger.log(`[InjectedApp] Could not find container element with id ${id}. Retry #${findContainerCount}/10`);
-      requestIdleCallback(() => {
-        findContainerElement(id);
-        findContainerCount += 1;
-      });
-    }
-    return null;
-  };
-
-  logger.log(`[InjectedApp][InjectedApp] render:`, {consoleState, masks});
+  logger.log(`[InjectedApp] render:`, { consoleState, masks });
   return (
     <Box>
       {masks.map((mask, index) => {
