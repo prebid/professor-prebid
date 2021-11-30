@@ -17,8 +17,6 @@ class GoogleAdManager {
     this.googletag = window.googletag || ({} as googletag.Googletag);
     this.googletag.cmd = this.googletag.cmd || [];
     this.googletag.cmd.push(() => this.addEventListeners());
-    // send google ad manager details to content script
-    // this.googletag.cmd.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
   }
 
   updatePostAuctionTimestamps(input: number) {
@@ -93,8 +91,8 @@ class GoogleAdManager {
 
     for (const e in events) {
       const event = events[e];
-      const message = event?.getMessage() || null;
-      const messageId = message?.getMessageId() || null;
+      const message = typeof event?.getMessage === 'function' ? event?.getMessage() : null;
+      const messageId = typeof message?.getMessageId === 'function' ? message?.getMessageId() : null;
 
       if (messageId == 70) {
         // refreshing ads
@@ -122,8 +120,8 @@ class GoogleAdManager {
 
     for (const e in events) {
       const event = events[e];
-      const message = event?.getMessage() || null;
-      const messageId = message?.getMessageId() || null;
+      const message = typeof event?.getMessage === 'function' ? event?.getMessage() : null;
+      const messageId = typeof message?.getMessageId === 'function' ? message?.getMessageId() : null;
 
       if (messageId == 70) {
         // refreshing ads
