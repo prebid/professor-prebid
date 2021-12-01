@@ -46,6 +46,7 @@ export const Popup = (): JSX.Element => {
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   const [tcf, setTcfDetails] = useState<ITcfDetails>();
   const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
+  const [isActive, setActive] = useState('/');
 
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
@@ -67,34 +68,30 @@ export const Popup = (): JSX.Element => {
       });
     });
   }, []); // get states on mount in case there is no more update when pop up is opened
+  useEffect(() => {
+    appHandler.handlePopUpUpdate((data: ITabInfo) => {
+      logger.log('[App] received update message from background', data);
+      const { prebid, tcf, googleAdManager } = data;
+      if (prebid) {
+        setPrebidDetails((previousData) => {
+          return JSON.stringify(previousData) === JSON.stringify(prebid) ? previousData : prebid;
+        });
+      }
+      if (tcf) {
+        setTcfDetails((previousData) => {
+          return JSON.stringify(previousData) === JSON.stringify(tcf) ? previousData : tcf;
+        });
+      }
+      if (googleAdManager) {
+        setGamDetails((previousData) => {
+          return JSON.stringify(previousData) === JSON.stringify(googleAdManager) ? previousData : googleAdManager;
+        });
+      }
+    });
+  }, []); // register event listener for update message from background script
 
-  appHandler.handlePopUpUpdate((data: ITabInfo) => {
-    logger.log('[App] received update message from background', data);
-    const { prebid, tcf, googleAdManager } = data;
-    if (prebid) {
-      setPrebidDetails((previousData) => {
-        return JSON.stringify(previousData) === JSON.stringify(prebid) ? previousData : prebid;
-      });
-    }
-    if (tcf) {
-      setTcfDetails((previousData) => {
-        return JSON.stringify(previousData) === JSON.stringify(tcf) ? previousData : tcf;
-      });
-    }
-    if (googleAdManager) {
-      setGamDetails((previousData) => {
-        return JSON.stringify(previousData) === JSON.stringify(googleAdManager) ? previousData : googleAdManager;
-      });
-    }
-  });
   logger.log(`[PopUp]: render `, tcf, prebid, googleAdManager);
 
-  // Blue current path button
-  const currentPath = (a: string) => {
-    const cropped_href = location.href.split('#')[1];
-    const isActive = cropped_href === a ? 'contained' : 'outlined';
-    return isActive;
-  };
 
   return (
     <Box
@@ -134,32 +131,32 @@ export const Popup = (): JSX.Element => {
             <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
               <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width="14%" />
               <StyledLink to="/">
-                <StyledButton size="small" variant={currentPath('/')} startIcon={<AdUnitsOutlinedIcon />}>
+                <StyledButton size="small" variant={isActive === "/" ? 'contained' : 'outlined'} onClick={() => setActive('/')} startIcon={<AdUnitsOutlinedIcon />}>
                   AdUnits
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/bids">
-                <StyledButton size="small" variant={currentPath('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
+                <StyledButton size="small" variant={isActive === "/bids" ? 'contained' : 'outlined'} onClick={() => setActive('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
                   Bids
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/timeline">
-                <StyledButton size="small" variant={currentPath('/timeline')} startIcon={<TimelineOutlinedIcon />}>
+                <StyledButton size="small" variant={isActive === "/timeline" ? 'contained' : 'outlined'} onClick={() => setActive('/timeline')} startIcon={<TimelineOutlinedIcon />}>
                   Timeline
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/config">
-                <StyledButton size="small" variant={currentPath('/config')} startIcon={<SettingsOutlinedIcon />}>
+                <StyledButton size="small" variant={isActive === "/config" ? 'contained' : 'outlined'} onClick={() => setActive('/config')} startIcon={<SettingsOutlinedIcon />}>
                   Config
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/userId">
-                <StyledButton size="small" variant={currentPath('/userId')} startIcon={<ContactPageOutlinedIcon />}>
+                <StyledButton size="small" variant={isActive === "/userId" ? 'contained' : 'outlined'} onClick={() => setActive('/userId')} startIcon={<ContactPageOutlinedIcon />}>
                   UserID
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/tools">
-                <StyledButton size="small" variant={currentPath('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
+                <StyledButton size="small" variant={isActive === "/tools" ? 'contained' : 'outlined'} onClick={() => setActive('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
                   Tools
                 </StyledButton>
               </StyledLink>
