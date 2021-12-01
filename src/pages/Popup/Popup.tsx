@@ -40,11 +40,13 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const StyledLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
 }));
+
 // Functions
 export const Popup = (): JSX.Element => {
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   const [tcf, setTcfDetails] = useState<ITcfDetails>();
   const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
+
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
@@ -66,12 +68,6 @@ export const Popup = (): JSX.Element => {
     });
   }, []); // get states on mount in case there is no more update when pop up is opened
 
-  // Blue current path button
-  const currentPath = (a: string) => {
-    const cropped_href = location.href.split('#')[1];
-    const isActive = cropped_href === a ? 'contained' : 'outlined';
-    return isActive;
-  };
   appHandler.handlePopUpUpdate((data: ITabInfo) => {
     logger.log('[App] received update message from background', data);
     const { prebid, tcf, googleAdManager } = data;
@@ -92,6 +88,13 @@ export const Popup = (): JSX.Element => {
     }
   });
   logger.log(`[PopUp]: render `, tcf, prebid, googleAdManager);
+
+  // Blue current path button
+  const currentPath = (a: string) => {
+    const cropped_href = location.href.split('#')[1];
+    const isActive = cropped_href === a ? 'contained' : 'outlined';
+    return isActive;
+  };
 
   return (
     <Box
