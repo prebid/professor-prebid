@@ -6,6 +6,18 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import logger from '../../../../logger';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Collapse from '@mui/material/Collapse';
+import Avatar from '@mui/material/Avatar';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Typography from '@mui/material/Typography';
+import EuroSharpIcon from '@mui/icons-material/EuroSharp';
+import { styled } from '@mui/styles';
+import Grid from '@mui/material/Grid';
 
 const defaultBuckets: IDefaultBuckets = {
   low: [{ precision: 2, min: 0, max: 5, increment: 0.5 }],
@@ -23,7 +35,88 @@ const defaultBuckets: IDefaultBuckets = {
   ],
 };
 
-const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps) => {
+interface ExpandMoreProps extends IconButtonProps {
+  expand: boolean;
+}
+
+const ExpandMore = styled((props: ExpandMoreProps) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+  marginLeft: 'auto',
+}));
+
+export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps) => {
+  const [expanded, setExpanded] = React.useState(false);
+  const [maxWidth, setMaxWidth] = React.useState<2 | 4 | 6 | 8 | 10 | 12>(4);
+
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+    setMaxWidth(expanded ? 4 : 8);
+  };
+
+  return (
+    <Grid item xs={maxWidth}>
+      <Card sx={{ width: 1, minHeight: 195, border: '1px solid #0e86d4' }}>
+        <CardHeader
+          avatar={
+            <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
+              <EuroSharpIcon />
+            </Avatar>
+          }
+          title="Price Granularity"
+          subheader={`${prebid.config.priceGranularity} (${
+            Object.keys(defaultBuckets).includes(prebid.config.priceGranularity) ? 'default' : 'custom'
+          })`}
+          action={
+            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+              <ExpandMoreIcon />
+            </ExpandMore>
+          }
+        />
+        <Collapse in={!expanded} timeout="auto" unmountOnExit>
+          {(() => {
+            if (['auto', 'dense', 'custom', 'medium'].includes(prebid.config.priceGranularity)) {
+              return (
+                <CardContent>
+                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <strong>Min: </strong> {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].min}
+                    <strong>Max: </strong> {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].max}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <strong>Precision: </strong>
+                    {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].precision}
+                    <strong>Increment: </strong>{' '}
+                    {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].increment}
+                  </Typography>
+                  {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets).length > 1 && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
+                    >
+                      + {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets).length - 1} more price
+                      buckets...
+                    </Typography>
+                  )}
+                </CardContent>
+              );
+            }
+          })()}
+        </Collapse>
+        <CardActions disableSpacing></CardActions>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <PriceGranularityComponent prebid={prebid}></PriceGranularityComponent>
+          </CardContent>
+        </Collapse>
+      </Card>
+    </Grid>
+  );
+};
+
+export const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps) => {
   const [type, setType] = React.useState<string>();
   const [rows, setRows] = React.useState<IPrebidConfigPriceBucket[]>([]);
   useEffect(() => {
@@ -84,5 +177,3 @@ interface IDefaultBuckets {
     increment: number;
   }[];
 }
-
-export default PriceGranularityComponent;
