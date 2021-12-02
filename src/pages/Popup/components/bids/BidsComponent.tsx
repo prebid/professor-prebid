@@ -26,7 +26,7 @@ interface TabPanelProps {
   value: number;
 }
 
-const TabPanel =(props: TabPanelProps) => {
+const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
 
   return (
@@ -38,14 +38,14 @@ const TabPanel =(props: TabPanelProps) => {
       )}
     </div>
   );
-}
+};
 
 const a11yProps = (index: number) => {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
   };
-}
+};
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.body}`]: {
@@ -73,13 +73,13 @@ const Row = ({ bid }: IRowComponentProps) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </StyledTableCell>
-        {bid.bidder && (<StyledTableCell>{bid.bidder}</StyledTableCell>)}
-        {bid.width && (<StyledTableCell>{bid.width}</StyledTableCell>)}
-        {bid.height && (<StyledTableCell>{bid.height}</StyledTableCell>)}
-        {bid.cpm && (<StyledTableCell>{bid.cpm ? Math.floor(bid.cpm * 100) / 100 : bid.cpm}</StyledTableCell>)}
-        {bid.currency && (<StyledTableCell>{bid.currency}</StyledTableCell>)}
-        {bid.adUnitCode && (<StyledTableCell>{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</StyledTableCell>)}
-        {bid.size && (<StyledTableCell>{bid.size}</StyledTableCell>)}
+        <StyledTableCell>{bid.bidder}</StyledTableCell>
+        <StyledTableCell>{bid.width}</StyledTableCell>
+        <StyledTableCell>{bid.height}</StyledTableCell>
+        <StyledTableCell>{bid.cpm ? Math.floor(bid.cpm * 100) / 100 : bid.cpm}</StyledTableCell>
+        <StyledTableCell>{bid.currency}</StyledTableCell>
+        <StyledTableCell>{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</StyledTableCell>
+        <StyledTableCell>{bid.size}</StyledTableCell>
       </StyledTableRow>
       <TableRow sx={{ backgroundColor: '#87CEEB' }}>
         <TableCell colSpan={8}>
@@ -121,8 +121,9 @@ const Row = ({ bid }: IRowComponentProps) => {
                       {bid.width} x {bid.height}
                     </TableCell>
                   </TableRow>
-                ) : ""
-                }
+                ) : (
+                  ''
+                )}
                 {bid.originalCpm && (
                   <TableRow>
                     <TableCell>Org. Cpm</TableCell>
