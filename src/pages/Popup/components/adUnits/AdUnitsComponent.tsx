@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
+import logger from '../../../../logger';
 
 // Styles
 const paperElevation = 2;
@@ -28,18 +29,32 @@ const StyledTypography = styled(Typography)(({ theme }) => ({
 }));
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
-  const allAvailableBids = prebid.events.filter((event) => event.eventType === 'bidResponse') || [];
-  const allNoBids = prebid.events.filter((event) => event.eventType === 'noBid') || [];
-  const allAdUnits = Array.from(
-    new Set(
-      prebid?.events
-        ?.filter((event) => event.eventType === 'auctionInit')
-        .reduce((previousValue, currentValue) => [].concat(previousValue, (currentValue as IPrebidAuctionInitEventData).args.adUnitCodes), [])
-    )
-  );
-  const allBidders = Array.from(new Set([].concat(allAvailableBids, allNoBids).map((event) => event?.args.bidder)));
-  
-  if (allAdUnits.length >= 1){
+  const [allBidResponseEvents, setAllBidResponseEvents] = React.useState<IPrebidBidResponseEventData[]>([]);
+  const [allNoBidEvents, setAllNoBidEvents] = React.useState<IPrebidNoBidEventData[]>([]);
+  const [allBidderEvents, setAllBidderEvents] = React.useState<any[]>([]);
+  const [allAdUnits, setAllAdUnits] = React.useState<string[]>([]);
+
+  useEffect(() => {
+    const allBidResponseEvents = (prebid.events?.filter((event) => event.eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
+    const allNoBidEvents = (prebid.events?.filter((event) => event.eventType === 'noBid') || []) as IPrebidNoBidEventData[];
+    const allBidderEvents = Array.from(new Set([].concat(allBidResponseEvents, allNoBidEvents).map((event) => event?.args.bidder)));
+    const allAdUnits = Array.from(
+      new Set(
+        prebid?.events
+          ?.filter((event) => event.eventType === 'auctionInit')
+          .map((event) => (event as IPrebidAuctionInitEventData).args.adUnitCodes)
+          .flat()
+      )
+    );
+    setAllBidResponseEvents(allBidResponseEvents);
+    setAllNoBidEvents(allNoBidEvents);
+    setAllBidderEvents(allBidderEvents);
+    setAllAdUnits(allAdUnits);
+  }, [prebid.events]);
+
+  logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnits);
+
+  if (allAdUnits.length >= 1) {
     return (
       <Card>
         <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
@@ -59,13 +74,13 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Grid>
             <Grid item>
               <StyledPaper elevation={paperElevation}>
-                <StyledTypography>Bidders: {allBidders.length}</StyledTypography>
+                <StyledTypography>Bidders: {allBidderEvents.length}</StyledTypography>
               </StyledPaper>
             </Grid>
             <Grid item>
               <StyledPaper elevation={paperElevation}>
                 <StyledTypography>
-                  NoBid / Bid Ratio: {allNoBids.length} / {allAvailableBids.length}
+                  NoBid / Bid Ratio: {allNoBidEvents.length} / {allBidResponseEvents.length}
                 </StyledTypography>
               </StyledPaper>
             </Grid>
@@ -73,18 +88,22 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         </CardContent>
         <Paper>{prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}</Paper>
       </Card>
-    ); } else {
+    );
+  } else {
     return (
       <Card>
         <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
-              <StyledPaper elevation={paperElevation}><StyledTypography  sx={{ fontSize: '18px', fontWeight: 'bold' }} >Prebid Adapter detected but no AdUnits</StyledTypography></StyledPaper>
+              <StyledPaper elevation={paperElevation}>
+                <StyledTypography sx={{ fontSize: '18px', fontWeight: 'bold' }}>Prebid Adapter detected but no AdUnits</StyledTypography>
+              </StyledPaper>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
-    );}
+    );
+  }
 };
 
 interface IAdUnitsComponentProps {
