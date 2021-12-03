@@ -89,106 +89,108 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Paper elevation={5} sx={{ margin: '3% 5% 3% 5%', borderRadius: 4, maxWidth: '100%' }}>
               <Table>
-                {bid.mediaType && (
-                  <TableRow>
-                    <TableCell>Media Type</TableCell>
-                    <TableCell>{bid.mediaType}</TableCell>
-                  </TableRow>
-                )}
-                {bid.bidder && (
-                  <TableRow>
-                    <TableCell>Bidder</TableCell>
-                    <TableCell>
-                      {open}
-                      {bid.bidder}
-                    </TableCell>
-                  </TableRow>
-                )}
-                {bid.params && (
-                  <TableRow>
-                    <TableCell>Params</TableCell>
-                    <TableCell>
-                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                        {bid.params &&
-                          Object.keys(bid.params).map((key) => (
-                            <Chip
-                              key={key}
-                              label={key + ': ' + JSON.stringify(bid.params[key])}
-                              color="primary"
-                              variant="outlined"
-                              size="small"
-                              sx={{ maxWidth: '300px' }}
-                            />
-                          ))}
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                )}
-                {bid.width & bid.height ? (
-                  <TableRow>
-                    <TableCell>Size</TableCell>
-                    <TableCell>
-                      {bid.width} x {bid.height}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  ''
-                )}
-                {bid.originalCpm && (
-                  <TableRow>
-                    <TableCell>Org. Cpm</TableCell>
-                    <TableCell>{Math.floor(bid.originalCpm * 100) / 100}</TableCell>
-                  </TableRow>
-                )}
-                {bid.originalCurrency && (
-                  <TableRow>
-                    <TableCell>Org. Currency</TableCell>
-                    <TableCell>{bid.originalCurrency}</TableCell>
-                  </TableRow>
-                )}
-                {bid.timeToRespond && (
-                  <TableRow>
-                    <TableCell>Time to Respond</TableCell>
-                    <TableCell>{bid.timeToRespond}</TableCell>
-                  </TableRow>
-                )}
-                {bid.statusMessage && (
-                  <TableRow>
-                    <TableCell>Status Message</TableCell>
-                    <TableCell>{bid.statusMessage}</TableCell>
-                  </TableRow>
-                )}
-                {bid.adUnitCode && (
-                  <TableRow>
-                    <TableCell>AdUnit Code</TableCell>
-                    <TableCell>{bid.adUnitCode}</TableCell>
-                  </TableRow>
-                )}
-                {bid.source && (
-                  <TableRow>
-                    <TableCell>Source</TableCell>
-                    <TableCell>{bid.source}</TableCell>
-                  </TableRow>
-                )}
-                {bid.ttl && (
-                  <TableRow>
-                    <TableCell>TTL</TableCell>
-                    <TableCell>{bid.ttl}</TableCell>
-                  </TableRow>
-                )}
-                {bid.adserverTargeting && (
-                  <TableRow>
-                    <TableCell>Adserver Targeting</TableCell>
-                    <TableCell>
-                      <Stack direction="column" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                        {bid.adserverTargeting &&
-                          Object.keys(bid.adserverTargeting).map((key) => (
-                            <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '300px' }} />
-                          ))}
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                )}
+                <TableBody>
+                  {bid.mediaType && (
+                    <TableRow>
+                      <TableCell>Media Type</TableCell>
+                      <TableCell>{bid.mediaType}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.bidder && (
+                    <TableRow>
+                      <TableCell>Bidder</TableCell>
+                      <TableCell>
+                        {open}
+                        {bid.bidder}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {bid.params && (
+                    <TableRow>
+                      <TableCell>Params</TableCell>
+                      <TableCell>
+                        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                          {bid.params &&
+                            Object.keys(bid.params).map((key) => (
+                              <Chip
+                                key={key}
+                                label={key + ': ' + JSON.stringify(bid.params[key])}
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                                sx={{ maxWidth: '300px' }}
+                              />
+                            ))}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {bid.width & bid.height ? (
+                    <TableRow>
+                      <TableCell>Size</TableCell>
+                      <TableCell>
+                        {bid.width} x {bid.height}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    ''
+                  )}
+                  {bid.originalCpm && (
+                    <TableRow>
+                      <TableCell>Org. Cpm</TableCell>
+                      <TableCell>{Math.floor(bid.originalCpm * 100) / 100}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.originalCurrency && (
+                    <TableRow>
+                      <TableCell>Org. Currency</TableCell>
+                      <TableCell>{bid.originalCurrency}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.timeToRespond && (
+                    <TableRow>
+                      <TableCell>Time to Respond</TableCell>
+                      <TableCell>{bid.timeToRespond}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.statusMessage && (
+                    <TableRow>
+                      <TableCell>Status Message</TableCell>
+                      <TableCell>{bid.statusMessage}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.adUnitCode && (
+                    <TableRow>
+                      <TableCell>AdUnit Code</TableCell>
+                      <TableCell>{bid.adUnitCode}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.source && (
+                    <TableRow>
+                      <TableCell>Source</TableCell>
+                      <TableCell>{bid.source}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.ttl && (
+                    <TableRow>
+                      <TableCell>TTL</TableCell>
+                      <TableCell>{bid.ttl}</TableCell>
+                    </TableRow>
+                  )}
+                  {bid.adserverTargeting && (
+                    <TableRow>
+                      <TableCell>Adserver Targeting</TableCell>
+                      <TableCell>
+                        <Stack direction="column" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                          {bid.adserverTargeting &&
+                            Object.keys(bid.adserverTargeting).map((key) => (
+                              <Chip key={key} label={key + ': ' + bid.adserverTargeting[key]} size="small" sx={{ maxWidth: '300px' }} />
+                            ))}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
               </Table>
             </Paper>
           </Collapse>
