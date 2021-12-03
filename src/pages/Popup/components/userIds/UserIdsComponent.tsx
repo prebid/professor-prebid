@@ -53,11 +53,13 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           </Typography>
           <TableContainer>
             <Table sx={{ maxWidth: '100%' }}>
-              <TableRow>
-                <TableCell>Source</TableCell>
-                <TableCell>User ID</TableCell>
-                <TableCell>Atype</TableCell>
-              </TableRow>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Source</TableCell>
+                  <TableCell>User ID</TableCell>
+                  <TableCell>Atype</TableCell>
+                </TableRow>
+              </TableHead>
               <TableBody>
                 {prebid.eids?.map((eid) =>
                   eid.uids.map((uid, index) => (
