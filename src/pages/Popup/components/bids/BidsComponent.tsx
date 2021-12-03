@@ -53,7 +53,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     color: theme.palette.common.black,
     margin: 0,
     padding: 0,
-    textAlign: 'left',
+    textAlign: 'center',
   },
 }));
 
@@ -76,13 +76,13 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </StyledTableCell>
-        <StyledTableCell>{bid.bidder}</StyledTableCell>
-        <StyledTableCell>{bid.width}</StyledTableCell>
-        <StyledTableCell>{bid.height}</StyledTableCell>
-        <StyledTableCell>{bid.cpm ? Math.floor(bid.cpm * 100) / 100 : bid.cpm}</StyledTableCell>
-        <StyledTableCell>{bid.currency}</StyledTableCell>
-        <StyledTableCell>{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</StyledTableCell>
-        <StyledTableCell>{bid.size}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.bidder}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.width}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.height}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.cpm ? Math.floor(bid.cpm * 100) / 100 : bid.cpm}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.currency}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</StyledTableCell>
+        <StyledTableCell variant="body">{bid.size}</StyledTableCell>
       </StyledTableRow>
       <TableRow sx={{ backgroundColor: '#87CEEB' }}>
         <TableCell colSpan={8}>
@@ -234,13 +234,13 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                       <AppsIcon />
                     </IconButton>
                   </TableCell>
-                  <TableCell>Bidder Code</TableCell>
-                  <TableCell>Width</TableCell>
-                  <TableCell>Height</TableCell>
-                  <TableCell>Cpm</TableCell>
-                  <TableCell>Currency</TableCell>
-                  <TableCell>AdUnit Code</TableCell>
-                  <TableCell>Size</TableCell>
+                  <TableCell variant="head">Bidder Code</TableCell>
+                  <TableCell variant="head">Width</TableCell>
+                  <TableCell variant="head">Height</TableCell>
+                  <TableCell variant="head">Cpm</TableCell>
+                  <TableCell variant="head">Currency</TableCell>
+                  <TableCell variant="head">AdUnit Code</TableCell>
+                  <TableCell variant="head">Size</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -257,7 +257,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <IconButton size="small">
+                    <IconButton  onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
                       <AppsIcon />
                     </IconButton>
                   </TableCell>
@@ -279,7 +279,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <IconButton size="small">
+                    <IconButton  onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
                       <AppsIcon />
                     </IconButton>
                   </TableCell>
