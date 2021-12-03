@@ -105,11 +105,11 @@ const Row = ({ bid }: IRowComponentProps) => {
                   <TableRow>
                     <TableCell>Params</TableCell>
                     <TableCell>
-                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                        {bid.params &&
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>       
+                      {bid.params &&
                           Object.keys(bid.params).map((key) => (
-                            <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} color="primary" variant="outlined" size="small" />
-                          ))}
+                            <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} color="primary" variant="outlined" size="small" sx={{ maxWidth: '300px' }}/>
+                          ))}       
                       </Stack>
                     </TableCell>
                   </TableRow>
@@ -210,7 +210,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Received Bids" {...a11yProps(0)} />
             <Tab label="No Bids" {...a11yProps(1)} />
-            <Tab label="Auction focus" {...a11yProps(2)} />
+            {/* <Tab label="Auction focus" {...a11yProps(2)} /> */}
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>

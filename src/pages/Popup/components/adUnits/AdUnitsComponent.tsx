@@ -64,7 +64,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Grid>
             <Grid item>
               <StyledPaper elevation={paperElevation}>
-                <StyledTypography>AdUnits Detected: {allAdUnits.length}</StyledTypography>
+                <StyledTypography>AdUnits: {allAdUnits.length}</StyledTypography>
               </StyledPaper>
             </Grid>
             <Grid item>
