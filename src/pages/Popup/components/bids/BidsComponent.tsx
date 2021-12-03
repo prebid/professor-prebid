@@ -100,7 +100,6 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
                     <TableRow>
                       <TableCell>Bidder</TableCell>
                       <TableCell>
-                        {open}
                         {bid.bidder}
                       </TableCell>
                     </TableRow>
@@ -125,15 +124,13 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
                       </TableCell>
                     </TableRow>
                   )}
-                  {bid.width & bid.height ? (
+                  {bid.width && bid.height && (
                     <TableRow>
                       <TableCell>Size</TableCell>
                       <TableCell>
                         {bid.width} x {bid.height}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    ''
                   )}
                   {bid.originalCpm && (
                     <TableRow>

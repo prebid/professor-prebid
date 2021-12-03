@@ -9,6 +9,7 @@ import logger from '../../../../../logger';
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
+import { TableBody } from '@mui/material';
 
 const inject = (code: string, callback: (result: any) => void) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
@@ -60,24 +61,26 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
       }}
     >
       <Table>
-        <TableRow>
-          <TableCell>
-            <FormControlLabel
-              control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
-              label="Enable Debugging"
-            />
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>
-            {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-          </TableCell>
-        </TableRow>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <FormControlLabel
+                control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
+                label="Enable Debugging"
+              />
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+            </TableCell>
+          </TableRow>
+        </TableBody>
       </Table>
     </Box>
   );
