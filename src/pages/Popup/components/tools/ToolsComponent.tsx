@@ -37,29 +37,21 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
-    <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: '5%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Paper
-        elevation={5}
-        sx={{
-          margin: '2% 2% 2% 2%',
-          borderRadius: 2,
-          textAlign: 'center',
-          minWidth: '0%'
-        }}
-      >
+    <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: 1, display: 'flex', justifyContent: 'center' }}>
+      <Paper elevation={5} sx={{ m: 1, borderRadius: 2, textAlign: 'center', minWidth: 1 }}>
         <Table>
-        <TableRow>
-            <TableCell align='center'>{prebid && <DebugComponent prebid={prebid} />}</TableCell>
+          <TableRow>
+            <TableCell align="center">{prebid && <DebugComponent prebid={prebid} />}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='center'>
+            <TableCell align="center">
               <Button variant="outlined" size="medium" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
                 open google AdManager console
               </Button>
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='center'>
+            <TableCell align="center">
               <FormControlLabel
                 control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />}
                 label="Show AdUnit Info Overlay"

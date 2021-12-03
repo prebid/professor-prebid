@@ -15,14 +15,14 @@ import logger from '../../../../logger';
 const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
   logger.log(`[PopUp][UserIdsComponent]: render `);
   return (
-    <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: '5%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Paper
         elevation={5}
         sx={{
-          margin: '2% 2% 2% 2%',
+          m: 1,
           borderRadius: 2,
           textAlign: 'center',
-          minWidth: '0%',
+          minWidth: 100,
         }}
       >
         {prebid.eids && prebid.eids[0] && (
@@ -32,11 +32,11 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
         )}
         <TableContainer>
           <Table sx={{ maxWidth: '100%' }}>
-              <TableRow>
-                <TableCell>Source</TableCell>
-                <TableCell>User ID</TableCell>
-                <TableCell>Atype</TableCell>
-              </TableRow>
+            <TableRow>
+              <TableCell>Source</TableCell>
+              <TableCell>User ID</TableCell>
+              <TableCell>Atype</TableCell>
+            </TableRow>
             <TableBody>
               {prebid.eids?.map((eid) =>
                 eid.uids.map((uid, index) => (
@@ -54,7 +54,9 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
         </TableContainer>
         <br />
         {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
-          <Typography variant='subtitle1' sx={{ padding: '2%' }}>Config</Typography>
+          <Typography variant="subtitle1" sx={{ padding: '2%' }}>
+            Config
+          </Typography>
         )}
         <TableContainer>
           <Table>
