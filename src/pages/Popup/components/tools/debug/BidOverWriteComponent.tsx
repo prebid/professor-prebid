@@ -77,7 +77,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
         width: 1,
       }}
     >
-      <Box sx={{ width: 0.2 }}>
+      <Box sx={{ width: 0.1 }}>
         <FormControl>
           <FormControlLabel label="" control={<Switch checked={bidsFilterEnabled} onChange={handleBidsFilterEnabledChange} />} />
         </FormControl>
@@ -89,10 +89,11 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
           flexDirection: 'row',
           flexWrap: 'nowrap',
           justifyContent: 'space-between',
-          width: 0.8,
+          width: 0.9,
+          columnGap: 0.5,
         }}
       >
-        <FormControl sx={{ width: 0.4, maxWidth: 0.5 }}>
+        <FormControl sx={{ width: 0.1, maxWidth: 0.1 }}>
           <Box component="form" noValidate autoComplete="off" sx={{ width: 1 }}>
             <TextField
               type="number"
@@ -106,7 +107,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
           </Box>
         </FormControl>
 
-        <FormControl sx={{ width: 0.88, maxWidth: 0.88 }}>
+        <FormControl sx={{ width: 0.9, maxWidth: 0.9 }}>
           <InputLabel>Select Bidder(s)</InputLabel>
           <Select
             multiple

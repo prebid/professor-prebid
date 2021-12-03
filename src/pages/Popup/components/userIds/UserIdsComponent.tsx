@@ -58,7 +58,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
             Config
           </Typography>
         )}
-        <TableContainer>
+        {/* <TableContainer>
           <Table>
             <TableBody>
               {prebid.config?.userSync?.userIds?.map((userId, index) => (
@@ -86,6 +86,46 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                       collapseStringsAfterLength={100}
                       style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
                     />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer> */}
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Storage Type</TableCell>
+                <TableCell>Storage Expires</TableCell>
+                <TableCell>Storage Name</TableCell>
+                <TableCell>Params</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {prebid.config?.userSync?.userIds?.map((userId, index) => (
+                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                  <TableCell>
+                    <strong>{userId.name}</strong>
+                  </TableCell>
+                  <TableCell>{userId.storage?.type}</TableCell>
+                  <TableCell>{userId.storage?.expires}</TableCell>
+                  <TableCell>{userId.storage?.name}</TableCell>
+                  <TableCell>
+                    {JSON.stringify(userId.params) !== "{}" && <ReactJson
+                      src={userId.params}
+                      name={false}
+                      collapsed={2}
+                      enableClipboard={false}
+                      displayObjectSize={false}
+                      displayDataTypes={false}
+                      sortKeys={false}
+                      quotesOnKeys={false}
+                      indentWidth={2}
+                      collapseStringsAfterLength={100}
+                      style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                    />}
                   </TableCell>
                 </TableRow>
               ))}
