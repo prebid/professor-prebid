@@ -22,7 +22,7 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
       {prebid.config.s2sConfig && <Server2ServerComponent prebid={prebid}></Server2ServerComponent>}
       {prebid?.config?.consentManagement && tcf && <PrivacyComponent prebid={prebid} tcf={tcf}></PrivacyComponent>}
       {/* {prebid?.config?.consentManagement?.gdpr && <ConsentModulesGdprComponent prebid={prebid}></ConsentModulesGdprComponent>} */}
-      {prebid.config?.userSync?.userIds[0] && <UserIdModule prebid={prebid}></UserIdModule>}
+      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <UserIdModule prebid={prebid}></UserIdModule>}
       {/* {prebid.config && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>} */}
     </Grid>
   );
