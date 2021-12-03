@@ -78,16 +78,20 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           {(() => {
-            if (['auto', 'dense', 'custom', 'medium'].includes(prebid.config.priceGranularity)) {
+            if (['auto', 'dense', 'custom', 'medium', 'high'].includes(prebid.config.priceGranularity)) {
               return (
                 <CardContent>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
                     <strong>Min: </strong> {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].min}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     <strong>Max: </strong> {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].max}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">
                     <strong>Precision: </strong>
-                    {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].precision}
+                    {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].precision || 2}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     <strong>Increment: </strong>{' '}
                     {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].increment}
                   </Typography>
@@ -106,7 +110,6 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
             }
           })()}
         </Collapse>
-        <CardActions disableSpacing></CardActions>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <PriceGranularityComponent prebid={prebid}></PriceGranularityComponent>

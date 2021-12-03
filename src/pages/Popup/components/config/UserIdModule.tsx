@@ -96,7 +96,7 @@ const UserIdModuleComponent = ({ prebid }: UserIdModuleComponentProps): JSX.Elem
             </CardContent>
           )}
           {prebid.config.userSync.userIds.length > 1 && (
-            <CardContent sx={{ paddingTop: 0, paddingBottom: 0 }}>
+            <CardContent>
               {prebid.config?.userSync?.userIds?.map((userId, index) => (
                 <Typography variant="body2" color="text.secondary" key={index}>
                   <strong>#{index}: </strong> {userId.name}
