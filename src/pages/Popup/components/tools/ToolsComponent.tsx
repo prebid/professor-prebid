@@ -10,6 +10,10 @@ import React, { useEffect, useState } from 'react';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import logger from '../../../../logger';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableCell from '@mui/material/TableCell';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = () => {
@@ -33,14 +37,37 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
-    <Box sx={{ m: 1 }}>
-      <Button variant="outlined" size="small" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
-        open google AdManager console
-      </Button>
-      <FormGroup>
-        <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="Show AdUnit Info Overlay" />
-      </FormGroup>
-      {prebid && <DebugComponent prebid={prebid} />}
+    <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: '5%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Paper
+        elevation={5}
+        sx={{
+          margin: '2% 2% 2% 2%',
+          borderRadius: 2,
+          textAlign: 'center',
+          minWidth: '0%'
+        }}
+      >
+        <Table>
+        <TableRow>
+            <TableCell align='center'>{prebid && <DebugComponent prebid={prebid} />}</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell align='center'>
+              <Button variant="outlined" size="medium" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
+                open google AdManager console
+              </Button>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell align='center'>
+              <FormControlLabel
+                control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />}
+                label="Show AdUnit Info Overlay"
+              />
+            </TableCell>
+          </TableRow>
+        </Table>
+      </Paper>
     </Box>
   );
 };

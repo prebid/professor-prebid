@@ -79,7 +79,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
     >
       <Box sx={{ width: 0.2 }}>
         <FormControl>
-          <FormControlLabel label="Overwrite CPM" control={<Switch checked={bidsFilterEnabled} onChange={handleBidsFilterEnabledChange} />} />
+          <FormControlLabel label="" control={<Switch checked={bidsFilterEnabled} onChange={handleBidsFilterEnabledChange} />} />
         </FormControl>
       </Box>
 
@@ -92,7 +92,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
           width: 0.8,
         }}
       >
-        <FormControl sx={{ width: 0.11, maxWidth: 0.11 }}>
+        <FormControl sx={{ width: 0.4, maxWidth: 0.5 }}>
           <Box component="form" noValidate autoComplete="off" sx={{ width: 1 }}>
             <TextField
               type="number"

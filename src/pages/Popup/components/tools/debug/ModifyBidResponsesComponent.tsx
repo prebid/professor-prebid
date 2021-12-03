@@ -5,8 +5,10 @@ import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
 import logger from '../../../../../logger';
+import Table from '@mui/material/Table';
+import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
 
 const inject = (code: string, callback: (result: any) => void) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
@@ -52,19 +54,31 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
         flexDirection: 'column',
         flexWrap: 'nowrap',
         justifyContent: 'flexStart',
-        alignItems: 'start',
+        alignItems: 'center',
         alignContent: 'center',
         rowGap: 2,
       }}
     >
-      <FormControlLabel
-        control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
-        label="Enable Debugging"
-      />
-      <Divider sx={{ color: 'rgba(0, 0, 0, 0.38)' }}>Modify Bid-Responses</Divider>
-      {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-
-      {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+      <Table>
+        <TableRow>
+          <TableCell>
+            <FormControlLabel
+              control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
+              label="Enable Debugging"
+            />
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+        {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+        </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>
+        {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+        </TableCell>
+        </TableRow>
+      </Table>
     </Box>
   );
 };

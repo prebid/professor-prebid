@@ -68,8 +68,8 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
         width: 1,
       }}
     >
-      <FormControl sx={{ width: 0.2 }}>
-        <FormControlLabel label="Filter Bidders" control={<Switch checked={bidderFilterEnabled} onChange={handleBidderFilterEnabledChange} />} />
+      <FormControl>
+        <FormControlLabel label="" control={<Switch checked={bidderFilterEnabled} onChange={handleBidderFilterEnabledChange} />} />
       </FormControl>
 
       <FormControl
@@ -78,7 +78,8 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
           flexDirection: 'row',
           flexWrap: 'nowrap',
           justifyContent: 'space-between',
-          width: 0.8,
+          width: 1,
+          maxWidth: 1
         }}
       >
         <InputLabel>Filter Bidder(s)</InputLabel>
