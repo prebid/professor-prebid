@@ -45,7 +45,7 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
             </Avatar>
           }
           title="Bidder Settings"
-          subheader={''}
+          subheader={'Timeout, ...'}
           action={
             <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
