@@ -11,6 +11,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
+import { tileHeight } from './ConfigComponent';
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
@@ -34,7 +35,7 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
   logger.log(`[PopUp][AnalyticsComponent]: render `);
   return (
     <Grid item xs={maxWidth}>
-      <Card sx={{ width: 1, minHeight: 195, border: '1px solid #0e86d4' }}>
+      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">

@@ -14,6 +14,7 @@ import { styled } from '@mui/styles';
 import DnsIcon from '@mui/icons-material/Dns';
 import ReactJson from 'react-json-view';
 import Grid from '@mui/material/Grid';
+import { tileHeight } from './ConfigComponent';
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -39,7 +40,7 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
   logger.log(`[PopUp][Server2ServerComponent]: render `, prebid.config.s2sConfig);
   return (
     <Grid item xs={maxWidth}>
-      <Card sx={{ width: 1, minHeight: 195, border: '1px solid #0e86d4' }}>
+      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: '#0e86d4' }}>
