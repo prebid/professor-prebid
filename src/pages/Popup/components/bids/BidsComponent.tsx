@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidBid } from '../../../../inject/scripts/prebid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -63,8 +63,11 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const Row = ({ bid }: IRowComponentProps) => {
+const Row = ({ bid, globalOpen }: IRowComponentProps) => {
   const [open, setOpen] = React.useState(false);
+  useEffect(() => {
+    setOpen(globalOpen);
+  }, [globalOpen]);
   return (
     <React.Fragment>
       <StyledTableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -197,6 +200,7 @@ const Row = ({ bid }: IRowComponentProps) => {
 
 const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   const [value, setValue] = React.useState(0);
+  const [globalOpen, setGlobalOpen] = React.useState(false);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -226,7 +230,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <IconButton size="small">
+                    <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
                       <AppsIcon />
                     </IconButton>
                   </TableCell>
@@ -241,7 +245,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               </TableHead>
               <TableBody>
                 {bidsReceived.map((bid, index) => (
-                  <Row key={index} bid={bid} />
+                  <Row key={index} bid={bid} globalOpen={globalOpen} />
                 ))}
               </TableBody>
             </Table>
@@ -263,7 +267,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               </TableHead>
               <TableBody>
                 {noBids.map((bid, index) => (
-                  <Row key={index} bid={bid} />
+                  <Row key={index} bid={bid} globalOpen={globalOpen} />
                 ))}
               </TableBody>
             </Table>
@@ -290,7 +294,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               </TableHead>
               <TableBody>
                 {bidsReceived.map((bid, index) => (
-                  <Row key={index} bid={bid} />
+                  <Row key={index} bid={bid} globalOpen={globalOpen} />
                 ))}
               </TableBody>
             </Table>
@@ -307,6 +311,7 @@ interface IBidsComponentProps {
 
 interface IRowComponentProps {
   bid: IPrebidBid;
+  globalOpen: boolean;
 }
 
 export default BidsComponent;
