@@ -79,11 +79,11 @@ const TcfComponent = ({ tcf, tcfKey }: any): JSX.Element => {
 
 const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
-  const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
+  const [maxWidth, setMaxWidth] = React.useState<8 | 12>(8);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    setMaxWidth(expanded ? 4 : 12);
+    setMaxWidth(expanded ? 8 : 12);
   };
   logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
   return (
@@ -103,29 +103,32 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
             </ExpandMore>
           }
         />
-
-        <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            <strong>Allow Auction Without Consent: </strong>
-            {JSON.stringify(prebid.config.consentManagement?.allowAuctionWithoutConsent)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong>CMP api:</strong>
-            {prebid.config.consentManagement.cmpApi ? prebid.config.consentManagement?.cmpApi : prebid.config.consentManagement.gdpr?.cmpApi}
-          </Typography>
-        </CardContent>
+        <Collapse in={!expanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Allow Auction Without Consent: </strong>
+              {prebid.config.consentManagement?.allowAuctionWithoutConsent ? 'true' : 'false'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>CMP Api: </strong>
+              {prebid.config.consentManagement.cmpApi ? prebid.config.consentManagement?.cmpApi : prebid.config.consentManagement.gdpr?.cmpApi}
+            </Typography>
+          </CardContent>
+        </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <Typography variant="body2" color="text.secondary">
-              <strong>Default GDPR Scope:</strong>
-              {JSON.stringify(
+              <strong>Default GDPR Scope: </strong>
+              {(
                 prebid.config.consentManagement.defaultGdprScope
                   ? prebid.config.consentManagement.defaultGdprScope
                   : prebid.config.consentManagement.gdpr?.defaultGdprScope
-              )}
+              )
+                ? 'true'
+                : 'false'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong>Timeout:</strong>
+              <strong>Timeout: </strong>
               {prebid.config.consentManagement.timeout ? prebid.config.consentManagement.timeout : prebid.config.consentManagement.gdpr?.timeout}
             </Typography>
             {Object.keys(tcf).map((key, index) => (

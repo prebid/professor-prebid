@@ -52,25 +52,42 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
             </ExpandMore>
           }
         />
-        <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            <strong> Bidder Sequence: </strong>
-            {prebid?.config?.bidderSequence}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong> Bidder Timeout: </strong>
-            {prebid?.config?.bidderTimeout}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong> Send All Bids:</strong> {String(prebid?.config?.enableSendAllBids)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong> Timeout Buffer: </strong>
-            {prebid?.config?.timeoutBuffer}
-          </Typography>
-        </CardContent>
+        <Collapse in={!expanded} timeout="auto" unmountOnExit>
+          <CardContent>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Bidder Sequence: </strong>
+              {prebid?.config?.bidderSequence}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Bidder Timeout: </strong>
+              {prebid?.config?.bidderTimeout}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Send All Bids:</strong> {String(prebid?.config?.enableSendAllBids)}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Timeout Buffer: </strong>
+              {prebid?.config?.timeoutBuffer}
+            </Typography>
+          </CardContent>
+        </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Bidder Sequence: </strong>
+              {prebid?.config?.bidderSequence}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Bidder Timeout: </strong>
+              {prebid?.config?.bidderTimeout}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Send All Bids:</strong> {String(prebid?.config?.enableSendAllBids)}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong> Timeout Buffer: </strong>
+              {prebid?.config?.timeoutBuffer}
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong> Max Nested Iframes:</strong> {prebid?.config?.maxNestedIframes}
             </Typography>

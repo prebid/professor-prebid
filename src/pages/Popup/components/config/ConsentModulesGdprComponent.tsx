@@ -16,6 +16,8 @@ import { styled } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 
+// should be subcomponent of ConsentManagementComponent
+
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }

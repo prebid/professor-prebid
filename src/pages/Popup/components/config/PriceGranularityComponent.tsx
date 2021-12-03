@@ -150,7 +150,7 @@ export const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponent
                 {type} #{index + 1}
               </TableCell>
               <TableCell align="left" sx={{ width: '15%' }}>
-                {row.precision}
+                {row.precision || 2}
               </TableCell>
               <TableCell align="left" sx={{ width: '15%' }}>
                 {row.min}
