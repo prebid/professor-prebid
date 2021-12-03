@@ -69,7 +69,7 @@ const useStyles = makeStyles({
       width: 0,
       height: '10px',
       opacity: 1,
-      transition: ' all 0.25s linear 0.2s',
+      transition: 'none',
       '& div': {
         marginLeft: '10px',
       },
@@ -86,16 +86,16 @@ const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject
   return nearestGridBar;
 };
 
-const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (
-  event: IPrebidBidRequestedEventData | IPrebidAuctionEndEventData | IPrebidBidResponseEventData | IPrebidNoBidEventData
-) => {
-  return (
-    event.eventType === eventType &&
-    event.args.auctionId === bidderRequest.auctionId &&
-    ((event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode ||
-      (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode)
-  );
-};
+const findEvent =
+  (bidderRequest: IPrebidBidderRequest, eventType: string) =>
+  (event: IPrebidBidRequestedEventData | IPrebidAuctionEndEventData | IPrebidBidResponseEventData | IPrebidNoBidEventData) => {
+    return (
+      event.eventType === eventType &&
+      event.args.auctionId === bidderRequest.auctionId &&
+      ((event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode ||
+        (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode)
+    );
+  };
 
 const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
   const prebidEvents = prebid.events || [];
