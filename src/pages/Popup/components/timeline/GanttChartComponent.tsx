@@ -131,9 +131,9 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
   return (
     <Card elevation={20} sx={{ width: 1, maxWidth: 1 }}>
       <CardContent>
-      <Box sx={{ display: 'flex' }} alignItems="center" justifyContent="center">
-      <Typography variant="overline">Auction ID: {auctionEndEvent.args.auctionId}</Typography>
-      </Box>      
+        <Box sx={{ display: 'flex' }} alignItems="center" justifyContent="center">
+          <Typography variant="overline">Auction ID: {auctionEndEvent.args.auctionId}</Typography>
+        </Box>
         <Box
           sx={{
             color: 'rgb(25, 118, 210) ',
@@ -142,9 +142,15 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
             justifyContent: 'space-around',
           }}
         >
-          <Typography sx={{ color: '#000'}} variant="button">Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}</Typography>
-          <Typography sx={{ color: '#000'}} variant="button">Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}</Typography>
-          <Typography sx={{ color: '#000'}} variant="button">Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()} </Typography>
+          <Typography sx={{ color: '#000' }} variant="button">
+            Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}
+          </Typography>
+          <Typography sx={{ color: '#000' }} variant="button">
+            Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp}
+          </Typography>
+          <Typography sx={{ color: '#000' }} variant="button">
+            Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()}{' '}
+          </Typography>
         </Box>
         <Box className={classes.root} onClick={() => setExpanded(!expanded)}>
           <List className="chart-values" ref={gridRef} dense={true}>

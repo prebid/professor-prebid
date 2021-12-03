@@ -92,7 +92,6 @@ export const Popup = (): JSX.Element => {
 
   logger.log(`[PopUp]: render `, tcf, prebid, googleAdManager);
 
-
   return (
     <Box
       className="popup"
@@ -100,7 +99,7 @@ export const Popup = (): JSX.Element => {
         height: '600px',
         width: '780px',
         overflowX: 'scroll',
-        backgroundColor: '#FFF',
+        backgroundColor: '#87CEEB',
         opacity: [0.9, 0.8, 0.7],
       }}
     >
@@ -131,32 +130,62 @@ export const Popup = (): JSX.Element => {
             <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
               <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width="14%" />
               <StyledLink to="/">
-                <StyledButton size="small" variant={isActive === "/" ? 'contained' : 'outlined'} onClick={() => setActive('/')} startIcon={<AdUnitsOutlinedIcon />}>
+                <StyledButton
+                  size="small"
+                  variant={isActive === '/' ? 'contained' : 'outlined'}
+                  onClick={() => setActive('/')}
+                  startIcon={<AdUnitsOutlinedIcon />}
+                >
                   AdUnits
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/bids">
-                <StyledButton size="small" variant={isActive === "/bids" ? 'contained' : 'outlined'} onClick={() => setActive('/bids')} startIcon={<AccountBalanceOutlinedIcon />}>
+                <StyledButton
+                  size="small"
+                  variant={isActive === '/bids' ? 'contained' : 'outlined'}
+                  onClick={() => setActive('/bids')}
+                  startIcon={<AccountBalanceOutlinedIcon />}
+                >
                   Bids
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/timeline">
-                <StyledButton size="small" variant={isActive === "/timeline" ? 'contained' : 'outlined'} onClick={() => setActive('/timeline')} startIcon={<TimelineOutlinedIcon />}>
+                <StyledButton
+                  size="small"
+                  variant={isActive === '/timeline' ? 'contained' : 'outlined'}
+                  onClick={() => setActive('/timeline')}
+                  startIcon={<TimelineOutlinedIcon />}
+                >
                   Timeline
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/config">
-                <StyledButton size="small" variant={isActive === "/config" ? 'contained' : 'outlined'} onClick={() => setActive('/config')} startIcon={<SettingsOutlinedIcon />}>
+                <StyledButton
+                  size="small"
+                  variant={isActive === '/config' ? 'contained' : 'outlined'}
+                  onClick={() => setActive('/config')}
+                  startIcon={<SettingsOutlinedIcon />}
+                >
                   Config
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/userId">
-                <StyledButton size="small" variant={isActive === "/userId" ? 'contained' : 'outlined'} onClick={() => setActive('/userId')} startIcon={<ContactPageOutlinedIcon />}>
+                <StyledButton
+                  size="small"
+                  variant={isActive === '/userId' ? 'contained' : 'outlined'}
+                  onClick={() => setActive('/userId')}
+                  startIcon={<ContactPageOutlinedIcon />}
+                >
                   UserID
                 </StyledButton>
               </StyledLink>
               <StyledLink to="/tools">
-                <StyledButton size="small" variant={isActive === "/tools" ? 'contained' : 'outlined'} onClick={() => setActive('/tools')} startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/>
+                <StyledButton
+                  size="small"
+                  variant={isActive === '/tools' ? 'contained' : 'outlined'}
+                  onClick={() => setActive('/tools')}
+                  startIcon={<DnsOutlinedIcon />} /*onClick={dfp_open_console}*/
+                >
                   Tools
                 </StyledButton>
               </StyledLink>

@@ -105,11 +105,18 @@ const Row = ({ bid }: IRowComponentProps) => {
                   <TableRow>
                     <TableCell>Params</TableCell>
                     <TableCell>
-                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>       
-                      {bid.params &&
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                        {bid.params &&
                           Object.keys(bid.params).map((key) => (
-                            <Chip key={key} label={key + ': ' + JSON.stringify(bid.params[key])} color="primary" variant="outlined" size="small" sx={{ maxWidth: '300px' }}/>
-                          ))}       
+                            <Chip
+                              key={key}
+                              label={key + ': ' + JSON.stringify(bid.params[key])}
+                              color="primary"
+                              variant="outlined"
+                              size="small"
+                              sx={{ maxWidth: '300px' }}
+                            />
+                          ))}
                       </Stack>
                     </TableCell>
                   </TableRow>

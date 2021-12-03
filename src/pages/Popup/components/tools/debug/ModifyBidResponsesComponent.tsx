@@ -70,13 +70,13 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
         </TableRow>
         <TableRow>
           <TableCell>
-        {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-        </TableCell>
+            {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell>
-        {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-        </TableCell>
+            {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
+          </TableCell>
         </TableRow>
       </Table>
     </Box>
