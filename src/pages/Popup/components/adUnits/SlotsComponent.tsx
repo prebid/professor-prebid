@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 import logger from '../../../../logger';
+import merge from 'lodash/merge';
 
 const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip }: any): JSX.Element => {
   let json: { [key: string]: any } = {};
@@ -120,11 +121,24 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
 };
 
 const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
-  const adUnits = prebid.events
-    .filter((event) => event.eventType === 'auctionEnd')
-    .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
-    .flat()
-    .sort((a, b) => (a.code > b.code ? 1 : -1));
+  const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
+  useEffect(() => {
+    const adUnits = prebid.events
+      .filter((event) => event.eventType === 'auctionEnd')
+      .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
+      .flat()
+      .reduce((previousValue, currentValue) => {
+        const toBeUpdatedIndex = previousValue.findIndex((adUnit) => adUnit.code === currentValue.code);
+        if (toBeUpdatedIndex !== -1) {
+          previousValue[toBeUpdatedIndex] = merge(previousValue[toBeUpdatedIndex], currentValue);
+          return previousValue;
+        } else {
+          return [...previousValue, currentValue];
+        }
+      }, [] as IPrebidAdUnit[])
+      .sort((a, b) => (a.code > b.code ? 1 : -1));
+    setAdUnits(adUnits);
+  }, [prebid.events]);
   logger.log(`[PopUp][SlotComponent]: render `, adUnits);
   return (
     <TableContainer>
