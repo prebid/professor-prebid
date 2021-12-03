@@ -225,9 +225,11 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <IconButton size="small">
-                    <AppsIcon />
-                  </IconButton>
+                  <TableCell>
+                    <IconButton size="small">
+                      <AppsIcon />
+                    </IconButton>
+                  </TableCell>
                   <TableCell>Bidder Code</TableCell>
                   <TableCell>Width</TableCell>
                   <TableCell>Height</TableCell>
@@ -250,9 +252,11 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <IconButton size="small">
-                    <AppsIcon />
-                  </IconButton>
+                  <TableCell>
+                    <IconButton size="small">
+                      <AppsIcon />
+                    </IconButton>
+                  </TableCell>
                   <TableCell>Bidder</TableCell>
                   <TableCell>AdUnit Code</TableCell>
                 </TableRow>
@@ -270,9 +274,11 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <IconButton size="small">
-                    <AppsIcon />
-                  </IconButton>
+                  <TableCell>
+                    <IconButton size="small">
+                      <AppsIcon />
+                    </IconButton>
+                  </TableCell>
                   <TableCell>Bidder Code</TableCell>
                   <TableCell>Width</TableCell>
                   <TableCell>Height</TableCell>
