@@ -46,8 +46,7 @@ export const Popup = (): JSX.Element => {
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   const [tcf, setTcfDetails] = useState<ITcfDetails>();
   const [prebid, setPrebidDetails] = useState<IPrebidDetails>();
-  const [isActive, setActive] = useState('/');
-
+  const [isActive, setActive] = useState(window.location.hash.replace('#', '') || '/');
   useEffect(() => {
     appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
       logger.log('[App] received Google AdManager Details from background', data);
