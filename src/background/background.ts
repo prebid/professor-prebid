@@ -22,7 +22,7 @@ class Background {
           }
         }
       });
-    }, 300000);
+    }, 3000);
   }
 
   updateBadge() {
@@ -86,6 +86,12 @@ class Background {
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received prebid details data:', payload);
+          payload.events.forEach((event: any) => {
+            delete event.args.ad;
+            event.args.bidsReceived?.forEach((bid: any) => {
+              delete bid.ad;
+            });
+          });
           this.tabInfo[tabId].prebid = { ...payload };
           this.updateBadge();
           this.updatePopUp(this.currentActiveTabId);
