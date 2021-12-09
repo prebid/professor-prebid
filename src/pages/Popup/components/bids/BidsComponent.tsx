@@ -19,6 +19,7 @@ import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Paper from '@mui/material/Paper';
+import ReactJson from 'react-json-view';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -77,8 +78,8 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
           </IconButton>
         </StyledTableCell>
         <StyledTableCell variant="body">{bid.bidder}</StyledTableCell>
-        <StyledTableCell variant="body">{bid.width}</StyledTableCell>
-        <StyledTableCell variant="body">{bid.height}</StyledTableCell>
+        {/* <StyledTableCell variant="body">{bid.width}</StyledTableCell> */}
+        {/* <StyledTableCell variant="body">{bid.height}</StyledTableCell> */}
         <StyledTableCell variant="body">{bid.cpm ? Math.floor(bid.cpm * 100) / 100 : bid.cpm}</StyledTableCell>
         <StyledTableCell variant="body">{bid.currency}</StyledTableCell>
         <StyledTableCell variant="body">{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</StyledTableCell>
@@ -99,28 +100,28 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
                   {bid.bidder && (
                     <TableRow>
                       <TableCell>Bidder</TableCell>
-                      <TableCell>
-                        {bid.bidder}
-                      </TableCell>
+                      <TableCell>{bid.bidder}</TableCell>
                     </TableRow>
                   )}
                   {bid.params && (
                     <TableRow>
                       <TableCell>Params</TableCell>
                       <TableCell>
-                        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                          {bid.params &&
-                            Object.keys(bid.params).map((key) => (
-                              <Chip
-                                key={key}
-                                label={key + ': ' + JSON.stringify(bid.params[key])}
-                                color="primary"
-                                variant="outlined"
-                                size="small"
-                                sx={{ maxWidth: '300px' }}
-                              />
-                            ))}
-                        </Stack>
+                        {bid.params && (
+                          <ReactJson
+                            src={bid.params}
+                            name={false}
+                            collapsed={false}
+                            enableClipboard={false}
+                            displayObjectSize={false}
+                            displayDataTypes={false}
+                            sortKeys={false}
+                            quotesOnKeys={false}
+                            indentWidth={2}
+                            collapseStringsAfterLength={100}
+                            style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   )}
@@ -170,7 +171,7 @@ const Row = ({ bid, globalOpen }: IRowComponentProps) => {
                   )}
                   {bid.ttl && (
                     <TableRow>
-                      <TableCell>TTL</TableCell>
+                      <TableCell>Bid Cache Period (seconds)</TableCell>
                       <TableCell>{bid.ttl}</TableCell>
                     </TableRow>
                   )}
@@ -234,8 +235,8 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                     </IconButton>
                   </TableCell>
                   <TableCell variant="head">Bidder Code</TableCell>
-                  <TableCell variant="head">Width</TableCell>
-                  <TableCell variant="head">Height</TableCell>
+                  {/* <TableCell variant="head">Width</TableCell> */}
+                  {/* <TableCell variant="head">Height</TableCell> */}
                   <TableCell variant="head">Cpm</TableCell>
                   <TableCell variant="head">Currency</TableCell>
                   <TableCell variant="head">AdUnit Code</TableCell>
@@ -256,7 +257,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <IconButton  onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
+                    <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
                       <AppsIcon />
                     </IconButton>
                   </TableCell>
@@ -278,7 +279,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <IconButton  onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
+                    <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
                       <AppsIcon />
                     </IconButton>
                   </TableCell>
