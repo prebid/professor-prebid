@@ -6,6 +6,8 @@ import TimeLineComponent from '../Popup/components/timeline/TimeLineComponent';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
+import BidsComponent from '../Popup/components/bids/BidsComponent';
+import ConfigComponent from '../Popup/components/config/ConfigComponent';
 import { appHandler } from './appHandler';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -24,18 +26,20 @@ const DebugComponent = () => {
       {debugData &&
         Object.keys(debugData)[0] &&
         Object.keys(debugData).map((key: any) => {
-          const { prebidDetails, tcfDetails, gamDetails } = debugData[key];
+          const { prebid, tcf, gam } = debugData[key];
 
           return (
             <Box key={key}>
               <Typography>Debug Data for Tab {key} </Typography>
               <Typography>Prebid Details</Typography>
-              {prebidDetails && <TimeLineComponent prebid={prebidDetails}></TimeLineComponent>}
-              {prebidDetails && <PrebidAdUnitsComponent prebid={prebidDetails}></PrebidAdUnitsComponent>}
+              {prebid && <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>}
+              {prebid && <BidsComponent prebid={prebid}></BidsComponent>}
+              {prebid && <TimeLineComponent prebid={prebid}></TimeLineComponent>}
+              {prebid?.config && <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>}
               <Typography>IAB TCF Details</Typography>
-              {tcfDetails && <UserIdsComponent prebid={prebidDetails}></UserIdsComponent>}
+              {prebid && <UserIdsComponent prebid={prebid}></UserIdsComponent>}
               <Typography>GAM Details</Typography>
-              {gamDetails && <GoogleAdManagerDetailsComponent googleAdManager={gamDetails}></GoogleAdManagerDetailsComponent>}
+              {gam && <GoogleAdManagerDetailsComponent googleAdManager={gam}></GoogleAdManagerDetailsComponent>}
             </Box>
           );
         })}
@@ -44,9 +48,9 @@ const DebugComponent = () => {
 };
 
 interface IDebugData {
-  prebidDetails: IPrebidDetails;
-  tcfDetails: ITcfDetails;
-  gamDetails: IGoogleAdManagerDetails;
+  prebid: IPrebidDetails;
+  tcf: ITcfDetails;
+  gam: IGoogleAdManagerDetails;
 }
 
 export default DebugComponent;
