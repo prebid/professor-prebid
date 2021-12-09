@@ -167,7 +167,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
               <StyledPaper elevation={paperElevation}>
-                <StyledTypography sx={{ fontSize: '18px', fontWeight: 'bold' }}>Prebid Adapter detected but no external User Ids</StyledTypography>
+                <StyledTypography sx={{ fontSize: '18px', fontWeight: 'bold' }}>No User IDs detected</StyledTypography>
               </StyledPaper>
             </Grid>
           </Grid>
