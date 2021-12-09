@@ -15,7 +15,7 @@ import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import { TableBody } from '@mui/material';
-
+import BugReportIcon from '@mui/icons-material/BugReport';
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -49,6 +49,9 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
               <TableCell align="center">
                 <Button variant="outlined" size="medium" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
                   open google AdManager console
+                </Button>
+                <Button variant="outlined" size="medium" onClick={popupHandler.openDebugTab} startIcon={<BugReportIcon />}>
+                  open debug tab
                 </Button>
               </TableCell>
             </TableRow>
