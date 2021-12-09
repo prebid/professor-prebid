@@ -19,6 +19,7 @@ import EuroSharpIcon from '@mui/icons-material/EuroSharp';
 import { styled } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
+import StraightenIcon from '@mui/icons-material/Straighten';
 
 const defaultBuckets: IDefaultBuckets = {
   low: [{ precision: 2, min: 0, max: 5, increment: 0.5 }],
@@ -63,7 +64,7 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
-              <EuroSharpIcon />
+              <StraightenIcon />
             </Avatar>
           }
           title="Price Granularity"
