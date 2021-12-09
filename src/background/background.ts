@@ -15,12 +15,14 @@ class Background {
         let activeTabIds = tabs.map((tab) => tab.id);
         for (let t in this.tabInfo) {
           if (activeTabIds.includes(parseInt(t))) {
+            logger.log(`[Background] Tab(${t}) is active' tabInfo has ~ ${Math.round(JSON.stringify(this.tabInfo[t]).length / (1000 * 1000))}mb`);
           } else {
+            logger.log(`[Background] Tab(${t}) is not active. Removing info...`);
             this.removeInfoForTabId(parseInt(t));
           }
         }
       });
-    }, 30000);
+    }, 300000);
   }
 
   updateBadge() {
