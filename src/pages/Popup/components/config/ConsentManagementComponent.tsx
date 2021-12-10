@@ -79,11 +79,11 @@ const TcfComponent = ({ tcf, tcfKey }: any): JSX.Element => {
 
 const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
-  const [maxWidth, setMaxWidth] = React.useState<8 | 12>(8);
+  const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    setMaxWidth(expanded ? 8 : 12);
+    setMaxWidth(expanded ? 4 : 12);
   };
   logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
   return (
@@ -106,7 +106,7 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <Typography variant="body2" color="text.secondary">
-              <strong>Allow Auction Without Consent: </strong>
+              <strong>Allow Auction Without Consent:</strong>
               {prebid.config.consentManagement?.allowAuctionWithoutConsent ? 'true' : 'false'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
