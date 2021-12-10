@@ -91,22 +91,26 @@ class Prebid {
       );
     };
     const truncateFields = (payload: IPrebidDetails) => {
-      payload.events.forEach((event: any) => {
-        delete event.args.ad;
-        delete event.args.gdprConsent;
-        delete event.args.vastXml;
-        delete event.args.userIdAsEids;
-        event.args.bids?.forEach((bid: any) => {
-          delete bid.userId;
-          delete bid.userIdsEids;
-        });
-        event.args.bidsReceived?.forEach((bid: any) => {
-          delete bid.ad;
-          delete bid.content;
-        });
+      const deleteFromBid = (bid: any) => {
+        delete bid.ad;
+        delete bid.content;
+        delete bid.gdprConsent;
+        delete bid.userId;
+        delete bid.userIdAsEids;
+        delete bid.vastXml;
+      };
+      payload.events.forEach((event: any) => {;
+        deleteFromBid(event.args);
+        event.args.bids?.forEach((bid: any) => deleteFromBid(bid));
+        event.args.bidsReceived?.forEach((bid: any) => deleteFromBid(bid));
         event.args.bidderRequests?.forEach((bidderRequest: any) => {
           delete bidderRequest.gdprConsent;
           delete bidderRequest.userId;
+          bidderRequest.bids?.forEach((bid: any) => deleteFromBid(bid));
+        });
+        
+        event.args.adUnits?.forEach((adUnit: any) => {
+          adUnit.bids?.forEach((bid: any) => deleteFromBid(bid));
         });
       });
       return payload;
