@@ -15,56 +15,45 @@ class Prebid {
   config: IPrebidConfig;
   eids: IPrebidEids[];
   stopLoop: boolean = false;
+  namespace: string;
 
-  init(): void {
-    setTimeout(() => {
-      this.stopLoop = true;
-    }, 8000);
-    this.loop();
-  }
-
-  loop(): void {
-    if (this.globalPbjs) {
-      this.globalPbjs.que.push(() => this.addEventListeners());
-      // this.globalPbjs.que.push(() => setInterval(() => this.sendDetailsToContentScript(), 1000));
-    } else if (!this.stopLoop) {
-      this.globalPbjs = this.isPrebidInPage();
-      requestIdleCallback(() => this.loop());
-      // setTimeout(() => this.loop(), 1000);
-    }
+  constructor(namespace: string) {
+    this.namespace = namespace;
+    this.globalPbjs = window[namespace as keyof Window];
+    this.globalPbjs.que.push(() => this.addEventListeners());
   }
 
   addEventListeners(): void {
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
-      logger.log('[Injected] auctionInit', { auctionInitData });
+      logger.log('[Injected] auctionInit', this.namespace, { auctionInitData });
       this.sendDetailsToContentScript();
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
-      logger.log('[Injected] auctionEnd', { auctionEndData });
+      logger.log('[Injected] auctionEnd', this.namespace, { auctionEndData });
       this.sendDetailsToContentScript();
     });
 
     this.globalPbjs.onEvent('bidRequested', (bidRequested: IPrebidBidRequestedEventData) => {
-      logger.log('[Injected] bidRequested', { bidRequested });
+      logger.log('[Injected] bidRequested', this.namespace, { bidRequested });
       this.sendDetailsToContentScript();
     });
 
     this.globalPbjs.onEvent('bidResponse', (bidRequested: IPrebidBidResponseEventData) => {
-      logger.log('[Injected] bidResponse', { bidRequested });
+      logger.log('[Injected] bidResponse', this.namespace, { bidRequested });
       this.sendDetailsToContentScript();
     });
 
     this.globalPbjs.onEvent('noBid', (noBid: IPrebidNoBidEventData) => {
-      logger.log('[Injected] noBid', { noBid });
+      logger.log('[Injected] noBid', this.namespace, { noBid });
       this.sendDetailsToContentScript();
     });
 
     this.globalPbjs.onEvent('bidWon', (bidWon: IPrebidBidWonEventData) => {
-      logger.log('[Injected] bidWon', { bidWon });
+      logger.log('[Injected] bidWon', this.namespace, { bidWon });
       this.sendDetailsToContentScript();
     });
-    logger.log('[Injected] event listeners added');
+    logger.log('[Injected] event listeners added', this.namespace);
   }
 
   isPrebidInPage() {
@@ -123,12 +112,34 @@ class Prebid {
       config: this.config,
       eids: this.eids,
       debug: this.getPbjsDebugConfig(),
+      namespace: this.namespace,
     };
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
   }
 }
 
-export const prebid = new Prebid();
+export const addEventListenersForPrebid = () => {
+  const allreadyInjectedPrebid: string[] = [];
+  let stopLoop = false;
+  setTimeout(() => {
+    stopLoop = true;
+  }, 8000);
+  const isPrebidInPage = () => {
+    const pbjsGlobals = window._pbjsGlobals || [];
+    if (pbjsGlobals.length > 0) {
+      pbjsGlobals.forEach((global) => {
+        if (!allreadyInjectedPrebid.includes(global)) {
+          new Prebid(global);
+          allreadyInjectedPrebid.push(global);
+        }
+      });
+    }
+    if (!stopLoop) {
+      setTimeout(() => isPrebidInPage(), 1);
+    }
+  };
+  isPrebidInPage();
+};
 
 export interface IPrebidBidParams {
   publisherId: string;
@@ -410,6 +421,7 @@ export interface IPrebidDetails {
   config: IPrebidConfig;
   eids: IPrebidEids[];
   debug: IPrebidDebugConfig;
+  namespace: string;
 }
 
 export interface IPrebidAuctionInitEventData {

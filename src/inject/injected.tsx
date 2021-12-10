@@ -9,11 +9,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import InjectedApp from './app/InjectedApp';
 import { googleAdManager } from './scripts/googleAdManager';
-import { prebid } from './scripts/prebid';
+import { addEventListenersForPrebid } from './scripts/prebid';
 import { iabTcf } from './scripts/tcf';
 
 googleAdManager.init();
-prebid.init();
+addEventListenersForPrebid();
 iabTcf.init();
 
 const injectApp = () => {
