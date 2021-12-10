@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidAdUnitMediaTypes, IPrebidAdUnit } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -120,65 +120,67 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
   );
 };
 
-const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
-  const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
-  useEffect(() => {
-    const adUnits = prebid.events
-      .filter((event) => event.eventType === 'auctionEnd')
-      .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
-      .flat()
-      .reduce((previousValue, currentValue) => {
-        const toBeUpdatedIndex = previousValue.findIndex((adUnit) => adUnit.code === currentValue.code);
-        if (toBeUpdatedIndex !== -1) {
-          previousValue[toBeUpdatedIndex] = merge(previousValue[toBeUpdatedIndex], currentValue);
-          return previousValue;
-        } else {
-          return [...previousValue, currentValue];
-        }
-      }, [] as IPrebidAdUnit[])
-      .sort((a, b) => (a.code > b.code ? 1 : -1));
-    setAdUnits(adUnits);
-  }, [prebid.events]);
-  logger.log(`[PopUp][SlotComponent]: render `, adUnits);
-  return (
-    <TableContainer>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell variant="head" sx={{ width: '33%' }}>
-              Code
-            </TableCell>
-            <TableCell variant="head" sx={{ width: '33%' }}>
-              Media Types
-            </TableCell>
-            <TableCell variant="head" sx={{ width: '34%' }}>
-              Bidders
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {adUnits.map((adUnit, index) => (
-            <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
-              <TableCell variant="body">
-                <strong>{adUnit.code}</strong>
+const SlotsComponent = memo(
+  ({ prebid }: ISlotsComponentProps): JSX.Element => {
+    const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
+    useEffect(() => {
+      const adUnits = prebid.events
+        .filter((event) => event.eventType === 'auctionEnd')
+        .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
+        .flat()
+        .reduce((previousValue, currentValue) => {
+          const toBeUpdatedIndex = previousValue.findIndex((adUnit) => adUnit.code === currentValue.code);
+          if (toBeUpdatedIndex !== -1) {
+            previousValue[toBeUpdatedIndex] = merge(previousValue[toBeUpdatedIndex], currentValue);
+            return previousValue;
+          } else {
+            return [...previousValue, currentValue];
+          }
+        }, [] as IPrebidAdUnit[])
+        .sort((a, b) => (a.code > b.code ? 1 : -1));
+      setAdUnits(adUnits);
+    }, [prebid.events]);
+    logger.log(`[PopUp][SlotComponent]: render `, adUnits);
+    return (
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell variant="head" sx={{ width: '33%' }}>
+                Code
               </TableCell>
-              <TableCell variant="body">
-                <MediaTypesComponent mediaTypes={adUnit.mediaTypes} />
+              <TableCell variant="head" sx={{ width: '33%' }}>
+                Media Types
               </TableCell>
-              <TableCell variant="body">
-                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {Array.from(new Set(adUnit.bids)).map((bid, index) => (
-                    <ChipWithPopOverOnClickComponent input={bid.params} label={bid.bidder} key={index} />
-                  ))}
-                </Stack>
+              <TableCell variant="head" sx={{ width: '34%' }}>
+                Bidders
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
+          </TableHead>
+          <TableBody>
+            {adUnits.map((adUnit, index) => (
+              <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell variant="body">
+                  <strong>{adUnit.code}</strong>
+                </TableCell>
+                <TableCell variant="body">
+                  <MediaTypesComponent mediaTypes={adUnit.mediaTypes} />
+                </TableCell>
+                <TableCell variant="body">
+                  <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                    {Array.from(new Set(adUnit.bids)).map((bid, index) => (
+                      <ChipWithPopOverOnClickComponent input={bid.params} label={bid.bidder} key={index} />
+                    ))}
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  }
+);
 
 interface ISlotsComponentProps {
   prebid: IPrebidDetails;
