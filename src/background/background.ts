@@ -26,7 +26,7 @@ class Background {
   }
 
   updateBadge() {
-    if (this.tabInfo[this.currentActiveTabId]?.prebid) {
+    if (this.tabInfo[this.currentActiveTabId]?.prebids) {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#F99B0C' });
       chrome.browserAction.setBadgeText({ text: `✓` });
     } else {
@@ -86,14 +86,17 @@ class Background {
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received prebid details data:', payload);
-          this.tabInfo[tabId].prebid = { ...payload };
+          this.tabInfo[tabId] = this.tabInfo[tabId] || {};
+          this.tabInfo[tabId]['prebids'] = this.tabInfo[tabId]['prebids'] || {};
+          this.tabInfo[tabId]['prebids'][payload.namespace] = payload;
           this.updateBadge();
           this.updatePopUp(this.currentActiveTabId);
           sendResponse();
           break;
         case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.prebid);
+          sendResponse(this.tabInfo[this.currentActiveTabId]?.prebids);
+          // sendResponse(this.tabInfo[this.currentActiveTabId]?.prebid);
           break;
         case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received tcf details data:', payload);
@@ -118,7 +121,7 @@ class Background {
       const frameId = web_navigation.frameId;
       if (frameId == 0) {
         logger.warn('[Background]', tabId, 'RESET');
-        this.tabInfo[tabId] = { googleAdManager: null, prebid: null, tcf: null, url: null };
+        this.tabInfo[tabId] = { googleAdManager: null, prebids: null, tcf: null, url: null };
         this.tabInfo[tabId]['url'] = web_navigation.url;
       }
     });
@@ -141,10 +144,14 @@ class Background {
   }
 }
 
+export interface IPrebids {
+  [key: string]: IPrebidDetails;
+}
+
 export interface ITabInfo {
   [key: number]: {
     googleAdManager?: IGoogleAdManagerDetails;
-    prebid?: IPrebidDetails;
+    prebids?: IPrebids;
     tcf?: ITcfDetails;
     url?: string;
   };
