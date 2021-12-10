@@ -20,6 +20,14 @@ class AppHandler {
     chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND }, cb);
   }
 
+  handleDebugTabUpdate(cb: any): void {
+    chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+      if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB) {
+        cb(request.payload);
+      }
+    }); 
+  }
+
   handlePopUpUpdate(cb: any): void {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {

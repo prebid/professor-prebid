@@ -40,6 +40,14 @@ class Background {
       type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
       payload: this.tabInfo[currentActiveTabId] || {},
     });
+    this.updateDebugTab();
+  }
+
+  updateDebugTab() {
+    chrome.runtime.sendMessage({
+      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB,
+      payload: this.tabInfo || {},
+    });
   }
 
   addEventListeners() {
