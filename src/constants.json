@@ -17,7 +17,8 @@
 		"REQUEST_PREBID_DETAILS_FROM_BACKGROUND": "RequestPrebidDetailsFromBackground",
 		"SEND_TCF_DETAILS_TO_BACKGROUND": "sendTcfDetailsToBackground",
 		"REQUEST_TCF_DETAILS_FROM_BACKGROUND": "RequestTcfDetailsFromBackground",
-		"REQUEST_DEBUG_DETAILS_FROM_BACKGROUND": "RequestDebugDetailsFromBackground"
+		"REQUEST_DEBUG_DETAILS_FROM_BACKGROUND": "RequestDebugDetailsFromBackground",
+		"EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB": "sendAuctionDataToDebugTab"
 	},
 	"CONSOLE_TOGGLE": "PP_CONSOLE_STATE",
 	"SAVE_MASK": "PP_SAVE_MASK",
