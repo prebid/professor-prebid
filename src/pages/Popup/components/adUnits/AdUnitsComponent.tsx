@@ -50,7 +50,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     setAllNoBidEvents(allNoBidEvents);
     setAllBidderEvents(allBidderEvents);
     setAllAdUnits(allAdUnits);
-  }, [prebid.events]);
+  }, [prebid.events.length]);
 
   logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnits);
 
