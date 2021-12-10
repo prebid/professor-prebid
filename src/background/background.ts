@@ -86,24 +86,6 @@ class Background {
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
           logger.log('[Background] received prebid details data:', payload);
-          payload.events.forEach((event: any) => {
-            delete event.args.ad;
-            delete event.args.gdprConsent;
-            delete event.args.vastXml;
-            delete event.args.userIdAsEids;
-            event.args.bids?.forEach((bid: any) => {
-              delete bid.userId;
-              delete bid.userIdsEids;
-            });
-            event.args.bidsReceived?.forEach((bid: any) => {
-              delete bid.ad;
-              delete bid.content;
-            });
-            event.args.bidderRequests?.forEach((bidderRequest: any) => {
-              delete bidderRequest.gdprConsent;
-              delete bidderRequest.userId;
-            });
-          });
           this.tabInfo[tabId].prebid = { ...payload };
           this.updateBadge();
           this.updatePopUp(this.currentActiveTabId);

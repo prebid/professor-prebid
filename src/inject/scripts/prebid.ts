@@ -90,6 +90,27 @@ class Prebid {
         event.eventType === 'bidWon'
       );
     };
+    const truncateFields = (payload: IPrebidDetails) => {
+      payload.events.forEach((event: any) => {
+        delete event.args.ad;
+        delete event.args.gdprConsent;
+        delete event.args.vastXml;
+        delete event.args.userIdAsEids;
+        event.args.bids?.forEach((bid: any) => {
+          delete bid.userId;
+          delete bid.userIdsEids;
+        });
+        event.args.bidsReceived?.forEach((bid: any) => {
+          delete bid.ad;
+          delete bid.content;
+        });
+        event.args.bidderRequests?.forEach((bidderRequest: any) => {
+          delete bidderRequest.gdprConsent;
+          delete bidderRequest.userId;
+        });
+      });
+      return payload;
+    };
     this.config = this.globalPbjs.getConfig();
     this.eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
     const prebidDetail: IPrebidDetails = {
@@ -114,7 +135,8 @@ class Prebid {
       debug: this.getPbjsDebugConfig(),
       namespace: this.namespace,
     };
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+    const truncatedPrebidDetail = truncateFields(prebidDetail);
+    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, truncatedPrebidDetail);
   }
 }
 
