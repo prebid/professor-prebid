@@ -85,7 +85,7 @@ export const Popup = (): JSX.Element => {
         return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
       });
       setGlobal((previous) => {
-        return previous === null ? Object.keys(data)[0] : previous;
+        return previous === null && data ? Object.keys(data)[0] : previous;
       });
     });
     appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
@@ -161,7 +161,7 @@ export const Popup = (): JSX.Element => {
                   <DialogContent>
                     <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
                       <FormControl sx={{ m: 1, minWidth: 120 }}>
-                        <Select value={global} onChange={handleGlobalChange} autoWidth>
+                        <Select value={global || undefined} onChange={handleGlobalChange} autoWidth>
                           {Object.keys(prebids).map((global, index) => (
                             <MenuItem key={index} value={global}>
                               {global}
