@@ -44,6 +44,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
+import Badge from '@mui/material/Badge';
 
 // Styles
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -154,7 +155,12 @@ export const Popup = (): JSX.Element => {
             }}
           >
             <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
-              <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width="14%" onClick={handleClickOpen} />
+              <Badge invisible={prebids && Object.keys(prebids).length < 2} badgeContent={prebids && Object.keys(prebids).length || null} color="primary" sx={{width: '14%'}}>
+                <img
+                  src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg"
+                  onClick={handleClickOpen}
+                />
+              </Badge>
               {prebids && (
                 <Dialog disableEscapeKeyDown open={dialogOpen} onClose={handleClose}>
                   <DialogTitle>Select Prebid Instance</DialogTitle>
