@@ -63,8 +63,6 @@ class Background {
         }
       });
 
-      this.tabInfo[tabId] = this.tabInfo[tabId] || {};
-
       switch (msgType) {
         case constants.EVENTS.OPEN_DATA_TAB:
           if (this.currentActiveTabId) {
@@ -82,10 +80,13 @@ class Background {
           }
           break;
         case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
-          logger.log('[Background] received gam details data:', payload);
-          this.tabInfo[tabId].googleAdManager = { ...payload };
-          this.updateBadge();
-          sendResponse();
+          if (tabId && payload) {
+            logger.log('[Background] received gam details data:', payload);
+            this.tabInfo[tabId] = this.tabInfo[tabId] || {};
+            this.tabInfo[tabId].googleAdManager = { ...payload };
+            this.updateBadge();
+            sendResponse();
+          }
           break;
         case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
@@ -93,13 +94,15 @@ class Background {
           sendResponse(this.tabInfo[this.currentActiveTabId]?.googleAdManager);
           break;
         case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
-          logger.log('[Background] received prebid details data:', payload);
-          this.tabInfo[tabId] = this.tabInfo[tabId] || {};
-          this.tabInfo[tabId]['prebids'] = this.tabInfo[tabId]['prebids'] || {};
-          this.tabInfo[tabId]['prebids'][payload.namespace] = payload;
-          this.updateBadge();
-          this.updatePopUp(this.currentActiveTabId);
-          sendResponse();
+          if (tabId && payload) {
+            logger.log('[Background] received prebid details data:', payload);
+            this.tabInfo[tabId] = this.tabInfo[tabId] || {};
+            this.tabInfo[tabId]['prebids'] = this.tabInfo[tabId]['prebids'] || {};
+            this.tabInfo[tabId]['prebids'][payload.namespace] = payload;
+            this.updateBadge();
+            this.updatePopUp(this.currentActiveTabId);
+            sendResponse();
+          }
           break;
         case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
@@ -107,9 +110,12 @@ class Background {
           // sendResponse(this.tabInfo[this.currentActiveTabId]?.prebid);
           break;
         case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
-          logger.log('[Background] received tcf details data:', payload);
-          this.tabInfo[tabId].tcf = { ...payload };
-          sendResponse();
+          if (tabId && payload) {
+            logger.log('[Background] received tcf details data:', payload);
+            this.tabInfo[tabId] = this.tabInfo[tabId] || {};
+            this.tabInfo[tabId].tcf = { ...payload };
+            sendResponse();
+          }
           break;
         case constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND:
           logger.log('[Background] send tcf details data:', this.tabInfo, this.currentActiveTabId);
