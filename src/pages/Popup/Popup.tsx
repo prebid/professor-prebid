@@ -127,7 +127,7 @@ export const Popup = (): JSX.Element => {
       sx={{
         height: '600px',
         width: '780px',
-        overflowX: 'scroll',
+        overflowX: 'auto',
         backgroundColor: '#87CEEB',
         opacity: [0.9, 0.8, 0.7],
       }}
@@ -155,11 +155,17 @@ export const Popup = (): JSX.Element => {
             }}
           >
             <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
-              <Badge invisible={prebids && Object.keys(prebids).length < 2} badgeContent={prebids && Object.keys(prebids).length || null} color="primary" sx={{width: '14%'}}>
-                <img
-                  src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg"
-                  onClick={handleClickOpen}
-                />
+              <Badge
+                invisible={prebids && Object.keys(prebids).length < 2}
+                badgeContent={(prebids && Object.keys(prebids).length) || null}
+                color="primary"
+                sx={{ width: '14%' }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+              >
+                <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" onClick={handleClickOpen} />
               </Badge>
               {prebids && (
                 <Dialog disableEscapeKeyDown open={dialogOpen} onClose={handleClose}>
