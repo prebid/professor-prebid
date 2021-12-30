@@ -30,7 +30,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
       ...input,
     };
     setDebugConfigState(input);
-    inject(`sessionStorage.setItem('pbjs:debugging', '${JSON.stringify(input)}')`, () => {});
+    inject(`sessionStorage.setItem('${prebid.namespace}:debugging', '${JSON.stringify(input)}')`, () => {});
   };
 
   const handleEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +39,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
 
   // read config from session storage & set states on mount
   useEffect(() => {
-    inject(`sessionStorage.getItem('pbjs:debugging')`, (result: string) => {
+    inject(`sessionStorage.getItem('${prebid.namespace}:debugging')`, (result: string) => {
       try {
         const savedConfig: IPrebidDebugConfig = JSON.parse(result);
         setDebugConfigState(savedConfig);
