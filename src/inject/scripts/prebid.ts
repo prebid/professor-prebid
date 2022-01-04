@@ -16,11 +16,14 @@ class Prebid {
   eids: IPrebidEids[];
   stopLoop: boolean = false;
   namespace: string;
+  lastUpdateTimestamp: number = 0;
+  lastUpdate: string;
 
   constructor(namespace: string) {
     this.namespace = namespace;
     this.globalPbjs = window[namespace as keyof Window];
     this.globalPbjs.que.push(() => this.addEventListeners());
+    this.globalPbjs.que.push(() => this.sendMessageRecursevly(1000));
   }
 
   addEventListeners(): void {
@@ -56,18 +59,6 @@ class Prebid {
     logger.log('[Injected] event listeners added', this.namespace);
   }
 
-  isPrebidInPage() {
-    const pbjsGlobals = window._pbjsGlobals;
-    if (pbjsGlobals && pbjsGlobals.length > 0) {
-      const pbjsGlobal = window[pbjsGlobals[0] as keyof Window];
-
-      const libLoaded = pbjsGlobal.libLoaded;
-      if (libLoaded) {
-        return pbjsGlobal;
-      }
-    }
-  }
-
   getPbjsDebugConfig() {
     const pbjsDebugString = window.sessionStorage.getItem('pbjs:debugging');
     try {
@@ -89,31 +80,6 @@ class Prebid {
         event.eventType === 'auctionInit' ||
         event.eventType === 'bidWon'
       );
-    };
-    const truncateFields = (payload: IPrebidDetails) => {
-      const deleteFromBid = (bid: any) => {
-        delete bid.ad;
-        delete bid.content;
-        delete bid.gdprConsent;
-        delete bid.userId;
-        delete bid.userIdAsEids;
-        delete bid.vastXml;
-      };
-      payload.events.forEach((event: any) => {;
-        deleteFromBid(event.args);
-        event.args.bids?.forEach((bid: any) => deleteFromBid(bid));
-        event.args.bidsReceived?.forEach((bid: any) => deleteFromBid(bid));
-        event.args.bidderRequests?.forEach((bidderRequest: any) => {
-          delete bidderRequest.gdprConsent;
-          delete bidderRequest.userId;
-          bidderRequest.bids?.forEach((bid: any) => deleteFromBid(bid));
-        });
-        
-        event.args.adUnits?.forEach((adUnit: any) => {
-          adUnit.bids?.forEach((bid: any) => deleteFromBid(bid));
-        });
-      });
-      return payload;
     };
     this.config = this.globalPbjs.getConfig();
     this.eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
@@ -139,8 +105,20 @@ class Prebid {
       debug: this.getPbjsDebugConfig(),
       namespace: this.namespace,
     };
-    const truncatedPrebidDetail = truncateFields(prebidDetail);
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, truncatedPrebidDetail);
+    if (this.lastUpdate !== JSON.stringify(prebidDetail)) {
+      sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+      this.lastUpdateTimestamp = Date.now();
+      this.lastUpdate = JSON.stringify(prebidDetail);
+      logger.log('[Injected] sendDetailsToContentScript', prebidDetail);
+    }
+  }
+
+  sendMessageRecursevly(interval: number): void {
+    // don't send another message if we've already sent one on events
+    if (Date.now() - this.lastUpdateTimestamp > interval) {
+      this.sendDetailsToContentScript();
+    }
+    setTimeout(() => this.sendMessageRecursevly(interval), interval);
   }
 }
 
