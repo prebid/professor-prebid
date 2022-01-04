@@ -28,12 +28,18 @@ class AppHandler {
     }); 
   }
 
-  handlePopUpUpdate(cb: any): void {
-    chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-      if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
-        cb(request.payload);
-      }
-    });
+
+  popUpUpdateHandler(request: any, _:any, sendResponse:any, cb: any): void {
+    if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
+      cb(request.payload);
+    }
+  }
+
+  addPopUpUpdateEventListener(cb: any): void {
+    chrome.runtime.onMessage.addListener(this.popUpUpdateHandler.bind(this, cb));
+  }
+  removePopUpUpdateEventListener(cb: any): void {
+    chrome.runtime.onMessage.removeListener(this.popUpUpdateHandler.bind(this, cb));
   }
 }
 

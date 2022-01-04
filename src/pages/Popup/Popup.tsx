@@ -98,7 +98,7 @@ export const Popup = (): JSX.Element => {
   }, []); // get states on mount in case there is no more update when pop up is opened
 
   useEffect(() => {
-    appHandler.handlePopUpUpdate((data: ITabInfo) => {
+    appHandler.addPopUpUpdateEventListener((data: ITabInfo) => {
       logger.log('[App] received update message from background', data);
       const { prebids, tcf, googleAdManager } = data;
       if (prebids) {
@@ -117,6 +117,9 @@ export const Popup = (): JSX.Element => {
         });
       }
     });
+    () => {
+      appHandler.addPopUpUpdateEventListener(null);
+    };
   }, []); // register event listener for update message from background script
 
   logger.log(`[PopUp]: render `, tcf, prebids, googleAdManager);
