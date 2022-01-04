@@ -6,7 +6,7 @@ import {
   IPrebidNoBidEventData,
   IPrebidBidderRequest,
 } from '../../../../inject/scripts/prebid';
-import React, { memo, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createRangeArray } from '../../../../utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -90,63 +90,61 @@ const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (
   );
 };
 
-const BidderBarComponent = memo(
-  ({ item, auctionEndLeft, auctionEndEvent }: IBidderBarComponentProps): JSX.Element => {
-    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-    const [bidderRequest, setBidderRequest] = React.useState<IPrebidBidderRequest | null>(null);
-    const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-    const handlePopoverClose = () => setAnchorEl(null);
-    const open = Boolean(anchorEl);
-    useEffect(() => {
-      setBidderRequest(auctionEndEvent.args.bidderRequests.find((bidderRequest) => bidderRequest.bidderRequestId === item.bidderRequestId));
-    }, []);
-    return (
-      <React.Fragment>
-        <ListItem
-          style={{
-            width: `${item.width}px`,
-            left: `${item.left}px`,
-            whiteSpace: 'nowrap',
-            paddingLeft: '10px',
-            borderColor: item.left + item.width > auctionEndLeft ? 'red' : 'rgb(25, 118, 210)',
+const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBarComponentProps): JSX.Element => {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [bidderRequest, setBidderRequest] = React.useState<IPrebidBidderRequest | null>(null);
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+  const handlePopoverClose = () => setAnchorEl(null);
+  const open = Boolean(anchorEl);
+  useEffect(() => {
+    setBidderRequest(auctionEndEvent.args.bidderRequests.find((bidderRequest) => bidderRequest.bidderRequestId === item.bidderRequestId));
+  }, []);
+  return (
+    <React.Fragment>
+      <ListItem
+        style={{
+          width: `${item.width}px`,
+          left: `${item.left}px`,
+          whiteSpace: 'nowrap',
+          paddingLeft: '10px',
+          borderColor: item.left + item.width > auctionEndLeft ? 'red' : 'rgb(25, 118, 210)',
+        }}
+        onClick={handlePopoverOpen}
+      >
+        <Typography
+          sx={{
+            color: item.left + item.width > auctionEndLeft ? 'red' : 'rgb(25, 118, 210)',
           }}
-          onClick={handlePopoverOpen}
         >
-          <Typography
-            sx={{
-              color: item.left + item.width > auctionEndLeft ? 'red' : 'rgb(25, 118, 210)',
-            }}
-          >
-            {item.bidderCode}: {item.end - item.start}ms {item.left + item.width > auctionEndLeft ? '(timeout)' : null}
-          </Typography>
-        </ListItem>
-        <Popover
-          id="mouse-over-popover"
-          open={open}
-          anchorEl={anchorEl}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-          onClose={handlePopoverClose}
-          disableRestoreFocus
-        >
-          <ReactJson
-            src={bidderRequest}
-            name={false}
-            collapsed={3}
-            enableClipboard={false}
-            displayObjectSize={false}
-            displayDataTypes={false}
-            sortKeys={false}
-            quotesOnKeys={false}
-            indentWidth={2}
-            collapseStringsAfterLength={100}
-            style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-          />
-        </Popover>
-      </React.Fragment>
-    );
-  }
-);
+          {item.bidderCode}: {item.end - item.start}ms {item.left + item.width > auctionEndLeft ? '(timeout)' : null}
+        </Typography>
+      </ListItem>
+      <Popover
+        id="mouse-over-popover"
+        open={open}
+        anchorEl={anchorEl}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        onClose={handlePopoverClose}
+        disableRestoreFocus
+      >
+        <ReactJson
+          src={bidderRequest}
+          name={false}
+          collapsed={3}
+          enableClipboard={false}
+          displayObjectSize={false}
+          displayDataTypes={false}
+          sortKeys={false}
+          quotesOnKeys={false}
+          indentWidth={2}
+          collapseStringsAfterLength={100}
+          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+        />
+      </Popover>
+    </React.Fragment>
+  );
+};
 
 const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
   const prebidEvents = prebid.events || [];
