@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import logger from '../../logger';
 
 const BidderRequestsComponent = ({ prebid }: IBidderRequestsComponentProps): JSX.Element => {
-  console.log(`[PopUp] render AdUnitsComponent`);
+  logger.log(`[PopUp] render AdUnitsComponent`);
   const auctionEndEvents = (prebid?.events.filter((event) => event.eventType === 'auctionEnd') || []) as IPrebidAuctionEndEventData[];
   return (
     <Box>

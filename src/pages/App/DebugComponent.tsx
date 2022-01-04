@@ -54,7 +54,7 @@ const DebugComponent = () => {
       setDebugData(data);
     });
   }, []);
-  console.log(debugData);
+  
   return (
     <Box>
       <IconButton color="secondary" aria-label="delete backgroundpage data">
@@ -74,6 +74,9 @@ const DebugComponent = () => {
         Object.keys(debugData)[0] &&
         Object.keys(debugData).map((key: any, index) => {
           const { prebids, tcf, gam } = debugData[key];
+          const size = new TextEncoder().encode(JSON.stringify(debugData[key])).length;
+          const kiloBytes = size / 1024;
+          const megaBytes = (kiloBytes / 1024).toFixed(2);
           return (
             <TabPanel value={value} index={index} key={index}>
               <Box key={key}>
@@ -82,7 +85,7 @@ const DebugComponent = () => {
                     const prebid = prebids[prebidKey];
                     return (
                       <Box key={prebidKey}>
-                        <Typography>Prebid {prebidKey}</Typography>
+                        <Typography>Prebid ({prebidKey}) {megaBytes}MB</Typography>
                         <ToolsComponent prebid={prebid}></ToolsComponent>
                         <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
                         <BidsComponent prebid={prebid}></BidsComponent>
