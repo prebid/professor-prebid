@@ -5,157 +5,149 @@ import { IPrebidDetails } from '../inject/scripts/prebid';
 import { ITcfDetails } from '../inject/scripts/tcf';
 
 class Background {
-  tabInfo: ITabInfo = {};
-  currentActiveTabId: number;
+  tabInfo: ITabInfos;
+  lastActiveTabId: number;
+  updateRateMs: number = 1000;
 
-  init() {
+  constructor() {
+    this.tabInfo = {};
     this.addEventListeners();
-    setInterval(() => {
-      chrome.tabs.query({}, (tabs) => {
-        let activeTabIds = tabs.map((tab) => tab.id);
-        for (let t in this.tabInfo) {
-          if (activeTabIds.includes(parseInt(t))) {
-            logger.log(`[Background] Tab(${t}) is active' tabInfo has ~ ${Math.round(JSON.stringify(this.tabInfo[t]).length / (1000 * 1000))}mb`);
-          } else {
-            logger.log(`[Background] Tab(${t}) is not active. Removing info...`);
-            this.removeInfoForTabId(parseInt(t));
-          }
-        }
-      });
-    }, 3000);
+    this.cleanUpTabInfo();
   }
 
-  updateBadge() {
-    if (this.tabInfo[this.currentActiveTabId]?.prebids) {
+  handleMessages = (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+    const { type, payload } = message;
+    const tabId = sender.tab?.id;
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => (this.lastActiveTabId = tabs[0]?.id));
+    switch (type) {
+      case constants.EVENTS.OPEN_DATA_TAB:
+        logger.log('[Background] Open data tab');
+        sendResponse();
+        chrome.tabs.create({ url: `./app.html` }, (tab) => {
+          logger.log('[Background] created tab with tabId: ', tab.id);
+        });
+        break;
+      case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
+        logger.log('[Background] received gam details data:', payload);
+        sendResponse();
+        this.updateTabInfo(payload, tabId, 'googleAdManager');
+        break;
+      case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
+        logger.log('[Background] send gam details data:', this.tabInfo, this.lastActiveTabId);
+        sendResponse(this.tabInfo[this.lastActiveTabId]?.googleAdManager);
+        this.updateBadge(this.lastActiveTabId);
+        break;
+      case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
+        logger.log('[Background] received prebid details data:', payload);
+        sendResponse();
+        this.updateTabInfo(payload, tabId, 'prebids', payload.namespace);
+        this.updateBadge(tabId);
+        this.updatePopUp(tabId);
+        this.updateDebugTab();
+        break;
+      case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
+        logger.log('[Background] send prebid details data:', this.tabInfo, this.lastActiveTabId);
+        sendResponse(this.tabInfo[this.lastActiveTabId]?.prebids);
+        break;
+      case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
+        logger.log('[Background] received tcf details data:', payload);
+        sendResponse();
+        this.updateTabInfo(payload, tabId, 'tcf');
+        break;
+      case constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND:
+        logger.log('[Background] send tcf details data:', this.tabInfo, this.lastActiveTabId);
+        sendResponse(this.tabInfo[this.lastActiveTabId]?.tcf);
+        break;
+      case constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND:
+        logger.log('[Background] send debug details data:', this.tabInfo, this.lastActiveTabId);
+        sendResponse(this.tabInfo);
+        break;
+    }
+  };
+
+  handleOnActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
+    this.updateBadge(activeInfo.tabId);
+  };
+
+  handleOnBeforeNavigate = (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
+    const { frameId, tabId, url } = web_navigation;
+    if (frameId == 0) {
+      logger.warn('[Background]', tabId, 'RESET');
+      this.tabInfo = this.tabInfo || {};
+      this.tabInfo[tabId] = { url };
+    }
+  };
+
+  handleOnRemoved = (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
+    logger.log('[Background]', tabId, 'is removed', removeInfo);
+    this.deleteTabInfo(tabId);
+  };
+
+  addEventListeners = () => {
+    chrome.runtime.onMessage.addListener(this.handleMessages);
+    chrome.webNavigation.onBeforeNavigate.addListener(this.handleOnBeforeNavigate);
+    chrome.tabs.onRemoved.addListener(this.handleOnRemoved);
+    chrome.tabs.onActivated.addListener(this.handleOnActivated);
+  };
+
+  cleanUpTabInfo = () => {
+    chrome.tabs.query({}, (tabs) => {
+      const activeTabIds = tabs.map((tab) => tab.id);
+      for (const t in this.tabInfo) {
+        if (activeTabIds.includes(parseInt(t))) {
+          const size = new TextEncoder().encode(JSON.stringify(this.tabInfo[t])).length;
+          const megaBytes = (size / 1024 / 1024).toFixed(2);
+          logger.log(`[Background] Tab(${t}) is active' tabInfo has ~ ${megaBytes}mb`);
+        } else {
+          logger.log(`[Background] Tab(${t}) is not active. Removing info...`);
+          this.deleteTabInfo(parseInt(t));
+        }
+      }
+      setTimeout(this.cleanUpTabInfo, 300000);
+    });
+  };
+
+  deleteTabInfo = (tabId: number) => {
+    logger.log('[Background] Removing info for tabId ' + tabId);
+    delete this.tabInfo[tabId];
+  };
+
+  updateBadge = (tabId: number) => {
+    if (this.tabInfo[tabId]?.prebids) {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#F99B0C' });
       chrome.browserAction.setBadgeText({ text: `✓` });
     } else {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#ecf3f5' });
       chrome.browserAction.setBadgeText({ text: `` });
     }
-  }
+  };
 
-  updatePopUp(currentActiveTabId: number) {
-    chrome.runtime.sendMessage({
-      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
-      payload: this.tabInfo[currentActiveTabId] || {},
-    });
-    this.updateDebugTab();
-  }
-
-  updateDebugTab() {
+  updateDebugTab = () => {
     chrome.runtime.sendMessage({
       type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB,
       payload: this.tabInfo || {},
     });
-  }
+  };
 
-  addEventListeners() {
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      const msgType = message && message.type;
-      const payload = message && message.payload;
+  updatePopUp = (tabId: number) => {
+    logger.log('[Background] updatePopUp', this.tabInfo[tabId]);
+    chrome.runtime.sendMessage({
+      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
+      payload: this.tabInfo[tabId] || {},
+    });
+  };
 
-      const tabId = sender.tab?.id;
-      chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-        const currTab = tabs[0];
-        if (currTab) {
-          this.currentActiveTabId = currTab.id;
-        }
-      });
-
-      switch (msgType) {
-        case constants.EVENTS.OPEN_DATA_TAB:
-          if (this.currentActiveTabId) {
-            chrome.tabs.update(this.currentActiveTabId, { active: true, url: `./app.html` }, (tab) => {
-              this.currentActiveTabId = tab?.id;
-              logger.log('[Background] update tab with tabId: ', this.currentActiveTabId);
-              sendResponse();
-            });
-          } else {
-            chrome.tabs.create({ url: `./app.html` }, (tab) => {
-              this.currentActiveTabId = tab.id;
-              logger.log('[Background] created tab with tabId: ', this.currentActiveTabId);
-              sendResponse();
-            });
-          }
-          break;
-        case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
-          if (tabId && payload) {
-            logger.log('[Background] received gam details data:', payload);
-            this.tabInfo[tabId] = this.tabInfo[tabId] || {};
-            this.tabInfo[tabId].googleAdManager = { ...payload };
-            this.updateBadge();
-            sendResponse();
-          }
-          break;
-        case constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND:
-          logger.log('[Background] send gam details data:', this.tabInfo, this.currentActiveTabId);
-          this.updateBadge();
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.googleAdManager);
-          break;
-        case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
-          if (tabId && payload) {
-            logger.log('[Background] received prebid details data:', payload);
-            this.tabInfo[tabId] = this.tabInfo[tabId] || {};
-            this.tabInfo[tabId]['prebids'] = this.tabInfo[tabId]['prebids'] || {};
-            this.tabInfo[tabId]['prebids'][payload.namespace] = payload;
-            this.updateBadge();
-            this.updatePopUp(this.currentActiveTabId);
-            sendResponse();
-          }
-          break;
-        case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
-          logger.log('[Background] send prebid details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.prebids);
-          // sendResponse(this.tabInfo[this.currentActiveTabId]?.prebid);
-          break;
-        case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
-          if (tabId && payload) {
-            logger.log('[Background] received tcf details data:', payload);
-            this.tabInfo[tabId] = this.tabInfo[tabId] || {};
-            this.tabInfo[tabId].tcf = { ...payload };
-            sendResponse();
-          }
-          break;
-        case constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND:
-          logger.log('[Background] send tcf details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo[this.currentActiveTabId]?.tcf);
-          break;
-        case constants.EVENTS.REQUEST_DEBUG_DETAILS_FROM_BACKGROUND:
-          logger.log('[Background] send debug details data:', this.tabInfo, this.currentActiveTabId);
-          sendResponse(this.tabInfo);
-          break;
-        default:
-          sendResponse();
+  updateTabInfo = (payload: any, tabId: number, key: string, subkey?: string) => {
+    if (tabId && payload && JSON.stringify(payload) !== '{}') {
+      this.tabInfo[tabId] = this.tabInfo[tabId] || {};
+      if (key === 'prebids' && subkey) {
+        this.tabInfo[tabId]['prebids'] = this.tabInfo[tabId]['prebids'] || {};
+        this.tabInfo[tabId]['prebids'][subkey as keyof IPrebids] = payload;
+      } else {
+        this.tabInfo[tabId][key as keyof ITabInfo] = payload;
       }
-    });
-
-    chrome.webNavigation.onBeforeNavigate.addListener((web_navigation) => {
-      const tabId = web_navigation.tabId;
-      const frameId = web_navigation.frameId;
-      if (frameId == 0) {
-        logger.warn('[Background]', tabId, 'RESET');
-        this.tabInfo[tabId] = { googleAdManager: null, prebids: null, tcf: null, url: null };
-        this.tabInfo[tabId]['url'] = web_navigation.url;
-      }
-    });
-
-    chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-      logger.log('[Background]', tabId, 'is removed', removeInfo);
-      this.removeInfoForTabId(tabId);
-    });
-
-    chrome.tabs.onActivated.addListener((activeInfo) => {
-      this.currentActiveTabId = activeInfo.tabId;
-      this.updateBadge();
-      // this.updatePopUp(this.currentActiveTabId);
-    });
-  }
-
-  removeInfoForTabId(tabId: number) {
-    logger.log('[Background] Removing info for tabId ' + tabId);
-    if (this.tabInfo[tabId]) delete this.tabInfo[tabId];
-  }
+    }
+  };
 }
 
 export interface IPrebids {
@@ -163,14 +155,15 @@ export interface IPrebids {
 }
 
 export interface ITabInfo {
-  [key: number]: {
-    googleAdManager?: IGoogleAdManagerDetails;
-    prebids?: IPrebids;
-    tcf?: ITcfDetails;
-    url?: string;
-  };
+  googleAdManager?: IGoogleAdManagerDetails;
+  prebids?: IPrebids;
+  tcf?: ITcfDetails;
+  url?: string;
+}
+
+export interface ITabInfos {
+  [key: number]: ITabInfo;
   [key: string]: any;
 }
 
-const background = new Background();
-background.init();
+new Background();
