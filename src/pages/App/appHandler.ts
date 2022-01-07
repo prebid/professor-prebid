@@ -22,14 +22,14 @@ class AppHandler {
 
   handleDebugTabUpdate(cb: any): void {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+      sendResponse();
       if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB) {
         cb(request.payload);
       }
-    }); 
+    });
   }
 
-
-  popUpUpdateHandler(request: any, _:any, sendResponse:any, cb: any): void {
+  popUpUpdateHandler(request: any, _: any, sendResponse: any, cb: Function): void {
     if (request.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
       cb(request.payload);
     }
