@@ -20,7 +20,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import { ITabInfo } from '../../background/background';
+import { ITabInfos } from '../../background/background';
 // Material-UI
 import { styled } from '@mui/material/styles';
 import Typography, { TypographyProps } from '@mui/material/Typography';
@@ -98,7 +98,7 @@ export const Popup = (): JSX.Element => {
   }, []); // get states on mount in case there is no more update when pop up is opened
 
   useEffect(() => {
-    appHandler.addPopUpUpdateEventListener((data: ITabInfo) => {
+    appHandler.addPopUpUpdateEventListener((data: ITabInfos) => {
       logger.log('[App] received update message from background', data);
       const { prebids, tcf, googleAdManager } = data;
       if (prebids) {
