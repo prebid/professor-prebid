@@ -19,7 +19,8 @@ import CardHeader from '@mui/material/CardHeader';
 import ReactJson from 'react-json-view';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
 }
@@ -96,7 +97,7 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
             </Avatar>
           }
           title="Consent Management"
-          subheader={'.consentManagement'}
+          subheader={`.consentManagement`}
           action={
             <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
@@ -109,28 +110,72 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
               <strong>Allow Auction Without Consent:</strong>
               {prebid.config.consentManagement?.allowAuctionWithoutConsent ? 'true' : 'false'}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>CMP Api: </strong>
-              {prebid.config.consentManagement.cmpApi ? prebid.config.consentManagement?.cmpApi : prebid.config.consentManagement.gdpr?.cmpApi}
-            </Typography>
-          </CardContent>
-        </Collapse>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
+            {prebid.config.consentManagement.cmpApi && (
+              <Typography variant="body2" color="text.secondary">
+                <strong>CMP Api: </strong>
+                {String(prebid.config.consentManagement.cmpApi)}
+              </Typography>
+            )}
             <Typography variant="body2" color="text.secondary">
               <strong>Default GDPR Scope: </strong>
-              {(
-                prebid.config.consentManagement.defaultGdprScope
-                  ? prebid.config.consentManagement.defaultGdprScope
-                  : prebid.config.consentManagement.gdpr?.defaultGdprScope
-              )
-                ? 'true'
-                : 'false'}
+              {prebid.config.consentManagement.defaultGdprScope ? 'true' : 'false'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong>Timeout: </strong>
               {prebid.config.consentManagement.timeout ? prebid.config.consentManagement.timeout : prebid.config.consentManagement.gdpr?.timeout}
             </Typography>
+          </CardContent>
+        </Collapse>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          {prebid.config.consentManagement.gdpr && (
+            <Box>
+              <CardHeader>GDPR</CardHeader>
+              <CardContent>
+                {prebid.config.consentManagement.gdpr.cmpApi && (
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>CmpApi:</strong> {prebid.config.consentManagement.gdpr.cmpApi}
+                  </Typography>
+                )}
+                {prebid.config.consentManagement.gdpr.timeout && (
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>Timeout:</strong> {prebid.config.consentManagement.gdpr.timeout}
+                  </Typography>
+                )}
+                {prebid.config.consentManagement.gdpr.defaultGdprScope && (
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>defaultGdprScope:</strong> {JSON.stringify(prebid.config.consentManagement.gdpr.defaultGdprScope)}
+                  </Typography>
+                )}
+                {prebid.config.consentManagement.gdpr.allowAuctionWithoutConsent && (
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>allowAuctionWithoutConsent:</strong> {prebid.config.consentManagement.gdpr.allowAuctionWithoutConsent}
+                  </Typography>
+                )}
+              </CardContent>
+              {prebid.config.consentManagement.gdpr.rules && (
+                <CardContent>
+                  <CardHeader title="GDPR Enforcement" />
+                  {prebid.config.consentManagement.gdpr.rules && (
+                    <React.Fragment>
+                      {prebid.config.consentManagement.gdpr.rules.map((rule: any, index) => (
+                        <List dense={true}>
+                          <Typography>
+                            <strong>Rules #{index}</strong>
+                          </Typography>
+                          {Object.keys(rule).map((key, index) => (
+                            <ListItem key={index}>
+                              {key}: {String(rule[key])}
+                            </ListItem>
+                          ))}
+                        </List>
+                      ))}
+                    </React.Fragment>
+                  )}
+                </CardContent>
+              )}
+            </Box>
+          )}
+          <CardContent>
             {Object.keys(tcf).map((key, index) => (
               <TcfComponent key={index} tcf={tcf} tcfKey={key} />
             ))}
