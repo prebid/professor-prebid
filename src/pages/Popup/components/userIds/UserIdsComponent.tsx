@@ -81,40 +81,6 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
               Config
             </Typography>
           )}
-          {/* <TableContainer>
-          <Table>
-            <TableBody>
-              {prebid.config?.userSync?.userIds?.map((userId, index) => (
-                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell>Name</TableCell>
-                  <TableCell>{userId.name}</TableCell>
-                  <TableCell>Storage Type</TableCell>
-                  <TableCell>{userId.storage?.type}</TableCell>
-                  <TableCell>Storage Expires</TableCell>
-                  <TableCell>{userId.storage?.expires}</TableCell>
-                  <TableCell>Storage Name</TableCell>
-                  <TableCell>{userId.storage?.name}</TableCell>
-                  <TableCell>Params</TableCell>
-                  <TableCell>
-                    <ReactJson
-                      src={userId.params}
-                      name={false}
-                      collapsed={false}
-                      enableClipboard={false}
-                      displayObjectSize={false}
-                      displayDataTypes={false}
-                      sortKeys={false}
-                      quotesOnKeys={false}
-                      indentWidth={2}
-                      collapseStringsAfterLength={100}
-                      style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer> */}
           <TableContainer>
             <Table>
               <TableHead>
@@ -136,7 +102,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                     <TableCell>{userId.storage?.expires}</TableCell>
                     <TableCell>{userId.storage?.name}</TableCell>
                     <TableCell>
-                      {JSON.stringify(userId.params) !== '{}' && (
+                      {userId.params && JSON.stringify(userId.params) !== '{}' && (
                         <ReactJson
                           src={userId.params}
                           name={false}
@@ -151,6 +117,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                           style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
                         />
                       )}
+                      
                     </TableCell>
                   </TableRow>
                 ))}
