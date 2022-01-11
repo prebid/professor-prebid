@@ -3,7 +3,11 @@ import logger from '../logger';
 import { IGoogleAdManagerDetails } from '../inject/scripts/googleAdManager';
 import { IPrebidDetails } from '../inject/scripts/prebid';
 import { ITcfDetails } from '../inject/scripts/tcf';
-
+declare global {
+  interface Window {
+    tabInfos: ITabInfos;
+  }
+}
 class Background {
   tabInfo: ITabInfos;
   lastActiveTabId: number;
@@ -11,6 +15,7 @@ class Background {
 
   constructor() {
     this.tabInfo = {};
+    window.tabInfos = this.tabInfo;
     this.addEventListeners();
     this.cleanUpTabInfo();
   }
@@ -42,8 +47,6 @@ class Background {
         sendResponse();
         this.updateTabInfo(payload, tabId, 'prebids', payload.namespace);
         this.updateBadge(tabId);
-        this.updatePopUp(tabId);
-        this.updateDebugTab();
         break;
       case constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND:
         logger.log('[Background] send prebid details data:', this.tabInfo, this.lastActiveTabId);
@@ -120,21 +123,6 @@ class Background {
       chrome.browserAction.setBadgeBackgroundColor({ color: '#ecf3f5' });
       chrome.browserAction.setBadgeText({ text: `` });
     }
-  };
-
-  updateDebugTab = () => {
-    chrome.runtime.sendMessage({
-      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB,
-      payload: this.tabInfo || {},
-    });
-  };
-
-  updatePopUp = (tabId: number) => {
-    logger.log('[Background] updatePopUp', this.tabInfo[tabId]);
-    chrome.runtime.sendMessage({
-      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
-      payload: this.tabInfo[tabId] || {},
-    });
   };
 
   updateTabInfo = (payload: any, tabId: number, key: string, subkey?: string) => {

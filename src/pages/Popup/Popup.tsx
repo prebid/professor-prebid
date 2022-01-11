@@ -1,26 +1,21 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { HashRouter as Router, Route, Link, Switch, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 // Custom files
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { ITcfDetails } from '../../inject/scripts/tcf';
-import { IPrebidDetails } from '../../inject/scripts/prebid';
-import { IPrebids } from '../../background/background';
-import { appHandler } from '../App/appHandler';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPollH, faSlidersH, faAd, faTools, faCoins, faUserFriends } from '@fortawesome/free-solid-svg-icons';
+import { IPrebids, ITabInfo } from '../../background/background';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
 import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
-import { popupHandler } from './popupHandler';
 import ToolsComponent from './components/tools/ToolsComponent';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import { ITabInfos } from '../../background/background';
+
 // Material-UI
 import { styled } from '@mui/material/styles';
 import Typography, { TypographyProps } from '@mui/material/Typography';
@@ -42,8 +37,6 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Badge from '@mui/material/Badge';
 
 // Styles
@@ -73,54 +66,32 @@ export const Popup = (): JSX.Element => {
   const [googleAdManager, setGamDetails] = useState<IGoogleAdManagerDetails>();
   const [tcf, setTcfDetails] = useState<ITcfDetails>();
   const [isActive, setActive] = useState(window.location.hash.replace('#', '') || '/');
+  const [tabId, setTabId] = useState<number>(null);
+  const bg = chrome.extension.getBackgroundPage();
+  
   useEffect(() => {
-    appHandler.getGamDetailsFromBackground((data: IGoogleAdManagerDetails) => {
-      logger.log('[App] received Google AdManager Details from background', data);
-      setGamDetails((previousData) => {
-        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
-      });
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      setTabId(tabs[0].id);
     });
-    appHandler.getPrebidDetailsFromBackground((data: IPrebids) => {
-      logger.log('[App] received Prebid Details from background', data);
+  }, []); // set tabId on mount
+  
+  useEffect(() => {
+    if (tabId) {
+      const { googleAdManager, prebids, tcf, url } = bg.tabInfos[tabId];
+      setGamDetails((previousData) => {
+        return JSON.stringify(previousData) === JSON.stringify(googleAdManager) ? previousData : googleAdManager;
+      });
       setPrebids((previousData) => {
-        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+        return JSON.stringify(previousData) === JSON.stringify(prebids) ? previousData : prebids;
       });
       setGlobal((previous) => {
-        return previous === null && data ? Object.keys(data)[0] : previous;
+        return previous === null && prebids ? Object.keys(prebids)[0] : previous;
       });
-    });
-    appHandler.getTcfDetailsFromBackground((data: ITcfDetails) => {
-      logger.log('[App] received Prebid Details from background', data);
       setTcfDetails((previousData) => {
-        return JSON.stringify(previousData) === JSON.stringify(data) ? previousData : data;
+        return JSON.stringify(previousData) === JSON.stringify(tcf) ? previousData : tcf;
       });
-    });
-  }, []); // get states on mount in case there is no more update when pop up is opened
-
-  useEffect(() => {
-    appHandler.addPopUpUpdateEventListener((data: ITabInfos) => {
-      logger.log('[App] received update message from background', data);
-      const { prebids, tcf, googleAdManager } = data;
-      if (prebids) {
-        setPrebids((previousData) => {
-          return JSON.stringify(previousData) === JSON.stringify(prebids) ? previousData : prebids;
-        });
-      }
-      if (tcf) {
-        setTcfDetails((previousData) => {
-          return JSON.stringify(previousData) === JSON.stringify(tcf) ? previousData : tcf;
-        });
-      }
-      if (googleAdManager) {
-        setGamDetails((previousData) => {
-          return JSON.stringify(previousData) === JSON.stringify(googleAdManager) ? previousData : googleAdManager;
-        });
-      }
-    });
-    () => {
-      appHandler.addPopUpUpdateEventListener(null);
-    };
-  }, []); // register event listener for update message from background script
+    }
+  }, [bg.tabInfos[tabId]]);
 
   logger.log(`[PopUp]: render `, tcf, prebids, googleAdManager);
 
