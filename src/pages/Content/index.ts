@@ -60,7 +60,6 @@ class Content {
       return;
     }
     const { type, payload } = event.data;    
-    console.log({ type, payload })
     this.updateBackgroundPage(type, payload);
     this.updateMasks();
   };
