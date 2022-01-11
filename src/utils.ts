@@ -1,6 +1,6 @@
 import logger from './logger';
 
-export const sendToContentScript = (type: string, payload: any = '') => {
+export const sendToContentScript = (type: string, payload: any) => {
   const replacer = (key: any, value: any) => (typeof value === 'undefined' ? null : value);
 
   logger.log('[sendToContentScript] postMessage ', type);
