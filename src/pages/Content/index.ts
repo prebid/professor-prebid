@@ -20,60 +20,7 @@ class Content {
   }
 
   listenToInjectedScript() {
-    window.addEventListener(
-      'message',
-      (event) => {
-        if (event.source != window) {
-          return;
-        }
-        const { type, payload } = event.data;
-
-        switch (type) {
-          case constants.EVENTS.REQUEST_CONSOLE_STATE: {
-            // update injected
-            this.sendConsoleStateToInjected();
-
-            break;
-          }
-
-          case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND: {
-            this.googleAdManager = JSON.parse(payload);
-
-            // update background page
-            this.updateBackgroundPage(constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, this.googleAdManager);
-
-            // update injected
-            this.updateMasks();
-
-            break;
-          }
-
-          case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND: {
-            this.prebid = JSON.parse(payload);
-
-            // update background page
-            this.updateBackgroundPage(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, this.prebid);
-
-            // update injected
-            this.updateMasks();
-
-            break;
-          }
-
-          case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND: {
-            this.tcf = JSON.parse(payload);
-            // update background page
-            this.updateBackgroundPage(constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, this.tcf);
-
-            // update injected
-            this.updateMasks();
-
-            break;
-          }
-        }
-      },
-      false
-    );
+    window.addEventListener('message', this.processMessageFromInjected, false);
   }
 
   listenToPopupScript() {
@@ -107,6 +54,16 @@ class Content {
     logger.log('[Content] mask ready', masks);
     return masks;
   }
+
+  processMessageFromInjected = (event: MessageEvent<any>) => {
+    if (event.source != window) {
+      return;
+    }
+    const { type, payload } = event.data;    
+    console.log({ type, payload })
+    this.updateBackgroundPage(type, payload);
+    this.updateMasks();
+  };
 
   sendConsoleStateToInjected() {
     chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {

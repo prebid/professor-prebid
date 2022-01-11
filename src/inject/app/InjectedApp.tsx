@@ -44,7 +44,7 @@ const InjectedApp = (): JSX.Element => {
   };
 
   useEffect(() => {
-    sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE);
+    sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE, null);
     document.addEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
     document.addEventListener(constants.SAVE_MASKS, handleNewMasks);
     return () => {
