@@ -7,7 +7,7 @@ export const sendToContentScript = (type: string, payload: any = '') => {
   window.postMessage(
     {
       type,
-      payload: JSON.stringify(payload, replacer),
+      payload: JSON.parse(JSON.stringify(payload, replacer)),
     },
     undefined
   );
