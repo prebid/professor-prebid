@@ -45,10 +45,11 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
           title="Analytics"
           subheader={''}
           action={
-            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
             </ExpandMore>
           }
+          onClick={handleExpandClick}
         />
         <CardContent>
           <Typography variant="body2" color="text.secondary">

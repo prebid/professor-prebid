@@ -52,11 +52,12 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
           action={
             (prebid.config.s2sConfig?.app ||
               (prebid.config.s2sConfig.adapterOptions && JSON.stringify(prebid.config.s2sConfig.adapterOptions) !== '{}')) && (
-              <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+              <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
                 <ExpandMoreIcon />
               </ExpandMore>
             )
           }
+          onClick={handleExpandClick}
         />
         <CardContent>
           <Typography variant="body2" color="text.secondary">

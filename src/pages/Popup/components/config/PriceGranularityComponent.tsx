@@ -72,10 +72,11 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
             Object.keys(defaultBuckets).includes(prebid.config.priceGranularity) ? 'default' : 'custom'
           })`}
           action={
-            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
             </ExpandMore>
           }
+          onClick={handleExpandClick}
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           {(() => {

@@ -47,10 +47,11 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
           title="Bidder Settings"
           subheader={'Timeout, ...'}
           action={
-            <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
             </ExpandMore>
           }
+          onClick={handleExpandClick}
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           <CardContent>
