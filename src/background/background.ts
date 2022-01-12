@@ -151,7 +151,6 @@ export interface ITabInfo {
 
 export interface ITabInfos {
   [key: number]: ITabInfo;
-  [key: string]: any;
 }
 
 new Background();

@@ -1,16 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import UserIdsComponent from '../Popup/components/userIds/UserIdsComponent';
 import PrebidAdUnitsComponent from '../Popup/components/adUnits/AdUnitsComponent';
 import TimeLineComponent from '../Popup/components/timeline/TimeLineComponent';
-import { IPrebids, ITabInfos } from '../../background/background';
-import { ITcfDetails } from '../../inject/scripts/tcf';
-import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
+import { ITabInfos } from '../../background/background';
 import BidsComponent from '../Popup/components/bids/BidsComponent';
 import ConfigComponent from '../Popup/components/config/ConfigComponent';
 import ToolsComponent from '../Popup/components/tools/ToolsComponent';
 import ReactJson from 'react-json-view';
-
-import { appHandler } from './appHandler';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
@@ -38,41 +34,48 @@ const TabPanel = (props: TabPanelProps) => {
 };
 
 const DebugComponent = () => {
+  const bg = chrome.extension.getBackgroundPage();
   const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
-  const [value, setValue] = useState(0);
+  const [muiTabId, setMuiTabId] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleMuiTabIdChange = (event: React.SyntheticEvent, newValue: number) => {
+    setMuiTabId(newValue);
   };
 
-  const bg = chrome.extension.getBackgroundPage();
   useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabInfos = bg.tabInfos;
-      setTabInfos(tabInfos)
-    });
-  }, [bg.tabInfos]);
+    const newTabInfos = { ...bg.tabInfos };
+    setTabInfos(newTabInfos);
+  }, []);
+
+  //  rerender once a second TODO: make this less of a hack
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setCount(count + 1), 1000);
+    return () => clearInterval(interval);
+  }, [count]);
 
   return (
     <Box>
       <IconButton color="secondary" aria-label="delete backgroundpage data">
         <DeleteIcon />
       </IconButton>
-      <ReactJson
-        src={tabInfos}
-        name={false}
-        collapsed={2}
-        enableClipboard={false}
-        displayObjectSize={true}
-        displayDataTypes={false}
-        sortKeys={false}
-        quotesOnKeys={false}
-        indentWidth={2}
-        collapseStringsAfterLength={100}
-        style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-      />
+      {tabInfos && (
+        <ReactJson
+          src={tabInfos}
+          name={false}
+          collapsed={2}
+          enableClipboard={false}
+          displayObjectSize={true}
+          displayDataTypes={false}
+          sortKeys={false}
+          quotesOnKeys={false}
+          indentWidth={2}
+          collapseStringsAfterLength={100}
+          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+        />
+      )}
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+        <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
           {tabInfos &&
             Object.keys(tabInfos)[0] &&
             Object.keys(tabInfos).map((key: any, index) => {
@@ -88,7 +91,7 @@ const DebugComponent = () => {
           const kiloBytes = size / 1024;
           const megaBytes = (kiloBytes / 1024).toFixed(2);
           return (
-            <TabPanel value={value} index={index} key={index}>
+            <TabPanel value={muiTabId} index={index} key={index}>
               <Box key={key}>
                 {prebids &&
                   Object.keys(prebids).map((prebidKey: string) => {
