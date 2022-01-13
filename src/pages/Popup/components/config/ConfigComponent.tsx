@@ -11,7 +11,6 @@ import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
 export const tileHeight = 255;
 
-
 const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
   logger.log(`[PopUp][BidderSettingsComponent]: render `);
   return (

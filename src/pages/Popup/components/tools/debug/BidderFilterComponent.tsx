@@ -80,7 +80,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
           flexDirection: 'row',
           flexWrap: 'nowrap',
           justifyContent: 'space-between',
-          width: 0.9
+          width: 0.9,
         }}
       >
         <InputLabel>Filter Bidder(s)</InputLabel>

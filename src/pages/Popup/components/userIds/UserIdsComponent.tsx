@@ -117,7 +117,6 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                           style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
                         />
                       )}
-                      
                     </TableCell>
                   </TableRow>
                 ))}
