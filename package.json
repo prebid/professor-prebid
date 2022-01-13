@@ -29,6 +29,7 @@
 		"@types/doubleclick-gpt": "^2019111201.0.2",
 		"@types/react-router-dom": "^5.1.8",
 		"@types/requestidlecallback": "^0.3.4",
+		"@typescript-eslint/parser": "^4.33.0",
 		"lodash": "^4.17.21",
 		"moment": "^2.29.1",
 		"normalize.css": "^8.0.1",
