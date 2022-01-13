@@ -32,7 +32,7 @@ const AdMaskComponent = ({ creativeRenderTime, elementId, winningCPM, winningBid
   );
 };
 
-interface IMaskInputData {
+export interface IMaskInputData {
   elementId: string;
   creativeRenderTime: number;
   winningBidder: string;
