@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import './ad-mask.scss';
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
 import AdMaskPortal from './AdMaskPortal';
-import Box from '@mui/material/Box';
+import { IMaskInputData } from './AdMask';
+
 import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../scripts/prebid';
 
 declare global {
@@ -12,28 +13,6 @@ declare global {
     [key: string]: any;
   }
 }
-
-let findContainerCount = 0;
-const findContainerElement = (id: string) => {
-  const container = document.getElementById(id);
-  const elementsWithIdSubstring = document.querySelectorAll(`[id*="${id}"]`);
-  if (container) {
-    logger.log(`[InjectedApp] Found container element with id ${id}.`);
-    return container;
-  }
-  if (elementsWithIdSubstring.length > 0) {
-    logger.log(`[InjectedApp] Found container element with id as substring in ${id}.`);
-    return elementsWithIdSubstring[0];
-  }
-  if (findContainerCount > 10) {
-    logger.log(`[InjectedApp] Could not find container element with id ${id}. Retry #${findContainerCount}/10`);
-    requestIdleCallback(() => {
-      findContainerElement(id);
-      findContainerCount += 1;
-    });
-  }
-  return null;
-};
 
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
@@ -46,35 +25,38 @@ const InjectedApp = (): JSX.Element => {
 
   const handleNewMasks = (event: Event) => {
     const customEvent = event as CustomEvent;
-    const newMasks = prepareMasks(customEvent.detail) || [];
-    logger.log('[InjectedApp] New masks prepared to set', newMasks);
-    setMasks(newMasks);
-  };
+    const pbjsNameSpace = customEvent.detail;
+    if (pbjsNameSpace) {
+      const pbsjsEvents = (window[pbjsNameSpace].getEvents() || []) as unknown[];
+      const auctionEndEvents = (pbsjsEvents as IPrebidAuctionEndEventData[]).filter((event) => event.eventType === 'auctionEnd');
+      const allAdunitCodes = Array.from(
+        new Set(
+          auctionEndEvents.reduce((acc, auctionEndEvent) => {
+            return acc.concat(auctionEndEvent.args.adUnitCodes);
+          }, [] as string[])
+        )
+      );
+      const masks = allAdunitCodes
+        .filter(
+          (adUnitCode) => document.getElementById(adUnitCode) || document.querySelector(`[id*="${adUnitCode}"]:not([id^=prpb-mask--container-])`)
+        )
+        .map((adUnitCode) => {
+          const slotsBidWonEvent = (pbsjsEvents as IPrebidBidWonEventData[])
+            .filter((event) => event.eventType === 'bidWon' && event.args.adUnitCode === adUnitCode)
+            .sort((a, b) => (a.args.responseTimestamp < b.args.responseTimestamp ? 1 : -1))[0];
 
-  const prepareMasks = (pbjsNameSpace: string) => {
-    logger.log('[InjectedApp] prepareMasks', pbjsNameSpace);
-    if (!pbjsNameSpace) return [];
-    const lastAuctionEndEvent = ((window[pbjsNameSpace].getEvents() || []) as IPrebidAuctionEndEventData[])
-      .filter((event) => event.eventType === 'auctionEnd')
-      .sort((a, b) => (a.args.timestamp > b.args.timestamp ? 1 : -1))
-      .pop();
-    const masks =
-      lastAuctionEndEvent?.args?.adUnits.map((slot) => {
-        const slotsBidWonEvent = window[pbjsNameSpace]
-          .getEvents()
-          .find(
-            (event: any) => event.eventType === 'bidWon' && (event as IPrebidBidWonEventData).args.adUnitCode === slot.code
-          ) as IPrebidBidWonEventData;
-        return {
-          elementId: slot.code,
-          creativeRenderTime: Date.now(), // TODO - get creative render time from prebid
-          winningCPM: slotsBidWonEvent?.args.cpm ? Math.round(slotsBidWonEvent?.args.cpm * 100) / 100 : undefined,
-          winningBidder: slotsBidWonEvent?.args.bidder || slotsBidWonEvent?.args.bidderCode,
-          currency: slotsBidWonEvent?.args.currency,
-          timeToRespond: slotsBidWonEvent?.args.timeToRespond,
-        };
-      });
-    return masks;
+          return {
+            elementId: adUnitCode,
+            creativeRenderTime: 666, // TODO - get creative render time from prebid
+            winningCPM: slotsBidWonEvent?.args.cpm ? Math.round(slotsBidWonEvent?.args.cpm * 100) / 100 : undefined,
+            winningBidder: slotsBidWonEvent?.args.bidder || slotsBidWonEvent?.args.bidderCode,
+            currency: slotsBidWonEvent?.args.currency,
+            timeToRespond: slotsBidWonEvent?.args.timeToRespond,
+          };
+        });
+      logger.log('[InjectedApp] New masks prepared to set', masks);
+      setMasks(masks);
+    }
   };
 
   useEffect(() => {
@@ -87,25 +69,15 @@ const InjectedApp = (): JSX.Element => {
     };
   }, []);
 
-  logger.log(`[InjectedApp] render:`, { consoleState, masks });
   return (
-    <Box>
+    <React.Fragment>
       {masks.map((mask, index) => {
-        return (
-          <AdMaskPortal key={index} container={findContainerElement(mask.elementId) as HTMLDivElement} mask={mask} consoleState={consoleState} />
-        );
+        const container =
+          document.getElementById(mask.elementId) || document.querySelector(`[id*="${mask.elementId}"]:not([id^=prpb-mask--container-])`);
+        return <AdMaskPortal key={index} mask={mask} consoleState={consoleState} container={container} />;
       })}
-    </Box>
+    </React.Fragment>
   );
 };
-
-interface IMaskInputData {
-  elementId: string;
-  creativeRenderTime: number;
-  winningBidder: string;
-  winningCPM: number;
-  currency: string;
-  timeToRespond: number;
-}
 
 export default InjectedApp;
