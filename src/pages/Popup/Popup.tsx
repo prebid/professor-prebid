@@ -9,6 +9,7 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
 import ToolsComponent from './components/tools/ToolsComponent';
+import { popupHandler } from './popupHandler';
 
 // Material-UI
 import Card from '@mui/material/Card';
@@ -54,14 +55,22 @@ export const Popup = (): JSX.Element => {
 
   const handleClose = () => setPbjsNamespaceDialogOpen(false);
   const handleClickOpen = () => setPbjsNamespaceDialogOpen(true);
-  const handlePbjsNamespaceChange = (event: SelectChangeEvent) => setPbjsNamespace(event.target.value as string);
+  const handlePbjsNamespaceChange = (event: SelectChangeEvent) => {
+    popupHandler.onPbjsNamespaceChange(event.target.value);
+    setPbjsNamespace(event.target.value as string);
+  };
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const bgPageTabInfo = backgroundPage.tabInfos[tabs[0].id];
       setTabInfo(bgPageTabInfo);
       setPbjsNamespace((previous) => {
-        return previous === null && bgPageTabInfo && bgPageTabInfo.prebids ? Object.keys(bgPageTabInfo.prebids)[0] : previous;
+        if (previous === null && bgPageTabInfo && bgPageTabInfo.prebids) {
+          popupHandler.onPbjsNamespaceChange(Object.keys(bgPageTabInfo.prebids)[0]);
+          return Object.keys(bgPageTabInfo.prebids)[0];
+        } else {
+          return previous;
+        }
       });
     });
   }, []);
@@ -118,7 +127,11 @@ export const Popup = (): JSX.Element => {
                   horizontal: 'right',
                 }}
               >
-                <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" onClick={handleClickOpen} />
+                <img
+                  src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg"
+                  onClick={handleClickOpen}
+                  width={'100%'}
+                />
               </Badge>
               {tabInfo.prebids && (
                 <Dialog disableEscapeKeyDown open={pbjsNamespaceDialogOpen} onClose={handleClose}>

@@ -45,6 +45,18 @@ class PopupHandler {
     }
   }
 
+  onPbjsNamespaceChange(pbjsNamespace: string) {
+    try {
+      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+        const tab = tabs[0];
+        logger.log('[PopupHandler] Send pbjsNamespace', { tab }, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+        chrome.tabs.sendMessage(tab.id, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+      });
+    } catch (e) {
+      logger.error('onConsoleToggle', e);
+    }
+  }
+
   openDebugTab() {
     chrome.runtime.sendMessage({
       type: constants.EVENTS.OPEN_DATA_TAB,

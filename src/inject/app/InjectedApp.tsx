@@ -5,6 +5,13 @@ import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
 import AdMaskPortal from './AdMaskPortal';
 import Box from '@mui/material/Box';
+import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../scripts/prebid';
+
+declare global {
+  interface Window {
+    [key: string]: any;
+  }
+}
 
 let findContainerCount = 0;
 const findContainerElement = (id: string) => {
@@ -39,8 +46,35 @@ const InjectedApp = (): JSX.Element => {
 
   const handleNewMasks = (event: Event) => {
     const customEvent = event as CustomEvent;
-    const newMasks = customEvent.detail || [];
+    const newMasks = prepareMasks(customEvent.detail) || [];
+    logger.log('[InjectedApp] New masks prepared to set', newMasks);
     setMasks(newMasks);
+  };
+
+  const prepareMasks = (pbjsNameSpace: string) => {
+    logger.log('[InjectedApp] prepareMasks', pbjsNameSpace);
+    if (!pbjsNameSpace) return [];
+    const lastAuctionEndEvent = ((window[pbjsNameSpace].getEvents() || []) as IPrebidAuctionEndEventData[])
+      .filter((event) => event.eventType === 'auctionEnd')
+      .sort((a, b) => (a.args.timestamp > b.args.timestamp ? 1 : -1))
+      .pop();
+    const masks =
+      lastAuctionEndEvent?.args?.adUnits.map((slot) => {
+        const slotsBidWonEvent = window[pbjsNameSpace]
+          .getEvents()
+          .find(
+            (event: any) => event.eventType === 'bidWon' && (event as IPrebidBidWonEventData).args.adUnitCode === slot.code
+          ) as IPrebidBidWonEventData;
+        return {
+          elementId: slot.code,
+          creativeRenderTime: Date.now(), // TODO - get creative render time from prebid
+          winningCPM: slotsBidWonEvent?.args.cpm ? Math.round(slotsBidWonEvent?.args.cpm * 100) / 100 : undefined,
+          winningBidder: slotsBidWonEvent?.args.bidder || slotsBidWonEvent?.args.bidderCode,
+          currency: slotsBidWonEvent?.args.currency,
+          timeToRespond: slotsBidWonEvent?.args.timeToRespond,
+        };
+      });
+    return masks;
   };
 
   useEffect(() => {
