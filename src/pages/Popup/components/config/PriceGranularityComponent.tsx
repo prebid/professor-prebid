@@ -9,13 +9,11 @@ import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
 import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
-import EuroSharpIcon from '@mui/icons-material/EuroSharp';
 import { styled } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
@@ -130,7 +128,7 @@ export const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponent
     setType(type);
     const rows = defaultBuckets[type] || prebid.config?.customPriceBucket?.buckets || [];
     setRows(rows);
-  }, [prebid.config.priceGranularity]);
+  }, [prebid.config.priceGranularity, prebid.config?.customPriceBucket?.buckets]);
 
   logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (

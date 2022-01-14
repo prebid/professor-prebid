@@ -98,7 +98,7 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
   const open = Boolean(anchorEl);
   useEffect(() => {
     setBidderRequest(auctionEndEvent.args.bidderRequests.find((bidderRequest) => bidderRequest.bidderRequestId === item.bidderRequestId));
-  }, []);
+  }, [auctionEndEvent.args.bidderRequests, item.bidderRequestId]);
   return (
     <React.Fragment>
       <ListItem
@@ -147,16 +147,15 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
 };
 
 const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
-  const prebidEvents = prebid.events || [];
+  const prebidEvents = prebid.events;
   const gridStep = (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / 100;
   const classes = useStyles();
   const gridRef = useRef(null);
   const [bidderArray, setBidderArray] = React.useState<ITableRow[]>([]);
   const [rangeArray, setRangeArray] = React.useState<number[]>([]);
-  const [expanded, setExpanded] = React.useState(false);
   const [auctionEndLeft, setAuctionEndLeft] = React.useState<number>(0);
 
-  logger.log(`[PopUp][GanttChartComponent]: render `, prebidEvents, gridStep, bidderArray, rangeArray, expanded);
+  logger.log(`[PopUp][GanttChartComponent]: render `, prebidEvents, gridStep, bidderArray, rangeArray);
   useEffect(() => {
     setAuctionEndLeft((previousValue) => {
       const auctionEndGridBar = getNearestGridBarElement(auctionEndEvent.args.auctionEnd, gridRef);
@@ -186,7 +185,15 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
           return { bidderCode, left, width, start, end, bidderRequestId };
         })
     );
-  }, [auctionEndEvent.args.bidderRequests.length, gridRef.current?.children]);
+  }, [
+    auctionEndEvent.args.auctionEnd,
+    auctionEndEvent.args.bidderRequests,
+    auctionEndEvent.args.bidderRequests.length,
+    auctionEndEvent.args.timestamp,
+    gridRef.current?.children,
+    gridStep,
+    prebidEvents,
+  ]);
 
   return (
     <Card elevation={20} sx={{ width: 1, maxWidth: 1 }}>

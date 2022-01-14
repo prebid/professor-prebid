@@ -45,7 +45,7 @@ const DebugComponent = () => {
   useEffect(() => {
     const newTabInfos = { ...bg.tabInfos };
     setTabInfos(newTabInfos);
-  }, []);
+  }, [bg.tabInfos]);
 
   //  rerender once a second TODO: make this less of a hack
   const [count, setCount] = useState(0);

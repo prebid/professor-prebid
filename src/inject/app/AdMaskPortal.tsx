@@ -33,7 +33,7 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
     } else {
       slotMaskElement?.parentNode.removeChild(slotMaskElement);
     }
-  }, [mask, consoleState]);
+  }, [mask, consoleState, container]);
 
   return ReactDOM.createPortal(
     <AdMaskComponent

@@ -1,7 +1,6 @@
 import { safelyParseJSON } from '../../utils';
 import constants from '../../constants.json';
 import logger from '../../logger';
-import React, { useCallback, useEffect, useState } from 'react';
 
 class PopupHandler {
   handleDataFromContentScript(cb: any) {

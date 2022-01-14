@@ -1,5 +1,4 @@
 import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
-import { IGoogleAdManagerDetails } from '../../../../inject/scripts/googleAdManager';
 import React, { useEffect } from 'react';
 import GanttChartComponent from './GanttChartComponent';
 import logger from '../../../../logger';

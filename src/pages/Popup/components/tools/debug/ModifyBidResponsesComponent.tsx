@@ -45,7 +45,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
         setDebugConfigState(savedConfig);
       } catch (e) {}
     });
-  }, []);
+  });
 
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (

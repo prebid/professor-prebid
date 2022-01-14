@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 // Custom files
 import { ITabInfo } from '../../background/background';
@@ -73,7 +73,7 @@ export const Popup = (): JSX.Element => {
         }
       });
     });
-  }, []);
+  }, [backgroundPage.tabInfos]);
 
   //  rerender once a second TODO: make this less of a hack
   const [count, setCount] = useState(0);
@@ -118,8 +118,8 @@ export const Popup = (): JSX.Element => {
           >
             <Stack sx={{ pl: 2, pr: 10 }} spacing={2} direction="row">
               <Badge
-                invisible={tabInfo.prebids && Object.keys(tabInfo.prebids).length < 2}
-                badgeContent={(tabInfo.prebids && Object.keys(tabInfo.prebids).length) || null}
+                invisible={tabInfo?.prebids && Object.keys(tabInfo.prebids).length < 2}
+                badgeContent={(tabInfo?.prebids && Object.keys(tabInfo.prebids).length) || null}
                 color="primary"
                 sx={{ width: '14%' }}
                 anchorOrigin={{
@@ -131,6 +131,7 @@ export const Popup = (): JSX.Element => {
                   src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg"
                   onClick={handleClickOpen}
                   width={'100%'}
+                  alt="prebid logo"
                 />
               </Badge>
               {tabInfo.prebids && (
@@ -140,7 +141,7 @@ export const Popup = (): JSX.Element => {
                     <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
                       <FormControl sx={{ m: 1, minWidth: 120 }}>
                         <Select value={pbjsNameSpace || undefined} onChange={handlePbjsNamespaceChange} autoWidth>
-                          {Object.keys(tabInfo.prebids).map((global, index) => (
+                          {Object.keys(tabInfo?.prebids).map((global, index) => (
                             <MenuItem key={index} value={global}>
                               {global}
                             </MenuItem>
@@ -220,7 +221,7 @@ export const Popup = (): JSX.Element => {
         </AppBar>
         <Switch>
           <Route exact path="/">
-            {tabInfo.prebids && !tabInfo.prebids[pbjsNameSpace] && (
+            {tabInfo?.prebids && !tabInfo.prebids[pbjsNameSpace] && (
               <Card>
                 <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
                   <Grid container justifyContent="center">
@@ -246,26 +247,26 @@ export const Popup = (): JSX.Element => {
                 </CardContent>
               </Card>
             )}
-            {tabInfo.prebids && tabInfo.prebids[pbjsNameSpace] && (
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && (
               <PrebidAdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></PrebidAdUnitsComponent>
             )}
           </Route>
           <Route exact path="/bids">
-            {tabInfo.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></BidsComponent>}
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></BidsComponent>}
           </Route>
           <Route exact path="/timeline">
-            {tabInfo.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]}></TimelineComponent>}
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]}></TimelineComponent>}
           </Route>
           <Route exact path="/config">
-            {tabInfo.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
               <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo.tcf}></ConfigComponent>
             )}
           </Route>
           <Route exact path="/userId">
-            {tabInfo.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></UserIdsComponent>}
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></UserIdsComponent>}
           </Route>
           <Route exact path="/tools">
-            {tabInfo.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></ToolsComponent>}
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></ToolsComponent>}
           </Route>
         </Switch>
       </Router>

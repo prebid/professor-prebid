@@ -115,6 +115,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
             );
           }
         }
+        return null;
       })}
     </Box>
   );

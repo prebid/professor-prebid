@@ -42,7 +42,7 @@ const TcfComponent = ({ tcf, tcfKey }: any): JSX.Element => {
       decodedTcfString = TCString.decode(string, null);
     } catch (e) {}
     setDecodedTcfString(decodedTcfString);
-  }, []);
+  }, [tcf, tcfKey]);
   logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf, tcfKey);
   return (
     <Box>
