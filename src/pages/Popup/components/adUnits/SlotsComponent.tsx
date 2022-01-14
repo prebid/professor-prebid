@@ -1,5 +1,11 @@
 import React, { useEffect } from 'react';
-import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidAdUnitMediaTypes, IPrebidAdUnit } from '../../../../inject/scripts/prebid';
+import {
+  IPrebidAuctionEndEventData,
+  IPrebidDetails,
+  IPrebidAdUnitMediaTypes,
+  IPrebidAdUnit,
+  IPrebidBidWonEventData,
+} from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -14,8 +20,9 @@ import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 import logger from '../../../../logger';
 import merge from 'lodash/merge';
+import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 
-const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip }: any): JSX.Element => {
+const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip, isWinner }: any): JSX.Element => {
   let json: { [key: string]: any } = {};
   if (typeof input !== 'object') {
     json[label] = input;
@@ -35,7 +42,15 @@ const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip }: any)
   const open = Boolean(anchorEl);
   return (
     <React.Fragment>
-      <Chip size="small" variant="outlined" color="primary" label={labelText} onClick={handlePopoverOpen} sx={{ maxWidth: 200 }} />
+      <Chip
+        size="small"
+        variant="outlined"
+        color={isWinner ? 'secondary' : 'primary'}
+        icon={isWinner ? <GavelOutlinedIcon sx={{height: '12px', paddingLeft: 1}}/> : null}
+        label={labelText}
+        onClick={handlePopoverOpen}
+        sx={{ maxWidth: 200 }}
+      />
       <Popover
         id="mouse-over-popover"
         open={open}
@@ -123,7 +138,15 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
 
 const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
   const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
+  const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
+
   useEffect(() => {
+    const auctionEndEvents = (prebid.events?.filter((event) => event.eventType === 'auctionEnd') || []) as IPrebidAuctionEndEventData[];
+    const latestAuctionId = auctionEndEvents.sort((a, b) => a?.args.timestamp - b?.args.timestamp)[0].args.auctionId;
+    const latestAuctionsWinningBids = (prebid.events?.filter((event) => event.eventType === 'bidWon' && event.args.auctionId === latestAuctionId) ||
+      []) as IPrebidBidWonEventData[];
+    setLatestAuctionsWinningBids(latestAuctionsWinningBids);
+
     const adUnits = prebid.events
       .filter((event) => event.eventType === 'auctionEnd')
       .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
@@ -140,6 +163,7 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
       .sort((a, b) => (a.code > b.code ? 1 : -1));
     setAdUnits(adUnits);
   }, [prebid.events]);
+
   logger.log(`[PopUp][SlotComponent]: render `, adUnits);
   return (
     <TableContainer>
@@ -158,23 +182,28 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {adUnits.map((adUnit, index) => (
-            <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
-              <TableCell variant="body">
-                <strong>{adUnit.code}</strong>
-              </TableCell>
-              <TableCell variant="body">
-                <MediaTypesComponent mediaTypes={adUnit.mediaTypes} />
-              </TableCell>
-              <TableCell variant="body">
-                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {Array.from(new Set(adUnit.bids)).map((bid, index) => (
-                    <ChipWithPopOverOnClickComponent input={bid.params} label={bid.bidder} key={index} />
-                  ))}
-                </Stack>
-              </TableCell>
-            </TableRow>
-          ))}
+          {adUnits.map((adUnit, index) => {
+            return (
+              <TableRow key={index} sx={{ verticalAlign: 'top', '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell variant="body">
+                  <strong>{adUnit.code}</strong>
+                </TableCell>
+                <TableCell variant="body">
+                  <MediaTypesComponent mediaTypes={adUnit.mediaTypes} />
+                </TableCell>
+                <TableCell variant="body">
+                  <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                    {Array.from(new Set(adUnit.bids)).map((bid, index) => {
+                      const isWinner = latestAuctionsWinningBids.some(
+                        (winningBid) => winningBid.args.adUnitCode === adUnit.code && winningBid.args.bidder === bid.bidder
+                      );
+                      return <ChipWithPopOverOnClickComponent input={bid.params} label={bid.bidder} key={index} isWinner={isWinner} />;
+                    })}
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>
