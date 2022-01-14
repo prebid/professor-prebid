@@ -53,45 +53,45 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   }, [prebid.events]);
 
   logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnits);
-
-  if (allAdUnits.length >= 1) {
-    return (
-      <Card>
-        <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
-          <Grid container direction="row" justifyContent="space-evenly">
-            <Grid item>
-              <StyledPaper elevation={paperElevation}>{prebid.version && <StyledTypography>Version: {prebid.version}</StyledTypography>}</StyledPaper>
+  return (
+    <Card>
+      {allAdUnits[0] && (
+        <React.Fragment>
+          <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
+            <Grid container direction="row" justifyContent="space-evenly">
+              <Grid item>
+                <StyledPaper elevation={paperElevation}>
+                  {prebid.version && <StyledTypography>Version: {prebid.version}</StyledTypography>}
+                </StyledPaper>
+              </Grid>
+              <Grid item>
+                <StyledPaper elevation={paperElevation}>
+                  <StyledTypography>AdUnits: {allAdUnits.length}</StyledTypography>
+                </StyledPaper>
+              </Grid>
+              <Grid item>
+                <StyledPaper elevation={paperElevation}>
+                  {prebid.config?.timeoutBuffer && <StyledTypography>Timeout: {prebid.config.bidderTimeout}</StyledTypography>}
+                </StyledPaper>
+              </Grid>
+              <Grid item>
+                <StyledPaper elevation={paperElevation}>
+                  <StyledTypography>Bidders: {allBidderEvents.length}</StyledTypography>
+                </StyledPaper>
+              </Grid>
+              <Grid item>
+                <StyledPaper elevation={paperElevation}>
+                  <StyledTypography>
+                    Bid Ratio: {Math.round((allNoBidEvents.length / (allNoBidEvents.length + allBidResponseEvents.length)) * 100)}%
+                  </StyledTypography>
+                </StyledPaper>
+              </Grid>
             </Grid>
-            <Grid item>
-              <StyledPaper elevation={paperElevation}>
-                <StyledTypography>AdUnits: {allAdUnits.length}</StyledTypography>
-              </StyledPaper>
-            </Grid>
-            <Grid item>
-              <StyledPaper elevation={paperElevation}>
-                {prebid.config?.timeoutBuffer && <StyledTypography>Timeout: {prebid.config.bidderTimeout}</StyledTypography>}
-              </StyledPaper>
-            </Grid>
-            <Grid item>
-              <StyledPaper elevation={paperElevation}>
-                <StyledTypography>Bidders: {allBidderEvents.length}</StyledTypography>
-              </StyledPaper>
-            </Grid>
-            <Grid item>
-              <StyledPaper elevation={paperElevation}>
-                <StyledTypography>
-                  Bid Ratio: {Math.round((allNoBidEvents.length / (allNoBidEvents.length + allBidResponseEvents.length)) * 100)}%
-                </StyledTypography>
-              </StyledPaper>
-            </Grid>
-          </Grid>
-        </CardContent>
-        <Paper>{prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}</Paper>
-      </Card>
-    );
-  } else {
-    return (
-      <Card>
+          </CardContent>
+          <Paper>{prebid.events[0] && <SlotsComponent prebid={prebid}></SlotsComponent>}</Paper>
+        </React.Fragment>
+      )}
+      {!allAdUnits[0] && (
         <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
@@ -101,9 +101,9 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Grid>
           </Grid>
         </CardContent>
-      </Card>
-    );
-  }
+      )}
+    </Card>
+  );
 };
 
 interface IAdUnitsComponentProps {
