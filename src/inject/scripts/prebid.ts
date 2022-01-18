@@ -11,10 +11,6 @@ declare global {
 }
 class Prebid {
   globalPbjs: any = window.pbjs;
-  bids: IPrebidBid[];
-  config: IPrebidConfig;
-  eids: IPrebidEids[];
-  stopLoop: boolean = false;
   namespace: string;
   debug: IPrebidDebugConfig;
   lastTimeUpdateSentToContentScript: number;
@@ -28,87 +24,73 @@ class Prebid {
     this.globalPbjs.que.push(() => this.addEventListeners());
   }
 
-  addEventListeners(): void {
+  addEventListeners = (): void => {
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
       logger.log('[Injected] auctionInit', this.namespace, { auctionInitData });
-      this.throttle(this.sendDetailsToContentScript.bind(this));
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
       logger.log('[Injected] auctionEnd', this.namespace, { auctionEndData });
-      this.throttle(this.sendDetailsToContentScript.bind(this));
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidRequested', (bidRequested: IPrebidBidRequestedEventData) => {
       logger.log('[Injected] bidRequested', this.namespace, { bidRequested });
-      this.throttle(this.sendDetailsToContentScript.bind(this));
+      this.throttle(this.sendDetailsToContentScript);
     });
 
-    this.globalPbjs.onEvent('bidResponse', (bidRequested: IPrebidBidResponseEventData) => {
+    this.globalPbjs.onEvent('bidResponse', (bidRequested: any) => {
       logger.log('[Injected] bidResponse', this.namespace, { bidRequested });
-      this.throttle(this.sendDetailsToContentScript.bind(this));
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('noBid', (noBid: IPrebidNoBidEventData) => {
       logger.log('[Injected] noBid', this.namespace, { noBid });
-      this.throttle(this.sendDetailsToContentScript.bind(this));
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidWon', (bidWon: IPrebidBidWonEventData) => {
       logger.log('[Injected] bidWon', this.namespace, { bidWon });
-      this.throttle(this.sendDetailsToContentScript.bind(this));
+      this.throttle(this.sendDetailsToContentScript);
     });
     logger.log('[Injected] event listeners added', this.namespace);
-  }
+  };
 
-  getPbjsDebugConfig() {
+  getPbjsDebugConfig = () => {
     const pbjsDebugString = window.sessionStorage.getItem('pbjs:debugging');
     try {
       return JSON.parse(pbjsDebugString);
     } catch (e) {
       // return pbjsDebugString;
     }
-  }
+  };
 
-  getPbjsEvents() {
+  getPbjsEvents = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [];
-    return events;
-    // .filter(
-    //   (
-    //     event:
-    //       | IPrebidAuctionInitEventData
-    //       | IPrebidAuctionEndEventData
-    //       | IPrebidBidRequestedEventData
-    //       | IPrebidNoBidEventData
-    //       | IPrebidBidWonEventData
-    //   ) => {
-    //     return (
-    //       event.eventType === 'bidRequested' ||
-    //       event.eventType === 'bidResponse' ||
-    //       event.eventType === 'noBid' ||
-    //       event.eventType === 'auctionEnd' ||
-    //       event.eventType === 'auctionInit' ||
-    //       event.eventType === 'bidWon'
-    //     );
-    //   }
-    // );
-  }
+    return events.map((event: any) => {
+      delete event.args.doc; // throws CORS error in webpage console
+      return event;
+    });
+  };
 
-  sendDetailsToContentScript(): void {
-    this.config = this.globalPbjs.getConfig();
-    this.eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
+  sendDetailsToContentScript = (): void => {
+    const config = this.globalPbjs.getConfig();
+    const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
+    const events = this.getPbjsEvents();
+    const timeout = window.PREBID_TIMEOUT || null;
     const prebidDetail: IPrebidDetails = {
-      version: this.globalPbjs.version,
-      timeout: window.PREBID_TIMEOUT || null,
-      events: this.getPbjsEvents(),
-      config: this.config,
-      eids: this.eids,
+      config,
       debug: this.debug,
+      eids,
+      events,
       namespace: this.namespace,
+      timeout,
+      version: this.globalPbjs.version,
     };
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     logger.log('[Injected] sendDetailsToContentScript', prebidDetail);
-  }
+  };
 
   throttle = (fn: Function) => {
     if (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval) {
