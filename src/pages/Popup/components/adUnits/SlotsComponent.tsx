@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   IPrebidAuctionEndEventData,
-  IPrebidDetails,
   IPrebidAdUnitMediaTypes,
   IPrebidAdUnit,
   IPrebidBidWonEventData,
+  IPrebidBidResponseEventData,
 } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,22 +18,15 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
-import logger from '../../../../logger';
-import merge from 'lodash/merge';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 
 const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip, isWinner }: any): JSX.Element => {
-  let json: { [key: string]: any } = {};
-  if (typeof input !== 'object') {
-    json[label] = input;
-  } else {
-    json = { ...input };
-  }
-
   const labelText = showInputInChip ? `${label}: ${JSON.stringify(input)}` : `${label}`;
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+    if (typeof input === 'object') {
+      setAnchorEl(event.currentTarget);
+    }
   };
   const handlePopoverClose = () => {
     setAnchorEl(null);
@@ -46,7 +39,7 @@ const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip, isWinn
         size="small"
         variant="outlined"
         color={isWinner ? 'secondary' : 'primary'}
-        icon={isWinner ? <GavelOutlinedIcon sx={{height: '12px', paddingLeft: 1}}/> : null}
+        icon={isWinner ? <GavelOutlinedIcon sx={{ height: '12px', paddingLeft: 1 }} /> : null}
         label={labelText}
         onClick={handlePopoverOpen}
         sx={{ maxWidth: 200 }}
@@ -61,7 +54,7 @@ const ChipWithPopOverOnClickComponent = ({ input, label, showInputInChip, isWinn
         disableRestoreFocus
       >
         <ReactJson
-          src={json}
+          src={input}
           name={false}
           collapsed={false}
           enableClipboard={false}
@@ -136,35 +129,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
   );
 };
 
-const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
-  const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
-  const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
-
-  useEffect(() => {
-    const auctionEndEvents = (prebid.events?.filter((event) => event.eventType === 'auctionEnd') || []) as IPrebidAuctionEndEventData[];
-    const latestAuctionId = auctionEndEvents.sort((a, b) => a?.args.timestamp - b?.args.timestamp)[0].args.auctionId;
-    const latestAuctionsWinningBids = (prebid.events?.filter((event) => event.eventType === 'bidWon' && event.args.auctionId === latestAuctionId) ||
-      []) as IPrebidBidWonEventData[];
-    setLatestAuctionsWinningBids(latestAuctionsWinningBids);
-
-    const adUnits = prebid.events
-      .filter((event) => event.eventType === 'auctionEnd')
-      .map((event) => (event as IPrebidAuctionEndEventData).args.adUnits)
-      .flat()
-      .reduce((previousValue, currentValue) => {
-        const toBeUpdatedIndex = previousValue.findIndex((adUnit) => adUnit.code === currentValue.code);
-        if (toBeUpdatedIndex !== -1) {
-          previousValue[toBeUpdatedIndex] = merge(previousValue[toBeUpdatedIndex], currentValue);
-          return previousValue;
-        } else {
-          return [...previousValue, currentValue];
-        }
-      }, [] as IPrebidAdUnit[])
-      .sort((a, b) => (a.code > b.code ? 1 : -1));
-    setAdUnits(adUnits);
-  }, [prebid.events]);
-
-  logger.log(`[PopUp][SlotComponent]: render `, adUnits);
+const SlotsComponent = ({ adUnits, latestAuctionsWinningBids, latestAuctionsBidsReceived }: ISlotsComponentProps): JSX.Element => {
   return (
     <TableContainer>
       <Table size="small">
@@ -193,11 +158,23 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
                 </TableCell>
                 <TableCell variant="body">
                   <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                    {Array.from(new Set(adUnit.bids)).map((bid, index) => {
-                      const isWinner = latestAuctionsWinningBids.some(
-                        (winningBid) => winningBid.args.adUnitCode === adUnit.code && winningBid.args.bidder === bid.bidder
+                    {adUnit.bids.map((bid, index) => {
+                      const bidReceived = latestAuctionsBidsReceived.find(
+                        (bidReceived) =>
+                          bidReceived.args?.adUnitCode === adUnit.code &&
+                          bidReceived.args.bidder === bid.bidder &&
+                          adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args?.size)
                       );
-                      return <ChipWithPopOverOnClickComponent input={bid.params} label={bid.bidder} key={index} isWinner={isWinner} />;
+                      const isWinner = latestAuctionsWinningBids.some(
+                        (winningBid) =>
+                          winningBid.args.adUnitCode === adUnit.code &&
+                          winningBid.args.bidder === bid.bidder &&
+                          adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
+                      );
+                      const label = bidReceived?.args.cpm
+                        ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
+                        : `${bid.bidder}`;
+                      return <ChipWithPopOverOnClickComponent input={bid} label={label} key={index} isWinner={isWinner} />;
                     })}
                   </Stack>
                 </TableCell>
@@ -211,7 +188,11 @@ const SlotsComponent = ({ prebid }: ISlotsComponentProps): JSX.Element => {
 };
 
 interface ISlotsComponentProps {
-  prebid: IPrebidDetails;
+  auctionEndEvents: IPrebidAuctionEndEventData[];
+  allBidderEvents: IPrebidBidResponseEventData[];
+  latestAuctionsWinningBids: IPrebidBidWonEventData[];
+  latestAuctionsBidsReceived: IPrebidBidWonEventData[];
+  adUnits: IPrebidAdUnit[];
 }
 
 interface IMediaTypesComponentProps {
