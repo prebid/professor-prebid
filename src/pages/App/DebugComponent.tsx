@@ -11,8 +11,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
@@ -33,33 +31,69 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const DebugComponent = () => {
-  const bg = chrome.extension.getBackgroundPage();
-  const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
+const NamespaceTabs = ({ prebids, megaBytes, tcf }: any) => {
   const [muiTabId, setMuiTabId] = useState(0);
-
   const handleMuiTabIdChange = (event: React.SyntheticEvent, newValue: number) => {
     setMuiTabId(newValue);
   };
-
-  useEffect(() => {
-    const newTabInfos = { ...bg.tabInfos };
-    setTabInfos(newTabInfos);
-  }, [bg.tabInfos]);
-
-  //  rerender once a second TODO: make this less of a hack
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setCount(count + 1), 1000);
-    return () => clearInterval(interval);
-  }, [count]);
-
   return (
-    <Box>
-      <IconButton color="secondary" aria-label="delete backgroundpage data">
-        <DeleteIcon />
-      </IconButton>
-      {tabInfos && (
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
+          {Object.keys(prebids).map((prebidKey: string, index: number) => (
+            <Tab label={prebidKey} {...a11yProps(0)} key={index} />
+          ))}
+        </Tabs>
+      </Box>
+      {Object.keys(prebids).map((prebidKey: any, index) => {
+        const prebid = prebids[prebidKey];
+        return (
+          <TabPanel value={muiTabId} index={index} key={index}>
+            <Box key={prebidKey}>
+              <Typography>
+                Prebid ({prebidKey}) {megaBytes}MB
+              </Typography>
+              <ToolsComponent prebid={prebid}></ToolsComponent>
+              <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
+              <BidsComponent prebid={prebid}></BidsComponent>
+              <TimeLineComponent prebid={prebid}></TimeLineComponent>
+              <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>
+              <UserIdsComponent prebid={prebid}></UserIdsComponent>
+            </Box>
+          </TabPanel>
+        );
+      })}
+    </Box>
+  );
+};
+
+const ChromeTabs = ({ tabInfos }: any) => {
+  const [muiTabId, setMuiTabId] = useState(0);
+  const handleMuiTabIdChange = (event: React.SyntheticEvent, newValue: number) => {
+    setMuiTabId(newValue);
+  };
+  return (
+    <React.Fragment>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
+          {Object.keys(tabInfos).map((key: any, index) => {
+            return <Tab key={index} label={`${tabInfos[key].url} (TabId: ${key})`} {...a11yProps(index)} />;
+          })}
+          <Tab label={'JSON id:' + Object.keys(tabInfos).length} {...a11yProps(Object.keys(tabInfos).length)} />
+        </Tabs>
+      </Box>
+      {Object.keys(tabInfos).map((key: any, index) => {
+        const { prebids, tcf, googleAdManager } = tabInfos[key];
+        const size = new TextEncoder().encode(JSON.stringify(tabInfos[key])).length;
+        const kiloBytes = size / 1024;
+        const megaBytes = (kiloBytes / 1024).toFixed(2);
+        return (
+          <TabPanel value={muiTabId} index={index} key={index}>
+            <Box key={key}>{prebids && <NamespaceTabs prebids={prebids} megaBytes={megaBytes} tcf={tcf}></NamespaceTabs>}</Box>
+          </TabPanel>
+        );
+      })}
+      <TabPanel value={muiTabId} index={Object.keys(tabInfos).length} key="JSON">
         <ReactJson
           src={tabInfos}
           name={false}
@@ -73,51 +107,28 @@ const DebugComponent = () => {
           collapseStringsAfterLength={100}
           style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
         />
-      )}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
-          {tabInfos &&
-            Object.keys(tabInfos)[0] &&
-            Object.keys(tabInfos).map((key: any, index) => {
-              return <Tab key={index} label={`${tabInfos[key].url} (TabId: ${key})`} {...a11yProps(index)} />;
-            })}
-        </Tabs>
-      </Box>
-      {tabInfos &&
-        Object.keys(tabInfos)[0] &&
-        Object.keys(tabInfos).map((key: any, index) => {
-          const { prebids, tcf, googleAdManager } = tabInfos[key];
-          const size = new TextEncoder().encode(JSON.stringify(tabInfos[key])).length;
-          const kiloBytes = size / 1024;
-          const megaBytes = (kiloBytes / 1024).toFixed(2);
-          return (
-            <TabPanel value={muiTabId} index={index} key={index}>
-              <Box key={key}>
-                {prebids &&
-                  Object.keys(prebids).map((prebidKey: string) => {
-                    const prebid = prebids[prebidKey];
-                    return (
-                      <Box key={prebidKey}>
-                        <Typography>
-                          Prebid ({prebidKey}) {megaBytes}MB
-                        </Typography>
-                        <ToolsComponent prebid={prebid}></ToolsComponent>
-                        <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
-                        <BidsComponent prebid={prebid}></BidsComponent>
-                        <TimeLineComponent prebid={prebid}></TimeLineComponent>
-                        <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>
-                        <UserIdsComponent prebid={prebid}></UserIdsComponent>
-
-                        {/* {gam && <GoogleAdManagerDetailsComponent googleAdManager={gam}></GoogleAdManagerDetailsComponent>} */}
-                      </Box>
-                    );
-                  })}
-              </Box>
-            </TabPanel>
-          );
-        })}
-    </Box>
+      </TabPanel>
+    </React.Fragment>
   );
+};
+
+const DebugComponent = () => {
+  const bg = chrome.extension.getBackgroundPage();
+  const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
+
+  useEffect(() => {
+    const newTabInfos = { ...bg.tabInfos };
+    setTabInfos(newTabInfos);
+  }, [bg.tabInfos]);
+
+  //  rerender once a second TODO: make this less of a hack
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setCount(count + 1), 1000);
+    return () => clearInterval(interval);
+  }, [count]);
+
+  return tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>;
 };
 
 export default DebugComponent;
