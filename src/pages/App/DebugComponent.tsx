@@ -113,26 +113,26 @@ const ChromeTabs = ({ tabInfos }: any) => {
   );
 };
 
-const getTabInfosFromStorage = (cb: (tabInfos: ITabInfos, tabId: number) => void) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.storage.local.get(['tabInfos'], ({ tabInfos }) => cb(tabInfos, tabs[0].id));
-  });
+const getTabInfosFromStorage = async () => {
+  const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
+  return tabInfos;
 };
 
 const DebugComponent = () => {
   const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
   useEffect(() => {
-    const handleMessage = (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+    const handleMessage = async (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
       if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
-        getTabInfosFromStorage((tabInfos) => {
-          setTabInfos(tabInfos);
-        });
+        const tabInfos = await getTabInfosFromStorage();
+        setTabInfos(tabInfos);
       }
     };
-    getTabInfosFromStorage((tabInfos) => {
+    const loadInitialData = async () => {
+      const tabInfos = await getTabInfosFromStorage();
       setTabInfos(tabInfos);
-    });
+    };
     chrome.runtime.onMessage.addListener(handleMessage);
+    loadInitialData();
     return () => {
       chrome.runtime.onMessage.removeListener(handleMessage);
     };

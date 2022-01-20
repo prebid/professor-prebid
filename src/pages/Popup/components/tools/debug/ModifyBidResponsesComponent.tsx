@@ -38,23 +38,21 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
 
   // read config from session storage & set states on mount
   useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
-      chrome.scripting.executeScript(
-        {
-          target: { tabId: tabs[0].id },
-          func: (namespace: string, cb: Function) => {
-            return sessionStorage.getItem(`${namespace}:debugging`);
-          },
-          args: [prebid.namespace, null],
+    const getInitialState = async () => {
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const tabId = tabs[0].id;
+      const result: any = await chrome.scripting.executeScript({
+        target: { tabId},
+        func: (namespace: string) => {
+          return sessionStorage.getItem(`${namespace}:debugging`);
         },
-        (result: any) => {
-          try {
-            const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
-            setDebugConfigState(savedConfig);
-          } catch (e) {}
-        }
-      );
-    });
+        args: [prebid.namespace],
+      });
+
+      const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
+      setDebugConfigState(savedConfig);
+    };
+    getInitialState();
   }, []);
 
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
