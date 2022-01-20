@@ -48,11 +48,10 @@ class Content {
     logger.log('[Content] processMessageFromInjected()', { type, payload });
   };
 
-  sendConsoleStateToInjected = () => {
-    chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {
-      const checked = result ? result[constants.CONSOLE_TOGGLE] : false;
-      document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: checked }));
-    });
+  sendConsoleStateToInjected = async () => {
+    const result = await chrome.storage.local.get(constants.CONSOLE_TOGGLE);
+    const checked = result[constants.CONSOLE_TOGGLE];
+    document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: !!checked }));
     logger.log('[Content] sendConsoleStateToInjected()');
   };
 
