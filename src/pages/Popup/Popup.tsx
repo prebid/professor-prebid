@@ -62,7 +62,7 @@ export const Popup = (): JSX.Element => {
 
   useEffect(() => {
     setPbjsNamespace((previous) => {
-      if (previous === null && tabInfo.prebids) {
+      if (previous === null && tabInfo?.prebids) {
         popupHandler.onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
         return Object.keys(tabInfo.prebids)[0];
       } else {
@@ -92,22 +92,17 @@ export const Popup = (): JSX.Element => {
 
     getTabInfosFromStorage((tabInfos, tabId) => {
       setPbjsNamespace((previous) => {
-        return previous === null && tabInfos[tabId]?.prebids && Object.keys(tabInfos[tabId].prebids)[0] ? Object.keys(tabInfos[tabId].prebids)[0] : previous;
+        return previous === null && tabInfos[tabId]?.prebids && Object.keys(tabInfos[tabId].prebids)[0]
+          ? Object.keys(tabInfos[tabId].prebids)[0]
+          : previous;
       });
       setTabInfo(tabInfos[tabId]);
     });
 
-    () => {
+    return () => {
       chrome.runtime.onMessage.removeListener(handleMessages);
     };
   }, []);
-
-  //  rerender once a second TODO: make this less of a hack
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setCount(count + 1), 1000);
-    return () => clearInterval(interval);
-  }, [count]);
 
   logger.log(`[PopUp]: render `, tabInfo, pbjsNameSpace);
   return (
@@ -248,7 +243,7 @@ export const Popup = (): JSX.Element => {
         </AppBar>
         <Switch>
           <Route exact path="/">
-            {tabInfo?.prebids && !tabInfo.prebids[pbjsNameSpace] && (
+            {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
               <Card>
                 <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
                   <Grid container justifyContent="center">
