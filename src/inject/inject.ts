@@ -1,4 +1,4 @@
-import logger from "../logger";
+import logger from '../logger';
 const inject = () => {
   const script = document.createElement('script');
   script.src = chrome.runtime.getURL('/injected.bundle.js');
@@ -11,7 +11,7 @@ const inject = () => {
     };
   } else {
     // requestIdleCallback(inject);
-    setTimeout(() => inject(), 1)
+    setTimeout(() => inject(), 1);
   }
 };
 inject();

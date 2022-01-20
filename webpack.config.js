@@ -2,7 +2,7 @@ var webpack = require('webpack'),
   path = require('path'),
   fileSystem = require('fs-extra'),
   env = require('./utils/env'),
-  {CleanWebpackPlugin} = require('clean-webpack-plugin'),
+  { CleanWebpackPlugin } = require('clean-webpack-plugin'),
   CopyWebpackPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   TerserPlugin = require('terser-webpack-plugin');
@@ -38,7 +38,7 @@ var options = {
     openDfpConsole: path.join(__dirname, 'src', 'inject', 'scripts', 'openDfpConsole.ts'),
   },
   chromeExtensionBoilerplate: {
-    notHotReload: ['background.bundle.js', 'contentScript', 'devtools', 'inject', 'injected', 'openDfpConsole'],
+    notHotReload: ['background', 'background.bundle.js', 'contentScript', 'devtools', 'inject', 'injected', 'openDfpConsole'],
   },
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -97,7 +97,7 @@ var options = {
   },
   resolve: {
     alias: alias,
-    extensions: fileExtensions.map((extension) => '.' + extension).concat(['.js', '.jsx', '.ts', '.tsx', '.css','.s css']),
+    extensions: fileExtensions.map((extension) => '.' + extension).concat(['.js', '.jsx', '.ts', '.tsx', '.css', '.s css']),
   },
   plugins: [
     new CleanWebpackPlugin({

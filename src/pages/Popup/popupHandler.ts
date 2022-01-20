@@ -24,7 +24,7 @@ class PopupHandler {
         chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
           const tab = tabs[0];
           logger.log('[PopupHandler] Send onConsoleToggle', { tab }, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
-          chrome.tabs.sendMessage((tab.id as number), { type: constants.CONSOLE_TOGGLE, consoleState: checked });
+          chrome.tabs.sendMessage(tab.id as number, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
         });
       });
     } catch (e) {
