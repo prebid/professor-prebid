@@ -11,8 +11,8 @@ class Background {
     chrome.webNavigation?.onBeforeNavigate.addListener(this.handleOnBeforeNavigate);
     chrome.tabs.onRemoved.addListener(this.handleOnRemoved);
     chrome.tabs.onActivated.addListener(this.handleOnActivated);
-    chrome.alarms?.onAlarm.addListener(this.cleanStorage);
-    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 0.1 });
+    chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
+    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 1 });
     logger.log('[Background] addEventListeners');
     this.init();
   }
@@ -32,11 +32,6 @@ class Background {
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     logger.log('[Background] handleMessages', { tabId });
     switch (type) {
-      case constants.EVENTS.OPEN_DATA_TAB:
-        sendResponse();
-        chrome.tabs.create({ url: 'app.html' }, (tab) => {});
-        logger.log('[Background] Open data tab');
-        break;
       case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
         sendResponse();
         this.tabInfos[tabId]['googleAdManager'] = payload;
@@ -78,7 +73,7 @@ class Background {
   };
 
   handleOnAlarm = async (alarm: chrome.alarms.Alarm) => {
-    logger.log('[Background]', alarm.name, 'is triggered');
+    console.log('[Background]', alarm.name, 'is triggered');
     await this.cleanStorage();
   };
 
