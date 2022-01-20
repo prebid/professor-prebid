@@ -6,92 +6,99 @@ import { ITcfDetails } from '../../inject/scripts/tcf';
 
 class Background {
   tabInfos: ITabInfos = {};
-  updateRateMs: number = 1000;
   constructor() {
     chrome.runtime.onMessage.addListener(this.handleMessages);
     chrome.webNavigation?.onBeforeNavigate.addListener(this.handleOnBeforeNavigate);
     chrome.tabs.onRemoved.addListener(this.handleOnRemoved);
     chrome.tabs.onActivated.addListener(this.handleOnActivated);
-    chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
-
-    // read state from storage
-    chrome.storage.local.get(['tabInfos'], (res) => (this.tabInfos = res.tabInfos || this.tabInfos));
-
-    //  setup alarms
-    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 5 });
-
+    chrome.alarms?.onAlarm.addListener(this.cleanStorage);
+    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 0.1 });
     logger.log('[Background] addEventListeners');
+    this.init();
   }
+
+  init = async () => {
+    // read state from storage
+    const res = await chrome.storage.local.get(['tabInfos']);
+    this.tabInfos = res.tabInfos || this.tabInfos;
+    // // clean up storage
+    await this.cleanStorage();
+  };
 
   handleMessages = async (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
     const { type, payload } = message;
+    if (!type || !payload || JSON.stringify(payload) === '{}') return;
     const tabId = sender.tab?.id;
+    this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     logger.log('[Background] handleMessages', { tabId });
     switch (type) {
       case constants.EVENTS.OPEN_DATA_TAB:
-        console.log('[Background] Open data tab');
         sendResponse();
-        chrome.tabs.create({ url: `./app.html` }, (tab) => {
-          logger.log('[Background] created tab with tabId: ', tab.id);
-        });
+        chrome.tabs.create({ url: 'app.html' }, (tab) => {});
+        logger.log('[Background] Open data tab');
         break;
       case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
         sendResponse();
-        await this.updateTabInfos(payload, tabId, 'googleAdManager');
+        this.tabInfos[tabId]['googleAdManager'] = payload;
         logger.log('[Background] received gam details data:', payload);
         break;
       case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
         sendResponse();
-        await this.updateTabInfos(payload, tabId, 'prebids', payload.namespace);
-        this.updateBadge(tabId);
+        this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
+        this.tabInfos[tabId]['prebids']![payload.namespace] = payload;
         logger.log('[Background] received prebid details data:', payload);
         break;
       case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
         sendResponse();
-        await this.updateTabInfos(payload, tabId, 'tcf');
+        this.tabInfos[tabId]['tcf'] = payload;
         logger.log('[Background] received tcf details data:', payload);
         break;
     }
+    await this.persistInStorage();
+    this.updateBadge(tabId);
+    this.updatePopUp(tabId);
   };
 
   handleOnActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
     this.updateBadge(activeInfo.tabId);
   };
 
-  handleOnBeforeNavigate = (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
+  handleOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
     if (frameId == 0) {
       logger.warn('[Background]', tabId, 'RESET');
-      this.tabInfos = this.tabInfos || {};
       this.tabInfos[tabId] = { url };
+      await this.persistInStorage();
     }
   };
 
-  handleOnRemoved = (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
+  handleOnRemoved = async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
     logger.log('[Background]', tabId, 'is removed', removeInfo);
-    this.deleteTabInfo(tabId);
+    await this.deleteTabInfo(tabId);
   };
 
-  handleOnAlarm = (input: any) => {
-    logger.log('[Background] handleOnAlarm', input);
-    chrome.tabs.query({}, (tabs) => {
-      const activeTabIds = tabs.map((tab) => tab.id);
-      for (const t in this.tabInfos) {
-        if (activeTabIds.includes(parseInt(t))) {
-          const size = new TextEncoder().encode(JSON.stringify(this.tabInfos[t])).length;
-          const megaBytes = (size / 1024 / 1024).toFixed(2);
-          logger.log(`[Background] Tab(${t}) is active' tabInfo has ~ ${megaBytes}mb`);
-        } else {
-          logger.log(`[Background] Tab(${t}) is not active. Removing info...`);
-          this.deleteTabInfo(parseInt(t));
-        }
+  handleOnAlarm = async (alarm: chrome.alarms.Alarm) => {
+    logger.log('[Background]', alarm.name, 'is triggered');
+    await this.cleanStorage();
+  };
+
+  cleanStorage = async () => {
+    const tabs = await chrome.tabs.query({});
+    const activeTabIds = tabs.map((tab) => tab.id);
+    logger.log('[Background] clean up storage', tabs, activeTabIds);
+    for (const t in this.tabInfos) {
+      if (activeTabIds.includes(parseInt(t))) {
+        logger.log(`[Background] Tab(${t}) is active`);
+      } else {
+        logger.log(`[Background] Tab(${t}) is not active. Removing info...`);
+        await this.deleteTabInfo(parseInt(t));
       }
-    });
+    }
   };
 
   deleteTabInfo = async (tabId: number) => {
     delete this.tabInfos[tabId];
-    await this.updateTabInfos(this.tabInfos[tabId], tabId, null);
+    await this.persistInStorage();
     logger.log('[Background] Removed info for tabId ' + tabId);
   };
 
@@ -114,20 +121,9 @@ class Background {
     });
   };
 
-  updateTabInfos = async (payload: any, tabId: number | undefined, key: string, subkey?: string) => {
+  persistInStorage = async () => {
     logger.log('[Background] updateTabInfos', this.tabInfos);
-    if (tabId && payload && JSON.stringify(payload) !== '{}') {
-      this.tabInfos = this.tabInfos || {};
-      this.tabInfos[tabId] = this.tabInfos[tabId] || {};
-      this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-      if (key === 'prebids' && subkey) {
-        this.tabInfos[tabId]['prebids']![subkey] = payload;
-      } else {
-        this.tabInfos[tabId][key as keyof ITabInfo] = payload;
-      }
-      await chrome.storage?.local.set({ tabInfos: this.tabInfos });
-      this.updatePopUp(tabId);
-    }
+    await chrome.storage?.local.set({ tabInfos: this.tabInfos });
   };
 }
 // chrome.storage?.local.set({ tabInfos: null });
