@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
-// Custom files
 import { ITabInfo, ITabInfos } from '../Background/background';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
@@ -9,9 +8,6 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
 import ToolsComponent from './components/tools/ToolsComponent';
-import { popupHandler } from './popupHandler';
-
-// Material-UI
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
@@ -38,7 +34,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
 import constants from '../../constants.json';
 
-// Styles
 const StyledButton = styled(Button)(({ theme }) => ({
   textDecoration: 'none',
 }));
@@ -46,7 +41,14 @@ const StyledLink = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
 }));
 
-// Functions
+const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
+  chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+    const tab = tabs[0];
+    logger.log('[PopupHandler] Send pbjsNamespace', { tab }, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+    chrome.tabs.sendMessage(tab.id, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+  });
+};
+
 export const Popup = (): JSX.Element => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
@@ -56,14 +58,14 @@ export const Popup = (): JSX.Element => {
   const handleClose = () => setPbjsNamespaceDialogOpen(false);
   const handleClickOpen = () => setPbjsNamespaceDialogOpen(true);
   const handlePbjsNamespaceChange = (event: SelectChangeEvent) => {
-    popupHandler.onPbjsNamespaceChange(event.target.value);
+    onPbjsNamespaceChange(event.target.value);
     setPbjsNamespace(event.target.value as string);
   };
 
   useEffect(() => {
     setPbjsNamespace((previous) => {
       if (previous === null && tabInfo?.prebids) {
-        popupHandler.onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
+        onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
         return Object.keys(tabInfo.prebids)[0];
       } else {
         return previous;

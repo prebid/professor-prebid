@@ -5,7 +5,6 @@ import Button from '@mui/material/Button';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Switch from '@mui/material/Switch';
-import { popupHandler } from '../../popupHandler';
 import React, { useEffect, useState } from 'react';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -16,6 +15,7 @@ import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import { TableBody } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import constants from '../../../../constants.json';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = () => {
@@ -34,17 +34,32 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
       chrome.scripting.executeScript({ target: { tabId }, func, args: [fileUrl] });
     });
   };
-
+  const openDebugTab = async () => {
+    const url = await chrome.runtime.getURL('app.html');
+    chrome.tabs.create({ url });
+  };
   const [consoleState, setConsoleState] = useState<boolean>(null);
   useEffect(() => {
-    popupHandler.getToggleStateFromStorage((checked: boolean) => {
+    chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {
+      const checked = result ? result[constants.CONSOLE_TOGGLE] : false;
       setConsoleState(checked);
     });
   }, [consoleState]);
 
   const handleConsoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setConsoleState(event.target.checked);
-    popupHandler.onConsoleToggle(event.target.checked);
+    const { checked } = event.target;
+    try {
+      chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
+        chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+          const tab = tabs[0];
+          logger.log('[PopupHandler] Send onConsoleToggle', { tab }, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
+          chrome.tabs.sendMessage(tab.id as number, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
+        });
+      });
+    } catch (e) {
+      logger.error('onConsoleToggle', e);
+    }
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
@@ -60,7 +75,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
                 <Button variant="outlined" size="medium" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
                   open google AdManager console
                 </Button>
-                <Button variant="outlined" size="medium" onClick={popupHandler.openDebugTab} startIcon={<BugReportIcon />}>
+                <Button variant="outlined" size="medium" onClick={openDebugTab} startIcon={<BugReportIcon />}>
                   open debug tab
                 </Button>
               </TableCell>
