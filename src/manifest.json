@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Professor Prebid",
-	"version": "2.10",
+  "version": "2.10",
   "options_page": "options.html",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "<all_urls>"],
-      "js": ["inject.bundle.js","contentScript.bundle.js"]
+      "js": ["inject.bundle.js", "contentScript.bundle.js"]
     }
   ],
   "devtools_page": "devtools.html",
@@ -24,13 +24,5 @@
       "matches": ["*://*/*", "http://*/*", "https://*/*", "<all_urls>"]
     }
   ],
-  "permissions": [
-		"activeTab",
-		"webNavigation",
-		"webRequest",
-		"storage",
-		"tabs",
-    "unlimitedStorage",
-    "scripting"
-	]
+  "permissions": ["activeTab", "webNavigation", "webRequest", "storage", "tabs", "unlimitedStorage", "scripting"]
 }

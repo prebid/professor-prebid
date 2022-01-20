@@ -48,7 +48,6 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
       }, (result: any) => {
         try {
           const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
-          console.log({savedConfig});
           setDebugConfigState(savedConfig);
         } catch (e) {}  
       });
