@@ -133,7 +133,7 @@ const DebugComponent = () => {
       setTabInfos(tabInfos);
     });
     chrome.runtime.onMessage.addListener(handleMessage);
-    () => {
+    return () => {
       chrome.runtime.onMessage.removeListener(handleMessage);
     };
   }, []);
