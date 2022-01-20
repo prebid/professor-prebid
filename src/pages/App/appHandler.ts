@@ -8,9 +8,9 @@ class AppHandler {
     chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_GAM_DETAILS_FROM_BACKGROUND }, cb);
   }
 
-  getPrebidDetailsFromBackground(cb: any): void {
-    chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND }, cb);
-  }
+  // getPrebidDetailsFromBackground(cb: any): void {
+  //   chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_PREBID_DETAILS_FROM_BACKGROUND }, cb);
+  // }
 
   getTcfDetailsFromBackground(cb: any): void {
     chrome.runtime.sendMessage({ type: constants.EVENTS.REQUEST_TCF_DETAILS_FROM_BACKGROUND }, cb);

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import UserIdsComponent from '../Popup/components/userIds/UserIdsComponent';
 import PrebidAdUnitsComponent from '../Popup/components/adUnits/AdUnitsComponent';
 import TimeLineComponent from '../Popup/components/timeline/TimeLineComponent';
-import { ITabInfos } from '../../background/background';
+import { ITabInfos } from '../Background/background';
 import BidsComponent from '../Popup/components/bids/BidsComponent';
 import ConfigComponent from '../Popup/components/config/ConfigComponent';
 import ToolsComponent from '../Popup/components/tools/ToolsComponent';
@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import constants from '../../constants.json';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
@@ -112,21 +113,30 @@ const ChromeTabs = ({ tabInfos }: any) => {
   );
 };
 
+const getTabInfosFromStorage = (cb: (tabInfos: ITabInfos, tabId: number) => void) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.storage.local.get(['tabInfos'], ({ tabInfos }) => cb(tabInfos, tabs[0].id));
+  });
+};
+
 const DebugComponent = () => {
-  const bg = chrome.extension.getBackgroundPage();
   const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
-
   useEffect(() => {
-    const newTabInfos = { ...bg.tabInfos };
-    setTabInfos(newTabInfos);
-  }, [bg.tabInfos]);
-
-  //  rerender once a second TODO: make this less of a hack
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setCount(count + 1), 1000);
-    return () => clearInterval(interval);
-  }, [count]);
+    const handleMessage = (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+      if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
+        getTabInfosFromStorage((tabInfos) => {
+          setTabInfos(tabInfos);
+        });
+      }
+    };
+    getTabInfosFromStorage((tabInfos) => {
+      setTabInfos(tabInfos);
+    });
+    chrome.runtime.onMessage.addListener(handleMessage);
+    () => {
+      chrome.runtime.onMessage.removeListener(handleMessage);
+    };
+  }, []);
 
   return tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>;
 };

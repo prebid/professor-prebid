@@ -11,15 +11,6 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import { TableBody } from '@mui/material';
 
-const inject = (code: string, callback: (result: any) => void) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
-    const currentTab = tabs[0];
-    chrome.tabs.executeScript(currentTab.id, { code }, (result) => {
-      callback(result);
-    });
-  });
-};
-
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
   const [debugConfgigState, setDebugConfigState] = useState<IPrebidDebugConfig>(null);
 
@@ -30,7 +21,15 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
       ...input,
     };
     setDebugConfigState(input);
-    inject(`sessionStorage.setItem('${prebid.namespace}:debugging', '${JSON.stringify(input)}')`, () => {});
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        func: (namespace: string, input: any) => {
+          sessionStorage.setItem(`${namespace}:debugging`, `${JSON.stringify(input)}`);
+        },
+        args: [prebid.namespace, input],
+      });
+    });
   };
 
   const handleEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,13 +38,22 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
 
   // read config from session storage & set states on mount
   useEffect(() => {
-    inject(`sessionStorage.getItem('${prebid.namespace}:debugging')`, (result: string) => {
-      try {
-        const savedConfig: IPrebidDebugConfig = JSON.parse(result);
-        setDebugConfigState(savedConfig);
-      } catch (e) {}
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        func: (namespace: string, cb: Function) => {
+          return sessionStorage.getItem(`${namespace}:debugging`);
+        },
+        args: [prebid.namespace, null],
+      }, (result: any) => {
+        try {
+          const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
+          console.log({savedConfig});
+          setDebugConfigState(savedConfig);
+        } catch (e) {}  
+      });
     });
-  });
+  },[]);
 
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (

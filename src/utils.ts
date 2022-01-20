@@ -6,7 +6,7 @@ export const sendToContentScript = (type: string, payload: any) => {
   // DOMException:xyz could not be cloned.
   // in window.postMessage
   payload = JSON.parse(JSON.stringify(payload));
-  window.top.postMessage(
+  (window as any).top.postMessage(
     {
       type,
       payload,
@@ -33,13 +33,13 @@ export const createRangeArray = (start: number, end: number, step: number): numb
 };
 
 export const getMinAndMaxNumber = (timestampArray: number[]) => {
-  let min: number = null;
-  let max: number = null;
+  let min: number = 0;
+  let max: number = 0;
   timestampArray.forEach((timestamp) => {
-    if (timestamp < min || min === null) {
+    if (timestamp < min || min === 0) {
       min = timestamp;
     }
-    if (timestamp > max || max === null) {
+    if (timestamp > max || max === 0) {
       max = timestamp;
     }
   });

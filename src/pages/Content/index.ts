@@ -15,6 +15,7 @@ class Content {
 
   listenToInjectedScript = () => {
     window.addEventListener('message', this.processMessageFromInjected, false);
+    logger.log('[Content] listenToInjectedScript()');
   };
 
   listenToPopupScript = () => {
@@ -28,6 +29,7 @@ class Content {
       }
       sendResponse();
     });
+    logger.log('[Content] listenToPopupScript()');
   };
 
   processMessageFromInjected = (event: MessageEvent<any>) => {
@@ -43,6 +45,7 @@ class Content {
     }
     this.updateBackgroundPage(type, payload);
     this.updateMasks();
+    logger.log('[Content] processMessageFromInjected()', { type, payload });
   };
 
   sendConsoleStateToInjected = () => {
@@ -50,12 +53,14 @@ class Content {
       const checked = result ? result[constants.CONSOLE_TOGGLE] : false;
       document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: checked }));
     });
+    logger.log('[Content] sendConsoleStateToInjected()');
   };
 
   updateBackgroundPage = (type: string, payload: any) => {
     if (!type || !payload) return;
     logger.log('[Content] updateBackgroundPage', type, payload);
     chrome.runtime.sendMessage({ type, payload });
+    logger.log('[Content] updateBackgroundPage()');
   };
 
   updateMasks = () => {
@@ -63,6 +68,7 @@ class Content {
     if (this.pbjsNamespace) {
       document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: this.pbjsNamespace }));
     }
+    logger.log('[Content] updateMasks()');
   };
 }
 

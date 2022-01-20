@@ -2,13 +2,13 @@ import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 
-declare global {
-  interface Window {
-    pbjs: any;
-    _pbjsGlobals: string[];
-    PREBID_TIMEOUT: number;
-  }
-}
+// declare global {
+//   interface Window {
+//     pbjs: any;
+//     _pbjsGlobals: string[];
+//     PREBID_TIMEOUT: number;
+//   }
+// }
 class Prebid {
   globalPbjs: any = window.pbjs;
   namespace: string;
@@ -106,15 +106,18 @@ class Prebid {
 }
 
 export const addEventListenersForPrebid = () => {
+  // document.body.style.backgroundColor = 'purple';
+  logger.log('[Injected] addEventListenersForPrebid', window._pbjsGlobals);
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(() => {
     stopLoop = true;
   }, 8000);
   const isPrebidInPage = () => {
+    logger.log('[Injected] isPrebidInPage', window.top);
     const pbjsGlobals = window._pbjsGlobals || [];
     if (pbjsGlobals.length > 0) {
-      pbjsGlobals.forEach((global) => {
+      pbjsGlobals.forEach((global: any) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);
           allreadyInjectedPrebid.push(global);
@@ -122,7 +125,7 @@ export const addEventListenersForPrebid = () => {
       });
     }
     if (!stopLoop) {
-      setTimeout(() => isPrebidInPage(), 1);
+      setTimeout(() => isPrebidInPage(), 1000);
     }
   };
   isPrebidInPage();

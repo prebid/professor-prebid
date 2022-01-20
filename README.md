@@ -21,6 +21,4 @@ Now, the content of `build` folder will be the extension ready to be submitted t
 
 ## Credits
 
-
-
 This extension is based on [chrome-extension-boilerplate-react](https://github.com/lxieyang/chrome-extension-boilerplate-react)

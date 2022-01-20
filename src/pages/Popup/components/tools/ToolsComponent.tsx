@@ -16,12 +16,22 @@ import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import { TableBody } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
+
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0];
-      const file = './openDfpConsole.bundle.js';
-      chrome.tabs.executeScript(currentTab.id, { file });
+      const tabId = currentTab.id;
+      const fileUrl = chrome.runtime.getURL('openDfpConsole.bundle.js');
+      const func = (fileUrl: string) => {
+        const script = document.createElement('script');
+        script.src = fileUrl;
+        (document.head || document.documentElement).appendChild(script);
+        script.onload = () => {
+          script.remove();
+        };
+      };
+      chrome.scripting.executeScript({ target: { tabId }, func, args: [fileUrl] });
     });
   };
 

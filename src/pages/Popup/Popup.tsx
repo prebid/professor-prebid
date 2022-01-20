@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 // Custom files
-import { ITabInfo } from '../../background/background';
+import { ITabInfo, ITabInfos } from '../Background/background';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
@@ -36,6 +36,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
+import constants from '../../constants.json';
 
 // Styles
 const StyledButton = styled(Button)(({ theme }) => ({
@@ -47,7 +48,6 @@ const StyledLink = styled(Link)(({ theme }) => ({
 
 // Functions
 export const Popup = (): JSX.Element => {
-  const backgroundPage = chrome.extension.getBackgroundPage();
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
   const [pbjsNameSpace, setPbjsNamespace] = React.useState<string>(null);
@@ -61,19 +61,46 @@ export const Popup = (): JSX.Element => {
   };
 
   useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const bgPageTabInfo = backgroundPage.tabInfos[tabs[0].id];
-      setTabInfo(bgPageTabInfo);
-      setPbjsNamespace((previous) => {
-        if (previous === null && bgPageTabInfo && bgPageTabInfo.prebids) {
-          popupHandler.onPbjsNamespaceChange(Object.keys(bgPageTabInfo.prebids)[0]);
-          return Object.keys(bgPageTabInfo.prebids)[0];
-        } else {
-          return previous;
-        }
-      });
+    setPbjsNamespace((previous) => {
+      if (previous === null && tabInfo.prebids) {
+        popupHandler.onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
+        return Object.keys(tabInfo.prebids)[0];
+      } else {
+        return previous;
+      }
     });
-  }, [backgroundPage.tabInfos]);
+  }, [tabInfo]);
+
+  const getTabInfosFromStorage = (cb: (tabInfos: ITabInfos, tabId: number) => void) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.storage.local.get(['tabInfos'], ({ tabInfos }) => cb(tabInfos, tabs[0].id));
+    });
+  };
+
+  useEffect(() => {
+    const handleMessages = (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+      if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
+        logger.log('[PopUp] received update message from background', message);
+        getTabInfosFromStorage((tabInfos, tabId) => {
+          if (message.payload.tabId === tabId) {
+            setTabInfo(tabInfos[tabId]);
+          }
+        });
+      }
+    };
+    chrome.runtime.onMessage.addListener(handleMessages);
+
+    getTabInfosFromStorage((tabInfos, tabId) => {
+      setPbjsNamespace((previous) => {
+        return previous === null && tabInfos[tabId]?.prebids && Object.keys(tabInfos[tabId].prebids)[0] ? Object.keys(tabInfos[tabId].prebids)[0] : previous;
+      });
+      setTabInfo(tabInfos[tabId]);
+    });
+
+    () => {
+      chrome.runtime.onMessage.removeListener(handleMessages);
+    };
+  }, []);
 
   //  rerender once a second TODO: make this less of a hack
   const [count, setCount] = useState(0);
@@ -134,7 +161,7 @@ export const Popup = (): JSX.Element => {
                   alt="prebid logo"
                 />
               </Badge>
-              {tabInfo.prebids && (
+              {tabInfo?.prebids && (
                 <Dialog disableEscapeKeyDown open={pbjsNamespaceDialogOpen} onClose={handleClose}>
                   <DialogTitle>Select Prebid Instance</DialogTitle>
                   <DialogContent>
@@ -258,7 +285,7 @@ export const Popup = (): JSX.Element => {
             {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]}></TimelineComponent>}
           </Route>
           <Route exact path="/config">
-            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
+            {tabInfo?.prebids && tabInfo?.tcf && tabInfo.prebids[pbjsNameSpace]?.config && (
               <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo.tcf}></ConfigComponent>
             )}
           </Route>
@@ -266,7 +293,7 @@ export const Popup = (): JSX.Element => {
             {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></UserIdsComponent>}
           </Route>
           <Route exact path="/tools">
-            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo.prebids[pbjsNameSpace]}></ToolsComponent>}
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo?.prebids[pbjsNameSpace]}></ToolsComponent>}
           </Route>
         </Switch>
       </Router>
