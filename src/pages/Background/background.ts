@@ -56,6 +56,7 @@ class Background {
 
   handleOnActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
     this.updateBadge(activeInfo.tabId);
+    this.updatePopUp(activeInfo.tabId);
   };
 
   handleOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
@@ -64,6 +65,8 @@ class Background {
       logger.warn('[Background]', tabId, 'RESET');
       this.tabInfos[tabId] = { url };
       await this.persistInStorage();
+      this.updateBadge(tabId);
+      this.updatePopUp(tabId);
     }
   };
 
