@@ -12,7 +12,7 @@ class Background {
     chrome.tabs.onRemoved.addListener(this.handleOnRemoved);
     chrome.tabs.onActivated.addListener(this.handleOnActivated);
     chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
-    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 1 });
+    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 15 });
     logger.log('[Background] addEventListeners');
     this.init();
   }
