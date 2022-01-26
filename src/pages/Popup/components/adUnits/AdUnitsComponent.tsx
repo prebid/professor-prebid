@@ -7,6 +7,7 @@ import {
   IPrebidAuctionEndEventData,
   IPrebidBidWonEventData,
   IPrebidAdUnit,
+  IPrebidAdRenderSucceededEventData,
 } from '../../../../inject/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
 import Card from '@mui/material/Card';
@@ -45,6 +46,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const [auctionEndEvents, setAuctionEndEvents] = React.useState<IPrebidAuctionEndEventData[]>([]);
   const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [latestAuctionsBidsReceived, setLatestAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
+  const [latestAuctionsAdsRendered, setLatestAuctionsAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
   const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
 
   useEffect(() => {
@@ -71,6 +73,10 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
       (event) => event.eventType === 'bidResponse' && event.args.auctionId === latestAuctionId
     );
 
+    const latestAuctionsAdsRendered = ((prebid.events || []) as IPrebidAdRenderSucceededEventData[]).filter(
+      (event) => event.eventType === "adRenderSucceeded" && event.args.bid.auctionId === latestAuctionId
+    );
+
     const adUnits = auctionEndEvents
       .reduce((previousValue, currentValue) => {
         return [...previousValue, ...currentValue.args.adUnits];
@@ -88,6 +94,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     setAdUnits(adUnits);
     setLatestAuctionsWinningBids(latestAuctionsWinningBids);
     setLatestAuctionBidsReceived(latestAuctionsBidsReceived);
+    setLatestAuctionsAdsRendered(latestAuctionsAdsRendered);
     setAuctionEndEvents(auctionEndEvents);
     setAllBidResponseEvents(allBidResponseEvents);
     setAllNoBidEvents(allNoBidEvents);
@@ -139,6 +146,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
                 latestAuctionsWinningBids={latestAuctionsWinningBids}
                 adUnits={adUnits}
                 latestAuctionsBidsReceived={latestAuctionsBidsReceived}
+                latestAuctionsAdsRendered={latestAuctionsAdsRendered}
               ></SlotsComponent>
             )}
           </Paper>

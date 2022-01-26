@@ -5,6 +5,7 @@ import {
   IPrebidAdUnit,
   IPrebidBidWonEventData,
   IPrebidBidResponseEventData,
+  IPrebidAdRenderSucceededEventData,
 } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -19,7 +20,7 @@ import Box from '@mui/material/Box';
 import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
-
+import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
 const AdUnitChipComponent = ({ adUnit }: any): JSX.Element => {
   const [labelText, setLabelText] = React.useState<string | null>(adUnit.code);
   const scroll2element = (elementId: string): any => {
@@ -69,8 +70,7 @@ const AdUnitChipComponent = ({ adUnit }: any): JSX.Element => {
   );
 };
 
-const BidChipComponent = ({ input, label, isWinner, bidReceived }: any): JSX.Element => {
-  const labelText = `${label}`;
+const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: any): JSX.Element => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     if (typeof input === 'object') {
@@ -88,10 +88,14 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived }: any): JSX.Ele
         size="small"
         variant="outlined"
         color={isWinner ? 'secondary' : bidReceived ? 'primary' : 'default'}
-        icon={isWinner ? <GavelOutlinedIcon sx={{ height: '12px', paddingLeft: 1 }} /> : null}
-        label={labelText}
+        icon={
+          <Stack direction="row" spacing={1}>
+            {isWinner && <GavelOutlinedIcon sx={{ height: '14pt' }} />}
+            {isRendered && <PictureInPictureOutlinedIcon sx={{ height: '14pt' }} />}
+          </Stack>
+        }
+        label={label}
         onClick={handlePopoverOpen}
-        sx={{ maxWidth: 200 }}
       />
       <Popover
         id="mouse-over-popover"
@@ -121,7 +125,6 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived }: any): JSX.Ele
 };
 
 const MediaTypeChipComponent = ({ input, label }: any): JSX.Element => {
-  const labelText = `${label}: ${JSON.stringify(input)}`;
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     if (typeof input === 'object') {
@@ -135,7 +138,14 @@ const MediaTypeChipComponent = ({ input, label }: any): JSX.Element => {
   const open = Boolean(anchorEl);
   return (
     <React.Fragment>
-      <Chip size="small" variant="outlined" color="primary" label={labelText} onClick={handlePopoverOpen} sx={{ maxWidth: 200 }} />
+      <Chip
+        size="small"
+        variant="outlined"
+        color="primary"
+        label={`${label}: ${JSON.stringify(input)}`}
+        onClick={handlePopoverOpen}
+        sx={{ maxWidth: 200 }}
+      />
       <Popover
         id="mouse-over-popover"
         open={open}
@@ -211,7 +221,12 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
   );
 };
 
-const SlotsComponent = ({ adUnits, latestAuctionsWinningBids, latestAuctionsBidsReceived }: ISlotsComponentProps): JSX.Element => {
+const SlotsComponent = ({
+  adUnits,
+  latestAuctionsWinningBids,
+  latestAuctionsBidsReceived,
+  latestAuctionsAdsRendered,
+}: ISlotsComponentProps): JSX.Element => {
   return (
     <TableContainer>
       <Table size="small">
@@ -253,10 +268,22 @@ const SlotsComponent = ({ adUnits, latestAuctionsWinningBids, latestAuctionsBids
                           winningBid.args.bidder === bid.bidder &&
                           adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
                       );
+                      const isRendered = latestAuctionsAdsRendered.some(
+                        (renderedAd) => renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bid.bidder
+                      );
                       const label = bidReceived?.args.cpm
                         ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
                         : `${bid.bidder}`;
-                      return <BidChipComponent input={bid} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} />;
+                      return (
+                        <BidChipComponent
+                          input={bid}
+                          label={label}
+                          key={index}
+                          isWinner={isWinner}
+                          bidReceived={bidReceived}
+                          isRendered={isRendered}
+                        />
+                      );
                     })}
                   </Stack>
                 </TableCell>
@@ -274,6 +301,7 @@ interface ISlotsComponentProps {
   allBidderEvents: IPrebidBidResponseEventData[];
   latestAuctionsWinningBids: IPrebidBidWonEventData[];
   latestAuctionsBidsReceived: IPrebidBidWonEventData[];
+  latestAuctionsAdsRendered: IPrebidAdRenderSucceededEventData[];
   adUnits: IPrebidAdUnit[];
 }
 
