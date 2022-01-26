@@ -7,10 +7,10 @@ import { ITcfDetails } from '../../inject/scripts/tcf';
 class Background {
   tabInfos: ITabInfos = {};
   constructor() {
-    chrome.runtime.onMessage.addListener(this.handleMessages);
-    chrome.webNavigation?.onBeforeNavigate.addListener(this.handleOnBeforeNavigate);
-    chrome.tabs.onRemoved.addListener(this.handleOnRemoved);
-    chrome.tabs.onActivated.addListener(this.handleOnActivated);
+    chrome.runtime.onMessage.addListener(this.handleMessagesFromInjected);
+    chrome.webNavigation?.onBeforeNavigate.addListener(this.handleWebNavigationOnBeforeNavigate);
+    chrome.tabs.onRemoved.addListener(this.handleOnTabRemoved);
+    chrome.tabs.onActivated.addListener(this.handleOnTabActivated);
     chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
     chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 15 });
     logger.log('[Background] addEventListeners');
@@ -20,15 +20,16 @@ class Background {
   init = async () => {
     // read state from storage
     const res = await chrome.storage.local.get(['tabInfos']);
+    console.log('[Background] init', res.tabInfos, this.tabInfos);
     this.tabInfos = res.tabInfos || this.tabInfos;
     // // clean up storage
     await this.cleanStorage();
   };
 
-  handleMessages = async (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+  handleMessagesFromInjected = async (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
     const { type, payload } = message;
-    if (!type || !payload || JSON.stringify(payload) === '{}') return;
     const tabId = sender.tab?.id;
+    if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     logger.log('[Background] handleMessages', { tabId });
     switch (type) {
@@ -54,12 +55,12 @@ class Background {
     this.updatePopUp(tabId);
   };
 
-  handleOnActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
+  handleOnTabActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
     this.updateBadge(activeInfo.tabId);
     this.updatePopUp(activeInfo.tabId);
   };
 
-  handleOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
+  handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
     if (frameId == 0) {
       logger.warn('[Background]', tabId, 'RESET');
@@ -70,13 +71,13 @@ class Background {
     }
   };
 
-  handleOnRemoved = async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
+  handleOnTabRemoved = async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
     logger.log('[Background]', tabId, 'is removed', removeInfo);
     await this.deleteTabInfo(tabId);
   };
 
   handleOnAlarm = async (alarm: chrome.alarms.Alarm) => {
-    console.log('[Background]', alarm.name, 'is triggered');
+    logger.log('[Background]', alarm.name, 'is triggered');
     await this.cleanStorage();
   };
 
@@ -109,6 +110,7 @@ class Background {
       chrome.action.setBadgeBackgroundColor({ color: '#ecf3f5' });
       chrome.action.setBadgeText({ text: `` });
     }
+    logger.log('[Background] updateBadge', tabId ,  this.tabInfos[tabId]?.prebids);
   };
 
   updatePopUp = (tabId: number) => {
