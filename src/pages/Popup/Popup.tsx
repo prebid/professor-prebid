@@ -150,10 +150,10 @@ export const Popup = (): JSX.Element => {
                   vertical: 'bottom',
                   horizontal: 'right',
                 }}
+                onClick={handleClickOpen}
               >
                 <img
                   src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg"
-                  onClick={handleClickOpen}
                   width={'100%'}
                   alt="prebid logo"
                 />
