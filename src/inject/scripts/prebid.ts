@@ -407,6 +407,7 @@ export interface IPrebidDetails {
     | IPrebidNoBidEventData
     | IPrebidBidWonEventData
     | IPrebidBidResponseEventData
+    | IPrebidAdRenderSucceededEventData
   )[];
   config: IPrebidConfig;
   eids: IPrebidEids[];
@@ -484,6 +485,17 @@ export interface IPrebidNoBidEventData {
     sizes: number[][];
     src: string;
     transactionId: string;
+  };
+  elapsedTime: number;
+  eventType: string;
+  id: string;
+}
+
+export interface IPrebidAdRenderSucceededEventData {
+  args: {
+    adId: string;
+    bid: IPrebidBid;
+
   };
   elapsedTime: number;
   eventType: string;

@@ -5,6 +5,7 @@ import {
   IPrebidBidResponseEventData,
   IPrebidNoBidEventData,
   IPrebidBidderRequest,
+  IPrebidAdRenderSucceededEventData,
 } from '../../../../inject/scripts/prebid';
 import React, { useEffect, useRef } from 'react';
 import { createRangeArray } from '../../../../utils';
@@ -79,16 +80,14 @@ const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject
   return nearestGridBar;
 };
 
-const findEvent =
-  (bidderRequest: IPrebidBidderRequest, eventType: string) =>
-  (event: IPrebidBidRequestedEventData | IPrebidAuctionEndEventData | IPrebidBidResponseEventData | IPrebidNoBidEventData) => {
-    return (
-      event.eventType === eventType &&
-      event.args.auctionId === bidderRequest.auctionId &&
-      ((event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode ||
-        (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode)
-    );
-  };
+const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (event: any) => {
+  return (
+    event.eventType === eventType &&
+    event.args.auctionId === bidderRequest.auctionId &&
+    ((event as IPrebidBidRequestedEventData).args.bidderCode === bidderRequest.bidderCode ||
+      (event as IPrebidBidRequestedEventData).args.bidder === bidderRequest.bidderCode)
+  );
+};
 
 const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBarComponentProps): JSX.Element => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
