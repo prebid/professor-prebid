@@ -20,7 +20,7 @@ class Background {
   init = async () => {
     // read state from storage
     const res = await chrome.storage.local.get(['tabInfos']);
-    console.log('[Background] init', res.tabInfos, this.tabInfos);
+    logger.log('[Background] init', res.tabInfos, this.tabInfos);
     this.tabInfos = res.tabInfos || this.tabInfos;
     // // clean up storage
     await this.cleanStorage();
