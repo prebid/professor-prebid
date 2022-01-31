@@ -264,7 +264,7 @@ export interface IPrebidConfigPriceBucket {
   increment: number;
 }
 
-interface IPrebidConfigUserSync {
+export interface IPrebidConfigUserId {
   name: string;
   storage: {
     type: string;
@@ -276,7 +276,7 @@ interface IPrebidConfigUserSync {
   };
 }
 
-interface IPrebidConfigUserSync {
+export interface IPrebidConfigUserSync {
   syncEnabled: boolean;
   filterSettings: {
     image: {
@@ -287,7 +287,7 @@ interface IPrebidConfigUserSync {
   syncsPerBidder: number;
   syncDelay: number;
   auctionDelay: number;
-  userIds: IPrebidConfigUserSync[];
+  userIds: IPrebidConfigUserId[];
 }
 
 export interface IPrebidConfigS2SConfig {
@@ -321,42 +321,45 @@ export interface IPrebidConfigS2SConfig {
   syncUrlModifier: any;
   timeout: number;
 };
+
+export interface IPrebidConfigConsentManagement {
+  allowAuctionWithoutConsent: boolean;
+  defaultGdprScope: string;
+  cmpApi: string;
+  timeout: number;
+  coppa: boolean;
+  gdpr: {
+    cmpApi: string;
+    defaultGdprScope: boolean;
+    timeout: number;
+    allowAuctionWithoutConsent: boolean;
+    consentData: {
+      tcString: string;
+      addtlConsent: string;
+      gdprApplies: boolean;
+    };
+    rules: {
+      purpose: string;
+      enforcePurpose: boolean;
+      enforceVendor: boolean;
+      vendorExceptions: string[];
+    }[];
+  };
+  usp: {
+    cmpApi: string;
+    getUSPData: {
+      uspString: string;
+    };
+    timeout: number;
+  };
+};
+
 export interface IPrebidConfig {
   debug: boolean;
   bidderTimeout: number;
   publisherDomain: string;
   priceGranularity: string;
-  consentManagement: {
-    allowAuctionWithoutConsent: boolean;
-    defaultGdprScope: string;
-    cmpApi: string;
-    timeout: number;
-    coppa: boolean;
-    gdpr: {
-      cmpApi: string;
-      defaultGdprScope: boolean;
-      timeout: number;
-      allowAuctionWithoutConsent: boolean;
-      consentData: {
-        tcString: string;
-        addtlConsent: string;
-        gdprApplies: boolean;
-      };
-      rules: {
-        purpose: string;
-        enforcePurpose: boolean;
-        enforceVendor: boolean;
-        vendorExceptions: string[];
-      }[];
-    };
-    usp: {
-      cmpApi: string;
-      getUSPData: {
-        uspString: string;
-      };
-      timeout: number;
-    };
-  };
+  consentManagement: IPrebidConfigConsentManagement;
   customPriceBucket: {
     buckets: IPrebidConfigPriceBucket[];
   };
