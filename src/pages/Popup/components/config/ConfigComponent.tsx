@@ -12,14 +12,16 @@ import Grid from '@mui/material/Grid';
 export const tileHeight = 255;
 
 const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
-  logger.log(`[PopUp][BidderSettingsComponent]: render `);
+  console.log(`[PopUp][BidderSettingsComponent]: render `, prebid.config, tcf);
   return (
     <Grid container spacing={1} padding={1}>
       {prebid.config && <PriceGranularityCard prebid={prebid} />}
-      {prebid.config && <BidderSettingsComponent prebid={prebid}></BidderSettingsComponent>}
-      {prebid.config.s2sConfig && <Server2ServerComponent prebid={prebid}></Server2ServerComponent>}
-      {prebid?.config?.consentManagement && tcf && <ConsentManagementComponent prebid={prebid} tcf={tcf}></ConsentManagementComponent>}
-      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <UserIdModule prebid={prebid}></UserIdModule>}
+      {prebid.config && <BidderSettingsComponent prebid={prebid} />}
+      {prebid.config.s2sConfig && Array.isArray(prebid.config.s2sConfig)
+        ? prebid.config.s2sConfig.map((s2sConfig, index) => <Server2ServerComponent s2sConfig={s2sConfig} key={index} />)
+        : prebid.config.s2sConfig && <Server2ServerComponent s2sConfig={prebid.config.s2sConfig} />}
+      {prebid?.config?.consentManagement && tcf && <ConsentManagementComponent prebid={prebid} tcf={tcf} />}
+      {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <UserIdModule prebid={prebid} />}
       {/* {prebid.config && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>} */}
     </Grid>
   );

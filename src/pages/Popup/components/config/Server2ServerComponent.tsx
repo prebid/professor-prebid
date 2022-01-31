@@ -1,7 +1,7 @@
 import React from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import {  IPrebidConfigS2SConfig } from '../../../../inject/scripts/prebid';
 import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -15,6 +15,7 @@ import DnsIcon from '@mui/icons-material/Dns';
 import ReactJson from 'react-json-view';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
+import { IPrebids } from '../../../Background/background';
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -28,7 +29,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   marginLeft: 'auto',
 }));
 
-const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.Element => {
+const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
 
@@ -37,7 +38,7 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
     setMaxWidth(expanded ? 4 : 8);
   };
 
-  logger.log(`[PopUp][Server2ServerComponent]: render `, prebid.config.s2sConfig);
+  logger.log(`[PopUp][Server2ServerComponent]: render `, s2sConfig);
   return (
     <Grid item xs={maxWidth}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
@@ -50,8 +51,8 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
           title="Prebid Server"
           subheader={`s2s Config`}
           action={
-            (prebid.config.s2sConfig?.app ||
-              (prebid.config.s2sConfig.adapterOptions && JSON.stringify(prebid.config.s2sConfig.adapterOptions) !== '{}')) && (
+            (s2sConfig.app ||
+              (s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}')) && (
               <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
                 <ExpandMoreIcon />
               </ExpandMore>
@@ -61,27 +62,27 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
         />
         <CardContent>
           <Typography variant="body2" color="text.secondary">
-            <strong>Account Id:</strong> {prebid?.config?.s2sConfig?.accountId}
+            <strong>Account Id:</strong> {s2sConfig.accountId}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            <strong>Adapter:</strong> {prebid.config.s2sConfig.adapter}
+            <strong>Adapter:</strong> {s2sConfig.adapter}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            <strong>max. Bids:</strong> {prebid.config.s2sConfig.maxBids}
+            <strong>max. Bids:</strong> {s2sConfig.maxBids}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            <strong>Timeout:</strong> {prebid.config.s2sConfig.timeout}
+            <strong>Timeout:</strong> {s2sConfig.timeout}
           </Typography>
         </CardContent>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
-            {prebid.config.s2sConfig?.app && (
+            {s2sConfig.app && (
               <Box sx={{ display: 'block' }}>
                 <Typography variant="body2" color="text.secondary">
                   <strong>App:</strong>
                 </Typography>
                 <ReactJson
-                  src={prebid.config.s2sConfig?.app}
+                  src={s2sConfig.app}
                   name={false}
                   collapsed={false}
                   enableClipboard={false}
@@ -95,13 +96,13 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
                 />
               </Box>
             )}
-            {prebid.config.s2sConfig.adapterOptions && JSON.stringify(prebid.config.s2sConfig.adapterOptions) !== '{}' && (
+            {s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}' && (
               <Box sx={{ display: 'block' }}>
                 <Typography variant="body2" color="text.secondary">
                   <strong>Adapter Options:</strong>
                 </Typography>
                 <ReactJson
-                  src={prebid.config.s2sConfig.adapterOptions}
+                  src={s2sConfig.adapterOptions}
                   name={false}
                   collapsed={false}
                   enableClipboard={false}
@@ -115,13 +116,13 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
                 />
               </Box>
             )}
-            {prebid.config.s2sConfig.syncUrlModifier && JSON.stringify(prebid.config.s2sConfig.syncUrlModifier) !== '{}' && (
+            {s2sConfig.syncUrlModifier && JSON.stringify(s2sConfig.syncUrlModifier) !== '{}' && (
               <Box sx={{ display: 'block' }}>
                 <Typography variant="body2" color="text.secondary">
                   <strong>Sync. Url Modifier:</strong>
                 </Typography>
                 <ReactJson
-                  src={prebid.config.s2sConfig.syncUrlModifier}
+                  src={s2sConfig.syncUrlModifier}
                   name={false}
                   collapsed={false}
                   enableClipboard={false}
@@ -143,7 +144,7 @@ const Server2ServerComponent = ({ prebid }: Server2ServerComponentProps): JSX.El
 };
 
 interface Server2ServerComponentProps {
-  prebid: IPrebidDetails;
+  s2sConfig: IPrebidConfigS2SConfig;
 }
 
 export default Server2ServerComponent;
