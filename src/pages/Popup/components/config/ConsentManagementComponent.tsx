@@ -159,7 +159,7 @@ const PrivacyComponent = ({ prebid, tcf }: IPrivacyComponentProps): JSX.Element 
                   {prebid.config.consentManagement.gdpr.rules && (
                     <React.Fragment>
                       {prebid.config.consentManagement.gdpr.rules.map((rule: any, index) => (
-                        <List dense={true}>
+                        <List dense={true} key={index}>
                           <Typography>
                             <strong>Rules #{index}</strong>
                           </Typography>
