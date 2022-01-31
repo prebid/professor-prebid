@@ -126,7 +126,6 @@ class Background {
     await chrome.storage?.local.set({ tabInfos: this.tabInfos });
   };
 }
-// chrome.storage?.local.set({ tabInfos: null });
 new Background();
 export interface IPrebids {
   [key: string]: IPrebidDetails;

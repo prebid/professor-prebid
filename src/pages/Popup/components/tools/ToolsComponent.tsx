@@ -78,6 +78,9 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
                 <Button variant="outlined" size="medium" onClick={openDebugTab} startIcon={<BugReportIcon />}>
                   open debug tab
                 </Button>
+                <Button variant="outlined" size="medium" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<BugReportIcon />}>
+                  delete tabInfos
+                </Button>
               </TableCell>
             </TableRow>
             <TableRow>
