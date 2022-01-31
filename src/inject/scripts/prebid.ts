@@ -1,14 +1,6 @@
 import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
-
-// declare global {
-//   interface Window {
-//     pbjs: any;
-//     _pbjsGlobals: string[];
-//     PREBID_TIMEOUT: number;
-//   }
-// }
 class Prebid {
   globalPbjs: any = window.pbjs;
   namespace: string;
@@ -74,10 +66,31 @@ class Prebid {
     });
   };
 
+  removeOldestEvents = (events: IPrebidDetails['events']) => {
+    const oldestAuctionId = (events.filter((event) => event.eventType === 'auctionEnd')[0] as IPrebidAuctionEndEventData).args.auctionId;
+    const newEvents = events.filter((event) => {
+      if ((event.args as any).auctionId === oldestAuctionId) {
+        return false
+      };
+      return true;
+    });
+    const newSize = new TextEncoder().encode(JSON.stringify(newEvents)).length / 1024 / 1024;
+    if (newSize > 15) {
+      this.removeOldestEvents(newEvents);
+    } else {
+      logger.log('[Injected] removeOldestEvents done', { newSize, newEvents });
+      return newEvents;
+    }
+  }
+
   sendDetailsToContentScript = (): void => {
     const config = this.globalPbjs.getConfig();
     const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
-    const events = this.getPbjsEvents();
+    let events = this.getPbjsEvents();
+    const size = new TextEncoder().encode(JSON.stringify(events)).length / 1024 / 1024;
+    if (size > 15) {
+      events = this.removeOldestEvents(events);
+    }
     const timeout = window.PREBID_TIMEOUT || null;
     const prebidDetail: IPrebidDetails = {
       config,
@@ -402,6 +415,7 @@ export interface IPrebidDebugConfig {
   bids?: IPrebidDebugConfigBid[];
   bidders?: string[];
 }
+
 export interface IPrebidDetails {
   version: string;
   timeout: number;
