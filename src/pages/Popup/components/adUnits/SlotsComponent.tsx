@@ -90,8 +90,8 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: a
         color={isWinner ? 'secondary' : bidReceived ? 'primary' : 'default'}
         icon={
           <Stack direction="row" spacing={1}>
-            {isWinner && <GavelOutlinedIcon sx={{ height: '14pt' }} />}
-            {isRendered && <PictureInPictureOutlinedIcon sx={{ height: '14pt' }} />}
+            {isWinner && <GavelOutlinedIcon sx={{ height: '14px' }} />}
+            {isRendered && <PictureInPictureOutlinedIcon sx={{ height: '14px' }} />}
           </Stack>
         }
         label={label}
@@ -117,7 +117,7 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: a
           quotesOnKeys={false}
           indentWidth={2}
           collapseStringsAfterLength={100}
-          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px' }}
         />
       </Popover>
     </React.Fragment>
