@@ -289,7 +289,39 @@ interface IPrebidConfigUserSync {
   auctionDelay: number;
   userIds: IPrebidConfigUserSync[];
 }
-interface IPrebidConfig {
+
+export interface IPrebidConfigS2SConfig {
+  accountId: string;
+  adapter: string;
+  adapterOptions: any;
+  app: {
+    bundle: string;
+    id: string;
+    name: string;
+    paid: number;
+    privacypolicy: number;
+    publisher: {
+      domain: string;
+      id: string;
+      name: string;
+    };
+    storeurl: string;
+  };
+  bidders: string[];
+  device: {
+    ifa: string;
+    ifa_type: string;
+    lmt: string;
+    os: string;
+  };
+  enabled: boolean;
+  endpoint: string;
+  syncEndpoint: string;
+  maxBids: number;
+  syncUrlModifier: any;
+  timeout: number;
+};
+export interface IPrebidConfig {
   debug: boolean;
   bidderTimeout: number;
   publisherDomain: string;
@@ -336,37 +368,7 @@ interface IPrebidConfig {
     priceGranularity: string;
     publisherDomain: string;
   };
-  s2sConfig: {
-    accountId: string;
-    adapter: string;
-    adapterOptions: any;
-    app: {
-      bundle: string;
-      id: string;
-      name: string;
-      paid: number;
-      privacypolicy: number;
-      publisher: {
-        domain: string;
-        id: string;
-        name: string;
-      };
-      storeurl: string;
-    };
-    bidders: string[];
-    device: {
-      ifa: string;
-      ifa_type: string;
-      lmt: string;
-      os: string;
-    };
-    enabled: boolean;
-    endpoint: string;
-    syncEndpoint: string;
-    maxBids: number;
-    syncUrlModifier: any;
-    timeout: number;
-  };
+  s2sConfig: IPrebidConfigS2SConfig
   targetingControls: {
     allowTargetingKeys: string[];
     alwaysIncludeDeals: boolean;
