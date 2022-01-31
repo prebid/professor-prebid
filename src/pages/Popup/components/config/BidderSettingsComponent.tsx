@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidConfig } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
@@ -26,7 +26,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   marginLeft: 'auto',
 }));
 
-const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX.Element => {
+const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
 
@@ -57,18 +57,18 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
           <CardContent>
             <Typography variant="body2" color="text.secondary">
               <strong> Bidder Sequence: </strong>
-              {prebid?.config?.bidderSequence}
+              {config.bidderSequence}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong> Bidder Timeout: </strong>
-              {prebid?.config?.bidderTimeout}
+              {config.bidderTimeout}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong> Send All Bids:</strong> {String(prebid?.config?.enableSendAllBids)}
+              <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong> Timeout Buffer: </strong>
-              {prebid?.config?.timeoutBuffer}
+              {config.timeoutBuffer}
             </Typography>
           </CardContent>
         </Collapse>
@@ -76,27 +76,27 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
           <CardContent>
             <Typography variant="body2" color="text.secondary">
               <strong> Bidder Sequence: </strong>
-              {prebid?.config?.bidderSequence}
+              {config.bidderSequence}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong> Bidder Timeout: </strong>
-              {prebid?.config?.bidderTimeout}
+              {config.bidderTimeout}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong> Send All Bids:</strong> {String(prebid?.config?.enableSendAllBids)}
+              <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong> Timeout Buffer: </strong>
-              {prebid?.config?.timeoutBuffer}
+              {config.timeoutBuffer}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong> Max Nested Iframes:</strong> {prebid?.config?.maxNestedIframes}
+              <strong> Max Nested Iframes:</strong> {config.maxNestedIframes}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong> Use Bid Cache:</strong> {String(prebid?.config?.useBidCache)}
+              <strong> Use Bid Cache:</strong> {String(config.useBidCache)}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
-              <strong> Bid Cache Url:</strong> {prebid?.config?.cache?.url}
+              <strong> Bid Cache Url:</strong> {config.cache?.url}
             </Typography>
           </CardContent>
         </Collapse>
@@ -106,7 +106,7 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
 };
 
 interface IBidderSettingsComponentProps {
-  prebid: IPrebidDetails;
+  config: IPrebidConfig;
 }
 
 export default BidderSettingsComponent;

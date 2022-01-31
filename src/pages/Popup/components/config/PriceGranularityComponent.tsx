@@ -47,7 +47,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   marginLeft: 'auto',
 }));
 
-export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps) => {
+export const PriceGranularityCard = ({ priceGranularity, customPriceBucket }: IPriceGranularityComponentProps) => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<2 | 4 | 6 | 8 | 10 | 12>(4);
 
@@ -66,9 +66,7 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
             </Avatar>
           }
           title="Price Granularity"
-          subheader={`${prebid.config.priceGranularity} (${
-            Object.keys(defaultBuckets).includes(prebid.config.priceGranularity) ? 'default' : 'custom'
-          })`}
+          subheader={`${priceGranularity} (${Object.keys(defaultBuckets).includes(priceGranularity) ? 'default' : 'custom'})`}
           action={
             <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
@@ -78,31 +76,29 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           {(() => {
-            if (['auto', 'dense', 'custom', 'medium', 'high'].includes(prebid.config.priceGranularity)) {
+            if (['auto', 'dense', 'custom', 'medium', 'high'].includes(priceGranularity)) {
               return (
                 <CardContent>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Min: </strong> {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].min}
+                    <strong>Min: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].min}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Max: </strong> {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].max}
+                    <strong>Max: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].max}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     <strong>Precision: </strong>
-                    {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].precision || 2}
+                    {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].precision || 2}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Increment: </strong>{' '}
-                    {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets)[0].increment}
+                    <strong>Increment: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].increment}
                   </Typography>
-                  {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets).length > 1 && (
+                  {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length > 1 && (
                     <Typography
                       variant="body2"
                       color="text.secondary"
                       sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
                     >
-                      + {(defaultBuckets[prebid.config.priceGranularity] || prebid.config?.customPriceBucket?.buckets).length - 1} more price
-                      buckets...
+                      + {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length - 1} more price buckets...
                     </Typography>
                   )}
                 </CardContent>
@@ -111,24 +107,22 @@ export const PriceGranularityCard = ({ prebid }: IPriceGranularityComponentProps
           })()}
         </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <PriceGranularityComponent prebid={prebid}></PriceGranularityComponent>
-          </CardContent>
+          <CardContent><PriceGranularityComponent priceGranularity={priceGranularity} customPriceBucket={customPriceBucket}></PriceGranularityComponent></CardContent>
         </Collapse>
       </Card>
     </Grid>
   );
 };
 
-export const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponentProps) => {
+export const PriceGranularityComponent = ({ priceGranularity, customPriceBucket }: IPriceGranularityComponentProps) => {
   const [type, setType] = React.useState<string>();
   const [rows, setRows] = React.useState<IPrebidConfigPriceBucket[]>([]);
   useEffect(() => {
-    const type = prebid.config.priceGranularity;
+    const type = priceGranularity;
     setType(type);
-    const rows = defaultBuckets[type] || prebid.config?.customPriceBucket?.buckets || [];
+    const rows = defaultBuckets[type] || customPriceBucket?.buckets || [];
     setRows(rows);
-  }, [prebid.config.priceGranularity, prebid.config?.customPriceBucket?.buckets]);
+  }, [priceGranularity, customPriceBucket?.buckets]);
 
   logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (
@@ -170,7 +164,10 @@ export const PriceGranularityComponent = ({ prebid }: IPriceGranularityComponent
 };
 
 interface IPriceGranularityComponentProps {
-  prebid: IPrebidDetails;
+  priceGranularity: string;
+  customPriceBucket: {
+    buckets: IPrebidConfigPriceBucket[];
+  };
 }
 
 interface IDefaultBuckets {

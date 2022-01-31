@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigUserSync } from '../../../../inject/scripts/prebid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
@@ -33,7 +33,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   marginLeft: 'auto',
 }));
 
-const UserIdModuleComponent = ({ prebid }: UserIdModuleComponentProps): JSX.Element => {
+const UserIdModuleComponent = ({ userSync }: UserIdModuleComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
 
@@ -54,8 +54,8 @@ const UserIdModuleComponent = ({ prebid }: UserIdModuleComponentProps): JSX.Elem
           }
           title="UserIds"
           subheader={
-            prebid.config?.userSync?.userIds?.length > 0
-              ? `${prebid.config?.userSync?.userIds?.length} UserId${prebid.config?.userSync?.userIds?.length > 1 ? 's' : ''} detected:`
+            userSync?.userIds?.length > 0
+              ? `${userSync?.userIds?.length} UserId${userSync?.userIds?.length > 1 ? 's' : ''} detected:`
               : 'No UserIds detected!'
           }
           action={
@@ -66,34 +66,34 @@ const UserIdModuleComponent = ({ prebid }: UserIdModuleComponentProps): JSX.Elem
           onClick={handleExpandClick}
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          {prebid.config?.userSync?.userIds.length === 1 && (
+          {userSync?.userIds.length === 1 && (
             <CardContent>
-              {prebid.config?.userSync?.userIds[0].name && (
+              {userSync?.userIds[0].name && (
                 <Typography variant="body2" color="text.secondary">
                   <strong>Name: </strong>
-                  {prebid.config?.userSync?.userIds[0].name}
+                  {userSync?.userIds[0].name}
                 </Typography>
               )}
-              {prebid.config.userSync.userIds[0].storage?.type && (
+              {userSync.userIds[0].storage?.type && (
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Storage Type: </strong> {prebid.config.userSync.userIds[0].storage?.type}
+                  <strong>Storage Type: </strong> {userSync.userIds[0].storage?.type}
                 </Typography>
               )}
-              {prebid.config.userSync.userIds[0].storage?.expires && (
+              {userSync.userIds[0].storage?.expires && (
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Storage Expires: </strong> {prebid.config.userSync.userIds[0].storage?.expires}
+                  <strong>Storage Expires: </strong> {userSync.userIds[0].storage?.expires}
                 </Typography>
               )}
-              {prebid.config.userSync.userIds[0].storage?.name && (
+              {userSync.userIds[0].storage?.name && (
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Storage Name: </strong> {prebid.config.userSync.userIds[0].storage?.name}
+                  <strong>Storage Name: </strong> {userSync.userIds[0].storage?.name}
                 </Typography>
               )}
             </CardContent>
           )}
-          {prebid.config.userSync.userIds.length > 1 && (
+          {userSync.userIds.length > 1 && (
             <CardContent>
-              {prebid.config?.userSync?.userIds?.map((userId, index) => (
+              {userSync?.userIds?.map((userId, index) => (
                 <Typography variant="body2" color="text.secondary" key={index}>
                   <strong>#{index}: </strong> {userId.name}
                 </Typography>
@@ -116,7 +116,7 @@ const UserIdModuleComponent = ({ prebid }: UserIdModuleComponentProps): JSX.Elem
                 </TableHead>
 
                 <TableBody>
-                  {prebid.config?.userSync?.userIds?.map((userId, index) => (
+                  {userSync?.userIds?.map((userId, index) => (
                     <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell>
                         <strong>{userId.name}</strong>
@@ -149,7 +149,7 @@ const UserIdModuleComponent = ({ prebid }: UserIdModuleComponentProps): JSX.Elem
 };
 
 interface UserIdModuleComponentProps {
-  prebid: IPrebidDetails;
+  userSync: IPrebidConfigUserSync;
 }
 
 export default UserIdModuleComponent;
