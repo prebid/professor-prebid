@@ -106,7 +106,7 @@ export const Popup = (): JSX.Element => {
     };
   }, []);
 
-  logger.log(`[PopUp]: render `, tabInfo, pbjsNameSpace);
+  logger.log(`[PopUp]: render `, tabInfo?.prebids, tabInfo, pbjsNameSpace);
   return (
     <Box
       className="popup"
@@ -152,11 +152,7 @@ export const Popup = (): JSX.Element => {
                 }}
                 onClick={handleClickOpen}
               >
-                <img
-                  src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg"
-                  width={'100%'}
-                  alt="prebid logo"
-                />
+                <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width={'100%'} alt="prebid logo" />
               </Badge>
               {tabInfo?.prebids && (
                 <Dialog disableEscapeKeyDown open={pbjsNamespaceDialogOpen} onClose={handleClose}>
@@ -282,8 +278,8 @@ export const Popup = (): JSX.Element => {
             {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]}></TimelineComponent>}
           </Route>
           <Route exact path="/config">
-            {tabInfo?.prebids && tabInfo?.tcf && tabInfo.prebids[pbjsNameSpace]?.config && (
-              <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo.tcf}></ConfigComponent>
+            {tabInfo?.prebids &&  tabInfo.prebids[pbjsNameSpace]?.config && (
+              <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo?.tcf}></ConfigComponent>
             )}
           </Route>
           <Route exact path="/userId">
