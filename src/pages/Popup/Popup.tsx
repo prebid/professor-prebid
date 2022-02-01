@@ -94,7 +94,7 @@ export const Popup = (): JSX.Element => {
 
     getTabInfosFromStorage((tabInfos, tabId) => {
       setPbjsNamespace((previous) => {
-        return previous === null && tabInfos[tabId]?.prebids && Object.keys(tabInfos[tabId].prebids)[0]
+        return previous === null && tabInfos && tabInfos[tabId]?.prebids && Object.keys(tabInfos[tabId].prebids)[0]
           ? Object.keys(tabInfos[tabId].prebids)[0]
           : previous;
       });
