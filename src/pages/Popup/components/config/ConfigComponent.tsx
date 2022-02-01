@@ -6,6 +6,7 @@ import Server2ServerComponent from './Server2ServerComponent';
 import AnalyticsComponent from './AnalyticsComponent';
 import ConsentManagementComponent from './ConsentManagementComponent';
 import BidderSettingsComponent from './BidderSettingsComponent';
+import FloorsModuleComponent from './FloorsModuleComponent';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
 import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
@@ -15,7 +16,9 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
   logger.log(`[PopUp][BidderSettingsComponent]: render `, prebid.config, tcf);
   return (
     <Grid container spacing={1} padding={1}>
-      {prebid.config.priceGranularity && <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} />}
+      {prebid.config.priceGranularity && (
+        <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} />
+      )}
 
       {prebid.config && <BidderSettingsComponent config={prebid.config} />}
 
@@ -26,6 +29,7 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
       {prebid?.config?.consentManagement && tcf && <ConsentManagementComponent consentManagement={prebid.config.consentManagement} tcf={tcf} />}
 
       {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <UserIdModule userSync={prebid.config.userSync} />}
+      {prebid.config?.floors && <FloorsModuleComponent floors={prebid.config.floors} />}
       {/* {prebid.config && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>} */}
     </Grid>
   );
