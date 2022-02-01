@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { IPrebidDetails , IPrebidConfigConsentManagement} from '../../../../inject/scripts/prebid';
+import { IPrebidDetails, IPrebidConfigConsentManagement } from '../../../../inject/scripts/prebid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
@@ -123,7 +123,7 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
             </Typography>
             <Typography variant="body2" color="text.secondary">
               <strong>Timeout: </strong>
-              {consentManagement.timeout ?consentManagement.timeout : consentManagement.gdpr?.timeout}
+              {consentManagement.timeout ? consentManagement.timeout : consentManagement.gdpr?.timeout}
             </Typography>
           </CardContent>
         </Collapse>
@@ -175,6 +175,44 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
                 </CardContent>
               )}
             </Box>
+          )}
+          <CardHeader title="USP" />
+          {consentManagement?.usp && (
+            <CardContent>
+              {consentManagement?.usp?.cmpApi && (
+                <Typography>
+                  <strong>CmpApi:</strong> {consentManagement.usp.cmpApi}
+                </Typography>
+              )}
+              {consentManagement?.usp?.timeout && (
+                <Typography>
+                  <strong>Timeout:</strong> {consentManagement.usp.timeout}
+                </Typography>
+              )}
+            </CardContent>
+          )}
+          <CardHeader title="GDPR Enforcement" />
+          {consentManagement?.gdpr?.rules && (
+            <Card sx={{ maxWidth: '200px' }}>
+              <CardContent>
+                {consentManagement?.gdpr?.rules && (
+                  <React.Fragment>
+                    {consentManagement.gdpr.rules.map((rule: any, index) => (
+                      <List dense={true}>
+                        <Typography>
+                          <strong>Rules #{index}</strong>
+                        </Typography>
+                        {Object.keys(rule).map((key, index) => (
+                          <ListItem key={index}>
+                            {key}: {String(rule[key])}
+                          </ListItem>
+                        ))}
+                      </List>
+                    ))}
+                  </React.Fragment>
+                )}
+              </CardContent>
+            </Card>
           )}
           <CardContent>
             {Object.keys(tcf).map((key, index) => (
