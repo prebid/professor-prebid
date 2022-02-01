@@ -401,6 +401,7 @@ export interface IPrebidConfig {
   cache: {
     url: string;
   };
+  gptPreAuction: { mcmEnabled: boolean };
   [key: string]: any;
 }
 
