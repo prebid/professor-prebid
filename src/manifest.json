@@ -21,7 +21,7 @@
   "web_accessible_resources": [
     {
       "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],
-      "matches": ["*://*/*", "http://*/*", "https://*/*", "<all_urls>"]
+      "matches": ["<all_urls>"]
     }
   ],
   "permissions": ["activeTab", "webNavigation", "webRequest", "storage", "tabs", "unlimitedStorage", "scripting"]
