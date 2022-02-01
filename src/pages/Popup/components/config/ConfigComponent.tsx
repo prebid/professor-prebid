@@ -7,6 +7,7 @@ import AnalyticsComponent from './AnalyticsComponent';
 import ConsentManagementComponent from './ConsentManagementComponent';
 import BidderSettingsComponent from './BidderSettingsComponent';
 import FloorsModuleComponent from './FloorsModuleComponent';
+import GptPreAuctionComponent from './GptPreAuctionComponent';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
 import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
@@ -30,6 +31,7 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
 
       {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <UserIdModule userSync={prebid.config.userSync} />}
       {prebid.config?.floors && <FloorsModuleComponent floors={prebid.config.floors} />}
+      {prebid.config?.gptPreAuction && <GptPreAuctionComponent gptPreAuction={prebid.config.gptPreAuction} />}
       {/* {prebid.config && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>} */}
     </Grid>
   );
