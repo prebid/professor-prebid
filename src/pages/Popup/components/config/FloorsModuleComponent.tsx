@@ -34,7 +34,7 @@ const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Ele
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    setMaxWidth(expanded ? 4 : 4);
+    setMaxWidth(expanded ? 4 : 8);
   };
   logger.log(`[PopUp][FloorsModuleComponent]: render `, floors);
   return (
@@ -47,7 +47,7 @@ const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Ele
             </Avatar>
           }
           title="Floors Module"
-          subheader={Object.keys(floors.data.values).map(key => `${key}: ${floors.data.values[key]}, `)}
+          subheader={'floors'}
           action={
             <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
@@ -56,25 +56,19 @@ const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Ele
           onClick={handleExpandClick}
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          <CardContent sx={{ flexDirection: 'row', display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', columnGap: '10px' }}>
-            <Stack>
-              {Object.keys(floors.data).map((key, index) => (
-                <Typography variant="body2" color="text.secondary" key={index}>
-                  {(typeof floors.data[key] === 'string' || typeof floors.data[key] === 'number') && (
-                    <React.Fragment>
-                      <strong>{key}:</strong> {floors.data[key].toString()}
-                    </React.Fragment>
-                  )}
-                </Typography>
-              ))}
-            </Stack>
-            <Stack>
-              {Object.keys(floors.enforcement).map((key, index) => (
-                <Typography variant="body2" color="text.secondary" key={index}>
-                  <strong>{key}:</strong> {String(floors.enforcement[key])}
-                </Typography>
-              ))}
-            </Stack>
+          <CardContent>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Currency:</strong> {floors.data.currency}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Schema Version:</strong> {floors.data.floorsSchemaVersion}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Schema Delimiter:</strong> {floors.data.schema.delimiter}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Schema Fieds:</strong> [{floors.data.schema.fields.join(' , ')}]
+            </Typography>
           </CardContent>
         </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
