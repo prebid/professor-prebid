@@ -81,14 +81,16 @@ const TcfComponent = ({ tcf, tcfKey }: any): JSX.Element => {
 const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
+  const ref = React.useRef<HTMLInputElement>(null);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
     setMaxWidth(expanded ? 4 : 12);
+    setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
   return (
-    <Grid item xs={maxWidth}>
+    <Grid item xs={maxWidth} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={

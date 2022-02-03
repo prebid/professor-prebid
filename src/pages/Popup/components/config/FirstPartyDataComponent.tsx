@@ -30,14 +30,16 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
+  const ref = React.useRef<HTMLInputElement>(null);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
     setMaxWidth(expanded ? 4 : 4);
+    setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   logger.log(`[PopUp][FirstPartyDataComponent]: render `, floors);
   return (
-    <Grid item xs={maxWidth}>
+    <Grid item xs={maxWidth} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={
@@ -56,7 +58,7 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           <CardContent>
-            <Typography variant="body2" color="text.secondary" key={index}>
+            <Typography variant="body2" color="text.secondary">
               {/* <strong>{key}:</strong> {floors.data[key].toString()} */}
             </Typography>
           </CardContent>

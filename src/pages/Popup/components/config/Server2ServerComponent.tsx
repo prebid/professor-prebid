@@ -32,15 +32,17 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
+  const ref = React.useRef<HTMLInputElement>(null);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
     setMaxWidth(expanded ? 4 : 8);
+    setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 
   logger.log(`[PopUp][Server2ServerComponent]: render `, s2sConfig);
   return (
-    <Grid item xs={maxWidth}>
+    <Grid item xs={maxWidth} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={

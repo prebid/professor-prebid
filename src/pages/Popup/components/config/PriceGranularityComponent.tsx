@@ -50,14 +50,16 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
 export const PriceGranularityCard = ({ priceGranularity, customPriceBucket }: IPriceGranularityComponentProps) => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<2 | 4 | 6 | 8 | 10 | 12>(4);
+  const ref = React.useRef<HTMLInputElement>(null);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
     setMaxWidth(expanded ? 4 : 8);
+    setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 
   return (
-    <Grid item xs={maxWidth}>
+    <Grid item xs={maxWidth} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={
@@ -107,7 +109,9 @@ export const PriceGranularityCard = ({ priceGranularity, customPriceBucket }: IP
           })()}
         </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent><PriceGranularityComponent priceGranularity={priceGranularity} customPriceBucket={customPriceBucket}></PriceGranularityComponent></CardContent>
+          <CardContent>
+            <PriceGranularityComponent priceGranularity={priceGranularity} customPriceBucket={customPriceBucket}></PriceGranularityComponent>
+          </CardContent>
         </Collapse>
       </Card>
     </Grid>

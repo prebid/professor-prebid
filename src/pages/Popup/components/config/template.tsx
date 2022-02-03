@@ -28,7 +28,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   marginLeft: 'auto',
 }));
 
-const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps): JSX.Element => {
+const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
   const ref = React.useRef<HTMLInputElement>(null);
@@ -38,7 +38,7 @@ const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps)
     setMaxWidth(expanded ? 4 : 4);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
-  logger.log(`[PopUp][GptPreAuctionModule]: render `, gptPreAuction);
+  logger.log(`[PopUp][FloorsModuleComponent]: render `, floors);
   return (
     <Grid item xs={maxWidth} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
@@ -48,8 +48,8 @@ const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps)
               <BorderBottomIcon />
             </Avatar>
           }
-          title="Gpt Pre-Auction Module"
-          subheader={''}
+          title="Floors Module"
+          subheader={Object.keys(floors.data.values).map((key) => `${key}: ${floors.data.values[key]}, `)}
           action={
             <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
@@ -58,18 +58,31 @@ const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps)
           onClick={handleExpandClick}
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              <React.Fragment>
-                <strong>mcmEnabled:</strong> {gptPreAuction.mcmEnabled.toString()}
-              </React.Fragment>
-            </Typography>
+          <CardContent sx={{ flexDirection: 'row', display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', columnGap: '10px' }}>
+            <Stack>
+              {Object.keys(floors.data).map((key, index) => (
+                <Typography variant="body2" color="text.secondary" key={index}>
+                  {(typeof floors.data[key] === 'string' || typeof floors.data[key] === 'number') && (
+                    <React.Fragment>
+                      <strong>{key}:</strong> {floors.data[key].toString()}
+                    </React.Fragment>
+                  )}
+                </Typography>
+              ))}
+            </Stack>
+            <Stack>
+              {Object.keys(floors.enforcement).map((key, index) => (
+                <Typography variant="body2" color="text.secondary" key={index}>
+                  <strong>{key}:</strong> {String(floors.enforcement[key])}
+                </Typography>
+              ))}
+            </Stack>
           </CardContent>
         </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <ReactJson
-              src={gptPreAuction}
+              src={floors}
               name={false}
               collapsed={false}
               enableClipboard={false}
@@ -88,8 +101,8 @@ const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps)
   );
 };
 
-interface IGptPreAuctionComponentProps {
-  gptPreAuction: IPrebidConfig['gptPreAuction'];
+interface IFloorsModuleComponentProps {
+  floors: IPrebidConfig['floors'];
 }
 
-export default GptPreAuctionComponent;
+export default FloorsModuleComponent;
