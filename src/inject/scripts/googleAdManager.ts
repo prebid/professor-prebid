@@ -235,7 +235,7 @@ interface IGoogleAdManagerSlot {
   elementId: string;
   name: string;
   sizes: string[];
-  targeting: { key: string; value: any }[];
+  targeting: { key: string; value: unknown }[];
   creativeRenderTime: number;
 }
 

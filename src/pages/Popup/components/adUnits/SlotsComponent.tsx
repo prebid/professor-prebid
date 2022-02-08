@@ -4,8 +4,9 @@ import {
   IPrebidAdUnitMediaTypes,
   IPrebidAdUnit,
   IPrebidBidWonEventData,
-  IPrebidBidResponseEventData,
   IPrebidAdRenderSucceededEventData,
+  IPrebidDetails,
+  IPrebidBid,
 } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -21,43 +22,43 @@ import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
-const AdUnitChipComponent = ({ adUnit }: any): JSX.Element => {
+import { getTabId } from '../../utils';
+
+const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element => {
   const [labelText, setLabelText] = React.useState<string | null>(adUnit.code);
-  const scroll2element = (elementId: string): any => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentTab = tabs[0];
-      const tabId = currentTab.id;
-      const func = (elementId: string) => {
-        const element = document.getElementById(elementId);
-        const addBorder = (element: HTMLElement) => {
-          const borderStyleBak = element.style.border;
-          element?.scrollIntoView();
-          element.style.border = '5px dashed #f99b0c';
-          element.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], {
-            duration: 1000,
-            iterations: 1, // Infinity
-          });
-          window.setTimeout(() => {
-            element.style.border = borderStyleBak;
-          }, 5000);
-        };
-        if (!element) {
-          return false;
-        } else {
-          addBorder(element);
-          return true;
-        }
+  const scroll2element = async (elementId: string): Promise<void> => {
+    const tabId = await getTabId();
+    const func = (elementId: string): boolean => {
+      const element = document.getElementById(elementId);
+      const addBorder = (element: HTMLElement) => {
+        const borderStyleBak = element.style.border;
+        element?.scrollIntoView();
+        element.style.border = '5px dashed #f99b0c';
+        element.animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }], {
+          duration: 1000,
+          iterations: 1, // Infinity
+        });
+        window.setTimeout(() => {
+          element.style.border = borderStyleBak;
+        }, 5000);
       };
-      chrome.scripting.executeScript({ target: { tabId }, func, args: [elementId] }, (injectionResults) => {
-        if (injectionResults[0].result) {
-          setLabelText(`✓ ${adUnit.code}`);
-        } else {
-          setLabelText(`✗ Element with id="${adUnit.code}" not found.`);
-        }
-        setTimeout(() => setLabelText(adUnit.code), 1500);
-      });
+      if (!element) {
+        return false;
+      } else {
+        addBorder(element);
+        return true;
+      }
+    };
+    chrome.scripting.executeScript({ target: { tabId }, func, args: [elementId] }, (injectionResults) => {
+      if (injectionResults[0].result) {
+        setLabelText(`✓ ${adUnit.code}`);
+      } else {
+        setLabelText(`✗ Element with id="${adUnit.code}" not found.`);
+      }
+      setTimeout(() => setLabelText(adUnit.code), 1500);
     });
   };
+
   return (
     <Chip
       onClick={() => {
@@ -70,7 +71,7 @@ const AdUnitChipComponent = ({ adUnit }: any): JSX.Element => {
   );
 };
 
-const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: any): JSX.Element => {
+const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: IBidChipComponentProps): JSX.Element => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     if (typeof input === 'object') {
@@ -124,12 +125,10 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: a
   );
 };
 
-const MediaTypeChipComponent = ({ input, label }: any): JSX.Element => {
+const MediaTypeChipComponent = ({ input, label }: IMediaTypeChipComponentProps): JSX.Element => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    if (typeof input === 'object') {
-      setAnchorEl(event.currentTarget);
-    }
+    setAnchorEl(event.currentTarget);
   };
   const handlePopoverClose = () => {
     setAnchorEl(null);
@@ -183,7 +182,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
               <Box key={index}>
                 <Typography variant="subtitle2">Banner Sizes:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {mediaTypes[mediaType].sizes.map((size, index) => (
+                  {mediaTypes['banner'].sizes.map((size, index) => (
                     <Chip size="small" variant="outlined" color="primary" label={`${size[0]}x${size[1]}`} key={index} />
                   ))}
                 </Stack>
@@ -195,8 +194,8 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
               <Box key={index}>
                 <Typography variant="subtitle2">Video:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {Object.keys(mediaTypes[mediaType]).map((key, index) => (
-                    <MediaTypeChipComponent input={mediaTypes[mediaType][key as keyof IPrebidAdUnitMediaTypes['video']]} label={key} key={index} />
+                  {Object.keys(mediaTypes['video']).map((key, index) => (
+                    <MediaTypeChipComponent input={mediaTypes['video']} label={key} key={index} />
                   ))}
                 </Stack>
               </Box>
@@ -208,7 +207,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                 <Typography variant="subtitle2">Native:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
                   {Object.keys(mediaTypes[mediaType]).map((key, index) => (
-                    <MediaTypeChipComponent input={mediaTypes[mediaType][key as keyof IPrebidAdUnitMediaTypes['native']]} label={key} key={index} />
+                    <MediaTypeChipComponent input={mediaTypes[mediaType]} label={key} key={index} />
                   ))}
                 </Stack>
               </Box>
@@ -298,7 +297,7 @@ const SlotsComponent = ({
 
 interface ISlotsComponentProps {
   auctionEndEvents: IPrebidAuctionEndEventData[];
-  allBidderEvents: IPrebidBidResponseEventData[];
+  allBidderEvents: IPrebidDetails['events'][];
   latestAuctionsWinningBids: IPrebidBidWonEventData[];
   latestAuctionsBidsReceived: IPrebidBidWonEventData[];
   latestAuctionsAdsRendered: IPrebidAdRenderSucceededEventData[];
@@ -309,4 +308,20 @@ interface IMediaTypesComponentProps {
   mediaTypes: IPrebidAdUnitMediaTypes;
 }
 
+interface IAdunitChipComponentProps {
+  adUnit: IPrebidAdUnit;
+}
+
 export default SlotsComponent;
+interface IBidChipComponentProps {
+  input: IPrebidBid;
+  label: string;
+  isWinner: boolean;
+  bidReceived: IPrebidBidWonEventData | undefined;
+  isRendered: boolean;
+}
+
+interface IMediaTypeChipComponentProps {
+  input: IPrebidAdUnitMediaTypes[keyof IPrebidAdUnitMediaTypes];
+  label: string;
+}

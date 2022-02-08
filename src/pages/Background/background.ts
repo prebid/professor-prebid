@@ -26,27 +26,28 @@ class Background {
     await this.cleanStorage();
   };
 
-  handleMessagesFromInjected = async (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+  handleMessagesFromInjected = async (message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails }, sender: chrome.runtime.MessageSender, sendResponse: (response?: undefined) => void) => {
     const { type, payload } = message;
-    const tabId = sender.tab?.id;
+    const { tab: { id: tabId } } = sender;
     if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     logger.log('[Background] handleMessages', { tabId });
     switch (type) {
       case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
         sendResponse();
-        this.tabInfos[tabId]['googleAdManager'] = payload;
+        this.tabInfos[tabId]['googleAdManager'] = payload as IGoogleAdManagerDetails;
         logger.log('[Background] received gam details data:', payload);
         break;
       case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
         sendResponse();
+        const typedPayload = payload as IPrebidDetails;
         this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-        this.tabInfos[tabId]['prebids']![payload.namespace] = payload;
+        this.tabInfos[tabId]['prebids']![typedPayload.namespace] = typedPayload;
         logger.log('[Background] received prebid details data:', payload);
         break;
       case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
         sendResponse();
-        this.tabInfos[tabId]['tcf'] = payload;
+        this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
         logger.log('[Background] received tcf details data:', payload);
         break;
     }
@@ -110,7 +111,7 @@ class Background {
       chrome.action.setBadgeBackgroundColor({ color: '#ecf3f5' });
       chrome.action.setBadgeText({ text: `` });
     }
-    logger.log('[Background] updateBadge', tabId ,  this.tabInfos[tabId]?.prebids);
+    logger.log('[Background] updateBadge', tabId, this.tabInfos[tabId]?.prebids);
   };
 
   updatePopUp = (tabId: number) => {

@@ -25,7 +25,7 @@ const InjectedApp = (): JSX.Element => {
 
   const handleNewMasks = (event: Event) => {
     const customEvent = event as CustomEvent;
-    const pbjsNameSpace = customEvent.detail;
+    const pbjsNameSpace: string = customEvent.detail;
     if (pbjsNameSpace) {
       const pbsjsEvents = (window[pbjsNameSpace].getEvents() || []) as unknown[];
       const auctionEndEvents = (pbsjsEvents as IPrebidAuctionEndEventData[]).filter((event) => event.eventType === 'auctionEnd');

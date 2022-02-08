@@ -1,12 +1,12 @@
 import logger from './logger';
 
-export const sendToContentScript = (type: string, payload: any) => {
+export const sendToContentScript = (type: string, payload: object): void => {
   logger.log('[sendToContentScript] postMessage ', type);
   // work-around for
   // DOMException:xyz could not be cloned.
   // in window.postMessage
   payload = JSON.parse(JSON.stringify(payload));
-  (window as any).top.postMessage(
+  window.top.postMessage(
     {
       type,
       payload,
@@ -15,7 +15,7 @@ export const sendToContentScript = (type: string, payload: any) => {
   );
 };
 
-export const safelyParseJSON = (data: any): any => {
+export const safelyParseJSON = (data: object | string): object => {
   if (typeof data === 'object') {
     return data;
   }
@@ -32,7 +32,7 @@ export const createRangeArray = (start: number, end: number, step: number): numb
   return Array.from(Array.from(Array(Math.ceil((end - start) / step)).keys()), (x) => start + x * step);
 };
 
-export const getMinAndMaxNumber = (timestampArray: number[]) => {
+export const getMinAndMaxNumber = (timestampArray: number[]): { min: number; max: number; } => {
   let min: number = 0;
   let max: number = 0;
   timestampArray.forEach((timestamp) => {

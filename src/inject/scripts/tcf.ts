@@ -3,8 +3,8 @@ import constants from '../../constants.json';
 
 declare global {
   interface Window {
-    __cmp: any;
-    __tcfapi: any;
+    __cmp: Function;
+    __tcfapi: Function;
   }
 }
 class IabTcf {
@@ -27,7 +27,7 @@ class IabTcf {
     }
   }
 
-  pingV1(callback: any) {
+  pingV1(callback: Function) {
     let cmpLoaded = false;
     try {
       window.__cmp('ping', null, (val: IPingReturn, success: boolean) => {
@@ -45,10 +45,10 @@ class IabTcf {
     }
   }
 
-  getConsentDataV1(callback: any) {
-    let consentData: any = null;
+  getConsentDataV1(callback: Function) {
+    let consentData: string = null;
     try {
-      window.__cmp('getConsentData', null, (val: any, success: any) => {
+      window.__cmp('getConsentData', null, (val: string, success: boolean) => {
         if (success) {
           consentData = val;
         }
@@ -63,7 +63,7 @@ class IabTcf {
     }
   }
 
-  pingV2(callback: any) {
+  pingV2(callback: Function) {
     let pingReturn: IPingReturn = null;
     try {
       window.__tcfapi('ping', 2, (ping: IPingReturn) => {
@@ -79,10 +79,10 @@ class IabTcf {
     }
   }
 
-  getTCDataV2(callback: any) {
-    let tcData: any = null;
+  getTCDataV2(callback: Function) {
+    let tcData: string = null;
     try {
-      window.__tcfapi('getTCData', 2, (data: any, success: any) => {
+      window.__tcfapi('getTCData', 2, (data: string, success: boolean) => {
         if (success) {
           tcData = data;
         }
@@ -104,8 +104,8 @@ class IabTcf {
   sendDetailsToContentScript() {
     if (typeof window.__cmp === 'function') {
       try {
-        this.pingV1((cmpLoaded: any) => {
-          this.getConsentDataV1((consentData: any) => {
+        this.pingV1((cmpLoaded: boolean) => {
+          this.getConsentDataV1((consentData: {gdprApplies: boolean, consentData: string}) => {
             const detail: ITcfDetails = {
               v1: {
                 cmpLoaded: cmpLoaded,
@@ -124,8 +124,8 @@ class IabTcf {
 
     if (typeof window.__tcfapi === 'function') {
       try {
-        this.pingV2((pingReturn: any) => {
-          this.getTCDataV2((tcData: any) => {
+        this.pingV2((pingReturn: IPingReturn) => {
+          this.getTCDataV2((tcData: {tcString: string}) => {
             const detail: ITcfDetails = {
               v2: {
                 cmpLoaded: pingReturn.cmpLoaded,

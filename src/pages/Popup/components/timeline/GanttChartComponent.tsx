@@ -71,7 +71,7 @@ const useStyles = makeStyles({
   },
 });
 
-const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<any>) => {
+const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>) => {
   const allGridBarsCollection = gridRef?.current?.children;
   const allGridBarsArray = Array.from(allGridBarsCollection || []) as HTMLLIElement[];
   const nearestGridBar = allGridBarsArray.sort(

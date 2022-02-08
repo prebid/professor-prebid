@@ -4,6 +4,7 @@
 // with the auction data it collected so far
 import logger from '../../logger';
 import constants from '../../constants.json';
+import { IPrebidDetails } from '../../inject/scripts/prebid';
 
 class Content {
   pbjsNamespace: string = null;
@@ -32,7 +33,7 @@ class Content {
     logger.log('[Content] listenToPopupScript()');
   };
 
-  processMessageFromInjected = (event: MessageEvent<any>) => {
+  processMessageFromInjected = (event: MessageEvent<{type: string; payload: object}>) => {
     if (event.source != window) {
       return;
     }
@@ -41,7 +42,7 @@ class Content {
       this.sendConsoleStateToInjected();
     }
     if (type === constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
-      this.pbjsNamespace = payload.namespace;
+      this.pbjsNamespace = (payload as IPrebidDetails).namespace;
     }
     this.updateBackgroundPage(type, payload);
     this.updateMasks();
@@ -55,7 +56,7 @@ class Content {
     logger.log('[Content] sendConsoleStateToInjected()');
   };
 
-  updateBackgroundPage = (type: string, payload: any) => {
+  updateBackgroundPage = (type: string, payload: object) => {
     if (!type || !payload) return;
     logger.log('[Content] updateBackgroundPage', type, payload);
     chrome.runtime.sendMessage({ type, payload });

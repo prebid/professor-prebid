@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import UserIdsComponent from '../Popup/components/userIds/UserIdsComponent';
 import PrebidAdUnitsComponent from '../Popup/components/adUnits/AdUnitsComponent';
 import TimeLineComponent from '../Popup/components/timeline/TimeLineComponent';
-import { ITabInfos } from '../Background/background';
+import { ITabInfos, ITabInfo } from '../Background/background';
 import BidsComponent from '../Popup/components/bids/BidsComponent';
 import ConfigComponent from '../Popup/components/config/ConfigComponent';
 import ToolsComponent from '../Popup/components/tools/ToolsComponent';
@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import constants from '../../constants.json';
+import { IPrebidDetails } from '../../inject/scripts/prebid';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
@@ -32,7 +33,13 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const NamespaceTabs = ({ prebids, megaBytes, tcf }: any) => {
+interface NamespaceTabsProps {
+  prebids: ITabInfo['prebids'];
+  megaBytes: string;
+  tcf: ITabInfo['tcf'];
+}
+
+const NamespaceTabs = ({ prebids, megaBytes, tcf }: NamespaceTabsProps) => {
   const [muiTabId, setMuiTabId] = useState(0);
   const handleMuiTabIdChange = (event: React.SyntheticEvent, newValue: number) => {
     setMuiTabId(newValue);
@@ -46,7 +53,7 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: any) => {
           ))}
         </Tabs>
       </Box>
-      {Object.keys(prebids).map((prebidKey: any, index) => {
+      {Object.keys(prebids).map((prebidKey: string, index) => {
         const prebid = prebids[prebidKey];
         return (
           <TabPanel value={muiTabId} index={index} key={index}>
@@ -68,7 +75,7 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: any) => {
   );
 };
 
-const ChromeTabs = ({ tabInfos }: any) => {
+const ChromeTabs = ({ tabInfos }: { tabInfos: ITabInfos }) => {
   const [muiTabId, setMuiTabId] = useState(0);
   const handleMuiTabIdChange = (event: React.SyntheticEvent, newValue: number) => {
     setMuiTabId(newValue);
@@ -77,15 +84,15 @@ const ChromeTabs = ({ tabInfos }: any) => {
     <React.Fragment>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
-          {Object.keys(tabInfos).map((key: any, index) => {
-            return <Tab key={index} label={`${tabInfos[key].url} (TabId: ${key})`} {...a11yProps(index)} />;
+          {Object.keys(tabInfos).map((key, index) => {
+            return <Tab key={index} label={`${tabInfos[Number(key)].url} (TabId: ${key})`} {...a11yProps(index)} />;
           })}
           <Tab label={'JSON id:' + Object.keys(tabInfos).length} {...a11yProps(Object.keys(tabInfos).length)} />
         </Tabs>
       </Box>
-      {Object.keys(tabInfos).map((key: any, index) => {
-        const { prebids, tcf, googleAdManager } = tabInfos[key];
-        const size = new TextEncoder().encode(JSON.stringify(tabInfos[key])).length;
+      {Object.keys(tabInfos).map((key, index) => {
+        const { prebids, tcf, googleAdManager } = tabInfos[Number(key)];
+        const size = new TextEncoder().encode(JSON.stringify(tabInfos[Number(key)])).length;
         const kiloBytes = size / 1024;
         const megaBytes = (kiloBytes / 1024).toFixed(2);
         return (
@@ -121,7 +128,7 @@ const getTabInfosFromStorage = async () => {
 const DebugComponent = () => {
   const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
   useEffect(() => {
-    const handleMessage = async (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+    const handleMessage = async (message: { type: 'string' }) => {
       if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
         const tabInfos = await getTabInfosFromStorage();
         setTabInfos(tabInfos);

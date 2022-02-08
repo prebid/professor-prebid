@@ -33,7 +33,7 @@ const ExpandMore = styled((props: ExpandMoreProps) => {
   marginLeft: 'auto',
 }));
 
-const TcfComponent = ({ tcf, tcfKey }: any): JSX.Element => {
+const TcfComponent = ({ tcf, tcfKey }: TcfComponentProps): JSX.Element => {
   const [decodedTcfString, setDecodedTcfString] = React.useState({});
   useEffect(() => {
     const string = tcf[tcfKey]?.consentData || '';
@@ -160,14 +160,14 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
                   <CardHeader title="GDPR Enforcement" />
                   {consentManagement.gdpr.rules && (
                     <React.Fragment>
-                      {consentManagement.gdpr.rules.map((rule: any, index) => (
+                      {consentManagement.gdpr.rules.map((rule, index) => (
                         <List dense={true} key={index}>
                           <Typography>
                             <strong>Rules #{index}</strong>
                           </Typography>
                           {Object.keys(rule).map((key, index) => (
                             <ListItem key={index}>
-                              {key}: {String(rule[key])}
+                              {key}: {String(rule[key as keyof typeof rule])}
                             </ListItem>
                           ))}
                         </List>
@@ -199,14 +199,14 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
               <CardContent>
                 {consentManagement?.gdpr?.rules && (
                   <React.Fragment>
-                    {consentManagement.gdpr.rules.map((rule: any, index) => (
+                    {consentManagement.gdpr.rules.map((rule, index) => (
                       <List dense={true}>
                         <Typography>
                           <strong>Rules #{index}</strong>
                         </Typography>
                         {Object.keys(rule).map((key, index) => (
                           <ListItem key={index}>
-                            {key}: {String(rule[key])}
+                            {key}: {String(rule[key as keyof typeof rule])}
                           </ListItem>
                         ))}
                       </List>
@@ -230,6 +230,11 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
 interface IPrivacyComponentProps {
   consentManagement: IPrebidConfigConsentManagement;
   tcf: ITcfDetails;
+}
+
+interface TcfComponentProps {
+  tcf: ITcfDetails;
+  tcfKey: string;
 }
 
 export default PrivacyComponent;

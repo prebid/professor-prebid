@@ -2,7 +2,14 @@ import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 class Prebid {
-  globalPbjs: any = window.pbjs;
+  globalPbjs: {
+    getEvents: () => IPrebidDetails['events'];
+    onEvent: Function;
+    que: Function[];
+    getConfig: () => IPrebidDetails['config'];
+    getUserIdsAsEids: () => IPrebidDetails['eids'];
+    version: string;
+  } = window.pbjs;
   namespace: string;
   debug: IPrebidDebugConfig;
   lastTimeUpdateSentToContentScript: number;
@@ -32,8 +39,8 @@ class Prebid {
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    this.globalPbjs.onEvent('bidResponse', (bidRequested: any) => {
-      logger.log('[Injected] bidResponse', this.namespace, { bidRequested });
+    this.globalPbjs.onEvent('bidResponse', (bidResponse: IPrebidBidResponseEventData) => {
+      logger.log('[Injected] bidResponse', this.namespace, { bidResponse });
       this.throttle(this.sendDetailsToContentScript);
     });
 
@@ -60,8 +67,8 @@ class Prebid {
 
   getPbjsEvents = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [];
-    return events.map((event: any) => {
-      delete event.args.doc; // throws CORS error in webpage console
+    return events.map(event => {
+      delete (event as any).args.doc; // throws CORS error in webpage console
       return event;
     });
   };
@@ -69,7 +76,7 @@ class Prebid {
   removeOldestEvents = (events: IPrebidDetails['events']) => {
     const oldestAuctionId = (events.filter((event) => event.eventType === 'auctionEnd')[0] as IPrebidAuctionEndEventData).args.auctionId;
     const newEvents = events.filter((event) => {
-      if ((event.args as any).auctionId === oldestAuctionId) {
+      if ((event.args as { auctionId: string }).auctionId === oldestAuctionId) {
         return false
       };
       return true;
@@ -130,7 +137,7 @@ export const addEventListenersForPrebid = () => {
     logger.log('[Injected] isPrebidInPage', window.top);
     const pbjsGlobals = window._pbjsGlobals || [];
     if (pbjsGlobals.length > 0) {
-      pbjsGlobals.forEach((global: any) => {
+      pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);
           allreadyInjectedPrebid.push(global);
@@ -306,7 +313,7 @@ export interface IPrebidConfigUserSync {
 export interface IPrebidConfigS2SConfig {
   accountId: string;
   adapter: string;
-  adapterOptions: any;
+  adapterOptions: object;
   app: {
     bundle: string;
     id: string;
@@ -331,7 +338,7 @@ export interface IPrebidConfigS2SConfig {
   endpoint: string;
   syncEndpoint: string;
   maxBids: number;
-  syncUrlModifier: any;
+  syncUrlModifier: object;
   timeout: number;
 };
 
@@ -396,13 +403,24 @@ export interface IPrebidConfig {
   timeoutBuffer: number;
   disableAjaxTimeout: boolean;
   maxNestedIframes: number;
-  auctionOptions: any;
+  auctionOptions: unknown;
   userSync: IPrebidConfigUserSync;
   cache: {
     url: string;
   };
   gptPreAuction: { mcmEnabled: boolean };
-  [key: string]: any;
+  floors: {
+    data: {
+      floorsSchemaVersion: string;
+      schema: {
+        delimiter: string;
+        fields: string[];
+      };
+      currency: string;
+      values: any;
+    }
+  };
+  [key: string]: unknown;
 }
 
 export interface IPrebidDebugConfigBid {
@@ -464,7 +482,7 @@ export interface IPrebidAuctionEndEventData {
     auctionStatus: string;
     bidderRequests: IPrebidBidderRequest[];
     bidsReceived: IPrebidBid[];
-    labels: any;
+    labels: unknown;
     noBids: IPrebidBid[];
     timeout: number;
     timestamp: number;
@@ -541,8 +559,8 @@ interface IPrebidGdprConsent {
     isServiceSpecific: boolean;
     listenerId: number;
     outOfBand: {
-      allowedVendors: any;
-      disclosedVendors: any;
+      allowedVendors: unknown;
+      disclosedVendors: unknown;
     };
     publisher: {
       consents: {
@@ -551,8 +569,8 @@ interface IPrebidGdprConsent {
       legitimateInterests: {
         [key: number]: boolean;
       };
-      customPurpose: any;
-      restrictions: any;
+      customPurpose: unknown;
+      restrictions: unknown;
     };
     publisherCC: string;
     purpose: {
@@ -591,9 +609,9 @@ export interface IPrebidBidderRequest {
   bidderCode: string;
   bidderRequestId: string;
   bids: IPrebidBid[];
-  ceh: any;
+  ceh: unknown;
   gdprConsent: IPrebidGdprConsent;
-  publisherExt: any;
+  publisherExt: unknown;
   refererInfo: {
     referer: string;
     reachedTop: boolean;
@@ -605,7 +623,7 @@ export interface IPrebidBidderRequest {
   endTimestamp: number;
   elapsedTime: number;
   timeout: number;
-  userExt: any;
+  userExt: unknown;
 }
 
 interface IPrebidEids {
