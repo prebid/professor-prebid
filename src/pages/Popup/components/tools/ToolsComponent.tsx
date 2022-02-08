@@ -6,7 +6,6 @@ import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import logger from '../../../../logger';
 import TableRow from '@mui/material/TableRow';
@@ -16,23 +15,21 @@ import TableCell from '@mui/material/TableCell';
 import { TableBody } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import constants from '../../../../constants.json';
+import { getTabId } from '../../utils';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
-  const dfp_open_console = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentTab = tabs[0];
-      const tabId = currentTab.id;
-      const fileUrl = chrome.runtime.getURL('openDfpConsole.bundle.js');
-      const func = (fileUrl: string) => {
-        const script = document.createElement('script');
-        script.src = fileUrl;
-        (document.head || document.documentElement).appendChild(script);
-        script.onload = () => {
-          script.remove();
-        };
+  const dfp_open_console = async () => {
+    const tabId = await getTabId();
+    const fileUrl = chrome.runtime.getURL('openDfpConsole.bundle.js');
+    const func = (fileUrl: string) => {
+      const script = document.createElement('script');
+      script.src = fileUrl;
+      (document.head || document.documentElement).appendChild(script);
+      script.onload = () => {
+        script.remove();
       };
-      chrome.scripting.executeScript({ target: { tabId }, func, args: [fileUrl] });
-    });
+    };
+    chrome.scripting.executeScript({ target: { tabId }, func, args: [fileUrl] });
   };
   const openDebugTab = async () => {
     const url = await chrome.runtime.getURL('app.html');

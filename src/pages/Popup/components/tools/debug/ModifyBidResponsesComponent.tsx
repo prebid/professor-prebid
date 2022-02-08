@@ -10,25 +10,20 @@ import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import { TableBody } from '@mui/material';
-
+import { getTabId } from '../../../utils';
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
   const [debugConfgigState, setDebugConfigState] = useState<IPrebidDebugConfig>(null);
 
-  // update bidderFilterEnabled state & session storage
-  const handleChange = (input: IPrebidDebugConfig) => {
-    input = {
-      ...debugConfgigState,
-      ...input,
-    };
+  const handleChange = async (input: IPrebidDebugConfig) => {
+    input = { ...debugConfgigState, ...input };
     setDebugConfigState(input);
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs: any) => {
-      chrome.scripting.executeScript({
-        target: { tabId: tabs[0].id },
-        func: (namespace: string, input: any) => {
-          sessionStorage.setItem(`${namespace}:debugging`, `${JSON.stringify(input)}`);
-        },
-        args: [prebid.namespace, input],
-      });
+    const tabId = await getTabId();
+    chrome.scripting.executeScript({
+      target: { tabId },
+      func: (namespace: string, input: object) => {
+        sessionStorage.setItem(`${namespace}:debugging`, `${JSON.stringify(input)}`);
+      },
+      args: [prebid.namespace, input],
     });
   };
 
@@ -39,10 +34,9 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
   // read config from session storage & set states on mount
   useEffect(() => {
     const getInitialState = async () => {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-      const tabId = tabs[0].id;
-      const result: any = await chrome.scripting.executeScript({
-        target: { tabId},
+      const tabId = await getTabId();
+      const result = await chrome.scripting.executeScript({
+        target: { tabId },
         func: (namespace: string) => {
           return sessionStorage.getItem(`${namespace}:debugging`);
         },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
-import { ITabInfo, ITabInfos } from '../Background/background';
+import { ITabInfo } from '../Background/background';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
@@ -8,6 +8,8 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
 import ToolsComponent from './components/tools/ToolsComponent';
+import constants from '../../constants.json';
+import { getTabId } from './utils';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
@@ -32,7 +34,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
-import constants from '../../constants.json';
 
 const StyledButton = styled(Button)(({ theme }) => ({
   textDecoration: 'none',
@@ -42,11 +43,18 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }));
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
-  chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-    const tab = tabs[0];
-    logger.log('[PopupHandler] Send pbjsNamespace', { tab }, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
-    chrome.tabs.sendMessage(tab.id, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
-  });
+  const tabId = await getTabId();
+  logger.log('[PopupHandler] Send pbjsNamespace', { tabId }, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+  chrome.tabs.sendMessage(tabId, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+};
+
+const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {
+  if (previous === null && tabInfo?.prebids) {
+    onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
+    return Object.keys(tabInfo.prebids)[0];
+  } else {
+    return previous;
+  }
 };
 
 export const Popup = (): JSX.Element => {
@@ -58,48 +66,32 @@ export const Popup = (): JSX.Element => {
   const handleClose = () => setPbjsNamespaceDialogOpen(false);
   const handleClickOpen = () => setPbjsNamespaceDialogOpen(true);
   const handlePbjsNamespaceChange = (event: SelectChangeEvent) => {
-    onPbjsNamespaceChange(event.target.value);
-    setPbjsNamespace(event.target.value as string);
+    onPbjsNamespaceChange(event.target.value), setPbjsNamespace(event.target.value);
   };
 
   useEffect(() => {
-    setPbjsNamespace((previous) => {
-      if (previous === null && tabInfo?.prebids) {
-        onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
-        return Object.keys(tabInfo.prebids)[0];
-      } else {
-        return previous;
-      }
-    });
+    setPbjsNamespace((previous) => getNameSpace(previous, tabInfo));
   }, [tabInfo]);
 
-  const getTabInfosFromStorage = (cb: (tabInfos: ITabInfos, tabId: number) => void) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.storage.local.get(['tabInfos'], ({ tabInfos }) => cb(tabInfos, tabs[0].id));
-    });
-  };
-
   useEffect(() => {
-    const handleMessages = (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+    const handleMessages = async (message: { type: string; payload: { tabId: number } }) => {
       if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
-        logger.log('[PopUp] received update message from background', message);
-        getTabInfosFromStorage((tabInfos, tabId) => {
-          if (message.payload.tabId === tabId) {
-            setTabInfo(tabInfos[tabId]);
-          }
-        });
+        const tabId = await getTabId();
+        if (message.payload.tabId === tabId) {
+          const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
+          setTabInfo(tabInfos[tabId]);
+        }
       }
     };
     chrome.runtime.onMessage.addListener(handleMessages);
 
-    getTabInfosFromStorage((tabInfos, tabId) => {
-      setPbjsNamespace((previous) => {
-        return previous === null && tabInfos && tabInfos[tabId]?.prebids && Object.keys(tabInfos[tabId].prebids)[0]
-          ? Object.keys(tabInfos[tabId].prebids)[0]
-          : previous;
-      });
-      setTabInfo(tabInfos[tabId]);
-    });
+    (async () => {
+      const tabId = await getTabId();
+      const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
+      const tabInfo = tabInfos[tabId];
+      setPbjsNamespace((previous) => getNameSpace(previous, tabInfo));
+      setTabInfo(tabInfo);
+    })();
 
     return () => {
       chrome.runtime.onMessage.removeListener(handleMessages);
@@ -278,7 +270,7 @@ export const Popup = (): JSX.Element => {
             {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]}></TimelineComponent>}
           </Route>
           <Route exact path="/config">
-            {tabInfo?.prebids &&  tabInfo.prebids[pbjsNameSpace]?.config && (
+            {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
               <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo?.tcf}></ConfigComponent>
             )}
           </Route>
