@@ -49,7 +49,7 @@ const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
 };
 
 const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {
-  if (previous === null && tabInfo?.prebids) {
+  if (previous === null && tabInfo?.prebids && Object.keys(tabInfo.prebids) && Object.keys(tabInfo.prebids)[0]) {
     onPbjsNamespaceChange(Object.keys(tabInfo.prebids)[0]);
     return Object.keys(tabInfo.prebids)[0];
   } else {
