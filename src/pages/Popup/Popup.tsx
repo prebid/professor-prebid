@@ -251,7 +251,7 @@ export const Popup = (): JSX.Element => {
                         }}
                       >
                         <Typography sx={{ fontSize: '18px', fontWeight: 'bold' }}>
-                          There is no Prebid adapter on this page. Scroll down or refresh the page
+                          No Prebid.js on this page. Scroll down or refresh the page
                         </Typography>
                       </Paper>
                     </Grid>

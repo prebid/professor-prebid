@@ -160,7 +160,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
               <StyledPaper elevation={paperElevation}>
-                <StyledTypography sx={{ fontSize: '18px', fontWeight: 'bold' }}>Prebid Adapter detected but no AdUnits</StyledTypography>
+                <StyledTypography sx={{ fontSize: '18px', fontWeight: 'bold' }}>Prebid.js detected but no AdUnits</StyledTypography>
               </StyledPaper>
             </Grid>
           </Grid>
