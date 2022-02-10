@@ -58,12 +58,12 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
       }
       timeout.current = setTimeout(() => setLabelText(adUnit.code), 1500);
     });
-    useEffect(() => {
-      return () => {
-        clearInterval(timeout.current);
-      };
-    }, []);
   };
+  useEffect(() => {
+    return () => {
+      clearInterval(timeout.current);
+    };
+  }, []);
 
   return (
     <Chip
