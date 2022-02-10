@@ -1,4 +1,4 @@
-import React, { useRef , useEffect} from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   IPrebidAuctionEndEventData,
   IPrebidAdUnitMediaTypes,
@@ -18,7 +18,7 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import ReactJson from 'react-json-view';
+import ReactJson, { OnCopyProps } from 'react-json-view';
 import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
@@ -63,7 +63,6 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
         clearInterval(timeout.current);
       };
     }, []);
-  
   };
 
   return (
@@ -87,6 +86,10 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: I
   };
   const handlePopoverClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleCopy = (copy: OnCopyProps) => {
+    navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
   };
 
   const open = Boolean(anchorEl);
@@ -115,10 +118,10 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: I
         disableRestoreFocus
       >
         <ReactJson
-          src={input}
+          src={{ input: input, bidResponse: bidReceived || 'noBid' }}
           name={false}
-          collapsed={false}
-          enableClipboard={false}
+          collapsed={2}
+          enableClipboard={handleCopy}
           displayObjectSize={false}
           displayDataTypes={false}
           sortKeys={false}
