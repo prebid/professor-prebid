@@ -56,10 +56,13 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     const allBidderEventsBidders = Array.from(new Set(allBidderEvents.map((event) => event?.args.bidder)));
     const allAdUnitCodes = Array.from(
       new Set(
-        prebid?.events
-          ?.filter((event) => event.eventType === 'auctionInit')
-          .map((event) => (event as IPrebidAuctionInitEventData).args.adUnitCodes)
-          .flat()
+        prebid.events.reduce((acc, event) => {
+          if (event.eventType === 'auctionInit') {
+            const adUnitCodes = (event as IPrebidAuctionInitEventData).args.adUnitCodes;
+            acc = [...acc, ...adUnitCodes];
+          }
+          return acc;
+        }, [] as string[])
       )
     );
     const auctionEndEvents = ((prebid.events || []) as IPrebidAuctionEndEventData[])
@@ -74,7 +77,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     );
 
     const latestAuctionsAdsRendered = ((prebid.events || []) as IPrebidAdRenderSucceededEventData[]).filter(
-      (event) => event.eventType === "adRenderSucceeded" && event.args.bid.auctionId === latestAuctionId
+      (event) => event.eventType === 'adRenderSucceeded' && event.args.bid.auctionId === latestAuctionId
     );
 
     const adUnits = auctionEndEvents
@@ -139,7 +142,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Grid>
           </CardContent>
           <Paper>
-            {prebid.events[0] && (
+            {prebid.events && prebid.events[0] && (
               <SlotsComponent
                 auctionEndEvents={auctionEndEvents}
                 allBidderEvents={allBidderEvents}
