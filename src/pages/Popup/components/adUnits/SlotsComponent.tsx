@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef , useEffect} from 'react';
 import {
   IPrebidAuctionEndEventData,
   IPrebidAdUnitMediaTypes,
@@ -26,6 +26,7 @@ import { getTabId } from '../../utils';
 
 const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element => {
   const [labelText, setLabelText] = React.useState<string | null>(adUnit.code);
+  const timeout = useRef<any>();
   const scroll2element = async (elementId: string): Promise<void> => {
     const tabId = await getTabId();
     const func = (elementId: string): boolean => {
@@ -55,8 +56,14 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
       } else {
         setLabelText(`✗ Element with id="${adUnit.code}" not found.`);
       }
-      setTimeout(() => setLabelText(adUnit.code), 1500);
+      timeout.current = setTimeout(() => setLabelText(adUnit.code), 1500);
     });
+    useEffect(() => {
+      return () => {
+        clearInterval(timeout.current);
+      };
+    }, []);
+  
   };
 
   return (
