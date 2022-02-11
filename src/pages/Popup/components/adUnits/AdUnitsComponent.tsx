@@ -135,7 +135,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
               <Grid item>
                 <StyledPaper elevation={paperElevation}>
                   <StyledTypography>
-                    Bid{allBidResponseEvents.length > 1 ? 's' : ''}: {allBidResponseEvents.length} / noBid{allBidResponseEvents.length > 1 ? 's' : ''}{' '}
+                    Bid{allBidResponseEvents.length > 1 ? 's' : ''}: {allBidResponseEvents.length} | noBid{allBidResponseEvents.length > 1 ? 's' : ''}{' '}
                     : {allNoBidEvents.length}
                   </StyledTypography>
                 </StyledPaper>
