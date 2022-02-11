@@ -109,10 +109,12 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
         />
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Allow Auction Without Consent:</strong>
-              {consentManagement?.allowAuctionWithoutConsent ? 'true' : 'false'}
-            </Typography>
+            {consentManagement?.allowAuctionWithoutConsent !== undefined && (
+              <Typography variant="body2" color="text.secondary">
+                <strong>Allow Auction Without Consent:</strong>
+                {consentManagement?.allowAuctionWithoutConsent ? 'true' : 'false'}
+              </Typography>
+            )}
             {consentManagement.cmpApi && (
               <Typography variant="body2" color="text.secondary">
                 <strong>CMP Api: </strong>
