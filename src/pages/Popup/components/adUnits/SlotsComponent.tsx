@@ -294,7 +294,7 @@ const SlotsComponent = ({
                           adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
                       );
                       const isRendered = latestAuctionsAdsRendered.some(
-                        (renderedAd) => renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bid.bidder
+                        (renderedAd) => renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bid.bidder && renderedAd.args.bid.auctionId === bid.auctionId
                       );
                       const label = bidReceived?.args.cpm
                         ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
