@@ -190,12 +190,28 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
           case 'banner': {
             return (
               <Box key={index}>
-                <Typography variant="subtitle2">Banner Sizes:</Typography>
-                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
-                  {mediaTypes['banner'].sizes.map((size, index) => (
-                    <Chip size="small" variant="outlined" color="primary" label={`${size[0]}x${size[1]}`} key={index} />
-                  ))}
-                </Stack>
+                {mediaTypes['banner'].sizes && (
+                  <React.Fragment>
+                    <Typography variant="subtitle2">Banner Sizes:</Typography>
+                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                      {mediaTypes['banner'].sizes?.map((size, index) => (
+                        <Chip size="small" variant="outlined" color="primary" label={`${size[0]}x${size[1]}`} key={index} />
+                      ))}
+                    </Stack>
+                  </React.Fragment>
+                )}
+                {mediaTypes['banner'].sizeConfig?.map((item, index) => (
+                  <React.Fragment key={index}>
+                    <Typography variant="caption">
+                      minViewPort {item.minViewPort[0]}x{item.minViewPort[1]}:
+                    </Typography>
+                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: '5px' }}>
+                      {item.sizes.map((size, index) => (
+                        <Chip size="small" variant="outlined" color="primary" label={`${size[0]}x${size[1]}`} key={index} />
+                      ))}
+                    </Stack>
+                  </React.Fragment>
+                ))}
               </Box>
             );
           }

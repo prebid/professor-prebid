@@ -215,7 +215,8 @@ export interface IPrebidBid {
 
 export interface IPrebidAdUnitMediaTypes {
   banner: {
-    sizes: number[][];
+    sizes?: number[][];
+    sizeConfig?: { minViewPort: number[]; sizes: number[][] }[]
   };
   native: {
     type: string;

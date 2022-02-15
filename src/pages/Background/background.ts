@@ -28,7 +28,7 @@ class Background {
 
   handleMessagesFromInjected = async (message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails }, sender: chrome.runtime.MessageSender, sendResponse: (response?: undefined) => void) => {
     const { type, payload } = message;
-    const { tab: { id: tabId } } = sender;
+    const tabId = sender.tab?.id;
     if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     logger.log('[Background] handleMessages', { tabId });
