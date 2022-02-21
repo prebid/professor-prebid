@@ -56,7 +56,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     const allBidderEventsBidders = Array.from(new Set(allBidderEvents.map((event) => event?.args.bidder)));
     const allAdUnitCodes = Array.from(
       new Set(
-        prebid.events.reduce((acc, event) => {
+        prebid.events?.reduce((acc, event) => {
           if (event.eventType === 'auctionInit') {
             const adUnitCodes = (event as IPrebidAuctionInitEventData).args.adUnitCodes;
             acc = [...acc, ...adUnitCodes];

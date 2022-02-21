@@ -206,12 +206,12 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
   };
   const bidsReceived =
     prebid.events
-      .filter((event) => event.eventType === 'auctionEnd')
+      ?.filter((event) => event.eventType === 'auctionEnd')
       .map((event) => (event as IPrebidAuctionEndEventData).args.bidsReceived)
       .flat() || [];
   const noBids =
     prebid.events
-      .filter((event) => event.eventType === 'auctionEnd')
+      ?.filter((event) => event.eventType === 'auctionEnd')
       .map((event) => (event as IPrebidAuctionEndEventData).args.noBids)
       .flat() || [];
   return (
