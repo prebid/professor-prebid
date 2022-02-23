@@ -34,8 +34,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
-import ReactGA from 'react-ga';
-ReactGA.initialize('UA-000000-01');
 
 const StyledButton = styled(Button)(({ theme }) => ({
   textDecoration: 'none',
@@ -67,7 +65,6 @@ export const Popup = (): JSX.Element => {
 
   const handleRouteChange = (input:any) => {
     setActiveRoute(input);
-    ReactGA.pageview(`PopUp:${input}`);
   };
   
   const handleClose = () => setPbjsNamespaceDialogOpen(false);
