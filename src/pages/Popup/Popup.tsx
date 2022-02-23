@@ -34,6 +34,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
+import ReactGA from 'react-ga';
+ReactGA.initialize('UA-000000-01');
 
 const StyledButton = styled(Button)(({ theme }) => ({
   textDecoration: 'none',
@@ -58,11 +60,16 @@ const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {
 };
 
 export const Popup = (): JSX.Element => {
-  const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
+  const [activeRoute, setActiveRoute ] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
   const [pbjsNameSpace, setPbjsNamespace] = React.useState<string>(null);
   const [tabInfo, setTabInfo] = useState<ITabInfo>({});
 
+  const handleRouteChange = (input:any) => {
+    setActiveRoute(input);
+    ReactGA.pageview(`PopUp:${input}`);
+  };
+  
   const handleClose = () => setPbjsNamespaceDialogOpen(false);
   const handleClickOpen = () => setPbjsNamespaceDialogOpen(true);
   const handlePbjsNamespaceChange = (event: SelectChangeEvent) => {
@@ -172,7 +179,7 @@ export const Popup = (): JSX.Element => {
                 <StyledButton
                   size="small"
                   variant={activeRoute === '/' ? 'contained' : 'outlined'}
-                  onClick={() => setActiveRoute('/')}
+                  onClick={() => handleRouteChange('/')}
                   startIcon={<AdUnitsOutlinedIcon />}
                 >
                   AdUnits
@@ -182,7 +189,7 @@ export const Popup = (): JSX.Element => {
                 <StyledButton
                   size="small"
                   variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
-                  onClick={() => setActiveRoute('/bids')}
+                  onClick={() => handleRouteChange('/bids')}
                   startIcon={<AccountBalanceOutlinedIcon />}
                 >
                   Bids
@@ -192,7 +199,7 @@ export const Popup = (): JSX.Element => {
                 <StyledButton
                   size="small"
                   variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
-                  onClick={() => setActiveRoute('/timeline')}
+                  onClick={() => handleRouteChange('/timeline')}
                   startIcon={<TimelineOutlinedIcon />}
                 >
                   Timeline
@@ -202,7 +209,7 @@ export const Popup = (): JSX.Element => {
                 <StyledButton
                   size="small"
                   variant={activeRoute === '/config' ? 'contained' : 'outlined'}
-                  onClick={() => setActiveRoute('/config')}
+                  onClick={() => handleRouteChange('/config')}
                   startIcon={<SettingsOutlinedIcon />}
                 >
                   Config
@@ -212,7 +219,7 @@ export const Popup = (): JSX.Element => {
                 <StyledButton
                   size="small"
                   variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
-                  onClick={() => setActiveRoute('/userId')}
+                  onClick={() => handleRouteChange('/userId')}
                   startIcon={<ContactPageOutlinedIcon />}
                 >
                   UserID
@@ -222,7 +229,7 @@ export const Popup = (): JSX.Element => {
                 <StyledButton
                   size="small"
                   variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
-                  onClick={() => setActiveRoute('/tools')}
+                  onClick={() => handleRouteChange('/tools')}
                   startIcon={<DnsOutlinedIcon />}
                 >
                   Tools
