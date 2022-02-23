@@ -18,7 +18,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
     input = { ...debugConfgigState, ...input };
     setDebugConfigState(input);
     const tabId = await getTabId();
-    chrome.scripting.executeScript({
+    await chrome.scripting.executeScript({
       target: { tabId },
       func: (namespace: string, input: object) => {
         sessionStorage.setItem(`${namespace}:debugging`, `${JSON.stringify(input)}`);
