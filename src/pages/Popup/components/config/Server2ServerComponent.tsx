@@ -1,7 +1,7 @@
 import React from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import {  IPrebidConfigS2SConfig } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigS2SConfig } from '../../../../inject/scripts/prebid';
 import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -42,7 +42,7 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
 
   logger.log(`[PopUp][Server2ServerComponent]: render `, s2sConfig);
   return (
-    <Grid item xs={maxWidth} ref={ref}>
+    <Grid item md={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={
@@ -53,8 +53,7 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
           title="Prebid Server"
           subheader={`s2s Config`}
           action={
-            (s2sConfig.app ||
-              (s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}')) && (
+            (s2sConfig.app || (s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}')) && (
               <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
                 <ExpandMoreIcon />
               </ExpandMore>

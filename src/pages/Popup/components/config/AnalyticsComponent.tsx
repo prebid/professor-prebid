@@ -36,7 +36,7 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
   };
   logger.log(`[PopUp][AnalyticsComponent]: render `);
   return (
-    <Grid item xs={maxWidth} ref={ref}>
+    <Grid item md={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
         <CardHeader
           avatar={
