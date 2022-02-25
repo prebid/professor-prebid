@@ -60,17 +60,21 @@ const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Ele
         <Collapse in={!expanded} timeout="auto" unmountOnExit>
           <CardContent>
             <Typography variant="body2" color="text.secondary">
-              <strong>Currency:</strong> {floors.data.currency}
+              <strong>Currency:</strong> {floors.data?.currency}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              <strong>Schema Version:</strong> {floors.data.floorsSchemaVersion}
+              <strong>Schema Version:</strong> {floors.data?.floorsSchemaVersion}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Schema Delimiter:</strong> {floors.data.schema.delimiter}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Schema Fieds:</strong> [{floors.data.schema.fields.join(' , ')}]
-            </Typography>
+            {floors.data?.schema?.delimiter && (
+              <Typography variant="body2" color="text.secondary">
+                <strong>Schema Delimiter:</strong> {floors.data.schema.delimiter}
+              </Typography>
+            )}
+            {floors.data?.schema?.fields && (
+              <Typography variant="body2" color="text.secondary">
+                <strong>Schema Fieds:</strong> [{floors.data.schema.fields.join(' , ')}]
+              </Typography>
+            )}
           </CardContent>
         </Collapse>
         <Collapse in={expanded} timeout="auto" unmountOnExit>
