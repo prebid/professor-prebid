@@ -1,6 +1,9 @@
 import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
+import forOwn from 'lodash/forOwn';
+import cloneDeep from 'lodash/cloneDeep';
+
 class Prebid {
   globalPbjs: {
     getEvents: () => IPrebidDetails['events'];
@@ -65,39 +68,56 @@ class Prebid {
     }
   };
 
+  removeLargeValues = (event: any, treshold: number, depth = 0) => {
+    forOwn(event, (value, key) => {
+      if (typeof value === 'object') {
+        this.removeLargeValues(value, treshold, depth++);
+      } else if (this.getSizeInKB(value) > treshold && depth < 9) {
+        event[key] = `> ${treshold}KB ➫  truncated by prof. prebid!`;
+      }
+    })
+    return event;
+  }
+
   getPbjsEvents = () => {
-    const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [];
-    return events.map(event => {
-      delete (event as any).args.doc; // throws CORS error in webpage console
-      return event;
-    });
+    return cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [])
+      .map((event) => {
+        if (this.getSizeInKB(event) > 50) {
+          return this.removeLargeValues(event, 1);
+        }
+        return event;
+      });
   };
 
-  removeOldestEvents = (events: IPrebidDetails['events']) => {
-    const oldestAuctionId = (events.filter((event) => event.eventType === 'auctionEnd')[0] as IPrebidAuctionEndEventData).args.auctionId;
-    const newEvents = events.filter((event) => {
-      if ((event.args as { auctionId: string }).auctionId === oldestAuctionId) {
-        return false
-      };
-      return true;
-    });
-    const newSize = new TextEncoder().encode(JSON.stringify(newEvents)).length / 1024 / 1024;
-    if (newSize > 15) {
-      this.removeOldestEvents(newEvents);
-    } else {
-      logger.log('[Injected] removeOldestEvents done', { newSize, newEvents });
-      return newEvents;
+  getSizeInKB(input: any) {
+    return Math.floor((new TextEncoder().encode(JSON.stringify(input)).length / 1024) * 100) / 100;
+  }
+
+  removeOldestEvents = (events: IPrebidDetails['events'], treshold: number) => {
+    const auctionEndEvents = events.filter((event) => event.eventType === 'auctionEnd');
+    if (auctionEndEvents.length > 1 && this.getSizeInKB(events) > treshold) {
+      const oldestAuctionId = (events.filter((event) => event.eventType === 'auctionEnd')[0] as IPrebidAuctionEndEventData).args.auctionId;
+      events = events.filter((event) => {
+        if (
+          (event.args as { auctionId: string }).auctionId === oldestAuctionId
+        ) {
+          return false
+        };
+        return true;
+      });
+      if (this.getSizeInKB(events) > treshold) {
+        this.removeOldestEvents(events, treshold);
+      }
+      return events;
     }
+    return events;
   }
 
   sendDetailsToContentScript = (): void => {
+    const maxKB = 5 * 1024; // 25MB per prebid.js instance
     const config = this.globalPbjs.getConfig();
     const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
-    let events = this.getPbjsEvents();
-    const size = new TextEncoder().encode(JSON.stringify(events)).length / 1024 / 1024;
-    if (size > 15) {
-      events = this.removeOldestEvents(events);
-    }
+    const events = this.removeOldestEvents(this.getPbjsEvents(), maxKB);
     const timeout = window.PREBID_TIMEOUT || null;
     const prebidDetail: IPrebidDetails = {
       config,
@@ -109,7 +129,7 @@ class Prebid {
       version: this.globalPbjs.version,
     };
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-    logger.log('[Injected] sendDetailsToContentScript', prebidDetail);
+    console.log('[Injected] sendDetailsToContentScript', prebidDetail);
   };
 
   throttle = (fn: Function) => {
