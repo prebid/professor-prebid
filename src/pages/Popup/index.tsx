@@ -9,4 +9,4 @@ const handleResize = () => {
 };
 const interval = setInterval(() => handleResize, 1000);
 window.addEventListener('resize', handleResize);
-window.addEventListener('resize', () => clearInterval(interval));
+window.addEventListener('close', () => clearInterval(interval));
