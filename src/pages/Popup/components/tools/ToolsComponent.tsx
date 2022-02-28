@@ -1,5 +1,5 @@
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
-import DebugComponent from './debug/ModifyBidResponsesComponent';
+import ModifyBidResponsesComponent from './debug/ModifyBidResponsesComponent';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
@@ -8,14 +8,14 @@ import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import logger from '../../../../logger';
-import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableCell from '@mui/material/TableCell';
-import { TableBody } from '@mui/material';
+import { Typography } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import constants from '../../../../constants.json';
 import { getTabId } from '../../utils';
+import theme from '../../../theme';
+import Grid from '@mui/material/Grid';
+import FormControl from '@mui/material/FormControl';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = async () => {
@@ -60,36 +60,48 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
-    <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: 1, display: 'flex', justifyContent: 'center' }}>
-      <Paper elevation={5} sx={{ m: 1, borderRadius: 2, textAlign: 'center', minWidth: 1 }}>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell align="center">{prebid && <DebugComponent prebid={prebid} />}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell align="center">
-                <Button variant="outlined" size="medium" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
-                  open google AdManager console
-                </Button>
-                <Button variant="outlined" size="medium" onClick={openDebugTab} startIcon={<BugReportIcon />}>
-                  open debug tab
-                </Button>
-                <Button variant="outlined" size="medium" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<BugReportIcon />}>
-                  delete tabInfos
-                </Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell align="center">
-                <FormControlLabel
-                  control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />}
-                  label="Show AdUnit Info Overlay"
-                />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+    <Box
+      sx={{
+        backgroundColor: 'primary.light',
+        opacity: 0.8,
+        p: 1,
+        display: 'flex',
+      }}
+    >
+      <Paper elevation={1} sx={{ p: 1, br: 2, width: 1 }}>
+        <Grid container spacing={1}>
+          {prebid && <ModifyBidResponsesComponent prebid={prebid} />}
+          <Grid item md={1} xs={1}>
+            <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+              <FormControl>
+                <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="" />
+              </FormControl>
+            </Box>
+          </Grid>
+          <Grid item xs={11} md={11}>
+            <Box sx={{ border: 1, borderColor: consoleState ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
+              <Typography component="div" sx={{ width: 1, p: 1.5, color: consoleState ? 'text' : 'text.disabled' }}>
+                Show AdUnit Info Overlay
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={1} md={1}></Grid>
+          <Grid item xs={12} md={5}>
+            <Button sx={{ width: 1 }} variant="outlined" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
+              <Typography variant="body2">open google AdManager console</Typography>
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Button sx={{ width: 1 }} variant="outlined" onClick={openDebugTab} startIcon={<BugReportIcon />}>
+              <Typography variant="body2">open debug tab</Typography>
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Button sx={{ width: 1 }} variant="outlined" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<BugReportIcon />}>
+              <Typography variant="body2">delete tabInfos</Typography>
+            </Button>
+          </Grid>
+        </Grid>
       </Paper>
     </Box>
   );

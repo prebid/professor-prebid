@@ -6,11 +6,12 @@ import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import logger from '../../../../../logger';
-import Table from '@mui/material/Table';
-import TableCell from '@mui/material/TableCell';
-import TableRow from '@mui/material/TableRow';
-import { TableBody } from '@mui/material';
 import { getTabId } from '../../../utils';
+import theme from '../../../../theme';
+import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
   const [debugConfgigState, setDebugConfigState] = useState<IPrebidDebugConfig>(null);
 
@@ -51,40 +52,24 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
 
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        flexWrap: 'nowrap',
-        justifyContent: 'flexStart',
-        alignItems: 'center',
-        alignContent: 'center',
-        rowGap: 2,
-      }}
-    >
-      <Table>
-        <TableBody>
-          <TableRow>
-            <TableCell>
-              <FormControlLabel
-                control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />}
-                label="Enable Debugging"
-              />
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>
-              {prebid && <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>
-              {prebid && <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </Box>
+    <React.Fragment>
+      <Grid item md={1} xs={1}>
+        <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+          <FormControl>
+            <FormControlLabel control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />} label="" />
+          </FormControl>
+        </Box>
+      </Grid>
+      <Grid item xs={11} md={11}>
+        <Box sx={{ border: 1, borderColor: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
+          <Typography component="div" sx={{ width: 1, p: 1.5, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
+            Enable Debugging
+          </Typography>
+        </Box>
+      </Grid>
+      <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />
+      <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />
+    </React.Fragment>
   );
 };
 

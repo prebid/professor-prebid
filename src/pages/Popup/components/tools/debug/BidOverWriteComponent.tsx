@@ -12,6 +12,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import logger from '../../../../../logger';
+import Grid from '@mui/material/Grid';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -57,7 +58,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
   }, [debugConfigState.bids]);
 
   useEffect(() => {
-    const events = prebid.events?.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType))|| [];
+    const events = prebid.events?.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
     const bidderNamesSet = events.reduce((previousValue, currentValue) => {
       const adUnitsArray = (currentValue as IPrebidAuctionEndEventData).args.adUnits || [];
       adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
@@ -68,45 +69,24 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
 
   logger.log(`[PopUp][BidOverWriteComponent]: render `, bidderNames, bidsFilterEnabled, cpm, selectedBids);
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'nowrap',
-        width: 1,
-      }}
-    >
-      <Box sx={{ width: 0.1 }}>
-        <FormControl>
-          <FormControlLabel label="" control={<Switch checked={bidsFilterEnabled} onChange={handleBidsFilterEnabledChange} />} />
-        </FormControl>
-      </Box>
+    <React.Fragment>
+      <Grid item md={1} xs={1}>
+        <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+          <FormControl>
+            <FormControlLabel label="" control={<Switch checked={bidsFilterEnabled} onChange={handleBidsFilterEnabledChange} />} />
+          </FormControl>
+        </Box>
+      </Grid>
 
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'nowrap',
-          justifyContent: 'space-between',
-          width: 0.9,
-          columnGap: 0.5,
-        }}
-      >
-        <FormControl sx={{ width: 0.1, maxWidth: 0.1 }}>
-          <Box component="form" noValidate autoComplete="off" sx={{ width: 1 }}>
-            <TextField
-              type="number"
-              label="cpm"
-              value={cpm}
-              onChange={handleCpmChange}
-              variant="outlined"
-              sx={{ width: 1, '& .MuiOutlinedInput-root': { height: 56 } }}
-              disabled={!bidsFilterEnabled}
-            />
+      <Grid item md={2} xs={4}>
+        <FormControl>
+          <Box component="form" noValidate autoComplete="off">
+            <TextField type="number" label="cpm" value={cpm} onChange={handleCpmChange} variant="outlined" disabled={!bidsFilterEnabled} />
           </Box>
         </FormControl>
-
-        <FormControl sx={{ width: 0.9, maxWidth: 0.9 }}>
+      </Grid>
+      <Grid item md={9} xs={7}>
+        <FormControl sx={{ width: 1 }}>
           <InputLabel>Select Bidder(s)</InputLabel>
           <Select
             multiple
@@ -138,8 +118,8 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
             ))}
           </Select>
         </FormControl>
-      </Box>
-    </Box>
+      </Grid>
+    </React.Fragment>
   );
 };
 

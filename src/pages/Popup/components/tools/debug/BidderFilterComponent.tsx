@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Theme, useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -11,17 +10,11 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import logger from '../../../../../logger';
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = { PaperProps: { style: { maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP, width: 250 } } };
-const getStyles = (name: string, selectedBidders: string[], theme: Theme) => ({
-  fontWeight: selectedBidders?.indexOf(name) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
-});
+import Grid from '@mui/material/Grid';
+import theme from '../../../../theme';
 
 const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }: BidderFilterComponentProps): JSX.Element => {
   debugConfigState = debugConfigState || {};
-  const theme = useTheme();
   const [bidderNames, setBidderNames] = useState<string[]>([]);
   const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(!!(debugConfigState.bidders?.length > 0));
   const [selectedBidders, setSelectedBidders] = React.useState<string[]>(debugConfigState.bidders || []);
@@ -60,54 +53,44 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
   }, [prebid.events]);
   logger.log(`[PopUp][BidderFilterComponent]: render `, bidderNames, bidderFilterEnabled, selectedBidders);
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'nowrap',
-        width: 1,
-      }}
-    >
-      <Box sx={{ width: 0.1 }}>
-        <FormControl>
-          <FormControlLabel label="" control={<Switch checked={bidderFilterEnabled} onChange={handleBidderFilterEnabledChange} />} />
+    <React.Fragment>
+      <Grid item md={1} xs={1}>
+        <Box sx={{ [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+          <FormControl>
+            <FormControlLabel label=" " control={<Switch checked={bidderFilterEnabled} onChange={handleBidderFilterEnabledChange} />} />
+          </FormControl>
+        </Box>
+      </Grid>
+      <Grid item xs={11} md={11}>
+        <FormControl sx={{ display: 'flex' }}>
+          <InputLabel>Filter Bidder(s)</InputLabel>
+          <Select
+            multiple
+            value={selectedBidders}
+            onChange={handleSelectionChange}
+            input={<OutlinedInput label="Detected Bidders" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {selected.map((value) => (
+                  <Chip color="primary" variant="outlined" key={value} label={value} />
+                ))}
+              </Box>
+            )}
+            disabled={!bidderFilterEnabled}
+          >
+            {bidderNames.map((name) => (
+              <MenuItem
+                key={name}
+                value={name}
+                sx={{ fontWeight: selectedBidders?.indexOf(name) === -1 ? 'typography.fontWeightRegular' : 'typography.fontWeightMedium' }}
+              >
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
         </FormControl>
-      </Box>
-
-      <FormControl
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'nowrap',
-          justifyContent: 'space-between',
-          width: 0.9,
-        }}
-      >
-        <InputLabel>Filter Bidder(s)</InputLabel>
-        <Select
-          multiple
-          value={selectedBidders}
-          onChange={handleSelectionChange}
-          input={<OutlinedInput label="Detected Bidders" />}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
-            </Box>
-          )}
-          MenuProps={MenuProps}
-          disabled={!bidderFilterEnabled}
-          sx={{ width: 1 }}
-        >
-          {bidderNames.map((name) => (
-            <MenuItem key={name} value={name} style={getStyles(name, selectedBidders, theme)}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
+      </Grid>
+    </React.Fragment>
   );
 };
 
