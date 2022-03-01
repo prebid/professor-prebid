@@ -84,7 +84,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     setAllNoBidEvents(allNoBidEvents);
     setAllBidderEvents(allBidderEventsBidders);
     setAllAdUnitCodes(allAdUnitCodes);
-  }, [prebid.events]);
+  }, [auctionEndEvents, prebid.events]);
 
   logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnitCodes);
   return (
