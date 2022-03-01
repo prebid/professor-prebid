@@ -71,7 +71,8 @@ export const Popup = (): JSX.Element => {
   const handleClose = () => setPbjsNamespaceDialogOpen(false);
   const handleClickOpen = () => setPbjsNamespaceDialogOpen(true);
   const handlePbjsNamespaceChange = (event: SelectChangeEvent) => {
-    onPbjsNamespaceChange(event.target.value), setPbjsNamespace(event.target.value);
+    onPbjsNamespaceChange(event.target.value);
+    setPbjsNamespace(event.target.value);
   };
 
   useEffect(() => {
@@ -112,7 +113,7 @@ export const Popup = (): JSX.Element => {
           height: 600,
           overflowX: 'auto',
           backgroundColor: 'primary.light',
-          opacity: [0.9, 0.8, 0.7]
+          opacity: [0.9, 0.8, 0.7],
         }}
       >
         <Router>
