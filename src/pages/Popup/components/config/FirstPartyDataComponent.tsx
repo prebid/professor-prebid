@@ -13,7 +13,6 @@ import Collapse from '@mui/material/Collapse';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import ReactJson from 'react-json-view';
-import { Stack } from '@mui/material';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;

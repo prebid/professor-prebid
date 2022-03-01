@@ -15,7 +15,6 @@ import DnsIcon from '@mui/icons-material/Dns';
 import ReactJson from 'react-json-view';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-import { IPrebids } from '../../../Background/background';
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;

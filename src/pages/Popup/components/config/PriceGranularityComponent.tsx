@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { IPrebidDetails, IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
+import {  IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';

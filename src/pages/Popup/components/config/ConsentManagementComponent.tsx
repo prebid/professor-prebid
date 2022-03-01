@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { IPrebidDetails, IPrebidConfigConsentManagement } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigConsentManagement } from '../../../../inject/scripts/prebid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
