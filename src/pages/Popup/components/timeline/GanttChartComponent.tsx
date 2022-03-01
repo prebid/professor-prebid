@@ -5,71 +5,18 @@ import {
   IPrebidBidResponseEventData,
   IPrebidNoBidEventData,
   IPrebidBidderRequest,
-  IPrebidAdRenderSucceededEventData,
 } from '../../../../inject/scripts/prebid';
 import React, { useEffect, useRef } from 'react';
 import { createRangeArray } from '../../../../utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import { makeStyles } from '@mui/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import logger from '../../../../logger';
 import Popover from '@mui/material/Popover';
-import ReactJson from 'react-json-view';
-
-const useStyles = makeStyles({
-  root: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: '100%',
-    '& .chart-values': {
-      listStyleType: 'none',
-      paddingLeft: 'unset',
-      paddingTop: 'unset',
-      height: '100%',
-      width: '100%',
-      maxWidth: '100%',
-      position: 'absolute',
-      display: 'flex',
-      alignItems: 'stretch',
-    },
-    '& .chart-bars': {
-      listStyleType: 'none',
-      paddingLeft: 'unset',
-      height: '100%',
-      width: '100%',
-      maxWidth: '100%',
-    },
-    '& .chart-values li': {
-      flex: 1,
-      textAlign: 'start',
-      borderLeft: '1px dotted lightgrey',
-      padding: 0,
-      alignItems: 'flex-end',
-    },
-    '& .chart-bars li': {
-      cursor: 'default',
-      position: 'relative',
-      color: 'rgb(25, 118, 210)',
-      border: 'rgb(25, 118, 210) 1px solid',
-      backgroundColor: 'white',
-      marginBottom: '15px',
-      fontSize: '14px',
-      borderRadius: '10px',
-      padding: '10px 0px',
-      width: 0,
-      height: '10px',
-      opacity: 1,
-      transition: 'none',
-      '& div': {
-        marginLeft: '10px',
-      },
-    },
-  },
-});
+import ReactJson, { OnCopyProps } from 'react-json-view';
 
 const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>) => {
   const allGridBarsCollection = gridRef?.current?.children;
@@ -78,6 +25,10 @@ const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject
     (a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input)
   )[0] as HTMLElement;
   return nearestGridBar;
+};
+
+const handleCopy = (copy: OnCopyProps) => {
+  navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
 };
 
 const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (event: any) => {
@@ -101,25 +52,25 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
   return (
     <React.Fragment>
       <ListItem
-        style={{
+        onClick={handlePopoverOpen}
+        sx={{
+          whiteSpace: 'nowrap',
+          m: 1,
+          borderColor: item.left + item.width > auctionEndLeft ? 'warning.main' : 'primary.main',
+          position: 'relative',
+          color: 'primary.main',
+          border: '1px solid',
+          backgroundColor: 'background.paper',
+          borderRadius: '4px',
           width: `${item.width}px`,
           left: `${item.left}px`,
-          whiteSpace: 'nowrap',
-          paddingLeft: '10px',
-          borderColor: item.left + item.width > auctionEndLeft ? 'red' : 'rgb(25, 118, 210)',
         }}
-        onClick={handlePopoverOpen}
       >
-        <Typography
-          sx={{
-            color: item.left + item.width > auctionEndLeft ? 'red' : 'rgb(25, 118, 210)',
-          }}
-        >
+        <Typography variant="body1" sx={{ color: item.left + item.width > auctionEndLeft ? 'warning.main' : 'primary.main' }}>
           {item.bidderCode}: {item.end - item.start}ms {item.left + item.width > auctionEndLeft ? '(timeout)' : null}
         </Typography>
       </ListItem>
       <Popover
-        id="mouse-over-popover"
         open={open}
         anchorEl={anchorEl}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
@@ -131,24 +82,23 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
           src={bidderRequest}
           name={false}
           collapsed={3}
-          enableClipboard={false}
+          enableClipboard={handleCopy}
           displayObjectSize={false}
           displayDataTypes={false}
           sortKeys={false}
           quotesOnKeys={false}
           indentWidth={2}
           collapseStringsAfterLength={100}
-          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+          style={{ fontSize: 12, fontFamily: 'roboto', padding: '5px' }}
         />
       </Popover>
     </React.Fragment>
   );
 };
 
-const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
-  const prebidEvents = prebid.events;
-  const gridStep = (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / 100;
-  const classes = useStyles();
+
+const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
+  const gridStep = (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / (window.innerWidth / 10);
   const gridRef = useRef(null);
   const [bidderArray, setBidderArray] = React.useState<ITableRow[]>([]);
   const [rangeArray, setRangeArray] = React.useState<number[]>([]);
@@ -164,7 +114,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
 
   useEffect(() => {
     logger.log('[GanttChartComponent]: useEffect');
-    setRangeArray(createRangeArray(auctionEndEvent.args.timestamp - 150, auctionEndEvent.args.auctionEnd + 250, gridStep));
+    setRangeArray(createRangeArray(auctionEndEvent.args.timestamp, auctionEndEvent.args.auctionEnd, gridStep));
     setBidderArray(
       auctionEndEvent.args.bidderRequests
         .sort((a, b) => a.start - b.start)
@@ -195,64 +145,78 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
   ]);
 
   return (
-    <Card elevation={20} sx={{ width: 1, maxWidth: 1 }}>
+    <Card sx={{ width: 1, maxWidth: 1 }}>
       <CardContent>
-        <Box sx={{ display: 'flex' }} alignItems="center" justifyContent="center">
-          <Typography variant="overline">Auction ID: {auctionEndEvent.args.auctionId}</Typography>
+        <Box sx={{ display: 'flex', p: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Typography variant="h2">Auction ID: {auctionEndEvent.args.auctionId}</Typography>
         </Box>
-        <Box
-          sx={{
-            color: 'rgb(25, 118, 210) ',
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-          }}
-        >
-          <Typography sx={{ color: '#000' }} variant="button">
-            Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}
-          </Typography>
-          <Typography sx={{ color: '#000' }} variant="button">
-            Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms
-          </Typography>
+        <Box sx={{ display: 'flex', p: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
+          <Typography variant="h3">Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}</Typography>
+          <Typography variant="h3">Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms</Typography>
         </Box>
-        <Box
-          className={classes.root}
-          // onClick={() => setExpanded(!expanded)}
-        >
-          <List className="chart-values" ref={gridRef} dense={true}>
-            {rangeArray.map((val, index) => (
-              <ListItem key={index} {...{ 'data-timestamp': Math.round(val) }}></ListItem>
-            ))}
+        <Box sx={{ position: 'relative', width: 1, maxWidth: 1 }}>
+          <List
+            ref={gridRef}
+            sx={{
+              height: 1,
+              width: 1,
+              maxWidth: 1,
+              listStyleType: 'none',
+              paddingLeft: 'unset',
+              paddingTop: 'unset',
+              position: 'absolute',
+              display: 'flex',
+              alignItems: 'stretch',
+            }}
+          >
+            {rangeArray.map((val, index) => {
+              const isZero = Math.floor(val - auctionEndEvent.args.timestamp) === 0;
+              const isLabeled = index % 10 === 0;
+              return (
+                <ListItem
+                  {...{ 'data-timestamp': Math.round(val) }}
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    borderLeft: '1px dotted lightgrey',
+                    borderColor: isZero ? 'warning.main' : 'text.secondary',
+                    p: 0,
+                    alignItems: 'flex-end',
+                  }}
+                >
+                  {(isLabeled || isZero) && (
+                    <Typography
+                      id="yesy"
+                      component="span"
+                      variant="body2"
+                      sx={{ color: isZero ? 'warning.main' : 'text.secondary', transform: 'rotate(45deg) translate(10px, 15px)', position: 'absolute' }}
+                    >
+                      {Math.floor(val - auctionEndEvent.args.timestamp)}
+                    </Typography>
+                  )}
+                </ListItem>
+              );
+            })}
           </List>
-          <List className="chart-bars" dense={true}>
-            <ListItem
-              style={{
+          <List sx={{ listStyleType: 'none', paddingLeft: 'unset', height: 1, width: 1, maxWidth: 1 }}>
+            <Box
+              sx={{
                 position: 'absolute',
                 top: 0,
                 width: `1px`,
                 height: '100%',
                 left: `${auctionEndLeft}px`,
-                paddingLeft: '0px',
-                borderColor: 'red',
-                color: 'red',
-                fontWeight: 'unset',
+                backgroundColor: 'warning.main',
+                color: 'warning.main',
               }}
               key="auctionEndEvent"
             >
-              <Box sx={{ height: '110%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#000',
-                    marginLeft: '-90px',
-                    // marginBottom: '-25px'
-                  }}
-                  noWrap={true}
-                >
+              <Box sx={{ height: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                <Typography variant="body1" sx={{ marginLeft: '-90px', overflow: 'visible' }} noWrap={true}>
                   Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()}
                 </Typography>
               </Box>
-            </ListItem>
+            </Box>
             {bidderArray.map((item, index) => (
               <BidderBarComponent item={item} auctionEndLeft={auctionEndLeft} auctionEndEvent={auctionEndEvent} key={index} />
             ))}
@@ -264,7 +228,7 @@ const GanttChartComponent = ({ prebid, auctionEndEvent }: IGanttChartComponentPr
 };
 
 interface IGanttChartComponentProps {
-  prebid: IPrebidDetails;
+  prebidEvents: IPrebidDetails['events'];
   auctionEndEvent: IPrebidAuctionEndEventData;
 }
 

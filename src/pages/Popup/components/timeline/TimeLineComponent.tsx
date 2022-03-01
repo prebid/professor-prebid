@@ -13,7 +13,7 @@ const TimeLineComponent = ({ prebid }: ITimeLineComponentProps): JSX.Element => 
   return (
     <React.Fragment>
       {auctionEndEvents.map((event, index) => (
-        <GanttChartComponent key={index} prebid={prebid} auctionEndEvent={event}></GanttChartComponent>
+        <GanttChartComponent key={index} prebidEvents={prebid.events} auctionEndEvent={event}></GanttChartComponent>
       ))}
     </React.Fragment>
   );
