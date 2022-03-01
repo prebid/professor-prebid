@@ -28,10 +28,10 @@ const theme = createTheme({
         //         fontSize: 12,
         //     },
         body1: {
-            fontSizet: 12,
+            fontSize: 12,
         },
         body2: {
-            fontSizet: 10,
+            fontSize: 10,
         },
         //     button: {
         //         fontStyle: 'italic',
