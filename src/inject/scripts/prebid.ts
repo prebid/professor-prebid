@@ -83,7 +83,7 @@ class Prebid {
     return cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [])
       .map((event) => {
         if (this.getSizeInKB(event) > 50) {
-          return this.removeLargeValues(event, 1);
+          return this.removeLargeValues(event, 5);
         }
         return event;
       });
