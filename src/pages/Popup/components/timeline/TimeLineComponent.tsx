@@ -2,6 +2,7 @@ import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../../inject/s
 import React, { useEffect } from 'react';
 import GanttChartComponent from './GanttChartComponent';
 import logger from '../../../../logger';
+import Card from '@mui/material/Card';
 
 const TimeLineComponent = ({ prebid }: ITimeLineComponentProps): JSX.Element => {
   const [auctionEndEvents, setAuctionEndEvents] = React.useState<IPrebidAuctionEndEventData[]>([]);
@@ -11,11 +12,11 @@ const TimeLineComponent = ({ prebid }: ITimeLineComponentProps): JSX.Element => 
   }, [prebid.events]);
   logger.log(`[PopUp][GanttChartComponent]: render `, auctionEndEvents);
   return (
-    <React.Fragment>
+    <Card sx={{ backgroundColor: 'primary.light', opacity: 0.8 }}>
       {auctionEndEvents.map((event, index) => (
         <GanttChartComponent key={index} prebidEvents={prebid.events} auctionEndEvent={event}></GanttChartComponent>
       ))}
-    </React.Fragment>
+    </Card>
   );
 };
 

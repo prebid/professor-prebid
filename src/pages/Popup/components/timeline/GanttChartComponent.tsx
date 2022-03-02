@@ -11,12 +11,13 @@ import { createRangeArray } from '../../../../utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import logger from '../../../../logger';
 import Popover from '@mui/material/Popover';
 import ReactJson, { OnCopyProps } from 'react-json-view';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid';
 
 const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>) => {
   const allGridBarsCollection = gridRef?.current?.children;
@@ -96,7 +97,6 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
   );
 };
 
-
 const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
   const gridStep = (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / (window.innerWidth / 10);
   const gridRef = useRef(null);
@@ -145,85 +145,116 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
   ]);
 
   return (
-    <Card sx={{ width: 1, maxWidth: 1 }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', p: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Typography variant="h2">Auction ID: {auctionEndEvent.args.auctionId}</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', p: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
-          <Typography variant="h3">Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}</Typography>
-          <Typography variant="h3">Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms</Typography>
-        </Box>
-        <Box sx={{ position: 'relative', width: 1, maxWidth: 1 }}>
-          <List
-            ref={gridRef}
-            sx={{
-              height: 1,
-              width: 1,
-              maxWidth: 1,
-              listStyleType: 'none',
-              paddingLeft: 'unset',
-              paddingTop: 'unset',
-              position: 'absolute',
-              display: 'flex',
-              alignItems: 'stretch',
-            }}
-          >
-            {rangeArray.map((val, index) => {
-              const isZero = Math.floor(val - auctionEndEvent.args.timestamp) === 0;
-              const isLabeled = index % 10 === 0;
-              return (
-                <ListItem
-                  {...{ 'data-timestamp': Math.round(val) }}
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    borderLeft: '1px dotted lightgrey',
-                    borderColor: isZero ? 'warning.main' : 'text.secondary',
-                    p: 0,
-                    alignItems: 'flex-end',
-                  }}
-                >
-                  {(isLabeled || isZero) && (
-                    <Typography
-                      id="yesy"
-                      component="span"
-                      variant="body2"
-                      sx={{ color: isZero ? 'warning.main' : 'text.secondary', transform: 'rotate(45deg) translate(10px, 15px)', position: 'absolute' }}
+    <CardContent>
+      <Grid container direction="row" justifyContent="space-around" spacing={2}>
+        <Grid xs={6} item>
+          <Paper sx={{ p: 1 }} elevation={1}>
+            <Typography variant="h2" component="span">
+              Auction ID:{' '}
+            </Typography>
+            <Typography variant="body1" component="span">
+              {auctionEndEvent.args.auctionId}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid xs={3} item>
+          <Paper sx={{ p: 1 }} elevation={1}>
+            <Typography variant="h2" component="span">
+              Auction Start:{' '}
+            </Typography>
+            <Typography variant="body1" component="span">
+              {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid xs={3} item>
+          <Paper sx={{ p: 1 }} elevation={1}>
+            <Typography variant="h2" component="span">
+              Auction Time: {' '}
+            </Typography>
+            <Typography variant="body1" component="span">
+              {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid xs={12} item>
+          <Paper sx={{ p: 1, pb: 3 }} elevation={1}>
+            <Box sx={{ position: 'relative', width: 1, maxWidth: 1 }}>
+              <List
+                ref={gridRef}
+                sx={{
+                  height: 1,
+                  width: 1,
+                  maxWidth: 1,
+                  listStyleType: 'none',
+                  paddingLeft: 'unset',
+                  paddingTop: 'unset',
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'stretch',
+                }}
+              >
+                {rangeArray.map((val, index) => {
+                  const isZero = Math.floor(val - auctionEndEvent.args.timestamp) === 0;
+                  const isLabeled = index % 10 === 0;
+                  return (
+                    <ListItem
+                      {...{ 'data-timestamp': Math.round(val) }}
+                      key={index}
+                      sx={{
+                        display: 'flex',
+                        borderLeft: '1px dotted lightgrey',
+                        borderColor: isZero ? 'warning.main' : 'text.secondary',
+                        p: 0,
+                        alignItems: 'flex-end',
+                      }}
                     >
-                      {Math.floor(val - auctionEndEvent.args.timestamp)}
+                      {(isLabeled || isZero) && (
+                        <Typography
+                          id="yesy"
+                          component="span"
+                          variant="body2"
+                          sx={{
+                            color: isZero ? 'warning.main' : 'text.secondary',
+                            transform: 'rotate(45deg) translate(10px, 15px)',
+                            position: 'absolute',
+                          }}
+                        >
+                          {Math.floor(val - auctionEndEvent.args.timestamp)}
+                        </Typography>
+                      )}
+                    </ListItem>
+                  );
+                })}
+              </List>
+              <List sx={{ listStyleType: 'none', paddingLeft: 'unset', height: 1, width: 1, maxWidth: 1 }}>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    width: `1px`,
+                    height: '100%',
+                    left: `${auctionEndLeft}px`,
+                    backgroundColor: 'warning.main',
+                    color: 'warning.main',
+                  }}
+                  key="auctionEndEvent"
+                >
+                  <Box sx={{ height: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                    <Typography variant="body1" sx={{ marginLeft: '-90px', overflow: 'visible' }} noWrap={true}>
+                      Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()}
                     </Typography>
-                  )}
-                </ListItem>
-              );
-            })}
-          </List>
-          <List sx={{ listStyleType: 'none', paddingLeft: 'unset', height: 1, width: 1, maxWidth: 1 }}>
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                width: `1px`,
-                height: '100%',
-                left: `${auctionEndLeft}px`,
-                backgroundColor: 'warning.main',
-                color: 'warning.main',
-              }}
-              key="auctionEndEvent"
-            >
-              <Box sx={{ height: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                <Typography variant="body1" sx={{ marginLeft: '-90px', overflow: 'visible' }} noWrap={true}>
-                  Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()}
-                </Typography>
-              </Box>
+                  </Box>
+                </Box>
+                {bidderArray.map((item, index) => (
+                  <BidderBarComponent item={item} auctionEndLeft={auctionEndLeft} auctionEndEvent={auctionEndEvent} key={index} />
+                ))}
+              </List>
             </Box>
-            {bidderArray.map((item, index) => (
-              <BidderBarComponent item={item} auctionEndLeft={auctionEndLeft} auctionEndEvent={auctionEndEvent} key={index} />
-            ))}
-          </List>
-        </Box>
-      </CardContent>
-    </Card>
+          </Paper>
+        </Grid>
+      </Grid>
+    </CardContent>
   );
 };
 

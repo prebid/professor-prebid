@@ -41,13 +41,13 @@ const SlotsComponent = ({
           <TableHead>
             <TableRow>
               <TableCell variant="head" sx={{ width: 0.33 }}>
-                Code
+                <Typography variant="h3">Code</Typography>
               </TableCell>
               <TableCell variant="head" sx={{ width: 0.33 }}>
-                Media Types
+                <Typography variant="h3">Media Types</Typography>
               </TableCell>
               <TableCell variant="head" sx={{ width: 0.33 }}>
-                Bidders
+                <Typography variant="h3">Bidders</Typography>
               </TableCell>
             </TableRow>
           </TableHead>

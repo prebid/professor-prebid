@@ -13,128 +13,171 @@ import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
-// Styles
-const paperElevation = 2;
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#FFF',
-  width: '115%',
-  height: '120%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  textAlign: 'center',
-}));
+const TabPanel = (props: TabPanelProps) => {
+  const { children, value, index, ...other } = props;
+  return (
+    <Box role="tabpanel" hidden={value !== index} {...other}>
+      {value === index && <Typography component="div">{children}</Typography>}
+    </Box>
+  );
+};
 
-const StyledTypography = styled(Typography)(({ theme }) => ({
-  color: '#000',
-  fontFamily: 'Roboto',
-  fontSize: '15px',
-  fontWeight: 'bold',
-}));
 const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
+  const [value, setValue] = React.useState(0);
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
   logger.log(`[PopUp][UserIdsComponent]: render `);
   if (prebid.eids && prebid.eids[0]) {
     return (
-      <Box sx={{ backgroundColor: '#87CEEB', opacity: 0.8, p: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Paper
-          elevation={5}
-          sx={{
-            m: 1,
-            borderRadius: 2,
-            textAlign: 'center',
-            minWidth: 100,
-          }}
-        >
-          <Typography sx={{ padding: '2%' }}>
-            <strong>User IDs</strong>
-          </Typography>
-          <TableContainer>
-            <Table sx={{ maxWidth: '100%' }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Source</TableCell>
-                  <TableCell>User ID</TableCell>
-                  <TableCell>Atype</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {prebid.eids?.map((eid) =>
-                  eid.uids.map((uid, index) => (
-                    <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+      <Card sx={{ backgroundColor: 'primary.light', opacity: 0.8 }}>
+        <Tabs value={value} onChange={handleChange} sx={{ backgroundColor: 'primary.light' }}>
+          <Tab
+            label={
+              <Typography variant="h2" component={Paper} sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.main' : 'info.main' }}>
+                User Ids
+              </Typography>
+            }
+          />
+          <Tab
+            label={
+              <Typography variant="h2" component={Paper} sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.main' : 'info.main' }}>
+                Config
+              </Typography>
+            }
+          />
+        </Tabs>
+        <TabPanel value={value} index={0}>
+          {' '}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 1 }} elevation={1}>
+              <TableContainer>
+                <Table sx={{ maxWidth: 1 }}>
+                  <TableHead>
+                    <TableRow>
                       <TableCell>
-                        <strong>{eid.source}</strong>
+                        <Typography variant="h3">Source</Typography>
                       </TableCell>
-                      <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{uid.id}</TableCell>
-                      <TableCell>{uid.atype}</TableCell>
+                      <TableCell>
+                        <Typography variant="h3">User ID</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="h3">Atype</Typography>
+                      </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <br />
+                  </TableHead>
+                  <TableBody>
+                    {prebid.eids?.map((eid) =>
+                      eid.uids.map((uid, index) => (
+                        <TableRow key={index}>
+                          <TableCell>
+                            <Typography variant="body1">
+                              <strong>{eid.source}</strong>
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                            <Typography variant="body1">{uid.id}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1">{uid.atype}</Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Grid>
+        </TabPanel>
+        <TabPanel value={value} index={1}>
           {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
-            <Typography variant="subtitle1" sx={{ padding: '2%' }}>
-              Config
-            </Typography>
+            <Grid item xs={12}>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Typography variant="h3">Name</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="h3">Storage Type</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="h3">Storage Expires</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="h3">Storage Name</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="h3">Params</Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {prebid.config?.userSync?.userIds?.map((userId, index) => (
+                        <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                          <TableCell>
+                            <Typography variant="body1">
+                              <strong>{userId.name}</strong>
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1">{userId.storage?.type}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1">{userId.storage?.expires}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1">{userId.storage?.name}</Typography>
+                          </TableCell>
+                          <TableCell>
+                            {userId.params && JSON.stringify(userId.params) !== '{}' && (
+                              <ReactJson
+                                src={userId.params}
+                                name={false}
+                                collapsed={2}
+                                enableClipboard={false}
+                                displayObjectSize={false}
+                                displayDataTypes={false}
+                                sortKeys={false}
+                                quotesOnKeys={false}
+                                indentWidth={2}
+                                collapseStringsAfterLength={100}
+                                style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            </Grid>
           )}
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Storage Type</TableCell>
-                  <TableCell>Storage Expires</TableCell>
-                  <TableCell>Storage Name</TableCell>
-                  <TableCell>Params</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {prebid.config?.userSync?.userIds?.map((userId, index) => (
-                  <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>
-                      <strong>{userId.name}</strong>
-                    </TableCell>
-                    <TableCell>{userId.storage?.type}</TableCell>
-                    <TableCell>{userId.storage?.expires}</TableCell>
-                    <TableCell>{userId.storage?.name}</TableCell>
-                    <TableCell>
-                      {userId.params && JSON.stringify(userId.params) !== '{}' && (
-                        <ReactJson
-                          src={userId.params}
-                          name={false}
-                          collapsed={2}
-                          enableClipboard={false}
-                          displayObjectSize={false}
-                          displayDataTypes={false}
-                          sortKeys={false}
-                          quotesOnKeys={false}
-                          indentWidth={2}
-                          collapseStringsAfterLength={100}
-                          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-                        />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      </Box>
+        </TabPanel>
+      </Card>
     );
   } else {
     return (
       <Card>
-        <CardContent sx={{ backgroundColor: '#87CEEB', opacity: 0.8 }}>
+        <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.8 }}>
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
-              <StyledPaper elevation={paperElevation}>
-                <StyledTypography sx={{ fontSize: '18px', fontWeight: 'bold' }}>No User IDs detected</StyledTypography>
-              </StyledPaper>
+              <Paper elevation={1}>
+                <Typography variant="h1">No User IDs detected</Typography>
+              </Paper>
             </Grid>
           </Grid>
         </CardContent>

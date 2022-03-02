@@ -94,30 +94,36 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           <CardContent>
             <Grid container direction="row" justifyContent="space-evenly" rowSpacing={2}>
               <Grid item>
-                <Paper sx={{ p: 0.5 }} elevation={1}>
+                <Paper sx={{ p: 1 }} elevation={1}>
                   {prebid.version && <Typography variant="h2">Version: {prebid.version}</Typography>}
                 </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={{ p: 0.5 }} elevation={1}>
+                <Paper sx={{ p: 1 }} elevation={1}>
                   <Typography variant="h2">AdUnits: {allAdUnitCodes.length}</Typography>
                 </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={{ p: 0.5 }} elevation={1}>
+                <Paper sx={{ p: 1 }} elevation={1}>
                   {prebid.config?.timeoutBuffer && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
                 </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={{ p: 0.5 }} elevation={1}>
+                <Paper sx={{ p: 1 }} elevation={1}>
                   <Typography variant="h2">Bidders: {allBidderEvents.length}</Typography>
                 </Paper>
               </Grid>
               <Grid item>
-                <Paper sx={{ p: 0.5 }} elevation={1}>
+                <Paper sx={{ p: 1 }} elevation={1}>
                   <Typography variant="h2">
-                    Bid{allBidResponseEvents.length > 1 ? 's' : ''}: {allBidResponseEvents.length} | noBid{allBidResponseEvents.length > 1 ? 's' : ''}{' '}
-                    : {allNoBidEvents.length}
+                    Bid{allBidResponseEvents.length > 1 ? 's' : ''}: {allBidResponseEvents.length}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item>
+                <Paper sx={{ p: 1 }} elevation={1}>
+                  <Typography variant="h2">
+                    noBid{allNoBidEvents.length > 1 ? 's' : ''} : {allNoBidEvents.length}
                   </Typography>
                 </Paper>
               </Grid>
