@@ -72,7 +72,7 @@ class Prebid {
     forOwn(event, (value, key) => {
       if (typeof value === 'object') {
         this.removeLargeValues(value, treshold, depth++);
-      } else if (this.getSizeInKB(value) > treshold && depth < 9) {
+      } else if (this.getSizeInKB(value) > treshold && depth < 4) {
         event[key] = `> ${treshold}KB ➫  truncated by prof. prebid!`;
       }
     })
@@ -81,12 +81,12 @@ class Prebid {
 
   getPbjsEvents = () => {
     return cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [])
-      .map((event) => {
-        if (this.getSizeInKB(event) > 50) {
-          return this.removeLargeValues(event, 5);
-        }
-        return event;
-      });
+    // .map((event) => {
+    //   if (this.getSizeInKB(event) > 50) {
+    //     return this.removeLargeValues(event, 2);
+    //   }
+    //   return event;
+    // });
   };
 
   getSizeInKB(input: any) {
@@ -114,7 +114,7 @@ class Prebid {
   }
 
   sendDetailsToContentScript = (): void => {
-    const maxKB = 5 * 1024; // 25MB per prebid.js instance
+    const maxKB = 50 * 1024; // 5MB per prebid.js instance
     const config = this.globalPbjs.getConfig();
     const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
     const events = this.removeOldestEvents(this.getPbjsEvents(), maxKB);
@@ -129,10 +129,10 @@ class Prebid {
       version: this.globalPbjs.version,
     };
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-    console.log('[Injected] sendDetailsToContentScript', prebidDetail);
+    logger.log('[Injected] sendDetailsToContentScript', prebidDetail);
   };
 
-  throttle = (fn: Function) => {
+  throttle = async (fn: Function) => {
     if (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval) {
       logger.log('[Prebid] updateContentScript');
       this.sendDetailsToContentScript();
@@ -146,7 +146,6 @@ class Prebid {
 }
 
 export const addEventListenersForPrebid = () => {
-  // document.body.style.backgroundColor = 'purple';
   logger.log('[Injected] addEventListenersForPrebid', window._pbjsGlobals);
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
@@ -349,6 +348,7 @@ export interface IPrebidConfigS2SConfig {
     storeurl: string;
   };
   bidders: string[];
+  defaultTtl: number;
   device: {
     ifa: string;
     ifa_type: string;
@@ -356,9 +356,13 @@ export interface IPrebidConfigS2SConfig {
     os: string;
   };
   enabled: boolean;
-  endpoint: string;
-  syncEndpoint: string;
+  endpoint: string | {
+    [key: string]: string;
+  };
   maxBids: number;
+  syncEndpoint: string | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 };
@@ -431,15 +435,30 @@ export interface IPrebidConfig {
   };
   gptPreAuction: { mcmEnabled: boolean };
   floors: {
+    auctionDelay: number;
     data: {
-      floorsSchemaVersion: string;
-      schema: {
-        delimiter: string;
-        fields: string[];
-      };
       currency: string;
-      values: any;
+      floorProvider: string;
+      floorsSchemaVersion: string;
+      modelGroups: {
+        default: number;
+        modelVersion: string;
+        modelWeight: number;
+        schema: {
+          delimiter: string;
+          fields: string[];
+        };
+        values: { [key: string]: unknown }
+      }[];
+      modelTimestamp: number;
+      modelWeightSum: number;
+      skipRate: number;
     }
+    endpoint: { url: string };
+    enforcement: {
+      floorDeals: boolean;
+    }
+    floorProvider: string;
   };
   [key: string]: unknown;
 }
