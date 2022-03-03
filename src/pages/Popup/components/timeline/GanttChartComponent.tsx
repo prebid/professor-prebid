@@ -47,6 +47,7 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handlePopoverClose = () => setAnchorEl(null);
   const open = Boolean(anchorEl);
+  const isTimeOut = item.left + item.width > auctionEndLeft;
   useEffect(() => {
     setBidderRequest(auctionEndEvent.args.bidderRequests.find((bidderRequest) => bidderRequest.bidderRequestId === item.bidderRequestId));
   }, [auctionEndEvent.args.bidderRequests, item.bidderRequestId]);
@@ -56,10 +57,9 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
         onClick={handlePopoverOpen}
         sx={{
           whiteSpace: 'nowrap',
-          m: 1,
-          borderColor: item.left + item.width > auctionEndLeft ? 'warning.main' : 'primary.main',
+          m: 1,  
           position: 'relative',
-          color: 'primary.main',
+          color: isTimeOut ? 'warning.main' : 'primary.main',
           border: '1px solid',
           backgroundColor: 'background.paper',
           borderRadius: '4px',
@@ -67,8 +67,8 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
           left: `${item.left}px`,
         }}
       >
-        <Typography variant="body1" sx={{ color: item.left + item.width > auctionEndLeft ? 'warning.main' : 'primary.main' }}>
-          {item.bidderCode}: {item.end - item.start}ms {item.left + item.width > auctionEndLeft ? '(timeout)' : null}
+        <Typography variant="body1" sx={{ color: isTimeOut ? 'warning.main' : 'primary.main' }}>
+          {item.bidderCode}: {item.end - item.start}ms {isTimeOut ? '(timeout)' : null}
         </Typography>
       </ListItem>
       <Popover
@@ -197,8 +197,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
                 {rangeArray.map((val, index) => {
                   const isZero = Math.floor(val - auctionEndEvent.args.timestamp) === 0;
                   const isAuctionEnd = Math.floor(val - auctionEndEvent.args.auctionEnd) === 0;
-                  const isLabeled = (index % 10 === 0 || isAuctionEnd);
-                  console.log({isZero, isAuctionEnd, isLabeled});
+                  const isLabeled = index % 10 === 0 || isAuctionEnd;
                   return (
                     <ListItem
                       {...{ 'data-timestamp': Math.round(val) }}
@@ -206,7 +205,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
                       sx={{
                         display: 'flex',
                         borderLeft: '1px dotted lightgrey',
-                        borderColor: (isZero || isAuctionEnd) ? 'warning.main' : 'text.secondary',
+                        borderColor: isZero || isAuctionEnd ? 'warning.main' : 'text.secondary',
                         p: 0,
                         alignItems: 'flex-end',
                       }}
@@ -217,7 +216,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
                           component="span"
                           variant="body2"
                           sx={{
-                            color: (isZero || isAuctionEnd) ? 'warning.main' : 'text.secondary',
+                            color: isZero || isAuctionEnd ? 'warning.main' : 'text.secondary',
                             transform: 'rotate(45deg) translate(10px, 15px)',
                             position: 'absolute',
                           }}
