@@ -57,7 +57,6 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           />
         </Tabs>
         <TabPanel value={value} index={0}>
-          {' '}
           <Grid item xs={12}>
             <Paper sx={{ p: 1 }} elevation={1}>
               <TableContainer>
@@ -76,9 +75,9 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {prebid.eids?.map((eid) =>
+                    {prebid.eids?.map((eid, i) =>
                       eid.uids.map((uid, index) => (
-                        <TableRow key={index}>
+                        <TableRow key={`${index}_${i}`}>
                           <TableCell>
                             <Typography variant="body1">
                               <strong>{eid.source}</strong>
