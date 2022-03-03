@@ -40,7 +40,7 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
             </Avatar>
           }
           title={<Typography variant="h3">Consent Management</Typography>}
-          subheader={<Typography variant="subtitle1">TCF, CPA, ...</Typography>}
+          subheader={<Typography variant="subtitle1">TCF, CPA, USP, ...</Typography>}
           action={
             <ExpandMoreIcon
               sx={{
@@ -121,71 +121,76 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
               </Grid>
             )}
             {expanded && consentManagement.gdpr?.rules && (
-              <Grid item xs={12} sm={tileWidth}>
+              <Grid item xs={12} sm={12}>
                 <Typography variant="body1">
-                  <strong>GDPR Enforcement</strong>
+                  <strong>GDPR Enforcement: </strong> {consentManagement.gdpr?.rules.length > 0 ? consentManagement.gdpr?.rules.length : '0'} rules
                 </Typography>
               </Grid>
             )}
             {expanded &&
               consentManagement.gdpr?.rules &&
               consentManagement.gdpr.rules.map((rule, index) => (
-                <List dense={true} key={index}>
-                  <Typography>
-                    <strong>Rules #{index}</strong>
-                  </Typography>
-                  {Object.keys(rule).map((key, index) => (
-                    <ListItem key={index}>
-                      {key}: {String(rule[key as keyof typeof rule])}
-                    </ListItem>
-                  ))}
-                </List>
+                <Grid item xs={12} sm={4}>
+                  <List dense={true} key={index}>
+                    <Typography>
+                      <strong>Rules #{index}</strong>
+                    </Typography>
+                    {Object.keys(rule).map((key, index) => (
+                      <ListItem key={index}>
+                        {key}: {String(rule[key as keyof typeof rule])}
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
               ))}
 
-            {expanded && consentManagement.usp && (
-              <Grid item xs={12} sm={tileWidth}>
-                <Card>
-                  <CardHeader title="USP" />
-                  <React.Fragment>
-                    {consentManagement.usp?.cmpApi && (
-                      <Typography>
-                        <strong>CmpApi:</strong> {consentManagement.usp.cmpApi}
-                      </Typography>
-                    )}
-                    {consentManagement.usp?.timeout && (
-                      <Typography>
-                        <strong>Timeout:</strong> {consentManagement.usp.timeout}
-                      </Typography>
-                    )}
-                  </React.Fragment>
-                </Card>
+            {expanded && consentManagement.usp?.cmpApi && (
+              <Grid item xs={12} sm={12}>
+                <Typography variant="body1">
+                  <strong>USP:</strong> {consentManagement.usp.cmpApi}
+                </Typography>
               </Grid>
             )}
+            {expanded && consentManagement.usp?.cmpApi && (
+              <Grid item xs={12} sm={12}>
+                <Typography variant="body1">
+                  <strong>CmpApi:</strong> {consentManagement.usp.cmpApi}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && consentManagement.usp?.timeout && (
+              <Grid item xs={12} sm={12}>
+                <Typography variant='body1'>
+                  <strong>Timeout:</strong> {consentManagement.usp.timeout}
+                </Typography>
+              </Grid>
+            )}
+
             {expanded && consentManagement.gdpr?.rules && (
-              <Grid item xs={12} sm={tileWidth}>
-                <Card>
-                  <CardHeader title="GDPR Enforcement" />
-                  <React.Fragment>
-                    {consentManagement.gdpr?.rules && (
-                      <React.Fragment>
-                        {consentManagement.gdpr.rules.map((rule, index) => (
-                          <List dense={true}>
-                            <Typography>
-                              <strong>Rules #{index}</strong>
-                            </Typography>
-                            {Object.keys(rule).map((key, index) => (
-                              <ListItem key={index}>
-                                {key}: {String(rule[key as keyof typeof rule])}
-                              </ListItem>
-                            ))}
-                          </List>
-                        ))}
-                      </React.Fragment>
-                    )}
-                  </React.Fragment>
-                </Card>
+              <Grid item xs={12} sm={12}>
+                <Typography variant='body1'>
+                  <strong>GDPR Enforcement:</strong> {consentManagement.usp.timeout}
+                </Typography>
               </Grid>
             )}
+
+            {expanded && consentManagement.gdpr?.rules && (
+              <Grid item xs={12} sm={12}>
+                {consentManagement.gdpr.rules.map((rule, index) => (
+                  <List dense={true}>
+                    <Typography>
+                      <strong>Rule #{index}</strong>
+                    </Typography>
+                    {Object.keys(rule).map((key, index) => (
+                      <ListItem key={index}>
+                        {key}: {String(rule[key as keyof typeof rule])}
+                      </ListItem>
+                    ))}
+                  </List>
+                ))}
+              </Grid>
+            )}
+
             {expanded && Object.keys(tcf).map((key, index) => <TcfComponent key={index} tcf={tcf} tcfKey={key} expanded={expanded} />)}
           </Grid>
         </CardContent>
