@@ -32,7 +32,7 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
       {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && <UserIdModule userSync={prebid.config.userSync} />}
       {prebid.config?.floors && <FloorsModuleComponent floors={prebid.config.floors} />}
       {prebid.config?.gptPreAuction && <GptPreAuctionComponent gptPreAuction={prebid.config.gptPreAuction} />}
-      {/* {prebid.config && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>} */}
+      {prebid.config && false && <AnalyticsComponent prebid={prebid}></AnalyticsComponent>}
     </Grid>
   );
 };
