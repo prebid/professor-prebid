@@ -32,7 +32,6 @@ export const createRangeArray = (start: number, end: number, step: number, offse
   const arr1 = Array.from(Array.from(Array(Math.ceil((end + offsetRight - start) / step)).keys()), (x) => start + x * step);
   const endValueIndex = arr1.indexOf(end);
   if (endValueIndex === -1) {
-    console.log({ endValueIndex, arr: arr1, end })
     arr1.push(end);
   }
   return arr1.sort();
