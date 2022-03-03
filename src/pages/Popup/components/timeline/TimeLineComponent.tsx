@@ -13,9 +13,10 @@ const TimeLineComponent = ({ prebid }: ITimeLineComponentProps): JSX.Element => 
   logger.log(`[PopUp][GanttChartComponent]: render `, auctionEndEvents);
   return (
     <Card sx={{ backgroundColor: 'primary.light', opacity: 0.8 }}>
-      {auctionEndEvents.map((event, index) => (
-        <GanttChartComponent key={index} prebidEvents={prebid.events} auctionEndEvent={event}></GanttChartComponent>
-      ))}
+      {prebid.events &&
+        auctionEndEvents.map((event, index) => (
+          <GanttChartComponent key={index} prebidEvents={prebid.events} auctionEndEvent={event}></GanttChartComponent>
+        ))}
     </Card>
   );
 };
