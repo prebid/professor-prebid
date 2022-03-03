@@ -114,7 +114,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
 
   useEffect(() => {
     logger.log('[GanttChartComponent]: useEffect');
-    setRangeArray(createRangeArray(auctionEndEvent.args.timestamp, auctionEndEvent.args.auctionEnd, gridStep));
+    setRangeArray(createRangeArray(auctionEndEvent.args.timestamp, auctionEndEvent.args.auctionEnd, gridStep, 50));
     setBidderArray(
       auctionEndEvent.args.bidderRequests
         .sort((a, b) => a.start - b.start)
@@ -170,7 +170,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
         <Grid xs={3} item>
           <Paper sx={{ p: 1 }} elevation={1}>
             <Typography variant="h2" component="span">
-              Auction Time: {' '}
+              Auction Time:{' '}
             </Typography>
             <Typography variant="body1" component="span">
               {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms
@@ -196,7 +196,9 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
               >
                 {rangeArray.map((val, index) => {
                   const isZero = Math.floor(val - auctionEndEvent.args.timestamp) === 0;
-                  const isLabeled = index % 10 === 0;
+                  const isAuctionEnd = Math.floor(val - auctionEndEvent.args.auctionEnd) === 0;
+                  const isLabeled = (index % 10 === 0 || isAuctionEnd);
+                  console.log({isZero, isAuctionEnd, isLabeled});
                   return (
                     <ListItem
                       {...{ 'data-timestamp': Math.round(val) }}
@@ -204,7 +206,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
                       sx={{
                         display: 'flex',
                         borderLeft: '1px dotted lightgrey',
-                        borderColor: isZero ? 'warning.main' : 'text.secondary',
+                        borderColor: (isZero || isAuctionEnd) ? 'warning.main' : 'text.secondary',
                         p: 0,
                         alignItems: 'flex-end',
                       }}
@@ -215,7 +217,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
                           component="span"
                           variant="body2"
                           sx={{
-                            color: isZero ? 'warning.main' : 'text.secondary',
+                            color: (isZero || isAuctionEnd) ? 'warning.main' : 'text.secondary',
                             transform: 'rotate(45deg) translate(10px, 15px)',
                             position: 'absolute',
                           }}
@@ -228,24 +230,6 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
                 })}
               </List>
               <List sx={{ listStyleType: 'none', paddingLeft: 'unset', height: 1, width: 1, maxWidth: 1 }}>
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    width: `1px`,
-                    height: '100%',
-                    left: `${auctionEndLeft}px`,
-                    backgroundColor: 'warning.main',
-                    color: 'warning.main',
-                  }}
-                  key="auctionEndEvent"
-                >
-                  <Box sx={{ height: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                    <Typography variant="body1" sx={{ marginLeft: '-90px', overflow: 'visible' }} noWrap={true}>
-                      Auction End: {new Date(auctionEndEvent.args.auctionEnd).toLocaleTimeString()}
-                    </Typography>
-                  </Box>
-                </Box>
                 {bidderArray.map((item, index) => (
                   <BidderBarComponent item={item} auctionEndLeft={auctionEndLeft} auctionEndEvent={auctionEndEvent} key={index} />
                 ))}
