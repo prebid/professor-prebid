@@ -5,78 +5,18 @@ import Typography from '@mui/material/Typography';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
 import { TCString } from '@iabtcf/core';
 import TextField from '@mui/material/TextField';
-import Checkbox from '@mui/material/Checkbox';
 import logger from '../../../../logger';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BusinessIcon from '@mui/icons-material/Business';
-import { styled } from '@mui/styles';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import ReactJson from 'react-json-view';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
-
-const TcfComponent = ({ tcf, tcfKey }: TcfComponentProps): JSX.Element => {
-  const [decodedTcfString, setDecodedTcfString] = React.useState({});
-  useEffect(() => {
-    const string = tcf[tcfKey]?.consentData || '';
-    let decodedTcfString = {};
-    try {
-      decodedTcfString = TCString.decode(string, null);
-    } catch (e) {}
-    setDecodedTcfString(decodedTcfString);
-  }, [tcf, tcfKey]);
-  logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf, tcfKey);
-  return (
-    <Box>
-      <Typography variant="body2" color="text.secondary">
-        <strong>Version:</strong> {tcfKey}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        <strong>CMP Loaded: </strong> <Checkbox checked={tcf[tcfKey]?.cmpLoaded || false}></Checkbox>
-      </Typography>
-      <Box sx={{ paddingBottom: 1 }}>
-        <TextField
-          label="Consent Data:"
-          multiline
-          variant="outlined"
-          value={tcf[tcfKey]?.consentData ? tcf[tcfKey].consentData : 'no consent string found'}
-          sx={{ width: 1 }}
-        />
-      </Box>
-      <ReactJson
-        src={decodedTcfString}
-        name={false}
-        collapsed={false}
-        enableClipboard={false}
-        displayObjectSize={false}
-        displayDataTypes={false}
-        sortKeys={false}
-        quotesOnKeys={false}
-        indentWidth={2}
-        collapseStringsAfterLength={100}
-        style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-      />
-    </Box>
-  );
-};
+import CardContent from '@mui/material/CardContent';
 
 const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -89,146 +29,230 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
+  const tileWidth = expanded ? 4 : 12;
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
-            <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <BusinessIcon />
             </Avatar>
           }
-          title="Consent Management"
-          subheader={`.consentManagement`}
+          title={<Typography variant="h3">Consent Management</Typography>}
+          subheader={<Typography variant="subtitle1">TCF, CPA, ...</Typography>}
           action={
-            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon />
-            </ExpandMore>
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
-        <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            {consentManagement?.allowAuctionWithoutConsent !== undefined && (
-              <Typography variant="body2" color="text.secondary">
-                <strong>Allow Auction Without Consent:</strong>
-                {consentManagement?.allowAuctionWithoutConsent ? 'true' : 'false'}
-              </Typography>
+        <CardContent>
+          <Grid container spacing={2}>
+            {consentManagement.allowAuctionWithoutConsent !== undefined && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>Allow Auction Without Consent:</strong>
+                  {String(consentManagement?.allowAuctionWithoutConsent)}
+                </Typography>
+              </Grid>
             )}
             {consentManagement.cmpApi && (
-              <Typography variant="body2" color="text.secondary">
-                <strong>CMP Api: </strong>
-                {String(consentManagement.cmpApi)}
-              </Typography>
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>CMPApi: </strong>
+                  {String(consentManagement.cmpApi)}
+                </Typography>
+              </Grid>
             )}
-            <Typography variant="body2" color="text.secondary">
-              <strong>Default GDPR Scope: </strong>
-              {consentManagement.defaultGdprScope ? 'true' : 'false'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Timeout: </strong>
-              {consentManagement.timeout ? consentManagement.timeout : consentManagement.gdpr?.timeout}
-            </Typography>
-          </CardContent>
-        </Collapse>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          {consentManagement.gdpr && (
-            <Box>
-              <CardHeader>GDPR</CardHeader>
-              <CardContent>
-                {consentManagement.gdpr.cmpApi && (
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>CmpApi:</strong> {consentManagement.gdpr.cmpApi}
-                  </Typography>
-                )}
-                {consentManagement.gdpr.timeout && (
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Timeout:</strong> {consentManagement.gdpr.timeout}
-                  </Typography>
-                )}
-                {consentManagement.gdpr.defaultGdprScope && (
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>defaultGdprScope:</strong> {JSON.stringify(consentManagement.gdpr.defaultGdprScope)}
-                  </Typography>
-                )}
-                {consentManagement.gdpr.allowAuctionWithoutConsent && (
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>allowAuctionWithoutConsent:</strong> {consentManagement.gdpr.allowAuctionWithoutConsent}
-                  </Typography>
-                )}
-              </CardContent>
-              {consentManagement.gdpr.rules && (
-                <CardContent>
-                  <CardHeader title="GDPR Enforcement" />
-                  {consentManagement.gdpr.rules && (
-                    <React.Fragment>
-                      {consentManagement.gdpr.rules.map((rule, index) => (
-                        <List dense={true} key={index}>
-                          <Typography>
-                            <strong>Rules #{index}</strong>
-                          </Typography>
-                          {Object.keys(rule).map((key, index) => (
-                            <ListItem key={index}>
-                              {key}: {String(rule[key as keyof typeof rule])}
-                            </ListItem>
-                          ))}
-                        </List>
-                      ))}
-                    </React.Fragment>
-                  )}
-                </CardContent>
-              )}
-            </Box>
-          )}
-          <CardHeader title="USP" />
-          {consentManagement?.usp && (
-            <CardContent>
-              {consentManagement?.usp?.cmpApi && (
-                <Typography>
-                  <strong>CmpApi:</strong> {consentManagement.usp.cmpApi}
+            {consentManagement.defaultGdprScope && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>Default GDPR Scope: </strong>
+                  {consentManagement.defaultGdprScope ? 'true' : 'false'}
                 </Typography>
-              )}
-              {consentManagement?.usp?.timeout && (
-                <Typography>
-                  <strong>Timeout:</strong> {consentManagement.usp.timeout}
+              </Grid>
+            )}
+            {consentManagement.timeout && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>Timeout: </strong>
+                  {consentManagement.timeout}
                 </Typography>
-              )}
-            </CardContent>
-          )}
-          <CardHeader title="GDPR Enforcement" />
-          {consentManagement?.gdpr?.rules && (
-            <Card sx={{ maxWidth: '200px' }}>
-              <CardContent>
-                {consentManagement?.gdpr?.rules && (
+              </Grid>
+            )}
+            {consentManagement.gdpr && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>GDPR</strong>
+                </Typography>
+              </Grid>
+            )}
+            {consentManagement.gdpr?.cmpApi && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>CmpApi:</strong> {consentManagement.gdpr.cmpApi}
+                </Typography>
+              </Grid>
+            )}
+            {consentManagement.gdpr?.timeout && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>Timeout:</strong> {consentManagement.gdpr.timeout}
+                </Typography>
+              </Grid>
+            )}
+            {consentManagement.gdpr?.defaultGdprScope && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>defaultGdprScope:</strong> {JSON.stringify(consentManagement.gdpr.defaultGdprScope)}
+                </Typography>
+              </Grid>
+            )}
+            {consentManagement.gdpr?.allowAuctionWithoutConsent && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>allowAuctionWithoutConsent:</strong> {consentManagement.gdpr.allowAuctionWithoutConsent}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && consentManagement.gdpr?.rules && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Typography variant="body1">
+                  <strong>GDPR Enforcement</strong>
+                </Typography>
+              </Grid>
+            )}
+            {expanded &&
+              consentManagement.gdpr?.rules &&
+              consentManagement.gdpr.rules.map((rule, index) => (
+                <List dense={true} key={index}>
+                  <Typography>
+                    <strong>Rules #{index}</strong>
+                  </Typography>
+                  {Object.keys(rule).map((key, index) => (
+                    <ListItem key={index}>
+                      {key}: {String(rule[key as keyof typeof rule])}
+                    </ListItem>
+                  ))}
+                </List>
+              ))}
+
+            {expanded && consentManagement.usp && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Card>
+                  <CardHeader title="USP" />
                   <React.Fragment>
-                    {consentManagement.gdpr.rules.map((rule, index) => (
-                      <List dense={true}>
-                        <Typography>
-                          <strong>Rules #{index}</strong>
-                        </Typography>
-                        {Object.keys(rule).map((key, index) => (
-                          <ListItem key={index}>
-                            {key}: {String(rule[key as keyof typeof rule])}
-                          </ListItem>
-                        ))}
-                      </List>
-                    ))}
+                    {consentManagement.usp?.cmpApi && (
+                      <Typography>
+                        <strong>CmpApi:</strong> {consentManagement.usp.cmpApi}
+                      </Typography>
+                    )}
+                    {consentManagement.usp?.timeout && (
+                      <Typography>
+                        <strong>Timeout:</strong> {consentManagement.usp.timeout}
+                      </Typography>
+                    )}
                   </React.Fragment>
-                )}
-              </CardContent>
-            </Card>
-          )}
-          <CardContent>
-            {Object.keys(tcf).map((key, index) => (
-              <TcfComponent key={index} tcf={tcf} tcfKey={key} />
-            ))}
-          </CardContent>
-        </Collapse>
+                </Card>
+              </Grid>
+            )}
+            {expanded && consentManagement.gdpr?.rules && (
+              <Grid item xs={12} sm={tileWidth}>
+                <Card>
+                  <CardHeader title="GDPR Enforcement" />
+                  <React.Fragment>
+                    {consentManagement.gdpr?.rules && (
+                      <React.Fragment>
+                        {consentManagement.gdpr.rules.map((rule, index) => (
+                          <List dense={true}>
+                            <Typography>
+                              <strong>Rules #{index}</strong>
+                            </Typography>
+                            {Object.keys(rule).map((key, index) => (
+                              <ListItem key={index}>
+                                {key}: {String(rule[key as keyof typeof rule])}
+                              </ListItem>
+                            ))}
+                          </List>
+                        ))}
+                      </React.Fragment>
+                    )}
+                  </React.Fragment>
+                </Card>
+              </Grid>
+            )}
+            {expanded && Object.keys(tcf).map((key, index) => <TcfComponent key={index} tcf={tcf} tcfKey={key} expanded={expanded} />)}
+          </Grid>
+        </CardContent>
       </Card>
     </Grid>
   );
 };
 
+const TcfComponent = ({ tcf, tcfKey, expanded }: TcfComponentProps): JSX.Element => {
+  const [decodedTcfString, setDecodedTcfString] = React.useState({});
+  useEffect(() => {
+    const string = tcf[tcfKey]?.consentData || '';
+    let decodedTcfString = {};
+    try {
+      decodedTcfString = TCString.decode(string, null);
+    } catch (e) {}
+    setDecodedTcfString(decodedTcfString);
+  }, [tcf, tcfKey]);
+  logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf, tcfKey);
+  return (
+    expanded && (
+      <React.Fragment>
+        <Grid item xs={4}>
+          <Typography variant="body1">
+            <strong>TCF</strong> {tcfKey}
+          </Typography>
+        </Grid>
+        <Grid item xs={4}>
+          <Typography variant="body1">
+            <strong>Version:</strong> {tcfKey}
+          </Typography>
+        </Grid>
+        <Grid item xs={4}>
+          <Typography variant="body1">
+            <strong>CMP Loaded: </strong> {String(tcf[tcfKey]?.cmpLoaded)}
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ pb: 1 }}>
+            <TextField
+              label="Consent Data:"
+              multiline
+              variant="outlined"
+              value={tcf[tcfKey]?.consentData ? tcf[tcfKey].consentData : 'no consent string found'}
+              sx={{ width: 1 }}
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <ReactJson
+            src={decodedTcfString}
+            name={false}
+            collapsed={false}
+            enableClipboard={false}
+            displayObjectSize={false}
+            displayDataTypes={false}
+            sortKeys={false}
+            quotesOnKeys={false}
+            indentWidth={2}
+            collapseStringsAfterLength={100}
+            style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+          />
+        </Grid>
+      </React.Fragment>
+    )
+  );
+};
 interface IPrivacyComponentProps {
   consentManagement: IPrebidConfigConsentManagement;
   tcf: ITcfDetails;
@@ -237,6 +261,7 @@ interface IPrivacyComponentProps {
 interface TcfComponentProps {
   tcf: ITcfDetails;
   tcfKey: string;
+  expanded: boolean;
 }
 
 export default PrivacyComponent;

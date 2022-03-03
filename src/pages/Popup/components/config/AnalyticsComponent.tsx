@@ -3,26 +3,13 @@ import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
-import { styled } from '@mui/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
 
 const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -37,24 +24,27 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
   logger.log(`[PopUp][AnalyticsComponent]: render `);
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
-            <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <AnalyticsIcon />
             </Avatar>
           }
-          title="Analytics"
-          subheader={''}
+          title={<Typography variant="h3">Analytics</Typography>}
+          subheader={<Typography  variant="subtitle1">subtitle</Typography>}
           action={
-            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon />
-            </ExpandMore>
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
         <CardContent>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body1" color="text.secondary">
             Todo
           </Typography>
         </CardContent>

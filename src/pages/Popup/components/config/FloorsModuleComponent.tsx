@@ -3,29 +3,14 @@ import { IPrebidConfig } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled } from '@mui/styles';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
-import Collapse from '@mui/material/Collapse';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import ReactJson from 'react-json-view';
 import BorderBottomIcon from '@mui/icons-material/BorderBottom';
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
+import CardContent from '@mui/material/CardContent';
 
 const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -39,60 +24,110 @@ const FloorsModuleComponent = ({ floors }: IFloorsModuleComponentProps): JSX.Ele
   };
   logger.log(`[PopUp][FloorsModuleComponent]: render `, floors);
   return (
-    <Grid item  md={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+    <Grid item md={maxWidth} xs={12} ref={ref}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
-            <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <BorderBottomIcon />
             </Avatar>
           }
-          title="Floors Module"
-          subheader={'floors'}
+          title={<Typography variant="h3">Floors Module</Typography>}
+          subheader={<Typography variant="subtitle1">Dynamic Floors</Typography>}
           action={
-            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon />
-            </ExpandMore>
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
-        <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Currency:</strong> {floors.data?.currency}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Schema Version:</strong> {floors.data?.floorsSchemaVersion}
-            </Typography>
-            {floors.data?.schema?.delimiter && (
-              <Typography variant="body2" color="text.secondary">
-                <strong>Schema Delimiter:</strong> {floors.data.schema.delimiter}
-              </Typography>
+        <CardContent>
+          <Grid container spacing={2}>
+            {floors.auctionDelay !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Auction Delay:</strong> {floors.auctionDelay}
+                </Typography>
+              </Grid>
             )}
-            {floors.data?.schema?.fields && (
-              <Typography variant="body2" color="text.secondary">
-                <strong>Schema Fieds:</strong> [{floors.data.schema.fields.join(' , ')}]
-              </Typography>
+            {floors.data?.currency !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Currency:</strong> {floors.data?.currency}
+                </Typography>
+              </Grid>
             )}
-          </CardContent>
-        </Collapse>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <ReactJson
-              src={floors}
-              name={false}
-              collapsed={false}
-              enableClipboard={false}
-              displayObjectSize={false}
-              displayDataTypes={false}
-              sortKeys={false}
-              quotesOnKeys={false}
-              indentWidth={2}
-              collapseStringsAfterLength={100}
-              style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px' }}
-            />
-          </CardContent>
-        </Collapse>
+            {expanded && floors.data?.floorsSchemaVersion !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Schema Version:</strong> {floors.data?.floorsSchemaVersion}
+                </Typography>
+              </Grid>
+            )}
+            {floors.data?.modelGroups !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong># Model Groups:</strong> {floors.data?.modelGroups.length}
+                </Typography>
+              </Grid>
+            )}
+            {floors.floorProvider !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Floor Provider:</strong> {floors.floorProvider}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && floors.data?.modelTimestamp !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Model Timestamp:</strong> {floors.data?.modelTimestamp}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && floors.data?.modelWeightSum !== undefined && (
+              <Grid item xs={12} sm={expanded ? 6 : 6}>
+                <Typography variant="body1">
+                  <strong>Model WeightSum:</strong> {floors.data?.modelWeightSum}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && floors.endpoint !== undefined && (
+              <Grid item xs={12} sm={expanded ? 6 : 12}>
+                <Typography variant="body1">
+                  <strong>Endpoint Url:</strong> {floors.endpoint?.url}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && floors.enforcement !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Enforcement Floor Deals:</strong> {String(floors.enforcement.floorDeals)}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && (
+              <Grid item xs={12}>
+                <ReactJson
+                  src={floors}
+                  name={false}
+                  collapsed={false}
+                  enableClipboard={false}
+                  displayObjectSize={false}
+                  displayDataTypes={false}
+                  sortKeys={false}
+                  quotesOnKeys={false}
+                  indentWidth={2}
+                  collapseStringsAfterLength={100}
+                  style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px' }}
+                />
+              </Grid>
+            )}
+          </Grid>
+        </CardContent>
       </Card>
     </Grid>
   );

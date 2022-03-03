@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import {  IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -9,12 +9,9 @@ import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import StraightenIcon from '@mui/icons-material/Straighten';
@@ -35,18 +32,6 @@ const defaultBuckets: IDefaultBuckets = {
   ],
 };
 
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
-
 export const PriceGranularityCard = ({ priceGranularity, customPriceBucket }: IPriceGranularityComponentProps) => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<2 | 4 | 6 | 8 | 10 | 12>(4);
@@ -60,59 +45,75 @@ export const PriceGranularityCard = ({ priceGranularity, customPriceBucket }: IP
 
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
-            <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <StraightenIcon />
             </Avatar>
           }
-          title="Price Granularity"
-          subheader={`${priceGranularity} (${Object.keys(defaultBuckets).includes(priceGranularity) ? 'default' : 'custom'})`}
+          title={<Typography variant="h3">Price Granularity</Typography>}
+          subheader={
+            <Typography variant="subtitle1">
+              {priceGranularity} ({Object.keys(defaultBuckets).includes(priceGranularity) ? 'default' : 'custom'})
+            </Typography>
+          }
           action={
-            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon />
-            </ExpandMore>
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
-        <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          {(() => {
-            if (['auto', 'dense', 'custom', 'medium', 'high'].includes(priceGranularity)) {
-              return (
-                <CardContent>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Min: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].min}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Max: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].max}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Precision: </strong>
-                    {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].precision || 2}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Increment: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].increment}
-                  </Typography>
-                  {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length > 1 && (
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}
-                    >
-                      + {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length - 1} more price buckets...
-                    </Typography>
-                  )}
-                </CardContent>
-              );
-            }
-          })()}
-        </Collapse>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <PriceGranularityComponent priceGranularity={priceGranularity} customPriceBucket={customPriceBucket}></PriceGranularityComponent>
-          </CardContent>
-        </Collapse>
+        <CardContent>
+          <Grid container spacing={2}>
+            {!expanded &&
+              (() => {
+                if (['auto', 'dense', 'custom', 'medium', 'high'].includes(priceGranularity)) {
+                  return (
+                    <React.Fragment>
+                      <Grid item xs={12} sm={expanded ? 3 : 6}>
+                        <Typography variant="body1">
+                          <strong>Min: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].min}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={expanded ? 3 : 6}>
+                        <Typography variant="body1">
+                          <strong>Max: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].max}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={expanded ? 3 : 6}>
+                        <Typography variant="body1">
+                          <strong>Precision: </strong>
+                          {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].precision || 2}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={expanded ? 3 : 6}>
+                        <Typography variant="body1">
+                          <strong>Increment: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].increment}
+                        </Typography>
+                      </Grid>
+                      {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length > 1 && (
+                        <Grid item xs={12} sm={expanded ? 4 : 12}>
+                          <Typography variant="body2">
+                            + {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length - 1} more price buckets...
+                          </Typography>
+                        </Grid>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+              })()}
+            <Grid item xs={12}>
+              {expanded && (
+                <PriceGranularityComponent priceGranularity={priceGranularity} customPriceBucket={customPriceBucket}></PriceGranularityComponent>
+              )}
+            </Grid>
+          </Grid>
+        </CardContent>
       </Card>
     </Grid>
   );
@@ -133,31 +134,43 @@ export const PriceGranularityComponent = ({ priceGranularity, customPriceBucket 
     <Table size="small">
       <TableHead>
         <TableRow>
-          <TableCell align="left">Bucket</TableCell>
-          <TableCell align="left">Precision</TableCell>
-          <TableCell align="left">Min</TableCell>
-          <TableCell align="left">Max</TableCell>
-          <TableCell align="left">Increment</TableCell>
+          <TableCell variant="head">
+            <Typography variant="h3">Bucket</Typography>
+          </TableCell>
+          <TableCell variant="head">
+            <Typography variant="h3">Precision</Typography>
+          </TableCell>
+          <TableCell variant="head">
+            <Typography variant="h3">Min</Typography>
+          </TableCell>
+          <TableCell variant="head">
+            <Typography variant="h3">Max</Typography>
+          </TableCell>
+          <TableCell variant="head">
+            <Typography variant="h3">Increment</Typography>
+          </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {rows.map((row, index) => {
           return (
             <TableRow key={index + 1} sx={{ verticalAlign: 'top' }}>
-              <TableCell align="left" sx={{ width: '40%' }}>
-                {type} #{index + 1}
+              <TableCell variant="body" sx={{ w: 0.4 }}>
+                <Typography variant="body1">
+                  {type} #{index + 1}
+                </Typography>
               </TableCell>
-              <TableCell align="left" sx={{ width: '15%' }}>
-                {row.precision || 2}
+              <TableCell variant="body" sx={{ w: 0.15 }}>
+                <Typography variant="body1">{row.precision || 2}</Typography>
               </TableCell>
-              <TableCell align="left" sx={{ width: '15%' }}>
-                {row.min}
+              <TableCell variant="body" sx={{ w: 0.15 }}>
+                <Typography variant="body1">{row.min}</Typography>
               </TableCell>
-              <TableCell align="left" sx={{ width: '15%' }}>
-                {row.max}
+              <TableCell variant="body" sx={{ w: 0.15 }}>
+                <Typography variant="body1">{row.max}</Typography>
               </TableCell>
-              <TableCell align="left" sx={{ width: '15%' }}>
-                {row.increment}
+              <TableCell variant="body" sx={{ w: 0.15 }}>
+                <Typography variant="body1">{row.increment}</Typography>
               </TableCell>
             </TableRow>
           );

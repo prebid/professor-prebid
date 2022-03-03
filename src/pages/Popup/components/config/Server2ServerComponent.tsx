@@ -1,32 +1,15 @@
 import React from 'react';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 import { IPrebidConfigS2SConfig } from '../../../../inject/scripts/prebid';
-import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled } from '@mui/styles';
 import DnsIcon from '@mui/icons-material/Dns';
 import ReactJson from 'react-json-view';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
 
 const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -39,48 +22,93 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 
-  logger.log(`[PopUp][Server2ServerComponent]: render `, s2sConfig);
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
-            <Avatar sx={{ bgcolor: '#0e86d4' }}>
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <DnsIcon />
             </Avatar>
           }
-          title="Prebid Server"
-          subheader={`s2s Config`}
+          title={<Typography variant="h3">Prebid Server</Typography>}
+          subheader={<Typography variant="subtitle1">s2s Config, ...</Typography>}
           action={
-            (s2sConfig.app || (s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}')) && (
-              <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-                <ExpandMoreIcon />
-              </ExpandMore>
-            )
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
         <CardContent>
-          <Typography variant="body2" color="text.secondary">
-            <strong>Account Id:</strong> {s2sConfig.accountId}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong>Adapter:</strong> {s2sConfig.adapter}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong>max. Bids:</strong> {s2sConfig.maxBids}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            <strong>Timeout:</strong> {s2sConfig.timeout}
-          </Typography>
-        </CardContent>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            {s2sConfig.app && (
-              <Box sx={{ display: 'block' }}>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>App:</strong>
+          <Grid container spacing={2}>
+            {s2sConfig.accountId !== undefined && (
+              <Grid item xs={12} sm={expanded ? 12 : 12}>
+                <Typography variant="body1">
+                  <strong>Account Id: </strong>
+                  {s2sConfig.accountId}
                 </Typography>
+              </Grid>
+            )}
+            {s2sConfig.adapter !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 6}>
+                <Typography variant="body1">
+                  <strong>Adapter: </strong>
+                  {s2sConfig.adapter}
+                </Typography>
+              </Grid>
+            )}
+            {s2sConfig.bidders !== undefined && (
+              <Grid item xs={12} sm={expanded ? 12 : 6}>
+                <Typography variant="body1">
+                  <strong>{expanded ? '' : '# '}Bidders: </strong>
+                  {expanded ? s2sConfig.bidders.join(', ') : s2sConfig.bidders.length}
+                </Typography>
+              </Grid>
+            )}
+            {s2sConfig.defaultTtl !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 6}>
+                <Typography variant="body1">
+                  <strong>Default TTL: </strong>
+                  {s2sConfig.defaultTtl}
+                </Typography>
+              </Grid>
+            )}
+            {s2sConfig.enabled !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 6}>
+                <Typography variant="body1">
+                  <strong>Enabled: </strong>
+                  {String(s2sConfig.enabled)}
+                </Typography>
+              </Grid>
+            )}
+            {s2sConfig.maxBids !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 6}>
+                <Typography variant="body1">
+                  <strong>max. Bids:</strong>
+                  {s2sConfig.maxBids}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.timeout !== undefined && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Timeout: </strong> {s2sConfig.timeout}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.app && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>App: </strong>
+                </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.app && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
                 <ReactJson
                   src={s2sConfig.app}
                   name={false}
@@ -94,13 +122,17 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
                   collapseStringsAfterLength={100}
                   style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
                 />
-              </Box>
+              </Grid>
             )}
-            {s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}' && (
-              <Box sx={{ display: 'block' }}>
-                <Typography variant="body2" color="text.secondary">
+            {expanded && s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}' && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
                   <strong>Adapter Options:</strong>
                 </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}' && (
+              <Grid item xs={12}>
                 <ReactJson
                   src={s2sConfig.adapterOptions}
                   name={false}
@@ -114,13 +146,67 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
                   collapseStringsAfterLength={100}
                   style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
                 />
-              </Box>
+              </Grid>
             )}
-            {s2sConfig.syncUrlModifier && JSON.stringify(s2sConfig.syncUrlModifier) !== '{}' && (
-              <Box sx={{ display: 'block' }}>
-                <Typography variant="body2" color="text.secondary">
+            {expanded && s2sConfig.endpoint && JSON.stringify(s2sConfig.endpoint) !== '{}' && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Endpoint:</strong>
+                  {typeof s2sConfig.endpoint === 'string' ? s2sConfig.endpoint : ''}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.endpoint && typeof s2sConfig.endpoint === 'object' && JSON.stringify(s2sConfig.endpoint) !== '{}' && (
+              <Grid item xs={12}>
+                <ReactJson
+                  src={s2sConfig.endpoint}
+                  name={false}
+                  collapsed={false}
+                  enableClipboard={false}
+                  displayObjectSize={false}
+                  displayDataTypes={false}
+                  sortKeys={false}
+                  quotesOnKeys={false}
+                  indentWidth={2}
+                  collapseStringsAfterLength={100}
+                  style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                />
+              </Grid>
+            )}
+            {expanded && s2sConfig.syncEndpoint && JSON.stringify(s2sConfig.syncEndpoint) !== '{}' && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
+                  <strong>Sync. Endpoint: </strong>
+                  {typeof s2sConfig.syncEndpoint === 'string' ? s2sConfig.syncEndpoint : ''}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.syncEndpoint && typeof s2sConfig.syncEndpoint === 'object' && JSON.stringify(s2sConfig.syncEndpoint) !== '{}' && (
+              <Grid item xs={12}>
+                <ReactJson
+                  src={s2sConfig.syncEndpoint}
+                  name={false}
+                  collapsed={false}
+                  enableClipboard={false}
+                  displayObjectSize={false}
+                  displayDataTypes={false}
+                  sortKeys={false}
+                  quotesOnKeys={false}
+                  indentWidth={2}
+                  collapseStringsAfterLength={100}
+                  style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                />
+              </Grid>
+            )}
+            {expanded && s2sConfig.syncUrlModifier && JSON.stringify(s2sConfig.syncUrlModifier) !== '{}' && (
+              <Grid item xs={12} sm={expanded ? 4 : 12}>
+                <Typography variant="body1">
                   <strong>Sync. Url Modifier:</strong>
                 </Typography>
+              </Grid>
+            )}
+            {expanded && s2sConfig.syncUrlModifier && JSON.stringify(s2sConfig.syncUrlModifier) !== '{}' && (
+              <Grid item xs={12}>
                 <ReactJson
                   src={s2sConfig.syncUrlModifier}
                   name={false}
@@ -134,10 +220,10 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
                   collapseStringsAfterLength={100}
                   style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
                 />
-              </Box>
+              </Grid>
             )}
-          </CardContent>
-        </Collapse>
+          </Grid>
+        </CardContent>
       </Card>
     </Grid>
   );

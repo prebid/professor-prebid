@@ -176,7 +176,9 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
               <Paper elevation={1}>
-                <Typography variant="h1">No User IDs detected</Typography>
+                <Typography variant="h1" sx={{ p: 1 }}>
+                  No User IDs detected
+                </Typography>
               </Paper>
             </Grid>
           </Grid>

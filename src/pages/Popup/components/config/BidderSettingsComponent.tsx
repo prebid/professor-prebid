@@ -3,28 +3,13 @@ import { IPrebidConfig } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
-import { styled } from '@mui/styles';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
-import Collapse from '@mui/material/Collapse';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
 
 const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -38,70 +23,74 @@ const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX
   };
   logger.log(`[PopUp][BidderSettingsComponent]: render `);
   return (
-    <Grid item  md={maxWidth} xs={12}  ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+    <Grid item md={maxWidth} xs={12} ref={ref}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
-            <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
+            <Avatar sx={{ bgcolor: 'primary.main' }}>
               <SettingsApplicationsIcon />
             </Avatar>
           }
-          title="Bidder Settings"
-          subheader={'Timeout, ...'}
+          title={<Typography variant="h3">Bidder Settings</Typography>}
+          subheader={<Typography variant="subtitle1">Timeouts and more...</Typography>}
           action={
-            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon />
-            </ExpandMore>
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
-        <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Bidder Sequence: </strong>
-              {config.bidderSequence}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Bidder Timeout: </strong>
-              {config.bidderTimeout}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Timeout Buffer: </strong>
-              {config.timeoutBuffer}
-            </Typography>
-          </CardContent>
-        </Collapse>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Bidder Sequence: </strong>
-              {config.bidderSequence}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Bidder Timeout: </strong>
-              {config.bidderTimeout}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Timeout Buffer: </strong>
-              {config.timeoutBuffer}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Max Nested Iframes:</strong> {config.maxNestedIframes}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong> Use Bid Cache:</strong> {String(config.useBidCache)}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
-              <strong> Bid Cache Url:</strong> {config.cache?.url}
-            </Typography>
-          </CardContent>
-        </Collapse>
+        <CardContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Typography variant="body1">
+                <strong> Bidder Sequence: </strong>
+                {config.bidderSequence}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Typography variant="body1">
+                <strong> Bidder Timeout: </strong>
+                {config.bidderTimeout}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Typography variant="body1">
+                <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Typography variant="body1">
+                <strong> Timeout Buffer: </strong>
+                {config.timeoutBuffer}
+              </Typography>
+            </Grid>
+            {expanded && (
+              <Grid item xs={12} sm={expanded ? 6 : 12}>
+                <Typography variant="body1">
+                  <strong> Max Nested Iframes:</strong> {config.maxNestedIframes}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && (
+              <Grid item xs={12} sm={expanded ? 6 : 12}>
+                <Typography variant="body1">
+                  <strong> Use Bid Cache:</strong> {String(config.useBidCache)}
+                </Typography>
+              </Grid>
+            )}
+            {expanded && (
+              <Grid item xs={12} sm={expanded ? 6 : 12}>
+                <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                  <strong> Bid Cache Url:</strong> {config.cache?.url}
+                </Typography>
+              </Grid>
+            )}
+          </Grid>
+        </CardContent>
       </Card>
     </Grid>
   );

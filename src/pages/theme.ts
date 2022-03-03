@@ -24,9 +24,9 @@ const theme = createTheme({
             fontSize: 14,
             fontWeight: 'bold',
         },
-        //     subtitle1: {
-        //         fontSize: 12,
-        //     },
+        subtitle1: {
+            fontSize: 12,
+        },
         body1: {
             fontSize: 12,
         },
@@ -40,7 +40,7 @@ const theme = createTheme({
     breakpoints: {
         values: {
             xs: 0,
-            sm: 425,
+            sm: 536,
             md: 800,
             lg: 1200,
             xl: 2400

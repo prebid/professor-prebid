@@ -3,28 +3,13 @@ import { IPrebidConfig } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled } from '@mui/styles';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
-import Collapse from '@mui/material/Collapse';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import ReactJson from 'react-json-view';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-}));
 
 const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -38,32 +23,33 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
   };
   logger.log(`[PopUp][FirstPartyDataComponent]: render `, floors);
   return (
-    <Grid item  md={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight, border: '1px solid #0e86d4' }}>
+    <Grid item md={maxWidth} xs={12} ref={ref}>
+      <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: '#0e86d4' }} aria-label="recipe">
               <DataObjectOutlinedIcon />
             </Avatar>
           }
-          title="Floors Module"
-          subheader={Object.keys(floors.data.values).map((key) => `${key}: ${floors.data.values[key]}, `)}
+          title={<Typography variant="h3">Floors Module</Typography>}
+          subheader={<Typography variant="subtitle1">Dynamic Floors</Typography>}
           action={
-            <ExpandMore expand={expanded} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon />
-            </ExpandMore>
+            <ExpandMoreIcon
+              sx={{
+                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                marginLeft: 'auto',
+              }}
+            />
           }
           onClick={handleExpandClick}
         />
-        <Collapse in={!expanded} timeout="auto" unmountOnExit>
-          <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              {/* <strong>{key}:</strong> {floors.data[key].toString()} */}
-            </Typography>
-          </CardContent>
-        </Collapse>
-        <Collapse in={expanded} timeout="auto" unmountOnExit>
-          <CardContent>
+        <Grid item xs={12}>
+          <Typography variant="body1">
+            <strong>Floor Data</strong>
+          </Typography>
+        </Grid>
+        {expanded && (
+          <Grid item xs={12}>
             <ReactJson
               src={floors}
               name={false}
@@ -77,8 +63,8 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
               collapseStringsAfterLength={100}
               style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px' }}
             />
-          </CardContent>
-        </Collapse>
+          </Grid>
+        )}
       </Card>
     </Grid>
   );
