@@ -79,9 +79,17 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
       </Grid>
 
       <Grid item md={2} xs={4}>
-        <FormControl>
-          <Box component="form" noValidate autoComplete="off">
-            <TextField type="number" label="cpm" value={cpm} onChange={handleCpmChange} variant="outlined" disabled={!bidsFilterEnabled} />
+        <FormControl sx={{ height: 1 }}>
+          <Box component="form" noValidate autoComplete="off" sx={{ height: 1 }}>
+            <TextField
+              sx={{ height: 1, '& div': { height: 1 } }}
+              type="number"
+              label="cpm"
+              value={cpm}
+              onChange={handleCpmChange}
+              variant="outlined"
+              disabled={!bidsFilterEnabled}
+            />
           </Box>
         </FormControl>
       </Grid>
@@ -95,17 +103,17 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
             input={<OutlinedInput label="Detected Bidders" />}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => (
-                  <Chip key={value} label={value} />
+                {selected.map((value, index) => (
+                  <Chip key={index} label={value} />
                 ))}
               </Box>
             )}
             MenuProps={MenuProps}
             disabled={!bidsFilterEnabled}
           >
-            {bidderNames.map((name) => (
+            {bidderNames.map((name, index) => (
               <MenuItem
-                key={name}
+                key={index}
                 value={name}
                 style={getStyles(
                   name,

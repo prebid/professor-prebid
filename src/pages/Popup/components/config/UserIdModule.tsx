@@ -61,8 +61,8 @@ const UserIdModuleComponent = ({ userSync }: UserIdModuleComponentProps): JSX.El
             {!expanded &&
               userSync.userIds?.length > 0 &&
               userSync.userIds.slice(0, 6).map((userId, index) => (
-                <Grid item xs={12} sm={expanded ? 3 : 6}>
-                  <Typography variant="body1" key={index}>
+                <Grid item xs={12} sm={expanded ? 3 : 6} key={index}>
+                  <Typography variant="body1">
                     <strong>#{index}: </strong> {userId.name}
                   </Typography>
                 </Grid>
