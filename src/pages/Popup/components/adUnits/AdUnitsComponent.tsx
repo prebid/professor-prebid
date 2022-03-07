@@ -147,7 +147,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         <CardContent>
           <Grid container direction="row" justifyContent="space-evenly">
             <Grid item>
-              <Paper elevation={1}>
+              <Paper elevation={1} sx={{ p: 1 }}>
                 <Typography variant="h1">Prebid.js detected but no AdUnits</Typography>
               </Paper>
             </Grid>
