@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { ITabInfo } from '../Background/background';
@@ -58,6 +59,16 @@ const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {
   }
 };
 
+const fetchEvents = async (url: string) => {
+  try {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    return [];
+  }
+};
+
 export const Popup = (): JSX.Element => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
@@ -84,10 +95,14 @@ export const Popup = (): JSX.Element => {
       if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
         const tabId = await getTabId();
         if (message.payload.tabId === tabId) {
-          const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
-          for (const key of Object.keys(tabInfo.prebids)) {
-            const response = await fetch(tabInfo.prebids[key].eventsUrl);
-            tabInfo.prebids[key].events = await response.json();
+          const { tabInfos } = ((await chrome.storage.local.get(['tabInfos'])) || {}) as any;
+          for (const [_, tabInfo] of Object.entries(tabInfos)) {
+            const prebids = (tabInfo as ITabInfo).prebids;
+            if (prebids) {
+              for (const [_, prebid] of Object.entries(prebids)) {
+                prebid.events = await fetchEvents(prebid.eventsUrl);
+              }
+            }
           }
           setTabInfo(tabInfos[tabId]);
         }
@@ -99,13 +114,16 @@ export const Popup = (): JSX.Element => {
       const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
       const newTabInfo = tabInfos[tabId];
       setPbjsNamespace((previous) => getNameSpace(previous, newTabInfo));
-      for (const key of Object.keys(newTabInfo.prebids)) {
-        const response = await fetch(newTabInfo.prebids[key].eventsUrl);
-        newTabInfo.prebids[key].events = await response.json();
+      for (const [_, tabInfo] of Object.entries(tabInfos)) {
+        const prebids = (tabInfo as ITabInfo).prebids;
+        if (prebids) {
+          for (const [_, prebid] of Object.entries(prebids)) {
+            prebid.events = await fetchEvents(prebid.eventsUrl);
+          }
+        }
       }
       setTabInfo(newTabInfo);
     })();
-
     return () => {
       chrome.runtime.onMessage.removeListener(handleMessages);
     };
