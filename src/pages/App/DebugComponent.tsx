@@ -12,7 +12,9 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import constants from '../../constants.json';
-import { IPrebidDetails } from '../../inject/scripts/prebid';
+import Grid from '@mui/material/Grid';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from '../theme';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
@@ -67,6 +69,57 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: NamespaceTabsProps) => {
               <TimeLineComponent prebid={prebid}></TimeLineComponent>
               <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>
               <UserIdsComponent prebid={prebid}></UserIdsComponent>
+              <Typography component="div" variant="body1">
+                <Box sx={{ color: 'primary.main' }}>primary.main</Box>
+                <Box sx={{ color: 'secondary.main' }}>secondary.main</Box>
+                <Box sx={{ color: 'error.main' }}>error.main</Box>
+                <Box sx={{ color: 'warning.main' }}>warning.main</Box>
+                <Box sx={{ color: 'info.main' }}>info.main</Box>
+                <Box sx={{ color: 'success.main' }}>success.main</Box>
+                <Box sx={{ color: 'text.primary' }}>text.primary</Box>
+                <Box sx={{ color: 'text.secondary' }}>text.secondary</Box>
+                <Box sx={{ color: 'text.disabled' }}>text.disabled</Box>
+              </Typography>
+              <Grid container spacing={1}>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', p: 2 }}>primary.main</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'primary.light', color: 'primary.contrastText', p: 2 }}>primary.light</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    sx={{
+                      bgcolor: 'secondary.main',
+                      color: 'secondary.contrastText',
+                      p: 2,
+                    }}
+                  >
+                    secondary.main
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'error.main', color: 'error.contrastText', p: 2 }}>error.main</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'warning.main', color: 'warning.contrastText', p: 2 }}>warning.main</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'info.main', color: 'info.contrastText', p: 2 }}>info.main</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'success.main', color: 'success.contrastText', p: 2 }}>success.main</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'text.primary', color: 'background.paper', p: 2 }}>text.primary</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'text.secondary', color: 'background.paper', p: 2 }}>text.secondary</Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box sx={{ bgcolor: 'text.disabled', color: 'background.paper', p: 2 }}>text.disabled</Box>
+                </Grid>
+              </Grid>
             </Box>
           </TabPanel>
         );
@@ -125,12 +178,30 @@ const getTabInfosFromStorage = async () => {
   return tabInfos;
 };
 
+const fetchEvents = async (url: string) => {
+  try {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    return [];
+  }
+};
+
 const DebugComponent = () => {
   const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
   useEffect(() => {
     const handleMessage = async (message: { type: 'string' }) => {
       if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
         const tabInfos = await getTabInfosFromStorage();
+        for (const [_, tabInfo] of Object.entries(tabInfos)) {
+          const prebids = (tabInfo as ITabInfo).prebids;
+          if (prebids) {
+            for (const [_, prebid] of Object.entries(prebids)) {
+              prebid.events = await fetchEvents(prebid.eventsUrl);
+            }
+          }
+        }
         setTabInfos(tabInfos);
       }
     };
@@ -145,7 +216,7 @@ const DebugComponent = () => {
     };
   }, []);
 
-  return tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>;
+  return <ThemeProvider theme={theme}>{tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>}</ThemeProvider>;
 };
 
 export default DebugComponent;
