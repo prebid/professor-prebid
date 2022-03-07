@@ -85,18 +85,25 @@ export const Popup = (): JSX.Element => {
         const tabId = await getTabId();
         if (message.payload.tabId === tabId) {
           const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
+          for (const key of Object.keys(tabInfo.prebids)) {
+            const response = await fetch(tabInfo.prebids[key].eventsUrl);
+            tabInfo.prebids[key].events = await response.json();
+          }
           setTabInfo(tabInfos[tabId]);
         }
       }
     };
     chrome.runtime.onMessage.addListener(handleMessages);
-
     (async () => {
       const tabId = await getTabId();
       const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
-      const tabInfo = tabInfos[tabId];
-      setPbjsNamespace((previous) => getNameSpace(previous, tabInfo));
-      setTabInfo(tabInfo);
+      const newTabInfo = tabInfos[tabId];
+      setPbjsNamespace((previous) => getNameSpace(previous, newTabInfo));
+      for (const key of Object.keys(newTabInfo.prebids)) {
+        const response = await fetch(newTabInfo.prebids[key].eventsUrl);
+        newTabInfo.prebids[key].events = await response.json();
+      }
+      setTabInfo(newTabInfo);
     })();
 
     return () => {

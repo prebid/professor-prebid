@@ -1,7 +1,6 @@
 import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
-import forOwn from 'lodash/forOwn';
 import cloneDeep from 'lodash/cloneDeep';
 
 class Prebid {
@@ -18,6 +17,8 @@ class Prebid {
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 1000;
+  sendToContentScriptPending: boolean = false;
+  lastEventsObjectUrl: string = '';
 
   constructor(namespace: string) {
     this.namespace = namespace;
@@ -68,77 +69,41 @@ class Prebid {
     }
   };
 
-  removeLargeValues = (event: any, treshold: number, depth = 0) => {
-    forOwn(event, (value, key) => {
-      if (typeof value === 'object') {
-        this.removeLargeValues(value, treshold, depth++);
-      } else if (this.getSizeInKB(value) > treshold && depth < 4) {
-        event[key] = `> ${treshold}KB ➫  truncated by prof. prebid!`;
-      }
-    })
-    return event;
-  }
-
-  getPbjsEvents = () => {
-    return cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : [])
-    // .map((event) => {
-    //   if (this.getSizeInKB(event) > 50) {
-    //     return this.removeLargeValues(event, 2);
-    //   }
-    //   return event;
-    // });
+  getPbjsEventsObjUrl = () => {
+    URL.revokeObjectURL(this.lastEventsObjectUrl);
+    const cloned = cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : []);
+    const blob = new Blob([JSON.stringify(cloned, null, 2)], { type: 'application/json' });
+    const objectURL = URL.createObjectURL(blob);
+    this.lastEventsObjectUrl = objectURL;
+    return objectURL;
   };
 
-  getSizeInKB(input: any) {
-    return Math.floor((new TextEncoder().encode(JSON.stringify(input)).length / 1024) * 100) / 100;
-  }
-
-  removeOldestEvents = (events: IPrebidDetails['events'], treshold: number) => {
-    const auctionEndEvents = events.filter((event) => event.eventType === 'auctionEnd');
-    if (auctionEndEvents.length > 1 && this.getSizeInKB(events) > treshold) {
-      const oldestAuctionId = (events.filter((event) => event.eventType === 'auctionEnd')[0] as IPrebidAuctionEndEventData).args.auctionId;
-      events = events.filter((event) => {
-        if (
-          (event.args as { auctionId: string }).auctionId === oldestAuctionId
-        ) {
-          return false
-        };
-        return true;
-      });
-      if (this.getSizeInKB(events) > treshold) {
-        this.removeOldestEvents(events, treshold);
-      }
-      return events;
-    }
-    return events;
-  }
-
   sendDetailsToContentScript = (): void => {
-    const maxKB = 50 * 1024; // 5MB per prebid.js instance
     const config = this.globalPbjs.getConfig();
     const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
-    const events = this.removeOldestEvents(this.getPbjsEvents(), maxKB);
     const timeout = window.PREBID_TIMEOUT || null;
     const prebidDetail: IPrebidDetails = {
       config,
       debug: this.debug,
       eids,
-      events,
+      eventsUrl: this.getPbjsEventsObjUrl(),
       namespace: this.namespace,
       timeout,
       version: this.globalPbjs.version,
     };
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-    logger.log('[Injected] sendDetailsToContentScript', prebidDetail);
+
+    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail,);
+    const time = new Date().toJSON();
+    logger.log(`[Injected] sendDetailsToContentScript`, prebidDetail, time);
+    this.sendToContentScriptPending = false;
   };
 
   throttle = async (fn: Function) => {
-    if (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval) {
-      logger.log('[Prebid] updateContentScript');
-      this.sendDetailsToContentScript();
+    if (!this.sendToContentScriptPending && (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)) {
+      this.sendToContentScriptPending = true;
       this.lastTimeUpdateSentToContentScript = Date.now();
+      this.globalPbjs.que.push(async () => { this.sendDetailsToContentScript() });
     } else {
-      logger.log('[Prebid] contentScript skipped');
       clearTimeout(this.updateTimeout);
       this.updateTimeout = setTimeout(() => this.throttle(fn), this.updateRateInterval);
     }
@@ -478,7 +443,8 @@ export interface IPrebidDebugConfig {
 export interface IPrebidDetails {
   version: string;
   timeout: number;
-  events: (
+  eventsUrl: string;
+  events?: (
     | IPrebidAuctionInitEventData
     | IPrebidAuctionEndEventData
     | IPrebidBidRequestedEventData
