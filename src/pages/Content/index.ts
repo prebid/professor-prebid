@@ -60,7 +60,6 @@ class Content {
     if (!type || !payload) return;
     logger.log('[Content] updateBackgroundPage', type, payload);
     chrome.runtime.sendMessage({ type, payload });
-    logger.log('[Content] updateBackgroundPage()');
   };
 
   updateMasks = () => {
