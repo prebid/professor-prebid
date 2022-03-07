@@ -59,7 +59,7 @@ const UserIdModuleComponent = ({ userSync }: UserIdModuleComponentProps): JSX.El
         <CardContent>
           <Grid container spacing={2}>
             {!expanded &&
-              userSync.userIds?.length > 1 &&
+              userSync.userIds?.length > 0 &&
               userSync.userIds.slice(0, 6).map((userId, index) => (
                 <Grid item xs={12} sm={expanded ? 3 : 6}>
                   <Typography variant="body1" key={index}>
