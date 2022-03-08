@@ -10,7 +10,6 @@
     "OPEN_DATA_TAB": "openDataTab",
     "SEND_DATA_TO_BACKGROUND": "sendDataToBackground",
     "REQUEST_DATA_FROM_BACKGROUND": "requestDataFromBackground",
-    "EVENT_SEND_AUCTION_DATA_TO_POPUP": "sendAuctionDataToPopup",
     "SEND_GAM_DETAILS_TO_BACKGROUND": "sendGamDetailsToBackground",
     "REQUEST_GAM_DETAILS_FROM_BACKGROUND": "requestGamDetailsFromBackground",
     "SEND_PREBID_DETAILS_TO_BACKGROUND": "sendPrebidDetailsToBackground",

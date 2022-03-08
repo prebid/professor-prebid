@@ -84,24 +84,23 @@ export const Popup = (): JSX.Element => {
   }, [tabInfo]);
 
   useEffect(() => {
-    const handleMessages = async (message: { type: string; payload: { tabId: number } }) => {
-      if (message.type === constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP) {
-        const tabId = await getTabId();
-        if (message.payload.tabId === tabId) {
-          const { tabInfos } = ((await chrome.storage.local.get(['tabInfos'])) || {}) as any;
-          for (const [_, tabInfo] of Object.entries(tabInfos)) {
-            const prebids = (tabInfo as ITabInfo).prebids;
-            if (prebids) {
-              for (const [_, prebid] of Object.entries(prebids)) {
-                prebid.events = await fetchEvents(prebid.eventsUrl);
-              }
-            }
-          }
-          setTabInfo(tabInfos[tabId]);
+    const handleStorageChange = async (
+      changes: {
+        [key: string]: chrome.storage.StorageChange;
+      },
+      _areaName: 'sync' | 'local' | 'managed'
+    ) => {
+      const tabId = await getTabId();
+      const newTabInfo = changes.tabInfos.newValue[tabId];
+      const prebids = (newTabInfo as ITabInfo).prebids;
+      if (prebids) {
+        for (const [_, prebid] of Object.entries(prebids)) {
+          prebid.events = await fetchEvents(prebid.eventsUrl);
         }
       }
+      setTabInfo(newTabInfo);
     };
-    chrome.runtime.onMessage.addListener(handleMessages);
+    chrome.storage.onChanged.addListener(handleStorageChange);
     (async () => {
       const tabId = await getTabId();
       const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
@@ -118,7 +117,7 @@ export const Popup = (): JSX.Element => {
       setTabInfo(newTabInfo);
     })();
     return () => {
-      chrome.runtime.onMessage.removeListener(handleMessages);
+      chrome.storage.onChanged.removeListener(handleStorageChange);
     };
   }, []);
 

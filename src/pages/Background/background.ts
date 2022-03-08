@@ -53,12 +53,10 @@ class Background {
     }
     await this.persistInStorage();
     this.updateBadge(tabId);
-    this.updatePopUp(tabId);
   };
 
   handleOnTabActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
     this.updateBadge(activeInfo.tabId);
-    this.updatePopUp(activeInfo.tabId);
   };
 
   handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
@@ -68,7 +66,6 @@ class Background {
       this.tabInfos[tabId] = { url };
       await this.persistInStorage();
       this.updateBadge(tabId);
-      this.updatePopUp(tabId);
     }
   };
 
@@ -113,15 +110,7 @@ class Background {
     }
     logger.log('[Background] updateBadge', tabId, this.tabInfos[tabId]?.prebids);
   };
-
-  updatePopUp = (tabId: number) => {
-    logger.log('[Background] updatePopUp', this.tabInfos[tabId]);
-    chrome.runtime.sendMessage({
-      type: constants.EVENTS.EVENT_SEND_AUCTION_DATA_TO_POPUP,
-      payload: { tabId },
-    });
-  };
-
+  
   persistInStorage = async () => {
     logger.log('[Background] updateTabInfos', this.tabInfos);
     await chrome.storage?.local.set({ tabInfos: this.tabInfos });
