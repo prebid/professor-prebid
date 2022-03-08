@@ -5,13 +5,9 @@ import {
   IPrebidNoBidEventData,
   IPrebidBidResponseEventData,
   IPrebidAuctionEndEventData,
-  IPrebidBidWonEventData,
   IPrebidAdUnit,
-  IPrebidAdRenderSucceededEventData,
 } from '../../../../inject/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
@@ -24,9 +20,6 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const [allBidderEvents, setAllBidderEvents] = React.useState<IPrebidDetails['events'][]>([]);
   const [allAdUnitCodes, setAllAdUnitCodes] = React.useState<string[]>([]);
   const [auctionEndEvents, setAuctionEndEvents] = React.useState<IPrebidAuctionEndEventData[]>([]);
-  const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
-  const [latestAuctionsBidsReceived, setLatestAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
-  const [latestAuctionsAdsRendered, setLatestAuctionsAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
   const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
 
   useEffect(() => {
@@ -66,19 +59,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         }, [] as string[])
       )
     );
-    const latestAuctionId = auctionEndEvents[0]?.args.auctionId;
-    const latestAuctionsWinningBids = ((prebid.events || []) as IPrebidBidWonEventData[]).filter(
-      (event) => event.eventType === 'bidWon' && event.args.auctionId === latestAuctionId
-    );
-    const latestAuctionsBidsReceived = ((prebid.events || []) as IPrebidBidWonEventData[]).filter(
-      (event) => event.eventType === 'bidResponse' && event.args.auctionId === latestAuctionId
-    );
-    const latestAuctionsAdsRendered = ((prebid.events || []) as IPrebidAdRenderSucceededEventData[]).filter(
-      (event) => event.eventType === 'adRenderSucceeded' && event.args.bid.auctionId === latestAuctionId
-    );
-    setLatestAuctionsWinningBids(latestAuctionsWinningBids);
-    setLatestAuctionBidsReceived(latestAuctionsBidsReceived);
-    setLatestAuctionsAdsRendered(latestAuctionsAdsRendered);
+
     setAuctionEndEvents(auctionEndEvents);
     setAllBidResponseEvents(allBidResponseEvents);
     setAllNoBidEvents(allNoBidEvents);
@@ -127,18 +108,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
               </Paper>
             </Grid>
           </Grid>
-          <Paper sx={{ p: 1, m: 1 }}>
-            {prebid.events && prebid.events[0] && (
-              <SlotsComponent
-                auctionEndEvents={auctionEndEvents}
-                allBidderEvents={allBidderEvents}
-                latestAuctionsWinningBids={latestAuctionsWinningBids}
-                adUnits={adUnits}
-                latestAuctionsBidsReceived={latestAuctionsBidsReceived}
-                latestAuctionsAdsRendered={latestAuctionsAdsRendered}
-              ></SlotsComponent>
-            )}
-          </Paper>
+          <Paper sx={{ p: 1, m: 1 }}>{prebid.events && prebid.events[0] && <SlotsComponent events={prebid.events} adUnits={adUnits} />}</Paper>
         </React.Fragment>
       )}
       {!allAdUnitCodes[0] && (
