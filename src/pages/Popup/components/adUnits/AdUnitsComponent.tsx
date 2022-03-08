@@ -88,48 +88,46 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
 
   logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnitCodes);
   return (
-    <Card sx={{ backgroundColor: 'primary.light', opacity: 0.7, p: 1 }}>
+    <React.Fragment>
       {allAdUnitCodes[0] && (
         <React.Fragment>
-          <CardContent>
-            <Grid container direction="row" justifyContent="space-evenly" rowSpacing={2}>
-              <Grid item>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  {prebid.version && <Typography variant="h2">Version: {prebid.version}</Typography>}
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  <Typography variant="h2">AdUnits: {allAdUnitCodes.length}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  {prebid.config?.timeoutBuffer && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  <Typography variant="h2">Bidders: {allBidderEvents.length}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  <Typography variant="h2">
-                    Bid{allBidResponseEvents.length > 1 ? 's' : ''}: {allBidResponseEvents.length}
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  <Typography variant="h2">
-                    noBid{allNoBidEvents.length > 1 ? 's' : ''} : {allNoBidEvents.length}
-                  </Typography>
-                </Paper>
-              </Grid>
+          <Grid container direction="row" justifyContent="space-evenly" rowSpacing={2} sx={{ p: 1 }}>
+            <Grid item>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                {prebid.version && <Typography variant="h2">Version: {prebid.version}</Typography>}
+              </Paper>
             </Grid>
-          </CardContent>
-          <Paper>
+            <Grid item>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                <Typography variant="h2">AdUnits: {allAdUnitCodes.length}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                {prebid.config?.timeoutBuffer && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                <Typography variant="h2">Bidders: {allBidderEvents.length}</Typography>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                <Typography variant="h2">
+                  Bid{allBidResponseEvents.length > 1 ? 's' : ''}: {allBidResponseEvents.length}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Paper sx={{ p: 1 }} elevation={1}>
+                <Typography variant="h2">
+                  noBid{allNoBidEvents.length > 1 ? 's' : ''} : {allNoBidEvents.length}
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+          <Paper sx={{ p: 1, m: 1 }}>
             {prebid.events && prebid.events[0] && (
               <SlotsComponent
                 auctionEndEvents={auctionEndEvents}
@@ -144,17 +142,15 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         </React.Fragment>
       )}
       {!allAdUnitCodes[0] && (
-        <CardContent>
-          <Grid container direction="row" justifyContent="space-evenly">
-            <Grid item>
-              <Paper elevation={1} sx={{ p: 1 }}>
-                <Typography variant="h1">Prebid.js detected but no AdUnits</Typography>
-              </Paper>
-            </Grid>
+        <Grid container direction="row" justifyContent="space-evenly">
+          <Grid item>
+            <Paper elevation={1} sx={{ p: 1 }}>
+              <Typography variant="h1">Prebid.js detected but no AdUnits</Typography>
+            </Paper>
           </Grid>
-        </CardContent>
+        </Grid>
       )}
-    </Card>
+    </React.Fragment>
   );
 };
 
