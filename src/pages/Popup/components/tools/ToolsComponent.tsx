@@ -16,6 +16,7 @@ import { getTabId } from '../../utils';
 import theme from '../../../theme';
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const dfp_open_console = async () => {
@@ -90,7 +91,12 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
             </Button>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Button sx={{ width: 1 }} variant="outlined" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<BugReportIcon />}>
+            <Button
+              sx={{ width: 1 }}
+              variant="outlined"
+              onClick={() => chrome.storage?.local.set({ tabInfos: null })}
+              startIcon={<DeleteOutlineIcon />}
+            >
               <Typography variant="body2">delete tabInfos</Typography>
             </Button>
           </Grid>
