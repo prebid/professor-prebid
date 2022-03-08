@@ -38,7 +38,6 @@ const AdUnitCard = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebid
     const latestAuctionsBidsReceived = ((events || []) as IPrebidBidWonEventData[]).filter(
       (event) => event.eventType === 'bidResponse' && event.args.auctionId === latestAuctionId
     );
-    console.log({ latestAuctionsBidsReceived, events });
     const latestAuctionsAdsRendered = ((events || []) as IPrebidAdRenderSucceededEventData[]).filter(
       (event) => event.eventType === 'adRenderSucceeded' && event.args.bid.auctionId === latestAuctionId
     );
@@ -74,7 +73,6 @@ const AdUnitCard = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebid
 };
 
 const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails['events'] }): JSX.Element => {
-  console.log({ adUnit, events });
   const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [latestAuctionsBidsReceived, setLatestAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
   const [latestAuctionsAdsRendered, setLatestAuctionsAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
@@ -90,7 +88,6 @@ const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails
     const latestAuctionsBidsReceived = ((events || []) as IPrebidBidWonEventData[]).filter(
       (event) => event.eventType === 'bidResponse' && event.args.auctionId === latestAuctionId
     );
-    console.log({ latestAuctionsBidsReceived, events });
     const latestAuctionsAdsRendered = ((events || []) as IPrebidAdRenderSucceededEventData[]).filter(
       (event) => event.eventType === 'adRenderSucceeded' && event.args.bid.auctionId === latestAuctionId
     );
