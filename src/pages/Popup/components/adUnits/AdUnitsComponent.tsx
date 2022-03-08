@@ -88,7 +88,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
 
   logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnitCodes);
   return (
-    <Card sx={{ backgroundColor: 'primary.light', opacity: 0.8, p: 1 }}>
+    <Card sx={{ backgroundColor: 'primary.light', opacity: 0.7, p: 1 }}>
       {allAdUnitCodes[0] && (
         <React.Fragment>
           <CardContent>

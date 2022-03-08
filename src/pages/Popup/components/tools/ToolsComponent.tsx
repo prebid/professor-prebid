@@ -60,15 +60,8 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
-    <Box
-      sx={{
-        backgroundColor: 'primary.light',
-        opacity: 0.8,
-        p: 1,
-        display: 'flex',
-      }}
-    >
-      <Paper elevation={1} sx={{ p: 1, br: 2, width: 1 }}>
+    <Box sx={{ display: 'flex' }}>
+      <Paper elevation={1} sx={{ p: 1, m: 1, br: 4, width: 1 }}>
         <Grid container spacing={1}>
           {prebid && <ModifyBidResponsesComponent prebid={prebid} />}
           <Grid item md={1} xs={1}>

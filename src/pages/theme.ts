@@ -10,6 +10,9 @@ const theme = createTheme({
         },
         secondary: { main: '#f99b0c' },
         info: { main: '#ecf3f5' },
+        background: {
+            paper: 'white',
+          },
     },
     typography: {
         h1: {
@@ -66,5 +69,3 @@ export default theme;
 // button
 // caption
 // overline
-
-// backgroundColor: 'red',§
