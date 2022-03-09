@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Professor Prebid v0.2",
-  "version": "0.2.10",
+  "version": "0.2.30",
   "options_page": "options.html",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
@@ -21,7 +21,7 @@
   "web_accessible_resources": [
     {
       "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],
-      "matches": ["<all_urls>"]
+      "matches":["http://*/*", "https://*/*"]
     }
   ],
   "permissions": ["webNavigation", "storage","unlimitedStorage", "tabs", "scripting"],
