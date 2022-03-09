@@ -203,124 +203,138 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
       .flat() || [];
   return (
     <React.Fragment>
-      <Tabs value={value} onChange={handleChange}>
-        <Tab
-          label={
-            <Typography variant="h2" component={Paper} sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.light' : 'info.main' }}>
-              Received Bids
-            </Typography>
-          }
-        />
-        <Tab
-          label={
-            <Typography variant="h2" component={Paper} sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.light' : 'info.main' }}>
-              No Bids
-            </Typography>
-          }
-        />
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        <Grid container direction="row" justifyContent="space-evenly">
-          <Grid item xs={12} sx={{ p: 1 }}>
-            <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
-                        <AppsIcon />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">Bidder Code</Typography>
-                    </TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">Cpm</Typography>
-                    </TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">Currency</Typography>
-                    </TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">AdUnit Code</Typography>
-                    </TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">Size</Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {bidsReceived.map((bid, index) => (
-                    <Row key={index} bid={bid} globalOpen={globalOpen} />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
+      <Grid container direction="row" justifyContent="start" spacing={1} sx={{ p: 1 }}>
+        <Grid item xs={12}>
+          <Tabs value={value} onChange={handleChange} sx={{ minHeight: 0, '& > div > div > button': { minHeight: 0 } }}>
+            <Tab
+              sx={{ p: 0, justifyContent: 'flex-start' }}
+              label={
+                <Typography
+                  variant="h2"
+                  component={Paper}
+                  sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.light' : 'info.main' }}
+                >
+                  Received Bids
+                </Typography>
+              }
+            />
+            <Tab
+              sx={{ p: 0, justifyContent: 'flex-start' }}
+              label={
+                <Typography
+                  variant="h2"
+                  component={Paper}
+                  sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.light' : 'info.main' }}
+                >
+                  No Bids
+                </Typography>
+              }
+            />
+          </Tabs>
         </Grid>
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Grid container direction="row" justifyContent="space-evenly">
-          <Grid item xs={12} sx={{ p: 1 }}>
-            <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell variant="head">
-                      <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
-                        <AppsIcon />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">Bidder</Typography>
-                    </TableCell>
-                    <TableCell variant="head"></TableCell>
-                    <TableCell variant="head"></TableCell>
-                    <TableCell variant="head">
-                      <Typography variant="h3">AdUnit Code</Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {noBids.map((bid, index) => (
-                    <Row key={index} bid={bid} globalOpen={globalOpen} />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        {value === 0 && (
+          <Grid item xs={12}>
+            <TabPanel value={value} index={0}>
+              <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper', borderRadius: 1}}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
+                          <AppsIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">Bidder Code</Typography>
+                      </TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">Cpm</Typography>
+                      </TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">Currency</Typography>
+                      </TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">AdUnit Code</Typography>
+                      </TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">Size</Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {bidsReceived.map((bid, index) => (
+                      <Row key={index} bid={bid} globalOpen={globalOpen} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </TabPanel>
           </Grid>
-        </Grid>
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <Grid container direction="row" justifyContent="space-evenly">
-          <Grid item xs={12} sx={{ p: 1 }}>
-            <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
-                        <AppsIcon />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell>Bidder Code</TableCell>
-                    <TableCell>Width</TableCell>
-                    <TableCell>Height</TableCell>
-                    <TableCell>Cpm</TableCell>
-                    <TableCell>Currency</TableCell>
-                    <TableCell>AdUnit Code</TableCell>
-                    <TableCell>Size</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {bidsReceived.map((bid, index) => (
-                    <Row key={index} bid={bid} globalOpen={globalOpen} />
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        )}
+        {value === 1 && (
+          <Grid item xs={12}>
+            <TabPanel value={value} index={1}>
+              <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell variant="head">
+                        <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
+                          <AppsIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">Bidder</Typography>
+                      </TableCell>
+                      <TableCell variant="head"></TableCell>
+                      <TableCell variant="head"></TableCell>
+                      <TableCell variant="head">
+                        <Typography variant="h3">AdUnit Code</Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {noBids.map((bid, index) => (
+                      <Row key={index} bid={bid} globalOpen={globalOpen} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </TabPanel>
           </Grid>
-        </Grid>
-      </TabPanel>
+        )}
+        {value === 2 && (
+          <Grid item xs={12}>
+            <TabPanel value={value} index={2}>
+              <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        <IconButton onClick={(event) => setGlobalOpen(!globalOpen)} size="small">
+                          <AppsIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>Bidder Code</TableCell>
+                      <TableCell>Width</TableCell>
+                      <TableCell>Height</TableCell>
+                      <TableCell>Cpm</TableCell>
+                      <TableCell>Currency</TableCell>
+                      <TableCell>AdUnit Code</TableCell>
+                      <TableCell>Size</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {bidsReceived.map((bid, index) => (
+                      <Row key={index} bid={bid} globalOpen={globalOpen} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </TabPanel>
+          </Grid>
+        )}
+      </Grid>
     </React.Fragment>
   );
 };

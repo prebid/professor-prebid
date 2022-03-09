@@ -21,6 +21,7 @@ import BidderStackComponent from './BidderStackComponent';
 import BidChipComponent from './BidChipComponent';
 import AdUnitChipComponent from './AdUnitChipComponent';
 import MediaTypesComponent from './MediaTypesComponent';
+import Grid from '@mui/material/Grid';
 
 const AdUnitCard = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails['events'] }): JSX.Element => {
   const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
@@ -137,9 +138,11 @@ const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails
 
 const SlotsComponent = ({ adUnits, events }: ISlotsComponentProps): JSX.Element => {
   return (
-    <React.Fragment>
+    <Grid item xs={12}>
       <TableContainer
         sx={{
+          backgroundColor: 'background.paper',
+          borderRadius: 1,
           [theme.breakpoints.down('sm')]: {
             display: 'none',
           },
@@ -178,7 +181,7 @@ const SlotsComponent = ({ adUnits, events }: ISlotsComponentProps): JSX.Element 
           <AdUnitCard events={events} adUnit={adUnit} key={index} />
         ))}
       </Stack>
-    </React.Fragment>
+    </Grid>
   );
 };
 

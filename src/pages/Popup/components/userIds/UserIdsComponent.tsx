@@ -10,7 +10,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import logger from '../../../../logger';
-import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
@@ -39,28 +38,41 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
   if (prebid.eids && prebid.eids[0]) {
     return (
       <React.Fragment>
-        <Tabs value={value} onChange={handleChange}>
-          <Tab
-            label={
-              <Typography variant="h2" component={Paper} sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.main' : 'info.main' }}>
-                User Ids
-              </Typography>
-            }
-          />
-          <Tab
-            label={
-              <Typography variant="h2" component={Paper} sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.main' : 'info.main' }}>
-                Config
-              </Typography>
-            }
-          />
-        </Tabs>
-        <TabPanel value={value} index={0}>
-          <Grid container direction="row" justifyContent="space-evenly">
-            <Grid item xs={12} sx={{ p: 1 }}>
-              <Paper sx={{ p: 1 }} elevation={1}>
-                <TableContainer>
-                  <Table sx={{ maxWidth: 1 }}>
+        <Grid container direction="row" justifyContent="start" spacing={1} sx={{ p: 1 }}>
+          <Grid item xs={12}>
+            <Tabs value={value} onChange={handleChange} sx={{ minHeight: 0, '& > div > div > button': { minHeight: 0 } }}>
+              <Tab
+                sx={{ p: 0, justifyContent: 'flex-start' }}
+                label={
+                  <Typography
+                    variant="h2"
+                    component={Paper}
+                    sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.main' : 'info.main' }}
+                  >
+                    User Ids
+                  </Typography>
+                }
+              />
+              <Tab
+                sx={{ p: 0, justifyContent: 'flex-start' }}
+                label={
+                  <Typography
+                    variant="h2"
+                    component={Paper}
+                    sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.main' : 'info.main' }}
+                  >
+                    Config
+                  </Typography>
+                }
+              />
+            </Tabs>
+          </Grid>
+
+          {value === 0 && (
+            <Grid item xs={12}>
+              <TabPanel value={value} index={0}>
+                <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
+                  <Table size="small">
                     <TableHead>
                       <TableRow>
                         <TableCell>
@@ -95,16 +107,15 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                     </TableBody>
                   </Table>
                 </TableContainer>
-              </Paper>
+              </TabPanel>
             </Grid>
-          </Grid>
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
-            <Grid container direction="row" justifyContent="space-evenly">
-              <Grid item xs={12} sx={{ p: 1 }}>
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  <TableContainer>
+          )}
+
+          {value === 1 && (
+            <Grid item xs={12}>
+              <TabPanel value={value} index={1}>
+                {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
+                  <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
                     <Table>
                       <TableHead>
                         <TableRow>
@@ -164,11 +175,11 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                       </TableBody>
                     </Table>
                   </TableContainer>
-                </Paper>
-              </Grid>
+                )}
+              </TabPanel>
             </Grid>
           )}
-        </TabPanel>
+        </Grid>
       </React.Fragment>
     );
   } else {

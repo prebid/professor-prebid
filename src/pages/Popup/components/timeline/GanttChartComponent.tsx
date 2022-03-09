@@ -11,7 +11,6 @@ import { createRangeArray } from '../../../../utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import logger from '../../../../logger';
 import Popover from '@mui/material/Popover';
@@ -145,34 +144,25 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
   ]);
 
   return (
-    <Grid container direction="row" justifyContent="space-around" spacing={2} sx={{p:1}}>
-      <Grid xs={6} item>
+    <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 1 }}>
+      <Grid item>
         <Paper sx={{ p: 1 }} elevation={1}>
           <Typography variant="h2" component="span">
-            Auction ID:{' '}
-          </Typography>
-          <Typography variant="body1" component="span">
-            {auctionEndEvent.args.auctionId}
+            Auction ID: {auctionEndEvent.args.auctionId}
           </Typography>
         </Paper>
       </Grid>
-      <Grid xs={3} item>
+      <Grid item>
         <Paper sx={{ p: 1 }} elevation={1}>
           <Typography variant="h2" component="span">
-            Auction Start:{' '}
-          </Typography>
-          <Typography variant="body1" component="span">
-            {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}
+            Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}
           </Typography>
         </Paper>
       </Grid>
-      <Grid xs={3} item>
+      <Grid item>
         <Paper sx={{ p: 1 }} elevation={1}>
           <Typography variant="h2" component="span">
-            Auction Time:{' '}
-          </Typography>
-          <Typography variant="body1" component="span">
-            {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms
+            Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms
           </Typography>
         </Paper>
       </Grid>
