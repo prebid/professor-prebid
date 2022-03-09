@@ -11,7 +11,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import constants from '../../constants.json';
 import Grid from '@mui/material/Grid';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
@@ -187,7 +186,25 @@ const fetchEvents = async (url: string) => {
     return [];
   }
 };
-
+const loadInitialData = async (setTabInfos: Function) => {
+  const newTabInfos = await getTabInfosFromStorage();
+  for (const [_, newTabInfo] of Object.entries(newTabInfos)) {
+    const prebids = (newTabInfo as ITabInfo).prebids;
+    if (prebids) {
+      for (const [_, prebid] of Object.entries(prebids)) {
+        try {
+          const events = await fetchEvents(prebid.eventsUrl);
+          if (events.length > 0) {
+            prebid.events = events;
+          }
+        } catch (error) {
+          setTimeout(loadInitialData, 1000, setTabInfos);
+        }
+      }
+    }
+  }
+  setTabInfos(newTabInfos);
+};
 const DebugComponent = () => {
   const [tabInfos, setTabInfos] = useState<ITabInfos>(null);
   useEffect(() => {
@@ -208,12 +225,8 @@ const DebugComponent = () => {
       }
       setTabInfos(newTabInfos);
     };
-    const loadInitialData = async () => {
-      const tabInfos = await getTabInfosFromStorage();
-      setTabInfos(tabInfos);
-    };
     chrome.storage.onChanged.addListener(handleStorageChange);
-    loadInitialData();
+    loadInitialData(setTabInfos);
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };

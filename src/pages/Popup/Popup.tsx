@@ -62,6 +62,29 @@ const fetchEvents = async (url: string) => {
   }
 };
 
+const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => {
+  const tabId = await getTabId();
+  const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
+  const newTabInfo = tabInfos[tabId];
+  setPbjsNamespace((previous: string) => getNameSpace(previous, newTabInfo));
+  for (const [_, tabInfo] of Object.entries(tabInfos)) {
+    const prebids = (tabInfo as ITabInfo).prebids;
+    if (prebids) {
+      for (const [_, prebid] of Object.entries(prebids)) {
+        try {
+          const events = await fetchEvents(prebid.eventsUrl);
+          if (events.length > 0) {
+            prebid.events = events;
+          }
+        } catch (error) {
+          setTimeout(initialLoad, 1000, setPbjsNamespace, setTabInfo);
+        }
+      }
+    }
+  }
+  setTabInfo(newTabInfo);
+};
+
 export const Popup = (): JSX.Element => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
@@ -84,38 +107,22 @@ export const Popup = (): JSX.Element => {
   }, [tabInfo]);
 
   useEffect(() => {
-    const handleStorageChange = async (
-      changes: {
-        [key: string]: chrome.storage.StorageChange;
-      },
-      _areaName: 'sync' | 'local' | 'managed'
-    ) => {
+    const handleStorageChange = async (changes: { [key: string]: chrome.storage.StorageChange }, _areaName: string) => {
       const tabId = await getTabId();
-      const newTabInfo = changes.tabInfos.newValue[tabId];
-      const prebids = (newTabInfo as ITabInfo).prebids;
+      const newTabInfo = changes.tabInfos.newValue[tabId] as ITabInfo;
+      const prebids = newTabInfo.prebids;
       if (prebids) {
         for (const [_, prebid] of Object.entries(prebids)) {
-          prebid.events = await fetchEvents(prebid.eventsUrl);
+          const events = await fetchEvents(prebid.eventsUrl);
+          if (events.length > 0) {
+            prebid.events = events;
+          }
         }
       }
       setTabInfo(newTabInfo);
     };
     chrome.storage.onChanged.addListener(handleStorageChange);
-    (async () => {
-      const tabId = await getTabId();
-      const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
-      const newTabInfo = tabInfos[tabId];
-      setPbjsNamespace((previous) => getNameSpace(previous, newTabInfo));
-      for (const [_, tabInfo] of Object.entries(tabInfos)) {
-        const prebids = (tabInfo as ITabInfo).prebids;
-        if (prebids) {
-          for (const [_, prebid] of Object.entries(prebids)) {
-            prebid.events = await fetchEvents(prebid.eventsUrl);
-          }
-        }
-      }
-      setTabInfo(newTabInfo);
-    })();
+    initialLoad(setPbjsNamespace, setTabInfo);
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };
