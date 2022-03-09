@@ -18,7 +18,7 @@ class Prebid {
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 1000;
   sendToContentScriptPending: boolean = false;
-  lastEventsObjectUrl: string = '';
+  lastEventsObjectUrl: string[] = [];
 
   constructor(namespace: string) {
     this.namespace = namespace;
@@ -70,11 +70,19 @@ class Prebid {
   };
 
   getPbjsEventsObjUrl = () => {
-    URL.revokeObjectURL(this.lastEventsObjectUrl);
     const cloned = cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : []);
     const blob = new Blob([JSON.stringify(cloned, null, 2)], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
-    this.lastEventsObjectUrl = objectURL;
+    // memory management
+    this.lastEventsObjectUrl.push(objectURL);
+    const numberOfCachedUrls = 2;
+    if (this.lastEventsObjectUrl.length > numberOfCachedUrls) {
+      const count = this.lastEventsObjectUrl.length - numberOfCachedUrls;
+      const toRevoke = this.lastEventsObjectUrl.splice(0, count);
+      for (const url of toRevoke) {
+        URL.revokeObjectURL(url);
+      }
+    }
     return objectURL;
   };
 
