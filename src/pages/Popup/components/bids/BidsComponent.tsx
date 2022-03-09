@@ -205,14 +205,18 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
     <React.Fragment>
       <Grid container direction="row" justifyContent="start" spacing={1} sx={{ p: 1 }}>
         <Grid item xs={12}>
-          <Tabs value={value} onChange={handleChange} sx={{ minHeight: 0, '& > div > div > button': { minHeight: 0 } }}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            sx={{ minHeight: 0, '& > div > div > button': { minHeight: 0 }, '& > div  > span': { display: 'none' } }}
+          >
             <Tab
               sx={{ p: 0, justifyContent: 'flex-start' }}
               label={
                 <Typography
                   variant="h2"
                   component={Paper}
-                  sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.light' : 'info.main' }}
+                  sx={{ p: 1, border: 1, borderColor: value === 0 ? 'primary.main' : 'transparent' }}
                 >
                   Received Bids
                 </Typography>
@@ -224,7 +228,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
                 <Typography
                   variant="h2"
                   component={Paper}
-                  sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.light' : 'info.main' }}
+                  sx={{ p: 1, border: 1, borderColor: value === 1 ? 'primary.main' : 'transparent' }}
                 >
                   No Bids
                 </Typography>
@@ -235,7 +239,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
         {value === 0 && (
           <Grid item xs={12}>
             <TabPanel value={value} index={0}>
-              <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper', borderRadius: 1}}>
+              <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper', borderRadius: 1 }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>

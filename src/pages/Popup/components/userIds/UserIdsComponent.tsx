@@ -40,15 +40,19 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
       <React.Fragment>
         <Grid container direction="row" justifyContent="start" spacing={1} sx={{ p: 1 }}>
           <Grid item xs={12}>
-            <Tabs value={value} onChange={handleChange} sx={{ minHeight: 0, '& > div > div > button': { minHeight: 0 } }}>
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              sx={{
+                minHeight: 0,
+                '& > div > div > button': { minHeight: 0 },
+                '& > div  > span': { display: 'none' },
+              }}
+            >
               <Tab
                 sx={{ p: 0, justifyContent: 'flex-start' }}
                 label={
-                  <Typography
-                    variant="h2"
-                    component={Paper}
-                    sx={{ p: 1, border: '1px solid', borderColor: value === 0 ? 'primary.main' : 'info.main' }}
-                  >
+                  <Typography variant="h2" component={Paper} sx={{ p: 1, border: 1, borderColor: value === 0 ? 'primary.main' : 'transparent' }}>
                     User Ids
                   </Typography>
                 }
@@ -56,11 +60,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
               <Tab
                 sx={{ p: 0, justifyContent: 'flex-start' }}
                 label={
-                  <Typography
-                    variant="h2"
-                    component={Paper}
-                    sx={{ p: 1, border: '1px solid', borderColor: value === 1 ? 'primary.main' : 'info.main' }}
-                  >
+                  <Typography variant="h2" component={Paper} sx={{ p: 1, border: 1, borderColor: value === 1 ? 'primary.main' : 'transparent' }}>
                     Config
                   </Typography>
                 }
