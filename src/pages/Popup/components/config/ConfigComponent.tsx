@@ -11,12 +11,14 @@ import GptPreAuctionComponent from './GptPreAuctionComponent';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
 import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
+import SearchBarComponent from './SearchBarComponent';
 export const tileHeight = 255;
 
 const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
   logger.log(`[PopUp][BidderSettingsComponent]: render `, prebid.config, tcf);
   return (
     <Grid container spacing={1} padding={1}>
+      {false && <SearchBarComponent config={prebid.config}></SearchBarComponent>}
       {prebid.config.priceGranularity && (
         <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} />
       )}
