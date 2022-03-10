@@ -13,7 +13,6 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import logger from '../../../../logger';
 import merge from 'lodash/merge';
-import theme from '../../../theme';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const [allBidResponseEvents, setAllBidResponseEvents] = React.useState<IPrebidBidResponseEventData[]>([]);
@@ -75,16 +74,10 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         <React.Fragment>
           <Grid
             container
+            direction="row"
+            justifyContent="space-between"
             spacing={1}
-            sx={{
-              p: 1,
-              justifyContent: 'space-between',
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              [theme.breakpoints.down('sm')]: {
-                display: 'none',
-              },
-            }}
+            sx={{ p: 1, }}
           >
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
@@ -123,11 +116,15 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
                 <Typography variant="h2">
-                  Event{prebid.events.length > 1 ? 's' : ''} : {prebid.events.length}
+                  Event{prebid.events?.length > 1 ? 's' : ''} : {prebid.events?.length}
                 </Typography>
               </Paper>
             </Grid>
-            {prebid.events && prebid.events[0] && <SlotsComponent events={prebid.events} adUnits={adUnits} />}
+            <Grid item xs={12}>
+                <Grid spacing={0.25} container direction="row" >
+                  {prebid.events && prebid.events[0] && <SlotsComponent events={prebid.events} adUnits={adUnits} />}
+                </Grid>
+            </Grid>
           </Grid>
         </React.Fragment>
       )}

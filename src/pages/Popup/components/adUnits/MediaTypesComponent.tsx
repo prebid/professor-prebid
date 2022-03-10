@@ -8,7 +8,7 @@ import { IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
 
 const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Element => {
   return (
-    <Box>
+    <Box sx={{ p: 0.5}}>
       {Object.keys(mediaTypes).map((mediaType, index) => {
         switch (mediaType) {
           case 'banner': {
@@ -16,7 +16,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
               <Box key={index}>
                 {mediaTypes['banner'].sizes && (
                   <React.Fragment>
-                    <Typography variant="subtitle2">Banner Sizes:</Typography>
+                    <Typography variant="caption">Banner Sizes:</Typography>
                     <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                       {mediaTypes['banner'].sizes?.map((size, index) => (
                         <MediaTypeChipComponent input={mediaTypes['banner']} label={`${size[0]}x${size[1]}`} key={index} />
@@ -42,7 +42,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
           case 'video': {
             return (
               <Box key={index}>
-                <Typography variant="subtitle2">Video:</Typography>
+                <Typography variant="caption">Video:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                   {Object.keys(mediaTypes['video']).map((key, index) => (
                     <MediaTypeChipComponent
@@ -58,7 +58,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
           case 'native': {
             return (
               <Box key={index}>
-                <Typography variant="subtitle2">Native:</Typography>
+                <Typography variant="caption">Native:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                   {Object.keys(mediaTypes[mediaType]).map((key, index) => (
                     <MediaTypeChipComponent

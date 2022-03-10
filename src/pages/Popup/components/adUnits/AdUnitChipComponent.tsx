@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { IPrebidAdUnit } from '../../../../inject/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import { getTabId } from '../../utils';
+import Stack from '@mui/material/Stack';
 
 const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element => {
   const [labelText, setLabelText] = React.useState<string | null>(adUnit.code);
@@ -45,18 +46,19 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
   }, []);
 
   return (
-    <Chip
-      onClick={() => {
-        scroll2element(adUnit.code);
-      }}
-      label={labelText}
-      variant="outlined"
-      sx={{ transition: 'all linear 0.25s' }}
-    />
+    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, p: 0.5 }}>
+      <Chip
+        onClick={() => {
+          scroll2element(adUnit.code);
+        }}
+        label={labelText}
+        variant="outlined"
+      />
+    </Stack>
   );
 };
 
 interface IAdunitChipComponentProps {
   adUnit: IPrebidAdUnit;
 }
- export default AdUnitChipComponent;
+export default AdUnitChipComponent;
