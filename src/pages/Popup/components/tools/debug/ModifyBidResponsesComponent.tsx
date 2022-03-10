@@ -7,12 +7,13 @@ import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import logger from '../../../../../logger';
 import { getTabId } from '../../../utils';
-import theme from '../../../../theme';
+import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
 
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
+  const theme = useTheme();
   const [debugConfgigState, setDebugConfigState] = useState<IPrebidDebugConfig>(null);
 
   const handleChange = async (input: IPrebidDebugConfig) => {

@@ -46,84 +46,86 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: NamespaceTabsProps) => {
     setMuiTabId(newValue);
   };
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
-          {Object.keys(prebids).map((prebidKey: string, index: number) => (
-            <Tab label={prebidKey} {...a11yProps(0)} key={index} />
-          ))}
-        </Tabs>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
+            {Object.keys(prebids).map((prebidKey: string, index: number) => (
+              <Tab label={prebidKey} {...a11yProps(0)} key={index} />
+            ))}
+          </Tabs>
+        </Box>
+        {Object.keys(prebids).map((prebidKey: string, index) => {
+          const prebid = prebids[prebidKey];
+          return (
+            <TabPanel value={muiTabId} index={index} key={index}>
+              <Box key={prebidKey}>
+                <Typography>
+                  Prebid ({prebidKey}) {megaBytes}MB
+                </Typography>
+                <ToolsComponent prebid={prebid}></ToolsComponent>
+                <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
+                <BidsComponent prebid={prebid}></BidsComponent>
+                <TimeLineComponent prebid={prebid}></TimeLineComponent>
+                <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>
+                <UserIdsComponent prebid={prebid}></UserIdsComponent>
+                <Typography component="div" variant="body1">
+                  <Box sx={{ color: 'primary.main' }}>primary.main</Box>
+                  <Box sx={{ color: 'secondary.main' }}>secondary.main</Box>
+                  <Box sx={{ color: 'error.main' }}>error.main</Box>
+                  <Box sx={{ color: 'warning.main' }}>warning.main</Box>
+                  <Box sx={{ color: 'info.main' }}>info.main</Box>
+                  <Box sx={{ color: 'success.main' }}>success.main</Box>
+                  <Box sx={{ color: 'text.primary' }}>text.primary</Box>
+                  <Box sx={{ color: 'text.secondary' }}>text.secondary</Box>
+                  <Box sx={{ color: 'text.disabled' }}>text.disabled</Box>
+                </Typography>
+                <Grid container spacing={1}>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', p: 2 }}>primary.main</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'primary.light', color: 'primary.contrastText', p: 2 }}>primary.light</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box
+                      sx={{
+                        bgcolor: 'secondary.main',
+                        color: 'secondary.contrastText',
+                        p: 2,
+                      }}
+                    >
+                      secondary.main
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'error.main', color: 'error.contrastText', p: 2 }}>error.main</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'warning.main', color: 'warning.contrastText', p: 2 }}>warning.main</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'info.main', color: 'info.contrastText', p: 2 }}>info.main</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'success.main', color: 'success.contrastText', p: 2 }}>success.main</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'text.primary', color: 'background.paper', p: 2 }}>text.primary</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'text.secondary', color: 'background.paper', p: 2 }}>text.secondary</Box>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Box sx={{ bgcolor: 'text.disabled', color: 'background.paper', p: 2 }}>text.disabled</Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </TabPanel>
+          );
+        })}
       </Box>
-      {Object.keys(prebids).map((prebidKey: string, index) => {
-        const prebid = prebids[prebidKey];
-        return (
-          <TabPanel value={muiTabId} index={index} key={index}>
-            <Box key={prebidKey}>
-              <Typography>
-                Prebid ({prebidKey}) {megaBytes}MB
-              </Typography>
-              <ToolsComponent prebid={prebid}></ToolsComponent>
-              <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
-              <BidsComponent prebid={prebid}></BidsComponent>
-              <TimeLineComponent prebid={prebid}></TimeLineComponent>
-              <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>
-              <UserIdsComponent prebid={prebid}></UserIdsComponent>
-              <Typography component="div" variant="body1">
-                <Box sx={{ color: 'primary.main' }}>primary.main</Box>
-                <Box sx={{ color: 'secondary.main' }}>secondary.main</Box>
-                <Box sx={{ color: 'error.main' }}>error.main</Box>
-                <Box sx={{ color: 'warning.main' }}>warning.main</Box>
-                <Box sx={{ color: 'info.main' }}>info.main</Box>
-                <Box sx={{ color: 'success.main' }}>success.main</Box>
-                <Box sx={{ color: 'text.primary' }}>text.primary</Box>
-                <Box sx={{ color: 'text.secondary' }}>text.secondary</Box>
-                <Box sx={{ color: 'text.disabled' }}>text.disabled</Box>
-              </Typography>
-              <Grid container spacing={1}>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', p: 2 }}>primary.main</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'primary.light', color: 'primary.contrastText', p: 2 }}>primary.light</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box
-                    sx={{
-                      bgcolor: 'secondary.main',
-                      color: 'secondary.contrastText',
-                      p: 2,
-                    }}
-                  >
-                    secondary.main
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'error.main', color: 'error.contrastText', p: 2 }}>error.main</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'warning.main', color: 'warning.contrastText', p: 2 }}>warning.main</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'info.main', color: 'info.contrastText', p: 2 }}>info.main</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'success.main', color: 'success.contrastText', p: 2 }}>success.main</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'text.primary', color: 'background.paper', p: 2 }}>text.primary</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'text.secondary', color: 'background.paper', p: 2 }}>text.secondary</Box>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Box sx={{ bgcolor: 'text.disabled', color: 'background.paper', p: 2 }}>text.disabled</Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </TabPanel>
-        );
-      })}
-    </Box>
+    </ThemeProvider>
   );
 };
 

@@ -11,10 +11,11 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import logger from '../../../../../logger';
 import Grid from '@mui/material/Grid';
-import theme from '../../../../theme';
+import { useTheme } from '@mui/material';
 
 const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }: BidderFilterComponentProps): JSX.Element => {
   debugConfigState = debugConfigState || {};
+  const theme = useTheme();
   const [bidderNames, setBidderNames] = useState<string[]>([]);
   const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(!!(debugConfigState.bidders?.length > 0));
   const [selectedBidders, setSelectedBidders] = React.useState<string[]>(debugConfigState.bidders || []);

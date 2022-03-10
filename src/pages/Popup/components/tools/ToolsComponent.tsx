@@ -13,12 +13,13 @@ import { Typography } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import constants from '../../../../constants.json';
 import { getTabId } from '../../utils';
-import theme from '../../../theme';
+import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
+  const theme = useTheme();
   const dfp_open_console = async () => {
     const tabId = await getTabId();
     const fileUrl = chrome.runtime.getURL('openDfpConsole.bundle.js');
