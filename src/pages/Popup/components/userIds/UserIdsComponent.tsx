@@ -3,12 +3,6 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import ReactJson from 'react-json-view';
 import Typography from '@mui/material/Typography';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -38,7 +32,7 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
   if (prebid.eids && prebid.eids[0]) {
     return (
       <React.Fragment>
-        <Grid container direction="row" justifyContent="start" spacing={1} sx={{ p: 1 }}>
+        <Grid container direction="row" justifyContent="space-between" spacing={0.25} sx={{ p: 1 }}>
           <Grid item xs={12}>
             <Tabs
               value={value}
@@ -69,115 +63,154 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
           </Grid>
 
           {value === 0 && (
-            <Grid item xs={12}>
-              <TabPanel value={value} index={0}>
-                <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>
-                          <Typography variant="h3">Source</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="h3">User ID</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="h3">Atype</Typography>
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {prebid.eids?.map((eid, i) =>
-                        eid.uids.map((uid, index) => (
-                          <TableRow key={`${index}_${i}`}>
-                            <TableCell>
-                              <Typography variant="body1">
-                                <strong>{eid.source}</strong>
-                              </Typography>
-                            </TableCell>
-                            <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                              <Typography variant="body1">{uid.id}</Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body1">{uid.atype}</Typography>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </TabPanel>
-            </Grid>
+            <React.Fragment>
+              <Grid item xs={4}>
+                <TabPanel value={value} index={0}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Source</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              <Grid item xs={4}>
+                <TabPanel value={value} index={0}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">User ID</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              <Grid item xs={4}>
+                <TabPanel value={value} index={0}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Atype</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+
+              {prebid.eids?.map((eid, i) => {
+                return eid.uids.map((uid, index) => {
+                  return (
+                    <React.Fragment key={`${i}:${index}`}>
+                      <Grid item xs={4}>
+                        <Paper sx={{ height: 1 }}>
+                          <Typography variant="body1" sx={{ p: 0.5 }}>
+                            <strong>{eid.source}</strong>
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Paper sx={{ height: 1 }}>
+                          <Typography variant="body1" sx={{ whiteSpace: 'normal', wordBreak: 'break-word', p: 0.5 }}>
+                            {uid.id}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Paper sx={{ height: 1 }}>
+                          <Typography variant="body1" sx={{ p: 0.5 }}>
+                            {uid.atype}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    </React.Fragment>
+                  );
+                });
+              })}
+            </React.Fragment>
           )}
 
-          {value === 1 && (
-            <Grid item xs={12}>
-              <TabPanel value={value} index={1}>
-                {prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
-                  <TableContainer sx={{ maxWidth: 1, backgroundColor: 'background.paper' }}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>
-                            <Typography variant="h3">Name</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="h3">Storage Type</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="h3">Storage Expires</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="h3">Storage Name</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="h3">Params</Typography>
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {prebid.config?.userSync?.userIds?.map((userId, index) => (
-                          <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                            <TableCell>
-                              <Typography variant="body1">
-                                <strong>{userId.name}</strong>
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body1">{userId.storage?.type}</Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body1">{userId.storage?.expires}</Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body1">{userId.storage?.name}</Typography>
-                            </TableCell>
-                            <TableCell>
-                              {userId.params && JSON.stringify(userId.params) !== '{}' && (
-                                <ReactJson
-                                  src={userId.params}
-                                  name={false}
-                                  collapsed={2}
-                                  enableClipboard={false}
-                                  displayObjectSize={false}
-                                  displayDataTypes={false}
-                                  sortKeys={false}
-                                  quotesOnKeys={false}
-                                  indentWidth={2}
-                                  collapseStringsAfterLength={100}
-                                  style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-                                />
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </TabPanel>
-            </Grid>
+          {value === 1 && prebid.config?.userSync?.userIds && prebid.config?.userSync?.userIds[0] && (
+            <React.Fragment>
+              <Grid item xs={3}>
+                <TabPanel value={value} index={1}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Name</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              <Grid item xs={2}>
+                <TabPanel value={value} index={1}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Storage Type</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              <Grid item xs={2}>
+                <TabPanel value={value} index={1}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Storage Expires</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              <Grid item xs={2}>
+                <TabPanel value={value} index={1}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Storage Name</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              <Grid item xs={3}>
+                <TabPanel value={value} index={1}>
+                  <Paper sx={{ p: 0.5 }}>
+                    <Typography variant="h3">Params</Typography>
+                  </Paper>
+                </TabPanel>
+              </Grid>
+              {prebid.config?.userSync?.userIds?.map((userId, index) => (
+                <React.Fragment key={index}>
+                  <Grid item xs={3}>
+                    <Paper sx={{ height: 1 }}>
+                      <Typography variant="body1" sx={{ p: 0.5 }}>
+                        <strong>{userId.name}</strong>
+                      </Typography>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item xs={2}>
+                    <Paper sx={{ height: 1 }}>
+                      <Typography variant="body1" sx={{ p: 0.5 }}>
+                        {userId.storage?.type}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item xs={2}>
+                    <Paper sx={{ height: 1 }}>
+                      <Typography variant="body1" sx={{ p: 0.5 }}>
+                        {userId.storage?.expires}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item xs={2}>
+                    <Paper sx={{ height: 1 }}>
+                      <Typography variant="body1" sx={{ p: 0.5 }}>
+                        {userId.storage?.name}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                    <Paper sx={{ height: 1 }}>
+                      {userId.params && JSON.stringify(userId.params) !== '{}' && (
+                        <ReactJson
+                          src={userId.params}
+                          name={false}
+                          collapsed={2}
+                          enableClipboard={false}
+                          displayObjectSize={false}
+                          displayDataTypes={false}
+                          sortKeys={false}
+                          quotesOnKeys={false}
+                          indentWidth={2}
+                          collapseStringsAfterLength={100}
+                          style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                        />
+                      )}
+                    </Paper>
+                  </Grid>
+                </React.Fragment>
+              ))}
+            </React.Fragment>
           )}
         </Grid>
       </React.Fragment>
