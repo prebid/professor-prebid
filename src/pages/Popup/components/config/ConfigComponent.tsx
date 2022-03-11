@@ -17,7 +17,7 @@ export const tileHeight = 255;
 const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
   logger.log(`[PopUp][BidderSettingsComponent]: render `, prebid.config, tcf);
   return (
-    <Grid container spacing={1} padding={1}>
+    <Grid container spacing={0.25} padding={1}>
       {false && <SearchBarComponent config={prebid.config}></SearchBarComponent>}
       {prebid.config.priceGranularity && (
         <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} />
