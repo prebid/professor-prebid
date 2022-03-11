@@ -65,58 +65,48 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
-    <React.Fragment>
-      <Grid container spacing={1} sx={{ p: 1 }}>
-        <Grid item xs={12} md={5}>
-          <Paper>
-            <Button sx={{ width: 1 }} variant="outlined" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
-              <Typography variant="body2">open google AdManager console</Typography>
-            </Button>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper>
-            <Button sx={{ width: 1 }} variant="outlined" onClick={openDebugTab} startIcon={<BugReportIcon />}>
-              <Typography variant="body2">open debug tab</Typography>
-            </Button>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper>
-            <Button
-              sx={{ width: 1 }}
-              variant="outlined"
-              onClick={() => chrome.storage?.local.set({ tabInfos: null })}
-              startIcon={<DeleteOutlineIcon />}
-            >
-              <Typography variant="body2">delete tabInfos</Typography>
-            </Button>
-          </Paper>
-        </Grid>
-        <Grid item xs={1} md={1}></Grid>
-        <Grid item xs={12} sx={{ p: 1 }}>
-          <Paper sx={{ p: 0.5 }}>
-            <Grid container rowSpacing={0.5} sx={{ borderRadius: 1 }}>
-              {prebid && <ModifyBidResponsesComponent prebid={prebid} />}
-              <Grid item md={1} xs={1}>
-                <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
-                  <FormControl>
-                    <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="" />
-                  </FormControl>
-                </Box>
-              </Grid>
-              <Grid item xs={11} md={11}>
-                <Box sx={{ border: 1, borderColor: consoleState ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-                  <Typography component="div" sx={{ width: 1, p: 1.5, color: consoleState ? 'text' : 'text.disabled' }}>
-                    Show AdUnit Info Overlay
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </Paper>
+    <Grid container direction="row" justifyContent="flex-start" spacing={1} sx={{ p: 1 }}>
+      <Grid item>
+        <Paper elevation={1}>
+          <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
+            open google AdManager console
+          </Button>
+        </Paper>
+      </Grid>
+      <Grid item>
+        <Paper elevation={1}>
+          <Button size="small" variant="outlined" onClick={openDebugTab} startIcon={<BugReportIcon />}>
+            open debug tab
+          </Button>
+        </Paper>
+      </Grid>
+      <Grid item>
+        <Paper elevation={1}>
+          <Button size="small" variant="outlined" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<DeleteOutlineIcon />}>
+            delete tabInfos
+          </Button>
+        </Paper>
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container rowSpacing={0.5} columnSpacing={0.25} sx={{ borderRadius: 1, backgroundColor: 'background.paper', p: 1 }}>
+          {prebid && <ModifyBidResponsesComponent prebid={prebid} />}
+          <Grid item sm={1} xs={1}>
+            <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+              <FormControl>
+                <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="" />
+              </FormControl>
+            </Box>
+          </Grid>
+          <Grid item xs={11} sm={11}>
+            <Box sx={{ border: 1, borderColor: consoleState ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
+              <Typography component="div" sx={{ width: 1, p: 1.5, color: consoleState ? 'text' : 'text.disabled' }}>
+                Show AdUnit Info Overlay
+              </Typography>
+            </Box>
+          </Grid>
         </Grid>
       </Grid>
-    </React.Fragment>
+    </Grid>
   );
 };
 

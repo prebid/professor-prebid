@@ -1,10 +1,6 @@
 import React, { useEffect } from 'react';
 import { IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -15,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import StraightenIcon from '@mui/icons-material/Straighten';
+import { Box } from '@mui/system';
 
 const defaultBuckets: IDefaultBuckets = {
   low: [{ precision: 2, min: 0, max: 5, increment: 0.5 }],
@@ -131,52 +128,69 @@ export const PriceGranularityComponent = ({ priceGranularity, customPriceBucket 
 
   logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (
-    <Table size="small">
-      <TableHead>
-        <TableRow>
-          <TableCell variant="head">
+    <Box sx={{ backgroundColor: 'primary.main', p:0.25 }}>
+      <Grid container spacing={0.2}>
+        <Grid item xs={3}>
+          <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
             <Typography variant="h3">Bucket</Typography>
-          </TableCell>
-          <TableCell variant="head">
+          </Paper>
+        </Grid>
+        <Grid item xs={3}>
+          <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
             <Typography variant="h3">Precision</Typography>
-          </TableCell>
-          <TableCell variant="head">
+          </Paper>
+        </Grid>
+        <Grid item xs={2}>
+          <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
             <Typography variant="h3">Min</Typography>
-          </TableCell>
-          <TableCell variant="head">
+          </Paper>
+        </Grid>
+        <Grid item xs={2}>
+          <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
             <Typography variant="h3">Max</Typography>
-          </TableCell>
-          <TableCell variant="head">
+          </Paper>
+        </Grid>
+        <Grid item xs={2}>
+          <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
             <Typography variant="h3">Increment</Typography>
-          </TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
+          </Paper>
+        </Grid>
+
         {rows.map((row, index) => {
           return (
-            <TableRow key={index + 1} sx={{ verticalAlign: 'top' }}>
-              <TableCell variant="body" sx={{ w: 0.4 }}>
-                <Typography variant="body1">
-                  {type} #{index + 1}
-                </Typography>
-              </TableCell>
-              <TableCell variant="body" sx={{ w: 0.15 }}>
-                <Typography variant="body1">{row.precision || 2}</Typography>
-              </TableCell>
-              <TableCell variant="body" sx={{ w: 0.15 }}>
-                <Typography variant="body1">{row.min}</Typography>
-              </TableCell>
-              <TableCell variant="body" sx={{ w: 0.15 }}>
-                <Typography variant="body1">{row.max}</Typography>
-              </TableCell>
-              <TableCell variant="body" sx={{ w: 0.15 }}>
-                <Typography variant="body1">{row.increment}</Typography>
-              </TableCell>
-            </TableRow>
+            <React.Fragment key={index}>
+              <Grid xs={3} item>
+                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                  <Typography variant="body1">
+                    {type} #{index + 1}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid xs={3} item>
+                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                  <Typography variant="body1">{row.precision || 2}</Typography>
+                </Paper>
+              </Grid>
+              <Grid xs={2} item>
+                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                  <Typography variant="body1">{row.min}</Typography>
+                </Paper>
+              </Grid>
+              <Grid xs={2} item>
+                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                  <Typography variant="body1">{row.max}</Typography>
+                </Paper>
+              </Grid>
+              <Grid xs={2} item>
+                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                  <Typography variant="body1">{row.increment}</Typography>
+                </Paper>
+              </Grid>
+            </React.Fragment>
           );
         })}
-      </TableBody>
-    </Table>
+      </Grid>
+    </Box>
   );
 };
 
