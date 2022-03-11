@@ -94,7 +94,7 @@ const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails
   return (
     <React.Fragment>
       <Grid item xs={4} sx={{ [theme.breakpoints.down('sm')]: { display: 'none' } }}>
-        <Paper sx={{ height: '100%' }} id="florian">
+        <Paper sx={{ height: '100%' }}>
           <AdUnitChipComponent adUnit={adUnit} />
         </Paper>
       </Grid>
