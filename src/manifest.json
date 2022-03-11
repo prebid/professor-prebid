@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Professor Prebid v0.2",
-  "version": "0.2.30",
+  "version": "0.2.40",
   "options_page": "options.html",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
