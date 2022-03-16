@@ -16,7 +16,7 @@ class Prebid {
   debug: IPrebidDebugConfig;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
-  updateRateInterval: number = 1000;
+  updateRateInterval: number = 3000;
   sendToContentScriptPending: boolean = false;
   lastEventsObjectUrl: string[] = [];
 
@@ -70,8 +70,12 @@ class Prebid {
   };
 
   getPbjsEventsObjUrl = () => {
-    const cloned = cloneDeep(this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : []);
-    const blob = new Blob([JSON.stringify(cloned, null, 2)], { type: 'application/json' });
+    const events = this.globalPbjs.getEvents() || [];
+    const cloned = cloneDeep(events);
+    //doc in adRenderedEvents throws CORS error when JSON.stringified
+    const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object')) ? value : undefined;
+    const string = JSON.stringify(cloned, replacer, 2);
+    const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
     this.lastEventsObjectUrl.push(objectURL);
@@ -335,16 +339,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
