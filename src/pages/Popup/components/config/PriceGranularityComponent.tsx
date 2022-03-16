@@ -128,7 +128,7 @@ export const PriceGranularityComponent = ({ priceGranularity, customPriceBucket 
 
   logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (
-    <Box sx={{ backgroundColor: 'primary.main', p: 0.25 }}>
+    <Box sx={{ backgroundColor: 'text.disabled', p: 0.25, borderRadius: 1 }}>
       <Grid container spacing={0.2}>
         <Grid item xs={3}>
           <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
