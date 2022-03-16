@@ -48,11 +48,21 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
   return (
     <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, p: 0.5 }}>
       <Chip
+        size="small"
+        variant="outlined"
         onClick={() => {
           scroll2element(adUnit.code);
         }}
         label={labelText}
-        variant="outlined"
+        sx={{
+          height: 'unset',
+          minHeight: '24px',
+          '& .MuiChip-label': {
+            overflowWrap: 'anywhere',
+            whiteSpace: 'normal',
+            textOverflow: 'clip',
+          },
+        }}
       />
     </Stack>
   );
