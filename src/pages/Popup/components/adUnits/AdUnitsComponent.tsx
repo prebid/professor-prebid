@@ -40,14 +40,11 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         }
       }, [])
       .sort((a, b) => (a.code > b.code ? 1 : -1));
-    setAdUnits(adUnits);
-  }, [prebid.events]);
-
-  useEffect(() => {
     const allBidResponseEvents = (prebid.events?.filter((event) => event.eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
     const allNoBidEvents = (prebid.events?.filter((event) => event.eventType === 'noBid') || []) as IPrebidNoBidEventData[];
-    const allBidderEvents = [].concat(allBidResponseEvents, allNoBidEvents);
-    const allBidderEventsBidders = Array.from(new Set(allBidderEvents.map((event) => event?.args.bidder)));
+    setAllBidResponseEvents(allBidResponseEvents);
+    setAllNoBidEvents(allNoBidEvents);
+    setAdUnits(adUnits);
     const allAdUnitCodes = Array.from(
       new Set(
         prebid.events?.reduce((acc, event) => {
@@ -59,26 +56,21 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
         }, [] as string[])
       )
     );
-
-    setAuctionEndEvents(auctionEndEvents);
-    setAllBidResponseEvents(allBidResponseEvents);
-    setAllNoBidEvents(allNoBidEvents);
-    setAllBidderEvents(allBidderEventsBidders);
     setAllAdUnitCodes(allAdUnitCodes);
-  }, [auctionEndEvents, prebid.events]);
+  }, [prebid.events]);
+
+  useEffect(() => {
+    const allBidderEventsBidders = Array.from(new Set([].concat(allBidResponseEvents, allNoBidEvents).map((event) => event?.args.bidder)));
+    setAuctionEndEvents(auctionEndEvents);
+    setAllBidderEvents(allBidderEventsBidders);
+  }, [allBidResponseEvents, allNoBidEvents, auctionEndEvents]);
 
   logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnitCodes);
   return (
     <React.Fragment>
       {allAdUnitCodes[0] && (
         <React.Fragment>
-          <Grid
-            container
-            direction="row"
-            justifyContent="space-between"
-            spacing={1}
-            sx={{ p: 1, }}
-          >
+          <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 1 }}>
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
                 {prebid.version && <Typography variant="h2">Version: {prebid.version}</Typography>}
@@ -86,12 +78,12 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Grid>
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
-                <Typography variant="h2">AdUnits: {allAdUnitCodes.length}</Typography>
+                {prebid.config?.timeoutBuffer && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
               </Paper>
             </Grid>
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
-                {prebid.config?.timeoutBuffer && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
+                <Typography variant="h2">AdUnits: {allAdUnitCodes.length}</Typography>
               </Paper>
             </Grid>
             <Grid item>
@@ -121,9 +113,9 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
               </Paper>
             </Grid>
             <Grid item xs={12}>
-                <Grid spacing={0.25} container direction="row" >
-                  {prebid.events && prebid.events[0] && <SlotsComponent events={prebid.events} adUnits={adUnits} />}
-                </Grid>
+              <Grid spacing={0.25} container direction="row">
+                {prebid.events && prebid.events[0] && <SlotsComponent events={prebid.events} adUnits={adUnits} />}
+              </Grid>
             </Grid>
           </Grid>
         </React.Fragment>
