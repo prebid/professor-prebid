@@ -105,7 +105,7 @@ class IabTcf {
     if (typeof window.__cmp === 'function') {
       try {
         this.pingV1((cmpLoaded: boolean) => {
-          this.getConsentDataV1((consentData: {gdprApplies: boolean, consentData: string}) => {
+          this.getConsentDataV1((consentData: { gdprApplies: boolean; consentData: string }) => {
             const detail: ITcfDetails = {
               v1: {
                 cmpLoaded: cmpLoaded,
@@ -125,7 +125,7 @@ class IabTcf {
     if (typeof window.__tcfapi === 'function') {
       try {
         this.pingV2((pingReturn: IPingReturn) => {
-          this.getTCDataV2((tcData: {tcString: string}) => {
+          this.getTCDataV2((tcData: { tcString: string }) => {
             const detail: ITcfDetails = {
               v2: {
                 cmpLoaded: pingReturn.cmpLoaded,

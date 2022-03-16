@@ -42,7 +42,7 @@ const BidsComponent = ({ prebid }: IBidsComponentProps): JSX.Element => {
           },
         }}
       >
-        <Grid item xs={12} sx={{paddingBottom: 0.5}}>
+        <Grid item xs={12} sx={{ paddingBottom: 0.5 }}>
           <Tabs
             value={value}
             onChange={handleChange}

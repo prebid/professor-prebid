@@ -37,7 +37,7 @@ export const createRangeArray = (start: number, end: number, step: number, offse
   return arr1.sort();
 };
 
-export const getMinAndMaxNumber = (timestampArray: number[]): { min: number; max: number; } => {
+export const getMinAndMaxNumber = (timestampArray: number[]): { min: number; max: number } => {
   let min: number = 0;
   let max: number = 0;
   timestampArray.forEach((timestamp) => {

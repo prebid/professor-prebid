@@ -33,7 +33,7 @@ class Content {
     logger.log('[Content] listenToPopupScript()');
   };
 
-  processMessageFromInjected = (event: MessageEvent<{type: string; payload: object}>) => {
+  processMessageFromInjected = (event: MessageEvent<{ type: string; payload: object }>) => {
     if (event.source != window) {
       return;
     }

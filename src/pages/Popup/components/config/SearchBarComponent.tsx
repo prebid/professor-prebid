@@ -54,7 +54,6 @@ interface SearchBarComponentProps {
 
 export default SearchBarComponent;
 
-
 const renderRow = (props: ListChildComponentProps) => {
   const { data, index, style } = props;
   const dataSet = data[index];
@@ -76,7 +75,7 @@ const renderRow = (props: ListChildComponentProps) => {
       {dataSet[1]}
     </Typography>
   );
-}
+};
 
 const OuterElementContext = React.createContext({});
 

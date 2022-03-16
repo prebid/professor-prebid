@@ -21,12 +21,9 @@
   "web_accessible_resources": [
     {
       "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],
-      "matches":["http://*/*", "https://*/*"]
+      "matches": ["http://*/*", "https://*/*"]
     }
   ],
-  "permissions": ["webNavigation", "storage","unlimitedStorage", "tabs", "scripting"],
-  "host_permissions": [
-    "https://*/",
-    "http://*/"
-  ]
+  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
+  "host_permissions": ["https://*/", "http://*/"]
 }

@@ -160,7 +160,7 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
             )}
             {expanded && consentManagement.usp?.timeout && (
               <Grid item xs={12} sm={12}>
-                <Typography variant='body1'>
+                <Typography variant="body1">
                   <strong>Timeout:</strong> {consentManagement.usp.timeout}
                 </Typography>
               </Grid>
@@ -168,7 +168,7 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
 
             {expanded && consentManagement.gdpr?.rules && (
               <Grid item xs={12} sm={12}>
-                <Typography variant='body1'>
+                <Typography variant="body1">
                   <strong>GDPR Enforcement:</strong> {consentManagement.usp.timeout}
                 </Typography>
               </Grid>

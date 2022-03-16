@@ -8,7 +8,7 @@ import { IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
 
 const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Element => {
   return (
-    <Box sx={{ p: 0.5}}>
+    <Box sx={{ p: 0.5 }}>
       {Object.keys(mediaTypes).map((mediaType, index) => {
         switch (mediaType) {
           case 'banner': {

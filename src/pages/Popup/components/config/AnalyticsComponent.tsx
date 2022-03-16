@@ -32,7 +32,7 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
             </Avatar>
           }
           title={<Typography variant="h3">Analytics</Typography>}
-          subheader={<Typography  variant="subtitle1">subtitle</Typography>}
+          subheader={<Typography variant="subtitle1">subtitle</Typography>}
           action={
             <ExpandMoreIcon
               sx={{

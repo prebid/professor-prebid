@@ -100,17 +100,22 @@ class Prebid {
       version: this.globalPbjs.version,
     };
 
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail,);
+    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     const time = new Date().toJSON();
     logger.log(`[Injected] sendDetailsToContentScript`, prebidDetail, time);
     this.sendToContentScriptPending = false;
   };
 
   throttle = async (fn: Function) => {
-    if (!this.sendToContentScriptPending && (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)) {
+    if (
+      !this.sendToContentScriptPending &&
+      (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)
+    ) {
       this.sendToContentScriptPending = true;
       this.lastTimeUpdateSentToContentScript = Date.now();
-      this.globalPbjs.que.push(async () => { this.sendDetailsToContentScript() });
+      this.globalPbjs.que.push(async () => {
+        this.sendDetailsToContentScript();
+      });
     } else {
       clearTimeout(this.updateTimeout);
       this.updateTimeout = setTimeout(() => this.throttle(fn), this.updateRateInterval);
@@ -208,7 +213,7 @@ export interface IPrebidBid {
 export interface IPrebidAdUnitMediaTypes {
   banner: {
     sizes?: number[][];
-    sizeConfig?: { minViewPort: number[]; sizes: number[][] }[]
+    sizeConfig?: { minViewPort: number[]; sizes: number[][] }[];
   };
   native: {
     type: string;
@@ -329,16 +334,20 @@ export interface IPrebidConfigS2SConfig {
     os: string;
   };
   enabled: boolean;
-  endpoint: string | {
-    [key: string]: string;
-  };
+  endpoint:
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
-  syncEndpoint: string | {
-    [key: string]: string;
-  };
+  syncEndpoint:
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
-};
+}
 
 export interface IPrebidConfigConsentManagement {
   allowAuctionWithoutConsent: boolean;
@@ -370,7 +379,7 @@ export interface IPrebidConfigConsentManagement {
     };
     timeout: number;
   };
-};
+}
 
 export interface IPrebidConfig {
   debug: boolean;
@@ -389,7 +398,7 @@ export interface IPrebidConfig {
     priceGranularity: string;
     publisherDomain: string;
   };
-  s2sConfig: IPrebidConfigS2SConfig
+  s2sConfig: IPrebidConfigS2SConfig;
   targetingControls: {
     allowTargetingKeys: string[];
     alwaysIncludeDeals: boolean;
@@ -421,16 +430,16 @@ export interface IPrebidConfig {
           delimiter: string;
           fields: string[];
         };
-        values: { [key: string]: unknown }
+        values: { [key: string]: unknown };
       }[];
       modelTimestamp: number;
       modelWeightSum: number;
       skipRate: number;
-    }
+    };
     endpoint: { url: string };
     enforcement: {
       floorDeals: boolean;
-    }
+    };
     floorProvider: string;
   };
   [key: string]: unknown;
@@ -547,7 +556,6 @@ export interface IPrebidAdRenderSucceededEventData {
   args: {
     adId: string;
     bid: IPrebidBid;
-
   };
   elapsedTime: number;
   eventType: string;

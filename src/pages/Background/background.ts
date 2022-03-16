@@ -26,7 +26,11 @@ class Background {
     await this.cleanStorage();
   };
 
-  handleMessagesFromInjected = async (message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails }, sender: chrome.runtime.MessageSender, sendResponse: (response?: undefined) => void) => {
+  handleMessagesFromInjected = async (
+    message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails },
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: undefined) => void
+  ) => {
     const { type, payload } = message;
     const tabId = sender.tab?.id;
     if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
@@ -110,7 +114,7 @@ class Background {
     }
     logger.log('[Background] updateBadge', tabId, this.tabInfos[tabId]?.prebids);
   };
-  
+
   persistInStorage = async () => {
     logger.log('[Background] updateTabInfos', this.tabInfos);
     await chrome.storage?.local.set({ tabInfos: this.tabInfos });
