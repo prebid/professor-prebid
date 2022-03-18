@@ -73,7 +73,7 @@ class Prebid {
     const events = this.globalPbjs.getEvents() || [];
     const cloned = cloneDeep(events);
     //doc in adRenderedEvents throws CORS error when JSON.stringified
-    const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object')) ? value : undefined;
+    const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object') ? value : undefined);
     const string = JSON.stringify(cloned, replacer, 2);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
@@ -339,16 +339,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }

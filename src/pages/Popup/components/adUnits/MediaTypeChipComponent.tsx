@@ -25,7 +25,6 @@ const MediaTypeChipComponent = ({ input, label }: IMediaTypeChipComponentProps):
         sx={{ maxWidth: 200 }}
       />
       <Popover
-        id="mouse-over-popover"
         open={open}
         anchorEl={anchorEl}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
