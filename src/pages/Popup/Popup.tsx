@@ -232,12 +232,20 @@ export const Popup = (): JSX.Element => {
           <Switch>
             <Route exact path="/">
               {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
-                <Card>
+                <Card
+                  onClick={async () => {
+                    const tabId = await getTabId();
+                    await chrome.tabs.reload(tabId);
+                    await initialLoad(setPbjsNamespace, setTabInfo);
+                  }}
+                >
                   <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
                     <Grid container justifyContent="center">
                       <Grid item>
                         <Paper elevation={4} sx={{ p: 2 }}>
-                          <Typography variant="h2">No Prebid.js on this page. Try to scroll down or refresh the page.</Typography>
+                          <Typography variant="h2">
+                            No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.
+                          </Typography>
                         </Paper>
                       </Grid>
                     </Grid>
