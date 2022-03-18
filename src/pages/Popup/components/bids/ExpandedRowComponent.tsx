@@ -130,28 +130,30 @@ const ExpandedRowComponent = ({ bid }: IRowComponentProps) => {
               </Paper>
             </Grid>
           )}
-          <Grid item xs={12}>
-            <Paper sx={{ height: 1 }}>
-              <Typography variant="body1" sx={{ p: 0.5 }}>
-                <strong>Params: </strong>
-              </Typography>
-              {bid.params && (
-                <ReactJson
-                  src={bid.params}
-                  name={false}
-                  collapsed={1}
-                  enableClipboard={false}
-                  displayObjectSize={false}
-                  displayDataTypes={false}
-                  sortKeys={false}
-                  quotesOnKeys={false}
-                  indentWidth={2}
-                  collapseStringsAfterLength={100}
-                  style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-                />
-              )}
-            </Paper>
-          </Grid>
+          {bid.params && JSON.stringify(bid.params) !== '{}' && (
+            <Grid item xs={12}>
+              <Paper sx={{ height: 1 }}>
+                <Typography variant="body1" sx={{ p: 0.5 }}>
+                  <strong>Params: </strong>
+                </Typography>
+                {bid.params && (
+                  <ReactJson
+                    src={bid.params}
+                    name={false}
+                    collapsed={3}
+                    enableClipboard={false}
+                    displayObjectSize={false}
+                    displayDataTypes={false}
+                    sortKeys={false}
+                    quotesOnKeys={false}
+                    indentWidth={2}
+                    collapseStringsAfterLength={100}
+                    style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+                  />
+                )}
+              </Paper>
+            </Grid>
+          )}
         </Grid>
       </Grid>
     </React.Fragment>
