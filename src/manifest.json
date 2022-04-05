@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Professor Prebid v0.2",
+  "version": "0.2.40",
+  "options_page": "options.html",
+  "background": { "service_worker": "background.bundle.js" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon-34.png"
+  },
+  "icons": {
+    "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "<all_urls>"],
+      "js": ["inject.bundle.js", "contentScript.bundle.js"]
+    }
+  ],
+  "devtools_page": "devtools.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ],
+  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
+  "host_permissions": ["https://*/", "http://*/"]
+}
