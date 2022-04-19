@@ -123,7 +123,7 @@ const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartCompo
         </Grid>
         <Grid xs={12} item>
           <Paper sx={{ p: 1 , textAlign: 'center', color: 'warning.main'}} elevation={1}>
-            <Typography variant="h3">No Bidder Requests in this Auction</Typography>
+            <Typography variant="h3">No bidder-requests in this auction!</Typography>
           </Paper>
         </Grid>
       </Grid>
