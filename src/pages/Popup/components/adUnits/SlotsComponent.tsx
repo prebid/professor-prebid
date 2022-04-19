@@ -69,27 +69,14 @@ const AdUnitCard = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebid
 };
 
 const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails['events'] }): JSX.Element => {
-  const [latestAuctionsWinningBids, setLatestAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
-  const [latestAuctionsBidsReceived, setLatestAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
-  const [latestAuctionsAdsRendered, setLatestAuctionsAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
+  const [winningBids, setWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
+  const [bidsReceived, setBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
+  const [adsRendered, setAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
   const theme = useTheme();
   useEffect(() => {
-    const auctionEndEvents = ((events || []) as IPrebidAuctionEndEventData[])
-      .filter((event) => event.eventType === 'auctionInit' || event.eventType === 'auctionEnd')
-      .sort((a, b) => a.args.timestamp - b.args.timestamp);
-    const latestAuctionId = auctionEndEvents[0]?.args.auctionId;
-    const latestAuctionsWinningBids = ((events || []) as IPrebidBidWonEventData[]).filter(
-      (event) => event.eventType === 'bidWon' && event.args.auctionId === latestAuctionId
-    );
-    const latestAuctionsBidsReceived = ((events || []) as IPrebidBidWonEventData[]).filter(
-      (event) => event.eventType === 'bidResponse' && event.args.auctionId === latestAuctionId
-    );
-    const latestAuctionsAdsRendered = ((events || []) as IPrebidAdRenderSucceededEventData[]).filter(
-      (event) => event.eventType === 'adRenderSucceeded' && event.args.bid.auctionId === latestAuctionId
-    );
-    setLatestAuctionsWinningBids(latestAuctionsWinningBids);
-    setLatestAuctionBidsReceived(latestAuctionsBidsReceived);
-    setLatestAuctionsAdsRendered(latestAuctionsAdsRendered);
+    setWinningBids(((events || []) as IPrebidBidWonEventData[]).filter((event) => event.eventType === 'bidWon'));
+    setBidsReceived(((events || []) as IPrebidBidWonEventData[]).filter((event) => event.eventType === 'bidResponse'));
+    setAdsRendered(((events || []) as IPrebidAdRenderSucceededEventData[]).filter((event) => event.eventType === 'adRenderSucceeded'));
   }, [events]);
   return (
     <React.Fragment>
@@ -107,23 +94,22 @@ const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails
         <Paper sx={{ height: '100%' }}>
           <Stack direction="row" flexWrap={'wrap'} gap={0.5} sx={{ p: 0.5 }}>
             {adUnit.bids.map((bid, index) => {
-              const bidReceived = latestAuctionsBidsReceived.find(
+              const bidReceived = bidsReceived.find(
                 (bidReceived) =>
                   bidReceived.args?.adUnitCode === adUnit.code &&
                   bidReceived.args.bidder === bid.bidder &&
                   adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args?.size)
               );
-              const isWinner = latestAuctionsWinningBids.some(
+              const isWinner = winningBids.some(
                 (winningBid) =>
                   winningBid.args.adUnitCode === adUnit.code &&
                   winningBid.args.bidder === bid.bidder &&
                   adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
               );
-              const isRendered = latestAuctionsAdsRendered.some(
+              const isRendered = adsRendered.some(
                 (renderedAd) =>
                   renderedAd.args.bid.adUnitCode === adUnit.code &&
-                  renderedAd.args.bid.bidder === bid.bidder &&
-                  renderedAd.args.bid.auctionId === bid.auctionId
+                  renderedAd.args.bid.bidder === bid.bidder
               );
               const label = bidReceived?.args.cpm
                 ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
