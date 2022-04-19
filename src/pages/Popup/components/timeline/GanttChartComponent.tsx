@@ -97,6 +97,38 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent }: IBidderBa
 };
 
 const GanttChartComponent = ({ prebidEvents, auctionEndEvent }: IGanttChartComponentProps): JSX.Element => {
+  if (auctionEndEvent?.args.bidderRequests.length === 0) {
+    return (
+      <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 1 }}>
+        <Grid item>
+          <Paper sx={{ p: 1 }} elevation={1}>
+            <Typography variant="h2" component="span">
+              Auction ID: {auctionEndEvent.args.auctionId}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item>
+          <Paper sx={{ p: 1 }} elevation={1}>
+            <Typography variant="h2" component="span">
+              Auction Start: {new Date(auctionEndEvent.args.timestamp).toLocaleTimeString()}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item>
+          <Paper sx={{ p: 1 }} elevation={1}>
+            <Typography variant="h2" component="span">
+              Auction Time: {auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp} ms
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid xs={12} item>
+          <Paper sx={{ p: 1 , textAlign: 'center', color: 'warning.main'}} elevation={1}>
+            <Typography variant="h3">No Bidder Requests in this Auction</Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+    );
+  }
   const gridStep = (auctionEndEvent.args.auctionEnd - auctionEndEvent.args.timestamp) / (window.innerWidth / 10);
   const gridRef = useRef(null);
   const [bidderArray, setBidderArray] = React.useState<ITableRow[]>([]);
