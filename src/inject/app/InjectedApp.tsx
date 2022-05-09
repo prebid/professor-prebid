@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './ad-mask.scss';
+// import './ad-mask.scss';
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';

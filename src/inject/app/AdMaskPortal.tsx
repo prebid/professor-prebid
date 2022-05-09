@@ -23,6 +23,8 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
         element.current.style.padding = '4px 8px';
         element.current.style.wordBreak = 'break-all';
         element.current.style.overflow = 'hidden';
+        element.current.style.backgroundColor = '#f99b0c';
+        element.current.style.color = '#797f90;';
         element.current.classList.add('prpb-mask__overlay');
         element.current.id = `prpb-mask--container-${mask.elementId}`;
         container?.prepend(element.current);
