@@ -2,6 +2,10 @@
 
 ## Installing & Running
 
+Download the extension from the chrome web-store: https://chrome.google.com/webstore/detail/professor-prebid-v02/kdnllijdimhbledmfdbljampcdphcbdc
+
+or
+
 1. Make sure you have node version >= **13.2**
 2. run `npm install` in the directory
 3. run `npm start`
