@@ -6,7 +6,7 @@ Download the extension from the chrome web-store: https://chrome.google.com/webs
 
 or
 
-1. Make sure you have node version >= **13.2**
+1. Make sure you have node version >= **15.12.0**
 2. run `npm install` in the directory
 3. run `npm start`
 4. Load your extension on Chrome following:
