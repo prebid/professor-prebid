@@ -3,6 +3,12 @@ import ReactDOM from 'react-dom';
 import AdMaskComponent, { IMaskInputData } from './AdMask';
 import logger from '../../logger';
 
+export const getMaxZIndex = () =>
+  Math.max(
+    ...Array.from(document.querySelectorAll('*'), (el) => parseFloat(window.getComputedStyle(el).zIndex)).filter((zIndex) => !Number.isNaN(zIndex)),
+    0
+  );
+
 const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleState }) => {
   const { creativeRenderTime, elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
   const element = useRef<HTMLDivElement>(document.createElement('div'));
@@ -14,11 +20,7 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
     const slotMaskElement = document.getElementById(`prpb-mask--container-${mask.elementId}`);
     if (consoleState) {
       if (!slotMaskElement) {
-        const width = container?.offsetWidth || container?.clientWidth;
-        const height = container?.offsetHeight || container?.clientHeight;
-        element.current.style.width = `${width}px`;
-        element.current.style.height = `${height}px`;
-        element.current.style.display = height < 100 ? 'inline-block' : 'block';
+        element.current.style.zIndex = `${getMaxZIndex() + 1}`;
         element.current.style.position = 'absolute';
         element.current.style.wordBreak = 'break-all';
         element.current.classList.add('prpb-mask__overlay');
