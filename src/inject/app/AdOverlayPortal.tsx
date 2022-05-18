@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import AdMaskComponent, { IMaskInputData } from './AdMask';
+import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
 import logger from '../../logger';
 
 export const getMaxZIndex = () =>
@@ -9,8 +9,8 @@ export const getMaxZIndex = () =>
     0
   );
 
-const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleState }) => {
-  const { creativeRenderTime, elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
+const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, mask, consoleState }) => {
+  const { elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
   const element = useRef<HTMLDivElement>(document.createElement('div'));
   const closePortal = () => {
     document.getElementById(`prpb-mask--container-${mask.elementId}`).style.display = 'none';
@@ -23,7 +23,6 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
         element.current.style.zIndex = `${getMaxZIndex() + 1}`;
         element.current.style.position = 'absolute';
         element.current.style.wordBreak = 'break-all';
-        element.current.classList.add('prpb-mask__overlay');
         element.current.id = `prpb-mask--container-${mask.elementId}`;
         container?.prepend(element.current);
       } else {
@@ -36,9 +35,8 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
   }, [mask, consoleState, container]);
 
   return ReactDOM.createPortal(
-    <AdMaskComponent
+    <AdOverlayComponent
       key={`AdMask-${elementId}`}
-      creativeRenderTime={creativeRenderTime}
       elementId={elementId}
       winningCPM={winningCPM}
       winningBidder={winningBidder}
@@ -50,10 +48,10 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
   );
 };
 
-interface IAdMaskPortalProps {
-  mask: IMaskInputData;
+interface AdOverlayComponentPropsProps {
+  mask: AdOverlayComponentProps;
   consoleState: boolean;
   container: HTMLElement;
 }
 
-export default AdMaskPortal;
+export default AdOverlayPortal;

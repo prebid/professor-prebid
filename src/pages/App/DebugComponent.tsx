@@ -13,7 +13,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
 import { ThemeProvider } from '@mui/material/styles';
-import theme from '../theme';
+import { popupTheme } from '../theme';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
@@ -48,7 +48,7 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: NamespaceTabsProps) => {
     setMuiTabId(newValue);
   };
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={popupTheme}>
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
@@ -236,7 +236,7 @@ const DebugComponent = () => {
     };
   }, []);
 
-  return <ThemeProvider theme={theme}>{tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>}</ThemeProvider>;
+  return <ThemeProvider theme={popupTheme}>{tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>}</ThemeProvider>;
 };
 
 export default DebugComponent;

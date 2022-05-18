@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
@@ -13,11 +13,21 @@ const HeaderRow = ({
   expanded,
   setExpanded,
   openInPopOver,
-  slotRef,
   closePortal,
   inPopOver,
   closePopOver,
 }: IHeaderRowProps): JSX.Element => {
+  const [slot, setSlot] = React.useState<googletag.Slot>(null);
+  useEffect(() => {
+    if (googletag && typeof googletag?.pubads === 'function') {
+      const pubads = googletag.pubads();
+      const slots = pubads.getSlots();
+      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      if (slot) {
+        setSlot(slot);
+      }
+    }
+  }, [elementId]);
   return (
     <Grid container item justifyContent="space-between" alignItems="flex-start" xs={12}>
       <Grid item xs={8}>
@@ -47,7 +57,12 @@ const HeaderRow = ({
           </IconButton>
         )}
         {typeof googletag?.pubads === 'function' && (
-          <IconButton sx={{ p: 0, fontSize: 12 }} onClick={() => googletag.pubads().refresh([slotRef.current])}>
+          <IconButton
+            sx={{ p: 0, fontSize: 12 }}
+            onClick={() => {
+              googletag.pubads().refresh([slot]);
+            }}
+          >
             <Refresh sx={{ p: 0, fontSize: 12 }} />
           </IconButton>
         )}
@@ -72,9 +87,8 @@ interface IHeaderRowProps {
   expanded: boolean;
   setExpanded: any;
   openInPopOver: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  slotRef: React.RefObject<googletag.Slot>;
-  closePortal: (event: React.MouseEvent<HTMLButtonElement>) => void;
   closePopOver: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  closePortal: (event: React.MouseEvent<HTMLButtonElement>) => void;
   inPopOver: boolean;
 }
 
