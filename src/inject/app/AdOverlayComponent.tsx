@@ -44,6 +44,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           '&:hover': { opacity: 1 },
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <Grid container spacing={1}>

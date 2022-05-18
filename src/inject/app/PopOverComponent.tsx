@@ -38,7 +38,7 @@ const PopOverComponent = ({
       sx={{
         zIndex: getMaxZIndex() + 10,
         p: 1,
-        width: 0.2,
+        width: 0.33,
       }}
     >
       <Paper

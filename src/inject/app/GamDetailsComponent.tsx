@@ -116,8 +116,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
 
       {inPopOver && (
         <React.Fragment>
-          <Grid item xs={12} />
-          <Grid item>
+          <Grid item xs={12}>
             <Grid container direction={'column'} spacing={1}>
               {slotResponseInfo && (
                 <Grid item>
@@ -148,7 +147,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
               )}
 
               {slotTargeting && (
-                <Grid item>
+                <Grid item xs={12}>
                   <Paper elevation={1} sx={{ p: 1 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Targeting:</Typography>
                     <Box sx={{ display: 'flex', flexGrow: 1 }}>
