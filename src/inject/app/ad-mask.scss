@@ -1,0 +1,18 @@
+$bgColor: #f99b0c;
+
+.prpb-mask__overlay {
+    box-shadow: 0 0 0 4px $bgColor;
+    box-sizing: border-box;
+    opacity: 0.90;
+
+    .MuiBox-root {
+        background-color: $bgColor;
+        padding: 0 4px 4px;
+    }
+
+    .MuiTypography-body1 {
+        font-size: .8rem;
+        color: black;
+        line-height: 1.25rem;
+    }
+}

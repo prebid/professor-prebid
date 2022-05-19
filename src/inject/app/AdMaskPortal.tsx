@@ -17,14 +17,10 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
         element.current.style.width = `${width}px`;
         element.current.style.height = `${height}px`;
         element.current.style.display = height < 100 ? 'inline-block' : 'block';
-        element.current.style.opacity = '0.7';
         element.current.style.position = 'absolute';
-        element.current.style.zIndex = '100000000';
-        element.current.style.padding = '4px 8px';
+        element.current.style.zIndex = '2147483647';
         element.current.style.wordBreak = 'break-all';
         element.current.style.overflow = 'hidden';
-        element.current.style.backgroundColor = '#f99b0c';
-        element.current.style.color = '#797f90;';
         element.current.classList.add('prpb-mask__overlay');
         element.current.id = `prpb-mask--container-${mask.elementId}`;
         container?.prepend(element.current);
