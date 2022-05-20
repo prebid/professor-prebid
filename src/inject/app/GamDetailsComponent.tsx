@@ -7,7 +7,6 @@ import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
 
 const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps): JSX.Element => {
-  const [eventHandlersAdded, setEventHandlersAdded] = useState(false);
   const [networktId, setNetworkId] = useState<string>(null);
   const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
@@ -15,6 +14,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
   const [slotAdUnitPath, setSlotAdUnitPath] = useState<string>(null);
   const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string; id: number }[]>(null);
   const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
+  const [timeOutId, setTimeOutId] = useState<number>(null);
 
   useEffect(() => {
     if (googletag && typeof googletag?.pubads === 'function') {
@@ -32,22 +32,21 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
           setCreativeId(creativeId || sourceAgnosticCreativeId);
           setLineItemId(lineItemId || sourceAgnosticLineItemId);
         } else {
-          setTimeout(() => {
-            setSlotResponseInfo(slot.getResponseInformation());
-          }, 1000);
-        }
-        const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
-          if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
-            setSlotResponseInfo(slot.getResponseInformation());
-          }
-        };
-        if (!eventHandlersAdded) {
-          pubads.addEventListener('slotOnload', eventHandler);
-          setEventHandlersAdded(true);
+          setTimeOutId(
+            Number(
+              setTimeout(() => {
+                setSlotResponseInfo(slot.getResponseInformation());
+              }, 1000)
+            )
+          );
         }
       }
     }
-  }, [elementId, inPopOver, slotResponseInfo, eventHandlersAdded]);
+    return () => {
+      clearTimeout(timeOutId);
+    };
+  }, [elementId, inPopOver, slotResponseInfo, timeOutId]);
+
   return (
     <React.Fragment>
       {lineItemId && (
