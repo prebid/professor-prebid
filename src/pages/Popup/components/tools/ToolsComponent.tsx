@@ -8,7 +8,6 @@ import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import logger from '../../../../logger';
-import Paper from '@mui/material/Paper';
 import { Typography } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import constants from '../../../../constants.json';
@@ -17,7 +16,7 @@ import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-
+import { Paper } from '@mui/material';
 const dfp_open_console = async () => {
   const tabId = await getTabId();
   const fileUrl = chrome.runtime.getURL('openDfpConsole.bundle.js');
@@ -65,48 +64,56 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   };
   logger.log(`[PopUp][ToolsComponent]: render `, consoleState);
   return (
-    <Grid container direction="row" justifyContent="flex-start" spacing={1} sx={{ p: 1 }}>
-      <Grid item>
-        <Paper elevation={1}>
-          <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
-            open google AdManager console
-          </Button>
-        </Paper>
-      </Grid>
-      <Grid item>
-        <Paper elevation={1}>
-          <Button size="small" variant="outlined" onClick={openDebugTab} startIcon={<BugReportIcon />}>
-            open debug tab
-          </Button>
-        </Paper>
-      </Grid>
-      <Grid item>
-        <Paper elevation={1}>
-          <Button size="small" variant="outlined" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<DeleteOutlineIcon />}>
-            delete tabInfos
-          </Button>
-        </Paper>
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container rowSpacing={0.5} columnSpacing={0.25} sx={{ borderRadius: 1, backgroundColor: 'background.paper', p: 1 }}>
-          {prebid && <ModifyBidResponsesComponent prebid={prebid} />}
-          <Grid item sm={1} xs={1}>
-            <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
-              <FormControl>
-                <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="" />
-              </FormControl>
-            </Box>
-          </Grid>
-          <Grid item xs={11} sm={11}>
-            <Box sx={{ border: 1, borderColor: consoleState ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-              <Typography component="div" sx={{ width: 1, p: 1.5, color: consoleState ? 'text' : 'text.disabled' }}>
-                Show AdUnit Info Overlay
-              </Typography>
-            </Box>
-          </Grid>
+    <Box sx={{ m: 1 }}>
+      <Grid container direction="row" rowSpacing={0} columnSpacing={0.5} justifyContent="stretch" alignItems="center">
+        <Grid item sx={{ height: 36 }}>
+          <Paper elevation={1} sx={{ alignItems: 'center' }}>
+            <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
+              <Typography variant="h3">open google AdManager console</Typography>
+            </Button>
+          </Paper>
+        </Grid>
+        <Grid item sx={{ height: 36 }}>
+          <Paper elevation={1}>
+            <Button size="small" variant="outlined" onClick={openDebugTab} startIcon={<BugReportIcon />}>
+              <Typography variant="h3">open debug tab</Typography>
+            </Button>
+          </Paper>
+        </Grid>
+        <Grid item sx={{ height: 36 }}>
+          <Paper elevation={1}>
+            <Button size="small" variant="outlined" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<DeleteOutlineIcon />}>
+              <Typography variant="h3"> delete tabInfos</Typography>
+            </Button>
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
+            <Grid container rowSpacing={1} columnSpacing={0.5}>
+              <Grid item xs={12}>
+                <Grid container rowSpacing={1} columnSpacing={0.5}>
+                  {prebid && <ModifyBidResponsesComponent prebid={prebid} />}
+                </Grid>
+              </Grid>
+              <Grid item sm={1} xs={1}>
+                <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+                  <FormControl>
+                    <FormControlLabel control={<Switch checked={consoleState || false} onChange={handleConsoleChange} />} label="" />
+                  </FormControl>
+                </Box>
+              </Grid>
+              <Grid item xs={11} sm={11}>
+                <Box sx={{ border: 1, borderColor: consoleState ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
+                  <Typography component="div" sx={{ width: 1, p: 1.5, color: consoleState ? 'text' : 'text.disabled' }}>
+                    Show AdUnit Info Overlay
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
         </Grid>
       </Grid>
-    </Grid>
+    </Box>
   );
 };
 

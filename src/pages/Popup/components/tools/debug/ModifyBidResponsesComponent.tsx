@@ -11,6 +11,7 @@ import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
+import ReactJson from 'react-json-view';
 
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
   const theme = useTheme();
@@ -54,7 +55,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (
     <React.Fragment>
-      <Grid item md={1} xs={1}>
+      <Grid item md={1} xs={1} >
         <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
           <FormControl>
             <FormControlLabel control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />} label="" />
