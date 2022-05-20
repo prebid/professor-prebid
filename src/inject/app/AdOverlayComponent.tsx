@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { overlayTheme } from '../../pages/theme';
@@ -65,7 +65,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                 <Grid item>
                   <Paper elevation={1} sx={{ p: 0.5 }}>
                     <Typography>
-                      <strong>Winning CPM: </strong>
+                      <strong>CPM: </strong>
                       {winningCPM} {currency}
                     </Typography>
                   </Paper>
@@ -75,7 +75,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                 <Grid item>
                   <Paper elevation={1} sx={{ p: 0.5 }}>
                     <Typography>
-                      <strong>Winning Bidder: </strong>
+                      <strong>Bidder: </strong>
                       {winningBidder}
                     </Typography>
                   </Paper>
@@ -85,7 +85,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                 <Grid item>
                   <Paper elevation={1} sx={{ p: 0.5 }}>
                     <Typography>
-                      <strong>Time To Respond: </strong>
+                      <strong>TTR: </strong>
                       {timeToRespond}ms
                     </Typography>
                   </Paper>
