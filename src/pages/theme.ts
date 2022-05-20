@@ -67,3 +67,14 @@ export default theme;
 // button
 // caption
 // overline
+
+// <Box> PopUpComponent
+//      <Appbar>  PopUpComponent
+//      <Box sx={{ flexGrow: 1, p: 1 }}> FeatureComponent
+//          <Grid container direction="row" justifyContent="space-between" spacing={1}>  
+//              <Grid item><Paper><Typo> FeatureComponent Headline
+//              <Grid item xs={12}><Grid spacing={0.25} container direction="row"><Grid item> FeatureComponent Content
+//          <Grid container direction="row" justifyContent="space-evenly"> FeatureComponent Error Message
+//                <Grid item>
+//                      <Paper elevation={1} sx={{ p: 1 }}>
+//                              <Typography variant="h1"> 
