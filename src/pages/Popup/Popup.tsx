@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { ITabInfo } from '../Background/background';
 import { getTabId } from './utils';
-import { ThemeProvider, styled } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import logger from '../../logger';
 import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
@@ -35,7 +35,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
-import theme from '../theme';
+import { popupTheme } from '../theme';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
@@ -130,7 +130,7 @@ export const Popup = (): JSX.Element => {
 
   logger.log(`[PopUp]: render `, tabInfo?.prebids, tabInfo, pbjsNameSpace);
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={popupTheme}>
       <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light', opacity: 0.7 }}>
         <Router>
           <AppBar sx={{ p: 1, position: 'relative', backgroundColor: 'background.paper' }}>

@@ -45,7 +45,7 @@ class Content {
       this.pbjsNamespace = (payload as IPrebidDetails).namespace;
     }
     this.updateBackgroundPage(type, payload);
-    this.updateMasks();
+    this.updateOverlays();
     logger.log('[Content] processMessageFromInjected()', { type, payload });
   };
 
@@ -62,12 +62,12 @@ class Content {
     chrome.runtime.sendMessage({ type, payload });
   };
 
-  updateMasks = () => {
-    logger.log('[Content] updateMasks', this.pbjsNamespace);
+  updateOverlays = () => {
+    logger.log('[Content] update Overlays', this.pbjsNamespace);
     if (this.pbjsNamespace) {
       document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: this.pbjsNamespace }));
     }
-    logger.log('[Content] updateMasks()');
+    logger.log('[Content] update Overlays()');
   };
 }
 

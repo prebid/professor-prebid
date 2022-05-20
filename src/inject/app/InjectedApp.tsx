@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import logger from '../../logger';
 import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
-import AdMaskPortal from './AdMaskPortal';
-import { IMaskInputData } from './AdMask';
+import AdOverlayPortal from './AdOverlayPortal';
+import { AdOverlayComponentProps } from './AdOverlayComponent';
 
 import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../scripts/prebid';
 
@@ -16,7 +16,7 @@ declare global {
 
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
-  const [masks, setMasks] = useState<IMaskInputData[]>([]);
+  const [masks, setMasks] = useState<AdOverlayComponentProps[]>([]);
 
   const handleConsoleStateChange = (event: Event) => {
     const checked = (event as CustomEvent).detail;
@@ -47,7 +47,6 @@ const InjectedApp = (): JSX.Element => {
 
           return {
             elementId: adUnitCode,
-            creativeRenderTime: 666, // TODO - get creative render time from prebid
             winningCPM: slotsBidWonEvent?.args.cpm ? Math.round(slotsBidWonEvent?.args.cpm * 100) / 100 : undefined,
             winningBidder: slotsBidWonEvent?.args.bidder || slotsBidWonEvent?.args.bidderCode,
             currency: slotsBidWonEvent?.args.currency,
@@ -74,7 +73,7 @@ const InjectedApp = (): JSX.Element => {
       {masks.map((mask, index) => {
         const container =
           document.getElementById(mask.elementId) || document.querySelector(`[id*="${mask.elementId}"]:not([id^=prpb-mask--container-])`);
-        return <AdMaskPortal key={index} mask={mask} consoleState={consoleState} container={container} />;
+        return <AdOverlayPortal key={index} mask={mask} consoleState={consoleState} container={container} />;
       })}
     </React.Fragment>
   );
