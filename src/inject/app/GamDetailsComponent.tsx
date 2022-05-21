@@ -20,7 +20,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
     if (googletag && typeof googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
-      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      const slot = slots.find((slot) => slot.getAdUnitPath() === elementId);
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
@@ -52,10 +52,8 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {lineItemId && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography component={'span'} variant="h4">
-              LineItem-ID:{' '}
-            </Typography>
-            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
+            <Typography sx={{ '& a': { color: 'secondary.main', fontSize: 12 } }}>
+              <strong>LineItem: </strong>
               <a
                 href={`https://admanager.google.com/${networktId}#delivery/LineItemDetail/lineItemId=${lineItemId}`}
                 rel="noreferrer"
@@ -71,10 +69,8 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {creativeId && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              Creative-ID:{' '}
-            </Typography>
-            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
+            <Typography sx={{ '& a': { color: 'secondary.main', fontSize: 12 } }}>
+              <strong>Creative: </strong>
               <a
                 href={`https://admanager.google.com/${networktId}#delivery/CreativeDetail/creativeId=${creativeId}`}
                 rel="noreferrer"
@@ -90,10 +86,8 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {slotAdUnitPath && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              AdUnit Path:{' '}
-            </Typography>
-            <Typography variant="body1" component={'span'}>
+            <Typography>
+              <strong>AdUnit: </strong>
               {slotAdUnitPath}
             </Typography>
           </Paper>
@@ -103,10 +97,8 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {slotElementId && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              Element-ID:{' '}
-            </Typography>
-            <Typography variant="body1" component={'span'}>
+            <Typography>
+              <strong>Element: </strong>
               {slotElementId}
             </Typography>
           </Paper>
