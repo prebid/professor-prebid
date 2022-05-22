@@ -2,8 +2,7 @@ import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import ModifyBidResponsesComponent from './debug/ModifyBidResponsesComponent';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import GoogleIcon from '@mui/icons-material/Google';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -68,7 +67,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
     <Grid container direction="row" justifyContent="flex-start" spacing={1} sx={{ p: 1 }}>
       <Grid item>
         <Paper elevation={1}>
-          <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<FontAwesomeIcon icon={faGoogle} />}>
+          <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<GoogleIcon />}>
             open google AdManager console
           </Button>
         </Paper>
