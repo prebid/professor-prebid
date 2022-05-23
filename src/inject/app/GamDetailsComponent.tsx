@@ -20,7 +20,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
     if (googletag && typeof googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
-      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
@@ -31,21 +31,22 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
           setLineItemId(lineItemId || sourceAgnosticLineItemId);
-        } else {
-          setTimeOutId(
-            Number(
-              setTimeout(() => {
-                setSlotResponseInfo(slot.getResponseInformation());
-              }, 1000)
-            )
-          );
+
         }
+        const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
+          if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
+            setSlotResponseInfo(slot.getResponseInformation());
+          }
+        };
+        pubads.addEventListener('slotResponseReceived', eventHandler);
+        pubads.addEventListener('slotRenderEnded', eventHandler);
+        return () => {
+          pubads.removeEventListener('slotResponseReceived', eventHandler);
+          pubads.removeEventListener('slotRenderEnded', eventHandler);
+        };
       }
     }
-    return () => {
-      clearTimeout(timeOutId);
-    };
-  }, [elementId, inPopOver, slotResponseInfo, timeOutId]);
+  }, [elementId, inPopOver, slotResponseInfo]);
 
   return (
     <React.Fragment>
