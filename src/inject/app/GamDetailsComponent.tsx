@@ -20,7 +20,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
     if (googletag && typeof googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
-      const slot = slots.find((slot) => slot.getAdUnitPath() === elementId);
+      const slot = slots.find((slot) => slot.getAdUnitPath() === elementId || slot.getSlotElementId() === elementId);
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
