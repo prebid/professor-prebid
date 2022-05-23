@@ -40,6 +40,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           backgroundColor: 'primary.light',
           color: 'text.primary',
           padding: 0.5,
+          boxSizing: 'border-box',
           flexGrow: 1,
           '&:hover': { opacity: 1 },
           display: 'flex',
@@ -59,8 +60,8 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
               inPopOver={false}
             />
           </Grid>
-          {expanded && (currency || winningBidder || winningCPM || timeToRespond) && (
-            <Grid container item xs={12} spacing={1}>
+          {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
+            <Grid container item xs={12} spacing={.5} p={.5} sx={{paddingTop: '0px !important'}}>
               {winningCPM && (
                 <Grid item>
                   <Paper elevation={1} sx={{ p: 0.5 }}>
@@ -70,33 +71,30 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                     </Typography>
                   </Paper>
                 </Grid>
-              )}
-              {winningBidder && (
-                <Grid item>
-                  <Paper elevation={1} sx={{ p: 0.5 }}>
-                    <Typography>
-                      <strong>Bidder: </strong>
-                      {winningBidder}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-              {timeToRespond && (
-                <Grid item>
-                  <Paper elevation={1} sx={{ p: 0.5 }}>
-                    <Typography>
-                      <strong>TTR: </strong>
-                      {timeToRespond}ms
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-            </Grid>
-          )}
-
-          {expanded && elementId && (
-            <Grid container item xs={12} spacing={1}>
-              <GamDetailsComponent elementId={elementId} inPopOver={false} />
+             )}
+             {winningBidder && (
+               <Grid item>
+                 <Paper elevation={1} sx={{ p: 0.5 }}>
+                   <Typography>
+                     <strong>Bidder: </strong>
+                     {winningBidder}
+                   </Typography>
+                 </Paper>
+               </Grid>
+             )}
+             {timeToRespond && (
+               <Grid item>
+                 <Paper elevation={1} sx={{ p: 0.5 }}>
+                   <Typography>
+                     <strong>TTR: </strong>
+                     {timeToRespond}ms
+                   </Typography>
+                 </Paper>
+               </Grid>
+             )}
+             {elementId && (
+               <GamDetailsComponent elementId={elementId} inPopOver={false} />
+             )}
             </Grid>
           )}
         </Grid>
