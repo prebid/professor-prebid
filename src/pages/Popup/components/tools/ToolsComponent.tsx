@@ -104,7 +104,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
               </Grid>
               <Grid item xs={11} sm={11}>
                 <Box sx={{ border: 1, borderColor: consoleState ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-                  <Typography component="div" sx={{ width: 1, p: 1.5, color: consoleState ? 'text' : 'text.disabled' }}>
+                  <Typography variant='h4' sx={{ width: 1, p: 1.5, color: consoleState ? 'primary.main' : 'text.disabled' }}>
                     Show AdUnit Info Overlay
                   </Typography>
                 </Box>

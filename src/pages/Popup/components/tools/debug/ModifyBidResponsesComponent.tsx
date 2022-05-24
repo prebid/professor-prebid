@@ -11,7 +11,7 @@ import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
-import ReactJson from 'react-json-view';
+
 
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
   const theme = useTheme();
@@ -64,7 +64,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
       </Grid>
       <Grid item xs={11} md={11}>
         <Box sx={{ border: 1, borderColor: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-          <Typography component="div" sx={{ width: 1, p: 1.5, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
+          <Typography variant='h4' sx={{ width: 1, p: 1.5, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
             Enable Debugging
           </Typography>
         </Box>
