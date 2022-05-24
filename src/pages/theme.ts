@@ -4,14 +4,9 @@ const palette = {
   primary: {
     main: '#1976d2',
     light: '#87CEEB',
-    // contrastText:'#4285F4'
-    // dark?: string;
   },
   secondary: { main: '#f99b0c' },
-  info: { main: '#ecf3f5' },
-  background: {
-    paper: 'white',
-  },
+  info: { main: '#ecf3f5' }
 };
 
 const typography = {

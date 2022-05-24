@@ -12,10 +12,9 @@ import PopOverComponent from './PopOverComponent';
 const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal }: AdOverlayComponentProps): JSX.Element => {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  const openInPopOver = (event: React.MouseEvent<HTMLElement>) => {
+  const openInPopOver = () => {
     setAnchorEl(document.body);
   };
-
   const closePopOver = () => {
     setAnchorEl(null);
   };
@@ -48,20 +47,18 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           overflow: 'hidden',
         }}
       >
-        <Grid container spacing={1}>
-          <Grid container item xs={12}>
-            <HeaderRowComponent
-              elementId={elementId}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              openInPopOver={openInPopOver}
-              closePortal={closePortal}
-              closePopOver={closePopOver}
-              inPopOver={false}
-            />
-          </Grid>
+        <Grid container spacing={0} justifyContent="flex-start" alignItems="flex-start">
+          <HeaderRowComponent
+            elementId={elementId}
+            expanded={expanded}
+            setExpanded={setExpanded}
+            openInPopOver={openInPopOver}
+            closePortal={closePortal}
+            closePopOver={closePopOver}
+            inPopOver={false}
+          />
           {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
-            <Grid container item xs={12} spacing={.5} p={.5} sx={{paddingTop: '0px !important'}}>
+            <Grid container item xs={12} spacing={0.5}>
               {winningCPM && (
                 <Grid item>
                   <Paper elevation={1} sx={{ p: 0.5 }}>
@@ -71,30 +68,28 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                     </Typography>
                   </Paper>
                 </Grid>
-             )}
-             {winningBidder && (
-               <Grid item>
-                 <Paper elevation={1} sx={{ p: 0.5 }}>
-                   <Typography>
-                     <strong>Bidder: </strong>
-                     {winningBidder}
-                   </Typography>
-                 </Paper>
-               </Grid>
-             )}
-             {timeToRespond && (
-               <Grid item>
-                 <Paper elevation={1} sx={{ p: 0.5 }}>
-                   <Typography>
-                     <strong>TTR: </strong>
-                     {timeToRespond}ms
-                   </Typography>
-                 </Paper>
-               </Grid>
-             )}
-             {elementId && (
-               <GamDetailsComponent elementId={elementId} inPopOver={false} />
-             )}
+              )}
+              {winningBidder && (
+                <Grid item>
+                  <Paper elevation={1} sx={{ p: 0.5 }}>
+                    <Typography>
+                      <strong>Bidder: </strong>
+                      {winningBidder}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              )}
+              {timeToRespond && (
+                <Grid item>
+                  <Paper elevation={1} sx={{ p: 0.5 }}>
+                    <Typography>
+                      <strong>TTR: </strong>
+                      {timeToRespond}ms
+                    </Typography>
+                  </Paper>
+                </Grid>
+              )}
+              {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} />}
             </Grid>
           )}
         </Grid>
