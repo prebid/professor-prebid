@@ -12,7 +12,6 @@ import Grid from '@mui/material/Grid';
 import { Typography } from '@mui/material';
 import FormControl from '@mui/material/FormControl';
 
-
 const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProps): JSX.Element => {
   const theme = useTheme();
   const [debugConfgigState, setDebugConfigState] = useState<IPrebidDebugConfig>(null);
@@ -55,7 +54,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (
     <React.Fragment>
-      <Grid item md={1} xs={1} >
+      <Grid item md={1} xs={1}>
         <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
           <FormControl>
             <FormControlLabel control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />} label="" />
@@ -64,7 +63,7 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
       </Grid>
       <Grid item xs={11} md={11}>
         <Box sx={{ border: 1, borderColor: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-          <Typography variant='h4' sx={{ width: 1, p: 1.5, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
+          <Typography variant="h4" sx={{ width: 1, p: 1.5, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
             Enable Debugging
           </Typography>
         </Box>

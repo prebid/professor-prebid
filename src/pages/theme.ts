@@ -6,7 +6,7 @@ const palette = {
     light: '#87CEEB',
   },
   secondary: { main: '#f99b0c' },
-  info: { main: '#ecf3f5' }
+  info: { main: '#ecf3f5' },
 };
 
 const typography = {
@@ -34,7 +34,7 @@ const typography = {
   },
   body2: {
     fontSize: 10,
-  }
+  },
 };
 
 export const overlayTheme = createTheme({
@@ -65,8 +65,6 @@ export const popupTheme = createTheme({
   },
 });
 
-
-
 // h1 navigation bar
 // h2 component headline
 // h3 component table headline / config modules headline
@@ -84,10 +82,10 @@ export const popupTheme = createTheme({
 // <Box> PopUpComponent
 //      <Appbar>  PopUpComponent
 //      <Box sx={{ flexGrow: 1, p: 1 }}> FeatureComponent
-//          <Grid container direction="row" justifyContent="space-between" spacing={1}>  
+//          <Grid container direction="row" justifyContent="space-between" spacing={1}>
 //              <Grid item><Paper><Typo> FeatureComponent Headline
 //              <Grid item xs={12}><Grid spacing={0.25} container direction="row"><Grid item> FeatureComponent Content
 //          <Grid container direction="row" justifyContent="space-evenly"> FeatureComponent Error Message
 //                <Grid item>
 //                      <Paper elevation={1} sx={{ p: 1 }}>
-//                              <Typography variant="h1"> 
+//                              <Typography variant="h1">

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Grid from '@mui/material/Grid';
 import Popover from '@mui/material/Popover';
 import GamDetailsComponent from './GamDetailsComponent';

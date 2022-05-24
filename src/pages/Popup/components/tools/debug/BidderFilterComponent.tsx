@@ -19,7 +19,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
   const [detectedBidderNames, setDetectedBidderNames] = useState<string[]>([]);
 
   const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(false);
-  
+
   const [selectedBidders, setSelectedBidders] = React.useState<string[]>([]);
 
   const handleSelectionChange = (event: SelectChangeEvent<string[]>) => {
@@ -54,7 +54,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
     }, new Set<string>());
     setDetectedBidderNames(Array.from(bidderNamesSet));
   }, [prebid.events]);
-  
+
   logger.log(`[PopUp][BidderFilterComponent]: render `, detectedBidderNames, bidderFilterEnabled, selectedBidders);
   return (
     <React.Fragment>
