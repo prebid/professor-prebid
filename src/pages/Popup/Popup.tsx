@@ -109,17 +109,19 @@ export const Popup = (): JSX.Element => {
   useEffect(() => {
     const handleStorageChange = async (changes: { [key: string]: chrome.storage.StorageChange }, _areaName: string) => {
       const tabId = await getTabId();
-      const newTabInfo = changes.tabInfos.newValue[tabId] as ITabInfo;
-      const prebids = newTabInfo.prebids;
-      if (prebids) {
-        for (const [_, prebid] of Object.entries(prebids)) {
-          const events = await fetchEvents(prebid.eventsUrl);
-          if (events.length > 0) {
-            prebid.events = events;
+      if (changes.tabInfos) {
+        const newTabInfo = changes.tabInfos.newValue[tabId] as ITabInfo;
+        const prebids = newTabInfo.prebids;
+        if (prebids) {
+          for (const [_, prebid] of Object.entries(prebids)) {
+            const events = await fetchEvents(prebid.eventsUrl);
+            if (events.length > 0) {
+              prebid.events = events;
+            }
           }
         }
+        setTabInfo(newTabInfo);
       }
-      setTabInfo(newTabInfo);
     };
     chrome.storage.onChanged.addListener(handleStorageChange);
     initialLoad(setPbjsNamespace, setTabInfo);
