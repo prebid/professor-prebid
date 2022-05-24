@@ -14,7 +14,6 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
   const [slotAdUnitPath, setSlotAdUnitPath] = useState<string>(null);
   const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string; id: number }[]>(null);
   const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
-  const [timeOutId, setTimeOutId] = useState<number>(null);
 
   useEffect(() => {
     if (googletag && typeof googletag?.pubads === 'function') {
@@ -31,7 +30,6 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
           setLineItemId(lineItemId || sourceAgnosticLineItemId);
-
         }
         const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
           if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
@@ -53,8 +51,10 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {lineItemId && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography sx={{ '& a': { color: 'secondary.main', fontSize: 12 } }}>
-              <strong>LineItem: </strong>
+            <Typography component={'span'} variant="h4">
+              LineItem-ID:{' '}
+            </Typography>
+            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
               <a
                 href={`https://admanager.google.com/${networktId}#delivery/LineItemDetail/lineItemId=${lineItemId}`}
                 rel="noreferrer"
@@ -70,8 +70,10 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {creativeId && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography sx={{ '& a': { color: 'secondary.main', fontSize: 12 } }}>
-              <strong>Creative: </strong>
+            <Typography variant="h4" component={'span'}>
+              Creative-ID:{' '}
+            </Typography>
+            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
               <a
                 href={`https://admanager.google.com/${networktId}#delivery/CreativeDetail/creativeId=${creativeId}`}
                 rel="noreferrer"
@@ -87,8 +89,10 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {slotAdUnitPath && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography>
-              <strong>AdUnit: </strong>
+            <Typography variant="h4" component={'span'}>
+              AdUnit Path:{' '}
+            </Typography>
+            <Typography variant="body1" component={'span'}>
               {slotAdUnitPath}
             </Typography>
           </Paper>
@@ -98,8 +102,10 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
       {slotElementId && (
         <Grid item>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography>
-              <strong>Element: </strong>
+            <Typography variant="h4" component={'span'}>
+              Element-ID:{' '}
+            </Typography>
+            <Typography variant="body1" component={'span'}>
               {slotElementId}
             </Typography>
           </Paper>
