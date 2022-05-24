@@ -47,7 +47,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           overflow: 'hidden',
         }}
       >
-        <Grid container spacing={0} justifyContent="flex-start" alignItems="flex-start">
+        <Grid container columnSpacing={0.5} justifyContent="flex-start" alignItems="flex-start">
           <HeaderRowComponent
             elementId={elementId}
             expanded={expanded}
