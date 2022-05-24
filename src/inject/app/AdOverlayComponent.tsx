@@ -12,10 +12,9 @@ import PopOverComponent from './PopOverComponent';
 const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal }: AdOverlayComponentProps): JSX.Element => {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  const openInPopOver = (event: React.MouseEvent<HTMLElement>) => {
+  const openInPopOver = () => {
     setAnchorEl(document.body);
   };
-
   const closePopOver = () => {
     setAnchorEl(null);
   };
@@ -40,6 +39,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           backgroundColor: 'primary.light',
           color: 'text.primary',
           padding: 0.5,
+          boxSizing: 'border-box',
           flexGrow: 1,
           '&:hover': { opacity: 1 },
           display: 'flex',
@@ -47,20 +47,18 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           overflow: 'hidden',
         }}
       >
-        <Grid container spacing={1}>
-          <Grid container item xs={12}>
-            <HeaderRowComponent
-              elementId={elementId}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              openInPopOver={openInPopOver}
-              closePortal={closePortal}
-              closePopOver={closePopOver}
-              inPopOver={false}
-            />
-          </Grid>
-          {expanded && (currency || winningBidder || winningCPM || timeToRespond) && (
-            <Grid container item xs={12} spacing={1}>
+        <Grid container spacing={0} justifyContent="flex-start" alignItems="flex-start">
+          <HeaderRowComponent
+            elementId={elementId}
+            expanded={expanded}
+            setExpanded={setExpanded}
+            openInPopOver={openInPopOver}
+            closePortal={closePortal}
+            closePopOver={closePopOver}
+            inPopOver={false}
+          />
+          {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
+            <Grid container item xs={12} spacing={0.5}>
               {winningCPM && (
                 <Grid item>
                   <Paper elevation={1} sx={{ p: 0.5 }}>
@@ -91,12 +89,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                   </Paper>
                 </Grid>
               )}
-            </Grid>
-          )}
-
-          {expanded && elementId && (
-            <Grid container item xs={12} spacing={1}>
-              <GamDetailsComponent elementId={elementId} inPopOver={false} />
+              {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} />}
             </Grid>
           )}
         </Grid>

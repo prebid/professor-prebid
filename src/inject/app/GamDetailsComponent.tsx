@@ -7,7 +7,6 @@ import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
 
 const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps): JSX.Element => {
-  const [eventHandlersAdded, setEventHandlersAdded] = useState(false);
   const [networktId, setNetworkId] = useState<string>(null);
   const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
@@ -20,7 +19,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
     if (googletag && typeof googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
-      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
@@ -31,23 +30,22 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
           setLineItemId(lineItemId || sourceAgnosticLineItemId);
-        } else {
-          setTimeout(() => {
-            setSlotResponseInfo(slot.getResponseInformation());
-          }, 1000);
         }
         const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
           if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
             setSlotResponseInfo(slot.getResponseInformation());
           }
         };
-        if (!eventHandlersAdded) {
-          pubads.addEventListener('slotOnload', eventHandler);
-          setEventHandlersAdded(true);
-        }
+        pubads.addEventListener('slotResponseReceived', eventHandler);
+        pubads.addEventListener('slotRenderEnded', eventHandler);
+        return () => {
+          pubads.removeEventListener('slotResponseReceived', eventHandler);
+          pubads.removeEventListener('slotRenderEnded', eventHandler);
+        };
       }
     }
-  }, [elementId, inPopOver, slotResponseInfo, eventHandlersAdded]);
+  }, [elementId, inPopOver, slotResponseInfo]);
+
   return (
     <React.Fragment>
       {lineItemId && (

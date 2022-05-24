@@ -8,15 +8,7 @@ import MinimizeIcon from '@mui/icons-material/Minimize';
 import MaximizeIcon from '@mui/icons-material/Maximize';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 
-const HeaderRow = ({
-  elementId,
-  expanded,
-  setExpanded,
-  openInPopOver,
-  closePortal,
-  inPopOver,
-  closePopOver,
-}: IHeaderRowProps): JSX.Element => {
+const HeaderRow = ({ elementId, expanded, setExpanded, openInPopOver, closePortal, inPopOver, closePopOver }: IHeaderRowProps): JSX.Element => {
   const [slot, setSlot] = React.useState<googletag.Slot>(null);
   useEffect(() => {
     if (googletag && typeof googletag?.pubads === 'function') {
@@ -29,52 +21,52 @@ const HeaderRow = ({
     }
   }, [elementId]);
   return (
-    <Grid container item justifyContent="space-between" alignItems="flex-start" xs={12}>
+    <Grid container justifyContent="space-between" alignItems="flex-start" spacing={0}>
       <Grid item xs={8}>
-        <Typography variant="h3" sx={{ wordWrap: 'break-word' }}>
+        <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left', px: 0.5 }}>
           {elementId}
         </Typography>
       </Grid>
       <Grid
         item
         sx={{
+          display: 'flex',
           flexDirection: 'row',
           justifyContent: 'flex-end',
-          alignItems: 'flex-start',
+          alignItems: 'flex-end',
           color: 'text.secondary',
-          p: '0 !important',
         }}
+        xs={4}
       >
         {!inPopOver && (
           <IconButton sx={{ p: 0 }} onClick={() => setExpanded(!expanded)}>
-            {expanded && <MinimizeIcon sx={{ p: 0, fontSize: 12 }} />}
-            {!expanded && <MaximizeIcon sx={{ p: 0, fontSize: 12 }} />}
+            {expanded && <MinimizeIcon sx={{ fontSize: 14 }} />}
+            {!expanded && <MaximizeIcon sx={{ fontSize: 14 }} />}
           </IconButton>
         )}
         {!inPopOver && (
           <IconButton sx={{ p: 0 }} onClick={openInPopOver}>
-            <OpenInFullIcon sx={{ p: 0, fontSize: 12 }} />
+            <OpenInFullIcon sx={{ fontSize: 14 }} />
           </IconButton>
         )}
         {typeof googletag?.pubads === 'function' && (
           <IconButton
-            sx={{ p: 0, fontSize: 12 }}
+            sx={{ p: 0 }}
             onClick={() => {
               googletag.pubads().refresh([slot]);
             }}
           >
-            <Refresh sx={{ p: 0, fontSize: 12 }} />
+            <Refresh sx={{ fontSize: 14 }} />
           </IconButton>
         )}
-
         {inPopOver && (
-          <IconButton sx={{ p: 0, fontSize: 12 }} onClick={closePopOver}>
-            <Close sx={{ p: 0, fontSize: 12 }} />
+          <IconButton sx={{ p: 0 }} onClick={closePopOver}>
+            <Close sx={{ fontSize: 14 }} />
           </IconButton>
         )}
         {!inPopOver && (
-          <IconButton sx={{ p: 0, fontSize: 12 }} onClick={closePortal}>
-            <Close sx={{ p: 0, fontSize: 12 }} />
+          <IconButton sx={{ p: 0 }} onClick={closePortal}>
+            <Close sx={{ fontSize: 14 }} />
           </IconButton>
         )}
       </Grid>
