@@ -14,11 +14,13 @@ import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material';
 
 const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }: BidderFilterComponentProps): JSX.Element => {
-  debugConfigState = debugConfigState || {};
   const theme = useTheme();
-  const [bidderNames, setBidderNames] = useState<string[]>([]);
-  const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(!!(debugConfigState.bidders?.length > 0));
-  const [selectedBidders, setSelectedBidders] = React.useState<string[]>(debugConfigState.bidders || []);
+
+  const [detectedBidderNames, setDetectedBidderNames] = useState<string[]>([]);
+
+  const [bidderFilterEnabled, setBidderFilterEnabled] = useState<boolean>(false);
+
+  const [selectedBidders, setSelectedBidders] = React.useState<string[]>([]);
 
   const handleSelectionChange = (event: SelectChangeEvent<string[]>) => {
     const biddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
@@ -39,9 +41,9 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
   };
 
   useEffect(() => {
-    setBidderFilterEnabled(!!Array.isArray(debugConfigState.bidders));
-    setSelectedBidders(debugConfigState.bidders || []);
-  }, [debugConfigState.bidders]);
+    setBidderFilterEnabled(!!Array.isArray(debugConfigState?.bidders));
+    setSelectedBidders(debugConfigState?.bidders || []);
+  }, [debugConfigState?.bidders]);
 
   useEffect(() => {
     const events = prebid.events?.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
@@ -50,9 +52,10 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
       adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
       return previousValue;
     }, new Set<string>());
-    setBidderNames(Array.from(bidderNamesSet));
+    setDetectedBidderNames(Array.from(bidderNamesSet));
   }, [prebid.events]);
-  logger.log(`[PopUp][BidderFilterComponent]: render `, bidderNames, bidderFilterEnabled, selectedBidders);
+
+  logger.log(`[PopUp][BidderFilterComponent]: render `, detectedBidderNames, bidderFilterEnabled, selectedBidders);
   return (
     <React.Fragment>
       <Grid item md={1} xs={1}>
@@ -79,7 +82,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
             )}
             disabled={!bidderFilterEnabled}
           >
-            {bidderNames.map((name) => (
+            {detectedBidderNames.map((name) => (
               <MenuItem
                 key={name}
                 value={name}

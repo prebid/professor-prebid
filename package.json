@@ -20,6 +20,7 @@
     "@mui/icons-material": "^5.3.0",
     "@mui/material": "^5.3.0",
     "@mui/styles": "^5.3.0",
+    "@mui/x-data-grid": "^5.11.0",
     "@types/doubleclick-gpt": "^2019111201.0.2",
     "@types/react-router-dom": "^5.3.2",
     "@types/requestidlecallback": "^0.3.4",

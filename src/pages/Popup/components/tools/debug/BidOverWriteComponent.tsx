@@ -23,39 +23,71 @@ const getStyles = (name: string, selectedBidders: string[], theme: Theme) => ({
 });
 
 const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }: BidOverWriteComponentProps): JSX.Element => {
-  debugConfigState = debugConfigState || {};
   const theme = useTheme();
-  const [bidderNames, setBidderNames] = useState<string[]>([]);
-  const [bidsFilterEnabled, setBidsFilterEnabled] = useState<boolean>(!!(debugConfigState.bids?.length > 0));
-  const [cpm, setCpm] = React.useState(20.0);
-  const [selectedBids, setSelectedBids] = React.useState<IPrebidDebugConfigBid[]>(debugConfigState.bids || []);
 
-  const handleSelectionChange = (event: SelectChangeEvent<string[]>) => {
-    const biddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-    setSelectedBids(() => [...biddersArray.map((bidder: string) => ({ bidder, cpm }))]);
-    setBidsFilterEnabled(true);
-    if (biddersArray.length === 0) {
-      delete debugConfigState.bids;
-    } else {
-      debugConfigState.bids = [...biddersArray.map((bidder: string) => ({ bidder, cpm }))];
-    }
-    setDebugConfigState({ ...debugConfigState });
+  const [detectedBidderNames, setDetectedBidderNames] = useState<string[]>([]);
+  const [detectedAdUnitCodes, setDetectedAdUnitCodes] = useState<string[]>([]);
+
+  const [bidsOverwriteEnabled, setBidOverwriteEnabled] = useState<boolean>(false);
+  const [cpm, setCpm] = React.useState(20.0);
+
+  const [selectedBidders, setSelectedBidders] = React.useState<string[]>(debugConfigState?.bidders || []);
+  const [selectedAdUnitCodes, setSelectedAdUnitCodes] = React.useState<string[]>(debugConfigState?.bids?.map((bid) => bid.adUnitCode) || []);
+
+  const handleAdunitSelectionChange = (event: SelectChangeEvent<string[]>) => {
+    const selectedAdUnitCodesArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
+    updateDebugConfig(selectedAdUnitCodesArray, selectedBidders, cpm);
   };
 
-  const handleBidsFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setBidsFilterEnabled(event.target.checked);
-    debugConfigState.bids = event.target.checked ? selectedBids : undefined;
-    setDebugConfigState({ ...debugConfigState });
+  const handleBidderSelectionChange = (event: SelectChangeEvent<string[]>) => {
+    const selectedBiddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
+    updateDebugConfig(selectedAdUnitCodes, selectedBiddersArray, cpm);
+  };
+
+  const handleBidOverWriteEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBidOverwriteEnabled(event.target.checked);
+    if (!event.target.checked) {
+      setDebugConfigState({ ...debugConfigState, bids: undefined });
+    }
   };
 
   const handleCpmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCpm(Number(event.target.value));
+    updateDebugConfig(selectedAdUnitCodes, selectedBidders, Number(event.target.value));
+  };
+
+  const updateDebugConfig = (selectedAdUnitCodes: string[], selectedBidders: string[], cpm: number): void => {
+    const bids: IPrebidDebugConfigBid[] = [];
+    if (selectedAdUnitCodes.length === 0) {
+      selectedBidders.forEach((bidder: string) => {
+        bids.push({ bidder, cpm });
+      });
+    } else {
+      selectedAdUnitCodes.forEach((adUnitCode: string) => {
+        selectedBidders.forEach((bidder: string) => {
+          bids.push({ adUnitCode, bidder, cpm });
+        });
+      });
+    }
+    if (bids.length > 0) {
+      setDebugConfigState({ ...debugConfigState, bids });
+    } else {
+      setDebugConfigState({ ...debugConfigState, bids: undefined });
+    }
   };
 
   useEffect(() => {
-    setBidsFilterEnabled(!!Array.isArray(debugConfigState.bids));
-    setSelectedBids(debugConfigState.bids || []);
-  }, [debugConfigState.bids]);
+    if (!bidsOverwriteEnabled) {
+      setBidOverwriteEnabled(!!Array.isArray(debugConfigState?.bids));
+    }
+    setCpm(debugConfigState?.bids?.length > 0 ? Number(debugConfigState?.bids[0].cpm) : 20.0);
+    setSelectedBidders(debugConfigState?.bids?.map((item) => item.bidder).filter((v, i, a) => a.indexOf(v) === i) || []);
+    setSelectedAdUnitCodes(
+      debugConfigState?.bids
+        ?.map((item) => item.adUnitCode)
+        // .filter((i) => i)
+        .filter((v, i, a) => v && a.indexOf(v) === i) || []
+    );
+  }, [bidsOverwriteEnabled, debugConfigState?.bids]);
 
   useEffect(() => {
     const events = prebid.events?.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
@@ -64,21 +96,29 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
       adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
       return previousValue;
     }, new Set<string>());
-    setBidderNames(Array.from(bidderNamesSet));
+    setDetectedBidderNames(Array.from(bidderNamesSet));
+
+    const adUnitCodesSet = events.reduce((previousValue, currentValue) => {
+      const adUnitsCodesArray = (currentValue as IPrebidAuctionEndEventData).args.adUnitCodes || [];
+      adUnitsCodesArray.forEach((adUnitCode) => previousValue.add(adUnitCode));
+      return previousValue;
+    }, new Set<string>());
+    setDetectedAdUnitCodes(Array.from(adUnitCodesSet));
   }, [prebid.events]);
 
-  logger.log(`[PopUp][BidOverWriteComponent]: render `, bidderNames, bidsFilterEnabled, cpm, selectedBids);
+  logger.log(`[PopUp][BidOverWriteComponent]: render `, detectedBidderNames, bidsOverwriteEnabled, cpm);
+
   return (
     <React.Fragment>
       <Grid item md={1} xs={1}>
         <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
           <FormControl>
-            <FormControlLabel label="" control={<Switch checked={bidsFilterEnabled} onChange={handleBidsFilterEnabledChange} />} />
+            <FormControlLabel label="" control={<Switch checked={bidsOverwriteEnabled} onChange={handleBidOverWriteEnabledChange} />} />
           </FormControl>
         </Box>
       </Grid>
 
-      <Grid item md={2} xs={4}>
+      <Grid item md={2} xs={2}>
         <FormControl sx={{ height: 1 }}>
           <Box component="form" noValidate autoComplete="off" sx={{ height: 1 }}>
             <TextField
@@ -88,18 +128,19 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
               value={cpm}
               onChange={handleCpmChange}
               variant="outlined"
-              disabled={!bidsFilterEnabled}
+              disabled={!bidsOverwriteEnabled}
             />
           </Box>
         </FormControl>
       </Grid>
-      <Grid item md={9} xs={7}>
-        <FormControl sx={{ width: 1 }}>
+      <Grid item md={4.5} xs={4.5}>
+        <FormControl sx={{ height: 1, width: 1, '& .MuiOutlinedInput-root': { height: 1, alignItems: 'baseline' } }}>
           <InputLabel>Select Bidder(s)</InputLabel>
           <Select
             multiple
-            value={selectedBids.map((selectedBid) => selectedBid.bidder)}
-            onChange={handleSelectionChange}
+            name="bidders"
+            value={selectedBidders}
+            onChange={handleBidderSelectionChange}
             input={<OutlinedInput label="Detected Bidders" />}
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -109,18 +150,37 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
               </Box>
             )}
             MenuProps={MenuProps}
-            disabled={!bidsFilterEnabled}
+            disabled={!bidsOverwriteEnabled}
           >
-            {bidderNames.map((name, index) => (
-              <MenuItem
-                key={index}
-                value={name}
-                style={getStyles(
-                  name,
-                  selectedBids.map((selectedBid) => selectedBid.bidder),
-                  theme
-                )}
-              >
+            {detectedBidderNames.map((name, index) => (
+              <MenuItem key={index} value={name} style={getStyles(name, selectedBidders, theme)}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid>
+      <Grid item md={4.5} xs={4.5}>
+        <FormControl sx={{ height: 1, width: 1, '& .MuiOutlinedInput-root': { height: 1, alignItems: 'baseline' } }}>
+          <InputLabel>Select AdUnitCode(s)</InputLabel>
+          <Select
+            multiple
+            name="adUnitCodes"
+            value={selectedAdUnitCodes}
+            onChange={handleAdunitSelectionChange}
+            input={<OutlinedInput label="Detected AdUnit(s)" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value, index) => (
+                  <Chip key={index} label={value} />
+                ))}
+              </Box>
+            )}
+            MenuProps={MenuProps}
+            disabled={!bidsOverwriteEnabled || selectedBidders.length === 0}
+          >
+            {detectedAdUnitCodes.map((name, index) => (
+              <MenuItem key={index} value={name} style={getStyles(name, selectedAdUnitCodes, theme)}>
                 {name}
               </MenuItem>
             ))}

@@ -1,31 +1,28 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import AdMaskComponent, { IMaskInputData } from './AdMask';
+import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
 import logger from '../../logger';
 
-const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleState }) => {
-  const { creativeRenderTime, elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
-  const element = useRef<HTMLDivElement>(document.createElement('div'));
+export const getMaxZIndex = () =>
+  Math.max(
+    ...Array.from(document.querySelectorAll('*'), (el) => parseFloat(window.getComputedStyle(el).zIndex)).filter((zIndex) => !Number.isNaN(zIndex)),
+    0
+  );
 
+const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, mask, consoleState }) => {
+  const { elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
+  const element = useRef<HTMLDivElement>(document.createElement('div'));
+  const closePortal = () => {
+    document.getElementById(`prpb-mask--container-${mask.elementId}`).style.display = 'none';
+  };
   useEffect(() => {
     logger.log('[AdMaskPortal] Mounting AdMaskPortal');
     const slotMaskElement = document.getElementById(`prpb-mask--container-${mask.elementId}`);
     if (consoleState) {
       if (!slotMaskElement) {
-        const width = container?.offsetWidth || container?.clientWidth;
-        const height = container?.offsetHeight || container?.clientHeight;
-        element.current.style.width = `${width}px`;
-        element.current.style.height = `${height}px`;
-        element.current.style.display = height < 100 ? 'inline-block' : 'block';
-        element.current.style.opacity = '0.7';
+        element.current.style.zIndex = `${getMaxZIndex() + 1}`;
         element.current.style.position = 'absolute';
-        element.current.style.zIndex = '100000000';
-        element.current.style.padding = '4px 8px';
         element.current.style.wordBreak = 'break-all';
-        element.current.style.overflow = 'hidden';
-        element.current.style.backgroundColor = '#f99b0c';
-        element.current.style.color = '#797f90;';
-        element.current.classList.add('prpb-mask__overlay');
         element.current.id = `prpb-mask--container-${mask.elementId}`;
         container?.prepend(element.current);
       } else {
@@ -38,23 +35,23 @@ const AdMaskPortal: React.FC<IAdMaskPortalProps> = ({ container, mask, consoleSt
   }, [mask, consoleState, container]);
 
   return ReactDOM.createPortal(
-    <AdMaskComponent
+    <AdOverlayComponent
       key={`AdMask-${elementId}`}
-      creativeRenderTime={creativeRenderTime}
       elementId={elementId}
       winningCPM={winningCPM}
       winningBidder={winningBidder}
       currency={currency}
       timeToRespond={timeToRespond}
+      closePortal={closePortal}
     />,
     element.current
   );
 };
 
-interface IAdMaskPortalProps {
-  mask: IMaskInputData;
+interface AdOverlayComponentPropsProps {
+  mask: AdOverlayComponentProps;
   consoleState: boolean;
   container: HTMLElement;
 }
 
-export default AdMaskPortal;
+export default AdOverlayPortal;

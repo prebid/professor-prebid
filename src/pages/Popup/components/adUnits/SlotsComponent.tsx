@@ -107,9 +107,7 @@ const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails
                   adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
               );
               const isRendered = adsRendered.some(
-                (renderedAd) =>
-                  renderedAd.args.bid.adUnitCode === adUnit.code &&
-                  renderedAd.args.bid.bidder === bid.bidder
+                (renderedAd) => renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bid.bidder
               );
               const label = bidReceived?.args.cpm
                 ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
