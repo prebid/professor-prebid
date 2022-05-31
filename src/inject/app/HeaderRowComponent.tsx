@@ -21,9 +21,9 @@ const HeaderRow = ({ elementId, expanded, setExpanded, openInPopOver, closePorta
     }
   }, [elementId]);
   return (
-    <Grid container justifyContent="space-between" alignItems="flex-start" spacing={0}>
-      <Grid item xs={8}>
-        <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left', px: 0.5 }}>
+    <Grid container justifyContent="space-between" alignItems="flex-start">
+      <Grid item xs={7}>
+        <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left' }}>
           {elementId}
         </Typography>
       </Grid>
@@ -76,9 +76,9 @@ const HeaderRow = ({ elementId, expanded, setExpanded, openInPopOver, closePorta
 
 interface IHeaderRowProps {
   elementId: string;
-  expanded: boolean;
-  setExpanded: any;
-  openInPopOver: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  expanded?: boolean;
+  setExpanded?: React.Dispatch<React.SetStateAction<boolean>>;
+  openInPopOver?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   closePopOver: (event: React.MouseEvent<HTMLButtonElement>) => void;
   closePortal: (event: React.MouseEvent<HTMLButtonElement>) => void;
   inPopOver: boolean;
