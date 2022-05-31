@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Grid from '@mui/material/Grid';
 import Popover from '@mui/material/Popover';
 import GamDetailsComponent from './GamDetailsComponent';
 import { getMaxZIndex } from './AdOverlayPortal';
-import HeaderRowComponent from './HeaderRowComponent';
-import { Paper } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
+import { CacheProvider } from '@emotion/react/';
+import createCache from '@emotion/cache';
+import Card from '@mui/material/Card';
+import CardHeader from '@mui/material/CardHeader';
+import CardContent from '@mui/material/CardContent';
+import IconButton from '@mui/material/IconButton';
+import Close from '@mui/icons-material/Close';
 
 const PopOverComponent = ({
   elementId,
@@ -13,20 +19,14 @@ const PopOverComponent = ({
   winningBidder,
   currency,
   timeToRespond,
-  closePortal,
   anchorEl,
   setAnchorEl,
 }: PopOverComponentProps): JSX.Element => {
-  const [expanded, setExpanded] = useState<boolean>(true);
   const open = Boolean(anchorEl);
-
-  const openInPopOver = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(document.body);
-  };
-
   const closePopOver = () => {
     setAnchorEl(null);
   };
+  const cacheTopPage = createCache({ key: 'css', container: window.top.document?.head, prepend: true });
 
   return (
     <Popover
@@ -35,76 +35,68 @@ const PopOverComponent = ({
       onClose={closePopOver}
       anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
       transformOrigin={{ vertical: 'center', horizontal: 'center' }}
-      sx={{
-        zIndex: getMaxZIndex() + 10,
-        p: 1,
-        width: 0.33,
-      }}
+      sx={{ zIndex: getMaxZIndex() + 1, p: 1, width: 0.33 }}
     >
-      <Paper
-        elevation={1}
-        sx={{
-          backgroundColor: 'primary.light',
-          opacity: 0.7,
-          color: 'text.primary',
-          padding: 1,
-          flexGrow: 1,
-          display: 'flex',
-        }}
-      >
-        <Grid container direction={'row'} spacing={1}>
-          <HeaderRowComponent
-            elementId={elementId}
-            expanded={expanded}
-            setExpanded={setExpanded}
-            openInPopOver={openInPopOver}
-            closePortal={closePortal}
-            inPopOver={true}
-            closePopOver={closePopOver}
+      <CacheProvider value={cacheTopPage}>
+        <Card sx={{ w: 1, backgroundColor: 'primary.light', opacity: 0.7, color: 'text.primary' }}>
+          <CardHeader
+            action={
+              <IconButton sx={{ p: 0 }} onClick={closePopOver}>
+                <Close sx={{ fontSize: 14 }} />
+              </IconButton>
+            }
+            title={elementId}
+            titleTypographyProps={{ variant: 'h2' }}
+            subheader={`${winningBidder || ''} - ${winningCPM || ''} ${currency || ''}`}
+            subheaderTypographyProps={{ variant: 'h3' }}
           />
-          <Grid item xs={12}>
+          <CardContent sx={{ flexGrow: 1, display: 'flex' }}>
             <Grid container direction={'row'} spacing={1}>
-              {winningCPM && (
-                <Grid item xs={4}>
-                  <Paper sx={{ p: 1 }}>
-                    <Typography>
-                      <strong>Winning CPM: </strong>
-                      {winningCPM} {currency}
-                    </Typography>
-                  </Paper>
+              <Grid item xs={12}>
+                <Grid container direction={'row'} spacing={1}>
+                  {winningCPM && (
+                    <Grid item xs={4}>
+                      <Paper sx={{ p: 1 }}>
+                        <Typography>
+                          <strong>Winning CPM: </strong>
+                          {winningCPM} {currency}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  )}
+                  {winningBidder && (
+                    <Grid item xs={4}>
+                      <Paper sx={{ p: 1 }}>
+                        <Typography>
+                          <strong>Winning Bidder: </strong>
+                          {winningBidder}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  )}
+                  {timeToRespond && (
+                    <Grid item xs={4}>
+                      <Paper sx={{ p: 1 }}>
+                        <Typography>
+                          <strong>Time To Respond: </strong>
+                          {timeToRespond}ms
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  )}
                 </Grid>
-              )}
-              {winningBidder && (
-                <Grid item xs={4}>
-                  <Paper sx={{ p: 1 }}>
-                    <Typography>
-                      <strong>Winning Bidder: </strong>
-                      {winningBidder}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-              {timeToRespond && (
-                <Grid item xs={4}>
-                  <Paper sx={{ p: 1 }}>
-                    <Typography>
-                      <strong>Time To Respond: </strong>
-                      {timeToRespond}ms
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-            </Grid>
-          </Grid>
-          {elementId && (
-            <Grid item xs={12}>
-              <Grid container direction={'row'} spacing={1}>
-                <GamDetailsComponent elementId={elementId} inPopOver={true} />
               </Grid>
+              {elementId && (
+                <Grid item xs={12}>
+                  <Grid container direction={'row'} spacing={1}>
+                    <GamDetailsComponent elementId={elementId} inPopOver={true} />
+                  </Grid>
+                </Grid>
+              )}
             </Grid>
-          )}
-        </Grid>
-      </Paper>
+          </CardContent>
+        </Card>
+      </CacheProvider>
     </Popover>
   );
 };

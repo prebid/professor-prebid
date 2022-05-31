@@ -29,22 +29,19 @@ const AdOverlayComponent = ({
     setAnchorEl(null);
   };
   const cache = createCache({ key: 'css', container: contentRef?.contentWindow?.document?.head, prepend: true });
-  const cacheTopPage = createCache({ key: 'css', container: window.top.document?.head, prepend: true });
-
+  
   return (
     <ThemeProvider theme={overlayTheme}>
-      <CacheProvider value={cacheTopPage}>
-        <PopOverComponent
-          elementId={elementId}
-          winningCPM={winningCPM}
-          winningBidder={winningBidder}
-          currency={currency}
-          timeToRespond={timeToRespond}
-          closePortal={closePortal}
-          anchorEl={anchorEl}
-          setAnchorEl={setAnchorEl}
-        />
-      </CacheProvider>
+      <PopOverComponent
+        elementId={elementId}
+        winningCPM={winningCPM}
+        winningBidder={winningBidder}
+        currency={currency}
+        timeToRespond={timeToRespond}
+        closePortal={closePortal}
+        anchorEl={anchorEl}
+        setAnchorEl={setAnchorEl}
+      />
       <CacheProvider value={cache}>
         <Box
           sx={{
@@ -62,7 +59,7 @@ const AdOverlayComponent = ({
             overflow: 'hidden',
           }}
         >
-          <Grid container columnSpacing={0.5} justifyContent="flex-start" alignItems="flex-start">
+          <Grid container justifyContent="flex-start" alignItems="flex-start">
             <HeaderRowComponent
               elementId={elementId}
               expanded={expanded}
