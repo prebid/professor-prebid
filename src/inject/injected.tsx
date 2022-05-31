@@ -26,7 +26,6 @@ const injectApp = () => {
     ReactDOM.render(<InjectedApp />, document.getElementById(root.id));
   } else {
     requestIdleCallback(injectApp);
-    // setTimeout(() => injectApp(), 1000)
   }
 };
 injectApp();
