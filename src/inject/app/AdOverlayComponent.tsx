@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { overlayTheme } from '../../pages/theme';
 import { ThemeProvider } from '@mui/material/styles';
 import GamDetailsComponent from './GamDetailsComponent';
-import HeaderRowComponent from './HeaderRowComponent';
 import { Paper } from '@mui/material';
-import Typography from '@mui/material/Typography';
 import PopOverComponent from './PopOverComponent';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Close from '@mui/icons-material/Close';
+import Refresh from '@mui/icons-material/Refresh';
+import MinimizeIcon from '@mui/icons-material/Minimize';
+import MaximizeIcon from '@mui/icons-material/Maximize';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 
 const AdOverlayComponent = ({
   elementId,
@@ -22,14 +27,21 @@ const AdOverlayComponent = ({
 }: AdOverlayComponentProps): JSX.Element => {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [slot, setSlot] = React.useState<googletag.Slot>(null);
+  const cache = createCache({ key: 'css', container: contentRef?.contentWindow?.document?.head, prepend: true });
   const openInPopOver = () => {
     setAnchorEl(window.top.document.body);
   };
-  const closePopOver = () => {
-    setAnchorEl(null);
-  };
-  const cache = createCache({ key: 'css', container: contentRef?.contentWindow?.document?.head, prepend: true });
-  
+  useEffect(() => {
+    if (googletag && typeof googletag?.pubads === 'function') {
+      const pubads = googletag.pubads();
+      const slots = pubads.getSlots();
+      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      if (slot) {
+        setSlot(slot);
+      }
+    }
+  }, [elementId]);
   return (
     <ThemeProvider theme={overlayTheme}>
       <PopOverComponent
@@ -60,15 +72,48 @@ const AdOverlayComponent = ({
           }}
         >
           <Grid container justifyContent="flex-start" alignItems="flex-start">
-            <HeaderRowComponent
-              elementId={elementId}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              openInPopOver={openInPopOver}
-              closePortal={closePortal}
-              closePopOver={closePopOver}
-              inPopOver={false}
-            />
+            <Grid container item justifyContent="space-between" alignItems="flex-start">
+              <Grid item xs={7}>
+                <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left' }}>
+                  {elementId}
+                </Typography>
+              </Grid>
+              <Grid
+                item
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  color: 'text.secondary',
+                }}
+                xs={4}
+              >
+                <IconButton sx={{ p: 0 }} onClick={() => setExpanded(!expanded)}>
+                  {expanded && <MinimizeIcon sx={{ fontSize: 14 }} />}
+                  {!expanded && <MaximizeIcon sx={{ fontSize: 14 }} />}
+                </IconButton>
+
+                <IconButton sx={{ p: 0 }} onClick={openInPopOver}>
+                  <OpenInFullIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+
+                {typeof googletag?.pubads === 'function' && (
+                  <IconButton
+                    sx={{ p: 0 }}
+                    onClick={() => {
+                      googletag.pubads().refresh([slot]);
+                    }}
+                  >
+                    <Refresh sx={{ fontSize: 14 }} />
+                  </IconButton>
+                )}
+
+                <IconButton sx={{ p: 0 }} onClick={closePortal}>
+                  <Close sx={{ fontSize: 14 }} />
+                </IconButton>
+              </Grid>
+            </Grid>
             {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
               <Grid container item xs={12} spacing={0.5}>
                 {winningCPM && (
