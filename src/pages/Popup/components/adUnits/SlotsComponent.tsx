@@ -87,7 +87,10 @@ const Row = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events: IPrebidDetails
       </Grid>
       <Grid item xs={4} sx={{ [theme.breakpoints.down('sm')]: { display: 'none' } }}>
         <Paper sx={{ height: '100%' }}>
-          <MediaTypesComponent mediaTypes={adUnit.mediaTypes} />
+          <MediaTypesComponent
+            mediaTypes={adUnit.mediaTypes}
+            winningBid={winningBids.find((winningBid) => winningBid.args.adUnitCode === adUnit.code)}
+          />
         </Paper>
       </Grid>
       <Grid item xs={4} sx={{ [theme.breakpoints.down('sm')]: { display: 'none' } }}>
