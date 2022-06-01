@@ -47,7 +47,7 @@ const PopOverComponent = ({
             }
             title={elementId}
             titleTypographyProps={{ variant: 'h2' }}
-            subheader={`${winningBidder || ''} - ${winningCPM || ''} ${currency || ''}`}
+            subheader={winningBidder && winningCPM && currency && `${winningBidder || ''} - ${winningCPM || ''} ${currency || ''}`}
             subheaderTypographyProps={{ variant: 'h3' }}
           />
           <CardContent sx={{ flexGrow: 1, display: 'flex' }}>
