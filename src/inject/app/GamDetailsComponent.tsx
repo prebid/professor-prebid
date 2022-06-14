@@ -12,7 +12,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
   const [creativeId, setCreativeId] = useState<number>(null);
   const [lineItemId, setLineItemId] = useState<number>(null);
   const [slotAdUnitPath, setSlotAdUnitPath] = useState<string>(null);
-  const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string; id: number }[]>(null);
+  const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string[]; id: number }[]>(null);
   const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
         setNetworkId(slot.getAdUnitPath()?.split('/')[1]);
-        setSlotTargeting((slot as any).getTargetingKeys().map((key: string, id: number) => ({ key, value: slot.getTargeting(key), id })));
+        setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
         setSlotResponseInfo(slot.getResponseInformation());
         if (slotResponseInfo) {
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;

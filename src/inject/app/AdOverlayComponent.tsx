@@ -1,24 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { overlayTheme } from '../../pages/theme';
 import { ThemeProvider } from '@mui/material/styles';
 import GamDetailsComponent from './GamDetailsComponent';
-import HeaderRowComponent from './HeaderRowComponent';
 import { Paper } from '@mui/material';
-import Typography from '@mui/material/Typography';
 import PopOverComponent from './PopOverComponent';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Close from '@mui/icons-material/Close';
+import Refresh from '@mui/icons-material/Refresh';
+import MinimizeIcon from '@mui/icons-material/Minimize';
+import MaximizeIcon from '@mui/icons-material/Maximize';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 
-const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal }: AdOverlayComponentProps): JSX.Element => {
+const AdOverlayComponent = ({
+  elementId,
+  winningCPM,
+  winningBidder,
+  currency,
+  timeToRespond,
+  closePortal,
+  contentRef,
+}: AdOverlayComponentProps): JSX.Element => {
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [slot, setSlot] = React.useState<googletag.Slot>(null);
+  const cache = createCache({ key: 'css', container: contentRef?.contentWindow?.document?.head, prepend: true });
   const openInPopOver = () => {
-    setAnchorEl(document.body);
+    setAnchorEl(window.top.document.body);
   };
-  const closePopOver = () => {
-    setAnchorEl(null);
-  };
-
+  useEffect(() => {
+    if (googletag && typeof googletag?.pubads === 'function') {
+      const pubads = googletag.pubads();
+      const slots = pubads.getSlots();
+      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      if (slot) {
+        setSlot(slot);
+      }
+    }
+  }, [elementId]);
   return (
     <ThemeProvider theme={overlayTheme}>
       <PopOverComponent
@@ -31,69 +54,104 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
         anchorEl={anchorEl}
         setAnchorEl={setAnchorEl}
       />
-      <Box
-        sx={{
-          height: expanded ? '100%' : 'auto',
-          width: '100%',
-          opacity: 0.9,
-          backgroundColor: 'primary.light',
-          color: 'text.primary',
-          padding: 0.5,
-          boxSizing: 'border-box',
-          flexGrow: 1,
-          '&:hover': { opacity: 1 },
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
-        <Grid container columnSpacing={0.5} justifyContent="flex-start" alignItems="flex-start">
-          <HeaderRowComponent
-            elementId={elementId}
-            expanded={expanded}
-            setExpanded={setExpanded}
-            openInPopOver={openInPopOver}
-            closePortal={closePortal}
-            closePopOver={closePopOver}
-            inPopOver={false}
-          />
-          {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
-            <Grid container item xs={12} spacing={0.5}>
-              {winningCPM && (
-                <Grid item>
-                  <Paper elevation={1} sx={{ p: 0.5 }}>
-                    <Typography>
-                      <strong>CPM: </strong>
-                      {winningCPM} {currency}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-              {winningBidder && (
-                <Grid item>
-                  <Paper elevation={1} sx={{ p: 0.5 }}>
-                    <Typography>
-                      <strong>Bidder: </strong>
-                      {winningBidder}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-              {timeToRespond && (
-                <Grid item>
-                  <Paper elevation={1} sx={{ p: 0.5 }}>
-                    <Typography>
-                      <strong>TTR: </strong>
-                      {timeToRespond}ms
-                    </Typography>
-                  </Paper>
-                </Grid>
-              )}
-              {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} />}
+      <CacheProvider value={cache}>
+        <Box
+          sx={{
+            height: expanded ? '100%' : 'auto',
+            width: '100%',
+            opacity: 0.9,
+            backgroundColor: 'primary.light',
+            color: 'text.primary',
+            padding: 0.5,
+            boxSizing: 'border-box',
+            flexGrow: 1,
+            '&:hover': { opacity: 1 },
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <Grid container justifyContent="flex-start" alignItems="flex-start">
+            <Grid container item justifyContent="space-between" alignItems="flex-start">
+              <Grid item xs={7}>
+                <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left' }}>
+                  {elementId}
+                </Typography>
+              </Grid>
+              <Grid
+                item
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  color: 'text.secondary',
+                }}
+                xs={4}
+              >
+                <IconButton sx={{ p: 0 }} onClick={() => setExpanded(!expanded)}>
+                  {expanded && <MinimizeIcon sx={{ fontSize: 14 }} />}
+                  {!expanded && <MaximizeIcon sx={{ fontSize: 14 }} />}
+                </IconButton>
+
+                <IconButton sx={{ p: 0 }} onClick={openInPopOver}>
+                  <OpenInFullIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+
+                {typeof googletag?.pubads === 'function' && (
+                  <IconButton
+                    sx={{ p: 0 }}
+                    onClick={() => {
+                      googletag.pubads().refresh([slot]);
+                    }}
+                  >
+                    <Refresh sx={{ fontSize: 14 }} />
+                  </IconButton>
+                )}
+
+                <IconButton sx={{ p: 0 }} onClick={closePortal}>
+                  <Close sx={{ fontSize: 14 }} />
+                </IconButton>
+              </Grid>
             </Grid>
-          )}
-        </Grid>
-      </Box>
+            {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
+              <Grid container item xs={12} spacing={0.5}>
+                {winningCPM && (
+                  <Grid item>
+                    <Paper elevation={1} sx={{ p: 0.5 }}>
+                      <Typography>
+                        <strong>CPM: </strong>
+                        {winningCPM} {currency}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
+                {winningBidder && (
+                  <Grid item>
+                    <Paper elevation={1} sx={{ p: 0.5 }}>
+                      <Typography>
+                        <strong>Bidder: </strong>
+                        {winningBidder}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
+                {timeToRespond && (
+                  <Grid item>
+                    <Paper elevation={1} sx={{ p: 0.5 }}>
+                      <Typography>
+                        <strong>TTR: </strong>
+                        {timeToRespond}ms
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                )}
+                {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} />}
+              </Grid>
+            )}
+          </Grid>
+        </Box>
+      </CacheProvider>
     </ThemeProvider>
   );
 };
@@ -105,6 +163,7 @@ export interface AdOverlayComponentProps {
   currency: string;
   timeToRespond: number;
   closePortal?: () => void;
+  contentRef?: any;
 }
 
 export default AdOverlayComponent;

@@ -10,8 +10,7 @@ const inject = () => {
       script.remove();
     };
   } else {
-    // requestIdleCallback(inject);
-    setTimeout(() => inject(), 1);
+    requestIdleCallback(inject);
   }
 };
 inject();

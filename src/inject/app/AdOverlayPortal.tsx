@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useEffect, useRef, useState } from 'react';
 import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
 import logger from '../../logger';
+import { createPortal } from 'react-dom';
 
 export const getMaxZIndex = () =>
   Math.max(
@@ -10,11 +10,16 @@ export const getMaxZIndex = () =>
   );
 
 const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, mask, consoleState }) => {
+  const [contentRef, setContentRef] = useState(null);
+  const iFrameBody = contentRef?.contentWindow?.document?.body;
+  if (iFrameBody) iFrameBody.style.margin = '0';
+
   const { elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
   const element = useRef<HTMLDivElement>(document.createElement('div'));
   const closePortal = () => {
     document.getElementById(`prpb-mask--container-${mask.elementId}`).style.display = 'none';
   };
+
   useEffect(() => {
     logger.log('[AdMaskPortal] Mounting AdMaskPortal');
     const slotMaskElement = document.getElementById(`prpb-mask--container-${mask.elementId}`);
@@ -34,16 +39,30 @@ const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, ma
     }
   }, [mask, consoleState, container]);
 
-  return ReactDOM.createPortal(
-    <AdOverlayComponent
-      key={`AdMask-${elementId}`}
-      elementId={elementId}
-      winningCPM={winningCPM}
-      winningBidder={winningBidder}
-      currency={currency}
-      timeToRespond={timeToRespond}
-      closePortal={closePortal}
-    />,
+  return createPortal(
+    <iframe
+      title={element.current.id}
+      ref={setContentRef}
+      width={`${container?.offsetWidth || container?.clientWidth}px`}
+      height={`${container?.offsetHeight || container?.clientHeight}px`}
+      scrolling="no"
+      frameBorder="0"
+    >
+      {iFrameBody &&
+        createPortal(
+          <AdOverlayComponent
+            key={`AdMask-${elementId}`}
+            elementId={elementId}
+            winningCPM={winningCPM}
+            winningBidder={winningBidder}
+            currency={currency}
+            timeToRespond={timeToRespond}
+            closePortal={closePortal}
+            contentRef={contentRef}
+          />,
+          iFrameBody
+        )}
+    </iframe>,
     element.current
   );
 };
