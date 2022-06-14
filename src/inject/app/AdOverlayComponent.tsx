@@ -46,9 +46,7 @@ const AdOverlayComponent = ({
     }
   }, [elementId]);
   useEffect(() => {
-    if (gridRef.current?.offsetHeight > boxRef.current?.offsetHeight) {
-      setTruncate(true);
-    }
+    setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
   }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight]);
   return (
     <ThemeProvider theme={overlayTheme}>
