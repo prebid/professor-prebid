@@ -27,7 +27,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
         setNetworkId(slot.getAdUnitPath()?.split('/')[1]);
         setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
         setSlotResponseInfo(slot.getResponseInformation());
-        setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute("data-google-query-id") || null);
+        setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute('data-google-query-id') || null);
         if (slotResponseInfo) {
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
@@ -95,12 +95,8 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
               Query-ID:{' '}
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a
-                href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {queryId}
+              <a href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
+                {`${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}`}
               </a>
             </Typography>
           </Paper>
