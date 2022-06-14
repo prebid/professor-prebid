@@ -33,7 +33,7 @@ const AdOverlayComponent = ({
     setAnchorEl(window.top.document.body);
   };
   useEffect(() => {
-    if (googletag && typeof googletag?.pubads === 'function') {
+    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
@@ -98,11 +98,11 @@ const AdOverlayComponent = ({
                   <OpenInFullIcon sx={{ fontSize: 14 }} />
                 </IconButton>
 
-                {typeof googletag?.pubads === 'function' && (
+                {window.parent.googletag && typeof window.parent.googletag?.pubads === 'function' && (
                   <IconButton
                     sx={{ p: 0 }}
                     onClick={() => {
-                      googletag.pubads().refresh([slot]);
+                      window.parent.googletag.pubads().refresh([slot]);
                     }}
                   >
                     <Refresh sx={{ fontSize: 14 }} />
