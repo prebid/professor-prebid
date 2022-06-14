@@ -17,7 +17,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
   const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
 
   useEffect(() => {
-    if (googletag && typeof googletag?.pubads === 'function') {
+    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
