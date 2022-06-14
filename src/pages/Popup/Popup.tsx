@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { ITabInfo } from '../Background/background';
 import { getTabId } from './utils';
 import { ThemeProvider } from '@mui/material/styles';
 import logger from '../../logger';
-import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
+import AdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
 import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
@@ -254,7 +253,7 @@ export const Popup = (): JSX.Element => {
                   </CardContent>
                 </Card>
               )}
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <PrebidAdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
             </Route>
             <Route exact path="/bids">
               {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
