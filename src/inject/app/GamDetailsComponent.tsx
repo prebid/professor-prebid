@@ -6,7 +6,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
 
-const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps): JSX.Element => {
+const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
   const [networktId, setNetworkId] = useState<string>(null);
   const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
@@ -96,7 +96,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
               <a href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
-                {`${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}`}
+                {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
               </a>
             </Typography>
           </Paper>
@@ -192,6 +192,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
 export interface IGamDetailComponentProps {
   elementId: string;
   inPopOver: boolean;
+  truncate: boolean;
 }
 
 export interface IGamInfos {

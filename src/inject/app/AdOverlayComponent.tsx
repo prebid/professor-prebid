@@ -25,6 +25,8 @@ const AdOverlayComponent = ({
   closePortal,
   contentRef,
 }: AdOverlayComponentProps): JSX.Element => {
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const boxRef = React.useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [slot, setSlot] = React.useState<googletag.Slot>(null);
@@ -56,6 +58,7 @@ const AdOverlayComponent = ({
       />
       <CacheProvider value={cache}>
         <Box
+          ref={boxRef}
           sx={{
             height: expanded ? '100%' : 'auto',
             width: '100%',
@@ -71,7 +74,7 @@ const AdOverlayComponent = ({
             overflow: 'hidden',
           }}
         >
-          <Grid container justifyContent="flex-start" alignItems="flex-start">
+          <Grid container justifyContent="flex-start" alignItems="flex-start" ref={gridRef}>
             <Grid container item justifyContent="space-between" alignItems="flex-start">
               <Grid item xs={7}>
                 <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left' }}>
@@ -146,7 +149,13 @@ const AdOverlayComponent = ({
                     </Paper>
                   </Grid>
                 )}
-                {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} />}
+                {elementId && (
+                  <GamDetailsComponent
+                    elementId={elementId}
+                    inPopOver={false}
+                    truncate={gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false}
+                  />
+                )}
               </Grid>
             )}
           </Grid>
