@@ -10,6 +10,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
   const [networktId, setNetworkId] = useState<string>(null);
   const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
+  const [queryId, setQueryId] = useState<string>(null);
   const [lineItemId, setLineItemId] = useState<number>(null);
   const [slotAdUnitPath, setSlotAdUnitPath] = useState<string>(null);
   const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string[]; id: number }[]>(null);
@@ -26,6 +27,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
         setNetworkId(slot.getAdUnitPath()?.split('/')[1]);
         setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
         setSlotResponseInfo(slot.getResponseInformation());
+        setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute("data-google-query-id") || null);
         if (slotResponseInfo) {
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
@@ -80,6 +82,25 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
                 target="_blank"
               >
                 {creativeId}
+              </a>
+            </Typography>
+          </Paper>
+        </Grid>
+      )}
+
+      {queryId && (
+        <Grid item>
+          <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
+            <Typography variant="h4" component={'span'}>
+              Query-ID:{' '}
+            </Typography>
+            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
+              <a
+                href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {queryId}
               </a>
             </Typography>
           </Paper>

@@ -4,7 +4,7 @@ import Chip from '@mui/material/Chip';
 import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 
-const MediaTypeChipComponent = ({ input, label }: IMediaTypeChipComponentProps): JSX.Element => {
+const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipComponentProps): JSX.Element => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -19,7 +19,7 @@ const MediaTypeChipComponent = ({ input, label }: IMediaTypeChipComponentProps):
       <Chip
         size="small"
         variant="outlined"
-        color="primary"
+        color={isWinner ? 'secondary' : 'primary'}
         label={label || JSON.stringify(input)}
         onClick={handlePopoverOpen}
         sx={{ maxWidth: 200 }}
@@ -53,6 +53,7 @@ const MediaTypeChipComponent = ({ input, label }: IMediaTypeChipComponentProps):
 interface IMediaTypeChipComponentProps {
   input: IPrebidAdUnitMediaTypes[keyof IPrebidAdUnitMediaTypes];
   label: string;
+  isWinner?: boolean;
 }
 
 export default MediaTypeChipComponent;

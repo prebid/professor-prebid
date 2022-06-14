@@ -4,9 +4,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import MediaTypeChipComponent from './MediaTypeChipComponent';
-import { IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnitMediaTypes, IPrebidBidWonEventData } from '../../../../inject/scripts/prebid';
 
-const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Element => {
+const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentProps): JSX.Element => {
   return (
     <Box sx={{ p: 0.5 }}>
       {Object.keys(mediaTypes).map((mediaType, index) => {
@@ -19,7 +19,12 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
                     <Typography variant="caption">Banner Sizes:</Typography>
                     <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                       {mediaTypes['banner'].sizes?.map((size, index) => (
-                        <MediaTypeChipComponent input={mediaTypes['banner']} label={`${size[0]}x${size[1]}`} key={index} />
+                        <MediaTypeChipComponent
+                          input={mediaTypes['banner']}
+                          label={`${size[0]}x${size[1]}`}
+                          key={index}
+                          isWinner={winningBid?.args?.size === `${size[0]}x${size[1]}`}
+                        />
                       ))}
                     </Stack>
                   </React.Fragment>
@@ -80,6 +85,7 @@ const MediaTypesComponent = ({ mediaTypes }: IMediaTypesComponentProps): JSX.Ele
 
 interface IMediaTypesComponentProps {
   mediaTypes: IPrebidAdUnitMediaTypes;
+  winningBid?: IPrebidBidWonEventData;
 }
 
 export default MediaTypesComponent;
