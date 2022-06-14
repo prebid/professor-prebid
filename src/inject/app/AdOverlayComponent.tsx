@@ -27,6 +27,7 @@ const AdOverlayComponent = ({
 }: AdOverlayComponentProps): JSX.Element => {
   const gridRef = React.useRef<HTMLDivElement>(null);
   const boxRef = React.useRef<HTMLDivElement>(null);
+  const [truncate, setTruncate] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [slot, setSlot] = React.useState<googletag.Slot>(null);
@@ -44,6 +45,11 @@ const AdOverlayComponent = ({
       }
     }
   }, [elementId]);
+  useEffect(() => {
+    if (gridRef.current?.offsetHeight > boxRef.current?.offsetHeight) {
+      setTruncate(true);
+    }
+  }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight]);
   return (
     <ThemeProvider theme={overlayTheme}>
       <PopOverComponent
@@ -149,13 +155,7 @@ const AdOverlayComponent = ({
                     </Paper>
                   </Grid>
                 )}
-                {elementId && (
-                  <GamDetailsComponent
-                    elementId={elementId}
-                    inPopOver={false}
-                    truncate={gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false}
-                  />
-                )}
+                {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} truncate={truncate} />}
               </Grid>
             )}
           </Grid>
