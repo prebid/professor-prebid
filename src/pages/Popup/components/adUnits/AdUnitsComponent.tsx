@@ -78,7 +78,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Grid>
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
-                {prebid.config?.timeoutBuffer && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
+                {prebid.config?.bidderTimeout && <Typography variant="h2">Timeout: {prebid.config.bidderTimeout}</Typography>}
               </Paper>
             </Grid>
             <Grid item>
