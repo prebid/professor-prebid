@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { ITabInfo } from '../Background/background';
@@ -70,14 +71,7 @@ const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => 
     const prebids = (tabInfo as ITabInfo).prebids;
     if (prebids) {
       for (const [_, prebid] of Object.entries(prebids)) {
-        try {
-          const events = await fetchEvents(prebid.eventsUrl);
-          if (events.length > 0) {
-            prebid.events = events;
-          }
-        } catch (error) {
-          setTimeout(initialLoad, 1000, setPbjsNamespace, setTabInfo);
-        }
+        prebid.events =  await fetchEvents(prebid.eventsUrl);
       }
     }
   }
@@ -110,7 +104,7 @@ export const Popup = (): JSX.Element => {
       const tabId = await getTabId();
       if (changes.tabInfos) {
         const newTabInfo = changes.tabInfos.newValue[tabId] as ITabInfo;
-        const prebids = newTabInfo.prebids;
+        const prebids = newTabInfo?.prebids;
         if (prebids) {
           for (const [_, prebid] of Object.entries(prebids)) {
             const events = await fetchEvents(prebid.eventsUrl);
