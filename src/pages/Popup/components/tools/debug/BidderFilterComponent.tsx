@@ -23,20 +23,29 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
   const [selectedBidders, setSelectedBidders] = React.useState<string[]>([]);
 
   const handleSelectionChange = (event: SelectChangeEvent<string[]>) => {
-    const biddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
+    updateSelectedBidders(typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value);
+  };
+
+  const handleDelete = (bidderToDelete: string) => () => {
+    updateSelectedBidders(selectedBidders.filter((bidder) => bidder !== bidderToDelete));
+  };
+
+  const updateSelectedBidders = (biddersArray: string[]) => {
     setSelectedBidders(() => [...biddersArray]);
     setBidderFilterEnabled(true);
-    if (biddersArray.length === 0) {
+    if (biddersArray.length === 0 && debugConfigState) {
       delete debugConfigState.bidders;
     } else {
+      debugConfigState = debugConfigState || {};
       debugConfigState.bidders = biddersArray;
     }
     setDebugConfigState({ ...debugConfigState });
-  };
+  }
 
   const handleBidderFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setBidderFilterEnabled(event.target.checked);
+    debugConfigState = debugConfigState || {};
     debugConfigState.bidders = event.target.checked ? selectedBidders : undefined;
+    setBidderFilterEnabled(event.target.checked);
     setDebugConfigState({ ...debugConfigState });
   };
 
@@ -76,7 +85,16 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {selected.map((value) => (
-                  <Chip color="primary" variant="outlined" key={value} label={value} />
+                  <Chip
+                    color="primary"
+                    variant="outlined"
+                    key={value}
+                    label={value}
+                    onDelete={handleDelete(value)}
+                    onMouseDown={(event) => {
+                      event.stopPropagation();
+                    }}
+                  />
                 ))}
               </Box>
             )}
