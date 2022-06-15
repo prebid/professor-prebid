@@ -194,7 +194,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
                 {selected.map((value, index) => (
                   <Chip
                     key={index}
-                    label={value}
+                    label={value.length > 26 ? `${value.substring(0, 13)}...${value.substring(value.length - 13)}` : value}
                     onDelete={handleAdUnitDelete(value)}
                     onMouseDown={(event) => {
                       event.stopPropagation();
@@ -208,7 +208,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
           >
             {detectedAdUnitCodes.map((name, index) => (
               <MenuItem key={index} value={name} style={getStyles(name, selectedAdUnitCodes, theme)}>
-                {name}
+                {name.length > 40 ? `${name.substring(0, 20)}...${name.substring(name.length - 20)}` : name}
               </MenuItem>
             ))}
           </Select>
