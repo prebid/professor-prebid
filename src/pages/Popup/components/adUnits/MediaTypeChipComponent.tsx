@@ -5,32 +5,31 @@ import ReactJson from 'react-json-view';
 import Popover from '@mui/material/Popover';
 
 const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipComponentProps): JSX.Element => {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+    setPopUpOpen(true);
   };
   const handlePopoverClose = () => {
-    setAnchorEl(null);
+    setPopUpOpen(false);
   };
 
-  const open = Boolean(anchorEl);
   return (
     <React.Fragment>
       <Chip
         size="small"
         variant="outlined"
-        color={isWinner ? 'secondary' : 'primary'}
+        color={popUpOpen ? 'success' : isWinner ? 'secondary' : 'primary'}
         label={label || JSON.stringify(input)}
         onClick={handlePopoverOpen}
         sx={{ maxWidth: 200 }}
       />
       <Popover
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        open={popUpOpen}
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: 1, left: 1 }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         onClose={handlePopoverClose}
-        disableRestoreFocus
       >
         <ReactJson
           src={input}
