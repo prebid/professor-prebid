@@ -89,7 +89,7 @@ const PopOverComponent = ({
               {elementId && (
                 <Grid item xs={12}>
                   <Grid container direction={'row'} spacing={1}>
-                    <GamDetailsComponent elementId={elementId} inPopOver={true} />
+                    <GamDetailsComponent elementId={elementId} inPopOver={true} truncate={false} />
                   </Grid>
                 </Grid>
               )}

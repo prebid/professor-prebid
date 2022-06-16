@@ -44,6 +44,18 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
     updateDebugConfig(selectedAdUnitCodes, selectedBiddersArray, cpm);
   };
 
+  const handleBidderDelete = (bidderToDelete: string) => () => {
+    const newBidderArray = selectedBidders.filter((bidder) => bidder !== bidderToDelete);
+    setSelectedBidders(newBidderArray);
+    updateDebugConfig(selectedAdUnitCodes, newBidderArray, cpm);
+  };
+
+  const handleAdUnitDelete = (adUnitCodeToDelete: string) => () => {
+    const newAdUnitCodeArray = selectedAdUnitCodes.filter((adUnitCode) => adUnitCode !== adUnitCodeToDelete);
+    setSelectedAdUnitCodes(newAdUnitCodeArray);
+    updateDebugConfig(newAdUnitCodeArray, selectedBidders, cpm);
+  };
+
   const handleBidOverWriteEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBidOverwriteEnabled(event.target.checked);
     if (!event.target.checked) {
@@ -52,6 +64,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
   };
 
   const handleCpmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCpm(Number(event.target.value));
     updateDebugConfig(selectedAdUnitCodes, selectedBidders, Number(event.target.value));
   };
 
@@ -145,7 +158,14 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {selected.map((value, index) => (
-                  <Chip key={index} label={value} />
+                  <Chip
+                    key={index}
+                    label={value}
+                    onDelete={handleBidderDelete(value)}
+                    onMouseDown={(event) => {
+                      event.stopPropagation();
+                    }}
+                  />
                 ))}
               </Box>
             )}
@@ -172,7 +192,14 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {selected.map((value, index) => (
-                  <Chip key={index} label={value} />
+                  <Chip
+                    key={index}
+                    label={value.length > 26 ? `...${value.substring(value.length - 26)}` : value}
+                    onDelete={handleAdUnitDelete(value)}
+                    onMouseDown={(event) => {
+                      event.stopPropagation();
+                    }}
+                  />
                 ))}
               </Box>
             )}
@@ -181,7 +208,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
           >
             {detectedAdUnitCodes.map((name, index) => (
               <MenuItem key={index} value={name} style={getStyles(name, selectedAdUnitCodes, theme)}>
-                {name}
+                {name.length > 40 ? `...${name.substring(name.length - 40)}` : name}
               </MenuItem>
             ))}
           </Select>

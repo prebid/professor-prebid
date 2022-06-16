@@ -6,7 +6,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
 
-const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps): JSX.Element => {
+const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
   const [networktId, setNetworkId] = useState<string>(null);
   const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
@@ -17,7 +17,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
   const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
 
   useEffect(() => {
-    if (googletag && typeof googletag?.pubads === 'function') {
+    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
@@ -27,7 +27,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
         setNetworkId(slot.getAdUnitPath()?.split('/')[1]);
         setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
         setSlotResponseInfo(slot.getResponseInformation());
-        setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute("data-google-query-id") || null);
+        setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute('data-google-query-id') || null);
         if (slotResponseInfo) {
           const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
@@ -95,12 +95,8 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
               Query-ID:{' '}
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a
-                href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {queryId}
+              <a href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
+                {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
               </a>
             </Typography>
           </Paper>
@@ -196,6 +192,7 @@ const GamDetailsComponent = ({ elementId, inPopOver }: IGamDetailComponentProps)
 export interface IGamDetailComponentProps {
   elementId: string;
   inPopOver: boolean;
+  truncate: boolean;
 }
 
 export interface IGamInfos {

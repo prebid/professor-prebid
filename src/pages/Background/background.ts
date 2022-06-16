@@ -3,7 +3,7 @@ import logger from '../../logger';
 import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 import { ITcfDetails } from '../../inject/scripts/tcf';
-
+import { getTabId } from '../Popup/utils';
 class Background {
   tabInfos: ITabInfos = {};
   constructor() {
@@ -103,7 +103,9 @@ class Background {
     logger.log('[Background] Removed info for tabId ' + tabId);
   };
 
-  updateBadge = (tabId: number | undefined) => {
+  updateBadge = async (tabId: number | undefined) => {
+    const activeTabId = await getTabId();
+    if (!tabId || tabId !== activeTabId) return;
     logger.log('[Background] updateBadge', tabId);
     if (tabId && this.tabInfos[tabId]?.prebids) {
       chrome.action.setBadgeBackgroundColor({ color: '#1ba9e1' });

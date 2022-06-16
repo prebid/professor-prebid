@@ -8,27 +8,24 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
 
 const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: IBidChipComponentProps): JSX.Element => {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    if (typeof input === 'object') {
-      setAnchorEl(event.currentTarget);
-    }
+    setPopUpOpen(true);
   };
   const handlePopoverClose = () => {
-    setAnchorEl(null);
+    setPopUpOpen(false);
   };
 
   const handleCopy = (copy: OnCopyProps) => {
     navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
   };
 
-  const open = Boolean(anchorEl);
   return (
     <React.Fragment>
       <Chip
         size="small"
         variant="outlined"
-        color={isWinner ? 'secondary' : bidReceived ? 'primary' : 'default'}
+        color={popUpOpen ? 'success' : isWinner ? 'secondary' : bidReceived ? 'primary' : 'default'}
         icon={
           <Stack direction="row" spacing={1}>
             {isWinner && <GavelOutlinedIcon sx={{ height: '14px' }} />}
@@ -39,18 +36,17 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: I
         onClick={handlePopoverOpen}
       />
       <Popover
-        id="mouse-over-popover"
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        open={popUpOpen}
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: 1, left: 1 }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         onClose={handlePopoverClose}
-        disableRestoreFocus
       >
         <ReactJson
           src={{ input: input, bidResponse: bidReceived || 'noBid' }}
           name={false}
-          collapsed={2}
+          collapsed={3}
           enableClipboard={handleCopy}
           displayObjectSize={false}
           displayDataTypes={false}

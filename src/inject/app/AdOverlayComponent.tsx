@@ -25,6 +25,9 @@ const AdOverlayComponent = ({
   closePortal,
   contentRef,
 }: AdOverlayComponentProps): JSX.Element => {
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const boxRef = React.useRef<HTMLDivElement>(null);
+  const [truncate, setTruncate] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<boolean>(true);
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [slot, setSlot] = React.useState<googletag.Slot>(null);
@@ -33,7 +36,7 @@ const AdOverlayComponent = ({
     setAnchorEl(window.top.document.body);
   };
   useEffect(() => {
-    if (googletag && typeof googletag?.pubads === 'function') {
+    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
@@ -42,6 +45,9 @@ const AdOverlayComponent = ({
       }
     }
   }, [elementId]);
+  useEffect(() => {
+    setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
+  }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight]);
   return (
     <ThemeProvider theme={overlayTheme}>
       <PopOverComponent
@@ -56,6 +62,7 @@ const AdOverlayComponent = ({
       />
       <CacheProvider value={cache}>
         <Box
+          ref={boxRef}
           sx={{
             height: expanded ? '100%' : 'auto',
             width: '100%',
@@ -71,7 +78,7 @@ const AdOverlayComponent = ({
             overflow: 'hidden',
           }}
         >
-          <Grid container justifyContent="flex-start" alignItems="flex-start">
+          <Grid container justifyContent="flex-start" alignItems="flex-start" ref={gridRef}>
             <Grid container item justifyContent="space-between" alignItems="flex-start">
               <Grid item xs={7}>
                 <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left' }}>
@@ -98,11 +105,11 @@ const AdOverlayComponent = ({
                   <OpenInFullIcon sx={{ fontSize: 14 }} />
                 </IconButton>
 
-                {typeof googletag?.pubads === 'function' && (
+                {window.parent.googletag && typeof window.parent.googletag?.pubads === 'function' && (
                   <IconButton
                     sx={{ p: 0 }}
                     onClick={() => {
-                      googletag.pubads().refresh([slot]);
+                      window.parent.googletag.pubads().refresh([slot]);
                     }}
                   >
                     <Refresh sx={{ fontSize: 14 }} />
@@ -146,7 +153,7 @@ const AdOverlayComponent = ({
                     </Paper>
                   </Grid>
                 )}
-                {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} />}
+                {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} truncate={truncate} />}
               </Grid>
             )}
           </Grid>

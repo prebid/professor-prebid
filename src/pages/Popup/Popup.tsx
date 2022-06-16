@@ -5,7 +5,7 @@ import { ITabInfo } from '../Background/background';
 import { getTabId } from './utils';
 import { ThemeProvider } from '@mui/material/styles';
 import logger from '../../logger';
-import PrebidAdUnitsComponent from './components/adUnits/AdUnitsComponent';
+import AdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
 import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
@@ -71,14 +71,7 @@ const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => 
     const prebids = (tabInfo as ITabInfo).prebids;
     if (prebids) {
       for (const [_, prebid] of Object.entries(prebids)) {
-        try {
-          const events = await fetchEvents(prebid.eventsUrl);
-          if (events.length > 0) {
-            prebid.events = events;
-          }
-        } catch (error) {
-          setTimeout(initialLoad, 1000, setPbjsNamespace, setTabInfo);
-        }
+        prebid.events =  await fetchEvents(prebid.eventsUrl);
       }
     }
   }
@@ -111,7 +104,7 @@ export const Popup = (): JSX.Element => {
       const tabId = await getTabId();
       if (changes.tabInfos) {
         const newTabInfo = changes.tabInfos.newValue[tabId] as ITabInfo;
-        const prebids = newTabInfo.prebids;
+        const prebids = newTabInfo?.prebids;
         if (prebids) {
           for (const [_, prebid] of Object.entries(prebids)) {
             const events = await fetchEvents(prebid.eventsUrl);
@@ -254,7 +247,7 @@ export const Popup = (): JSX.Element => {
                   </CardContent>
                 </Card>
               )}
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <PrebidAdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
             </Route>
             <Route exact path="/bids">
               {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
