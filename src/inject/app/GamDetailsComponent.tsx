@@ -24,7 +24,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
-        setNetworkId(slot.getAdUnitPath()?.split('/')[1]);
+        setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(',')[0]);
         setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
         setSlotResponseInfo(slot.getResponseInformation());
         setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute('data-google-query-id') || null);
