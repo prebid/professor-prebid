@@ -46,8 +46,10 @@ const AdOverlayComponent = ({
     }
   }, [elementId]);
   useEffect(() => {
-    setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
-  }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight]);
+    if (!truncate) {
+      setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
+    }
+  }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight, truncate]);
   return (
     <ThemeProvider theme={overlayTheme}>
       <PopOverComponent
