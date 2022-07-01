@@ -57,7 +57,7 @@ class Content {
   };
 
   updateBackgroundPage = (type: string, payload: object) => {
-    if (!type || !payload || !chrome.runtime?.id)  return;
+    if (!type || !payload || !chrome.runtime?.id) return;
     logger.log('[Content] updateBackgroundPage', type, payload);
     chrome.runtime.sendMessage({ type, payload });
   };

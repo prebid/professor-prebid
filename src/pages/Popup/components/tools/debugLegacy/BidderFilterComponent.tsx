@@ -40,7 +40,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
       debugConfigState.bidders = biddersArray;
     }
     setDebugConfigState({ ...debugConfigState });
-  }
+  };
 
   const handleBidderFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     debugConfigState = debugConfigState || {};

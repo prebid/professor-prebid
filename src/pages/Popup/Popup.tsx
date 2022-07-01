@@ -71,7 +71,7 @@ const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => 
     const prebids = (tabInfo as ITabInfo).prebids;
     if (prebids) {
       for (const [_, prebid] of Object.entries(prebids)) {
-        prebid.events =  await fetchEvents(prebid.eventsUrl);
+        prebid.events = await fetchEvents(prebid.eventsUrl);
       }
     }
   }
