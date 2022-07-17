@@ -19,7 +19,7 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
         size="small"
         variant="outlined"
         color={popUpOpen ? 'success' : isWinner ? 'secondary' : 'primary'}
-        label={label || JSON.stringify(input)}
+        label={label}
         onClick={handlePopoverOpen}
         sx={{ maxWidth: 200 }}
       />

@@ -10,6 +10,7 @@ class Prebid {
     que: Function[];
     getConfig: () => IPrebidDetails['config'];
     getUserIdsAsEids: () => IPrebidDetails['eids'];
+    setConfig: (args: Object) => void;
     version: string;
   } = window.pbjs;
   namespace: string;
@@ -22,7 +23,6 @@ class Prebid {
 
   constructor(namespace: string) {
     this.namespace = namespace;
-    this.debug = this.getPbjsDebugConfig();
     this.globalPbjs = window[namespace as keyof Window];
     this.globalPbjs.que.push(() => this.addEventListeners());
   }
@@ -60,16 +60,16 @@ class Prebid {
     logger.log('[Injected] event listeners added', this.namespace);
   };
 
-  getPbjsDebugConfig = () => {
+  getDebugConfig = () => {
     const pbjsDebugString = window.sessionStorage.getItem('pbjs:debugging');
     try {
       return JSON.parse(pbjsDebugString);
     } catch (e) {
-      // return pbjsDebugString;
+      console.error(e);
     }
   };
 
-  getPbjsEventsObjUrl = () => {
+  getEventsObjUrl = () => {
     const events = this.globalPbjs.getEvents() || [];
     const cloned = cloneDeep(events);
     //doc in adRenderedEvents throws CORS error when JSON.stringified
@@ -96,9 +96,9 @@ class Prebid {
     const timeout = window.PREBID_TIMEOUT || null;
     const prebidDetail: IPrebidDetails = {
       config,
-      debug: this.debug,
+      debug: this.getDebugConfig(),
       eids,
-      eventsUrl: this.getPbjsEventsObjUrl(),
+      eventsUrl: this.getEventsObjUrl(),
       namespace: this.namespace,
       timeout,
       version: this.globalPbjs.version,
@@ -339,16 +339,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
@@ -459,6 +459,14 @@ export interface IPrebidDebugConfig {
   enabled?: boolean;
   bids?: IPrebidDebugConfigBid[];
   bidders?: string[];
+}
+export interface IPrebidDebugModuleConfig {
+  enabled?: boolean;
+  intercept?: IPrebidDebugModuleConfigRule[];
+}
+export interface IPrebidDebugModuleConfigRule {
+  when: { [key: string]: string | number };
+  then: { [key: string]: string | number };
 }
 
 export interface IPrebidDetails {

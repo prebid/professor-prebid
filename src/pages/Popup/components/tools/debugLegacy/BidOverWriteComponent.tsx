@@ -159,6 +159,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {selected.map((value, index) => (
                   <Chip
+                    size="small"
                     key={index}
                     label={value}
                     onDelete={handleBidderDelete(value)}
@@ -193,6 +194,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {selected.map((value, index) => (
                   <Chip
+                    size="small"
                     key={index}
                     label={value.length > 26 ? `...${value.substring(value.length - 26)}` : value}
                     onDelete={handleAdUnitDelete(value)}
