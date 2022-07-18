@@ -17,7 +17,7 @@ export const replaceRuleTargets: IReplaceRuleTarget[] = [
 
 const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRulesFormChange }: IReplaceRuleComponentProps): JSX.Element => (
   <React.Fragment key={groupIndex}>
-    {groupIndex !== 0 && <CardHeader subheader="and" sx={{ pb: 0.5, pt: 0.5 }} />}
+    {groupIndex !== 0 && <Typography variant="body1"> and </Typography>}
 
     <TextField
       size="small"
@@ -31,6 +31,7 @@ const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRu
           {option.label}
         </MenuItem>
       ))}
+      sx={{ m: 0.25, width: '15ch' }}
     />
 
     <Typography variant="h4" sx={{ h: 1 }} component="span">
@@ -43,6 +44,7 @@ const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRu
       value={rule.then[targetKey] || ''}
       name="replaceRule"
       onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
+      sx={{ m: 0.25, width: '20ch' }}
     />
     {Object.keys(rule.then).length > 1 && (
       <IconButton
