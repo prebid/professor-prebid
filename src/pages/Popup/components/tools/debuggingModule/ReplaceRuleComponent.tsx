@@ -46,7 +46,7 @@ const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRu
       sx={{ m: 0.25, width: '15ch' }}
     />
 
-    <IconButton size='small' color='primary' children={<DoubleArrowIcon />} />
+    <IconButton size="small" color="primary" children={<DoubleArrowIcon />} />
 
     <TextField
       size="small"

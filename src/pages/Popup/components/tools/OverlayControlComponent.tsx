@@ -35,7 +35,7 @@ const OverlayControlComponent = (): JSX.Element => {
       logger.error('onConsoleToggle', e);
     }
   };
-  
+
   return (
     <Grid item xs={12}>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>

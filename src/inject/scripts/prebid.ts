@@ -339,16 +339,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }

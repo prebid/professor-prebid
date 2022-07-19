@@ -1,10 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  IPrebidAdUnit,
-  IPrebidBidWonEventData,
-  IPrebidAdRenderSucceededEventData,
-  IPrebidDetails,
-} from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnit, IPrebidBidWonEventData, IPrebidAdRenderSucceededEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
 import Stack from '@mui/material/Stack';
 import BidChipComponent from './BidChipComponent';
 import AdUnitChipComponent from './AdUnitChipComponent';
