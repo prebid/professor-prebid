@@ -36,6 +36,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
 import { popupTheme } from '../theme';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
@@ -224,35 +225,33 @@ export const Popup = (): JSX.Element => {
               </Link>
             </Stack>
           </AppBar>
+          {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
+            <Card
+              onClick={async () => {
+                const tabId = await getTabId();
+                await chrome.tabs.reload(tabId);
+                await initialLoad(setPbjsNamespace, setTabInfo);
+              }}
+            >
+              <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
+                <Grid container justifyContent="center">
+                  <Grid item>
+                    <Paper elevation={4} sx={{ p: 2 }}>
+                      <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.</Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          )}
           <Routes>
             <Route
               path="/"
-              element={
-                <React.Fragment>
-                  {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
-                    <Card
-                      onClick={async () => {
-                        const tabId = await getTabId();
-                        await chrome.tabs.reload(tabId);
-                        await initialLoad(setPbjsNamespace, setTabInfo);
-                      }}
-                    >
-                      <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
-                        <Grid container justifyContent="center">
-                          <Grid item>
-                            <Paper elevation={4} sx={{ p: 2 }}>
-                              <Typography variant="h2">
-                                No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.
-                              </Typography>
-                            </Paper>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-                </React.Fragment>
-              }
+              element={tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+            />
+            <Route
+              path="/popup.html"
+              element={tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
             />
             <Route
               path="bids"
