@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { ITabInfo } from '../Background/background';
 import { getTabId } from './utils';
 import { ThemeProvider } from '@mui/material/styles';
@@ -36,6 +35,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
 import { popupTheme } from '../theme';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
@@ -125,9 +125,9 @@ export const Popup = (): JSX.Element => {
 
   logger.log(`[PopUp]: render `, tabInfo?.prebids, tabInfo, pbjsNameSpace);
   return (
-    <ThemeProvider theme={popupTheme}>
-      <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light', opacity: 0.7 }}>
-        <Router>
+    <BrowserRouter>
+      <ThemeProvider theme={popupTheme}>
+        <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light', opacity: 0.7 }}>
           <AppBar sx={{ p: 1, position: 'relative', backgroundColor: 'background.paper' }}>
             <Stack sx={{ justifyContent: 'center', flexWrap: 'wrap', gap: 1, '&> a  ': { textDecoration: 'none' } }} direction="row">
               <Badge
@@ -172,7 +172,7 @@ export const Popup = (): JSX.Element => {
                   AdUnits
                 </Button>
               </Link>
-              <Link to="/bids">
+              <Link to="bids">
                 <Button
                   size="small"
                   variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
@@ -182,7 +182,7 @@ export const Popup = (): JSX.Element => {
                   Bids
                 </Button>
               </Link>
-              <Link to="/timeline">
+              <Link to="timeline">
                 <Button
                   size="small"
                   variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
@@ -192,7 +192,7 @@ export const Popup = (): JSX.Element => {
                   Timeline
                 </Button>
               </Link>
-              <Link to="/config">
+              <Link to="config">
                 <Button
                   size="small"
                   variant={activeRoute === '/config' ? 'contained' : 'outlined'}
@@ -202,7 +202,7 @@ export const Popup = (): JSX.Element => {
                   Config
                 </Button>
               </Link>
-              <Link to="/userId">
+              <Link to="userId">
                 <Button
                   size="small"
                   variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
@@ -212,7 +212,7 @@ export const Popup = (): JSX.Element => {
                   UserID
                 </Button>
               </Link>
-              <Link to="/tools">
+              <Link to="tools">
                 <Button
                   size="small"
                   variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
@@ -224,51 +224,81 @@ export const Popup = (): JSX.Element => {
               </Link>
             </Stack>
           </AppBar>
-          <Switch>
-            <Route exact path="/">
-              {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
-                <Card
-                  onClick={async () => {
-                    const tabId = await getTabId();
-                    await chrome.tabs.reload(tabId);
-                    await initialLoad(setPbjsNamespace, setTabInfo);
-                  }}
-                >
-                  <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
-                    <Grid container justifyContent="center">
-                      <Grid item>
-                        <Paper elevation={4} sx={{ p: 2 }}>
-                          <Typography variant="h2">
-                            No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.
-                          </Typography>
-                        </Paper>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              )}
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/bids">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/timeline">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/config">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
-                <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo?.tcf} />
-              )}
-            </Route>
-            <Route exact path="/userId">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/tools">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo?.prebids[pbjsNameSpace]} />}
-            </Route>
-          </Switch>
-        </Router>
-      </Box>
-    </ThemeProvider>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <React.Fragment>
+                  {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
+                    <Card
+                      onClick={async () => {
+                        const tabId = await getTabId();
+                        await chrome.tabs.reload(tabId);
+                        await initialLoad(setPbjsNamespace, setTabInfo);
+                      }}
+                    >
+                      <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
+                        <Grid container justifyContent="center">
+                          <Grid item>
+                            <Paper elevation={4} sx={{ p: 2 }}>
+                              <Typography variant="h2">
+                                No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.
+                              </Typography>
+                            </Paper>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            />
+            <Route
+              path="bids"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="timeline"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="config"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
+                    <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo?.tcf} />
+                  )}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="userId"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="tools"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo?.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+          </Routes>
+        </Box>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 };
