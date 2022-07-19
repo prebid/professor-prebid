@@ -15,7 +15,6 @@ const JSONViewerComponent = ({
   const handleCopy = (copy: OnCopyProps) => {
     navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
   };
-  return null;
   return (
     <ReactJson
       src={src}
