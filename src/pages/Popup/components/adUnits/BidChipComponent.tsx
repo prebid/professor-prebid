@@ -2,7 +2,7 @@ import React from 'react';
 import { IPrebidBidWonEventData, IPrebidBid } from '../../../../inject/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import ReactJson, { OnCopyProps } from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
@@ -14,10 +14,6 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: I
   };
   const handlePopoverClose = () => {
     setPopUpOpen(false);
-  };
-
-  const handleCopy = (copy: OnCopyProps) => {
-    navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
   };
 
   return (
@@ -43,11 +39,10 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: I
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         onClose={handlePopoverClose}
       >
-        <ReactJson
+        <JSONViewerComponent
           src={{ input: input, bidResponse: bidReceived || 'noBid' }}
           name={false}
           collapsed={3}
-          enableClipboard={handleCopy}
           displayObjectSize={false}
           displayDataTypes={false}
           sortKeys={false}

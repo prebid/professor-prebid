@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
-import ReactJson from 'react-json-view';
+import JSONViewer from '../../pages/Shared/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
@@ -137,11 +137,10 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                 <Grid item>
                   <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Response-Info:</Typography>
-                    <ReactJson
+                    <JSONViewer
                       name={false}
                       src={slotResponseInfo}
                       collapsed={false}
-                      enableClipboard={false}
                       displayObjectSize={true}
                       displayDataTypes={false}
                       sortKeys={false}

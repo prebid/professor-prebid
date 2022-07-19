@@ -1,7 +1,7 @@
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
@@ -192,11 +192,10 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
                   <Grid item xs={3}>
                     <Paper sx={{ height: 1 }}>
                       {userId.params && JSON.stringify(userId.params) !== '{}' && (
-                        <ReactJson
+                        <JSONViewerComponent
                           src={userId.params}
                           name={false}
                           collapsed={2}
-                          enableClipboard={false}
                           displayObjectSize={false}
                           displayDataTypes={false}
                           sortKeys={false}

@@ -6,7 +6,7 @@ import { ITabInfos, ITabInfo } from '../Background/background';
 import BidsComponent from '../Popup/components/bids/BidsComponent';
 import ConfigComponent from '../Popup/components/config/ConfigComponent';
 import ToolsComponent from '../Popup/components/tools/ToolsComponent';
-import ReactJson, { OnCopyProps } from 'react-json-view';
+import JSONViewerComponent from '../Shared/JSONViewerComponent';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
@@ -24,9 +24,7 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-const handleCopy = (copy: OnCopyProps) => {
-  navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
-};
+
 const TabPanel = (props: TabPanelProps) => {
   const { children, value, index, ...other } = props;
   return (
@@ -158,11 +156,10 @@ const ChromeTabs = ({ tabInfos }: { tabInfos: ITabInfos }) => {
         );
       })}
       <TabPanel value={muiTabId} index={Object.keys(tabInfos).length} key="JSON">
-        <ReactJson
+        <JSONViewerComponent
           src={tabInfos}
           name={false}
           collapsed={2}
-          enableClipboard={handleCopy}
           displayObjectSize={true}
           displayDataTypes={false}
           sortKeys={false}
