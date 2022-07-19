@@ -5,19 +5,31 @@ import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import DeleteForever from '@mui/icons-material/DeleteForever';
-import CardHeader from '@mui/material/CardHeader';
+import DoubleArrowIcon from '@mui/icons-material/DoubleArrow';
 
 export const replaceRuleTargets: IReplaceRuleTarget[] = [
-  { value: 'cpm', label: 'CPM' },
-  { value: 'creative', label: 'Creative' },
+  { value: 'ad', label: 'ad' },
+  // { value: 'bidderCode', label: 'bidderCode' }, //can break setup
+  { value: 'cpm', label: 'cpm' },
+  { value: 'currency', label: 'currency' },
+  { value: 'dealId', label: 'dealId' },
+  { value: 'height', label: 'height' },
+  { value: 'meta', label: 'meta' },
+  { value: 'netRevenue', label: 'netRevenue' },
+  { value: 'ttl', label: 'ttl' },
+  // { value: 'vastUrl', label: 'vastUrl' }, // not working
+  // { value: 'vastXml', label: 'vastXml' }, // not working
+  // { value: 'vastImpUrl', label: 'vastImpUrl' },// not working
   { value: 'width', label: 'Width' },
-  { value: 'height', label: 'Height' },
-  { value: 'deal', label: 'Deal' },
 ];
 
 const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRulesFormChange }: IReplaceRuleComponentProps): JSX.Element => (
   <React.Fragment key={groupIndex}>
-    {groupIndex !== 0 && <Typography variant="body1"> and </Typography>}
+    {groupIndex !== 0 && (
+      <Typography variant="body1" sx={{ p: 0.5 }}>
+        and
+      </Typography>
+    )}
 
     <TextField
       size="small"
@@ -34,9 +46,7 @@ const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRu
       sx={{ m: 0.25, width: '15ch' }}
     />
 
-    <Typography variant="h4" sx={{ h: 1 }} component="span">
-      should be
-    </Typography>
+    <IconButton size='small' color='primary' children={<DoubleArrowIcon />} />
 
     <TextField
       size="small"
@@ -44,7 +54,7 @@ const ReplaceRuleComponent = ({ rule, ruleIndex, groupIndex, targetKey, handleRu
       value={rule.then[targetKey] || ''}
       name="replaceRule"
       onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
-      sx={{ m: 0.25, width: '20ch' }}
+      sx={{ m: 0.25, width: '18ch' }}
     />
     {Object.keys(rule.then).length > 1 && (
       <IconButton

@@ -82,11 +82,15 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
         newFormValues.push({ when: { adUnitCode: '' }, then: { cpm: 20 } });
         break;
       }
+      case 'enabled': {
+        debuggingModuleConfig.enabled = !!value;
+        break;
+      }
       default: {
       }
     }
     setDebuggingModuleConfig({ ...debuggingModuleConfig, intercept: newFormValues });
-    await writeConfigToLS({ intercept: newFormValues });
+    await writeConfigToLS({ ...debuggingModuleConfig, intercept: newFormValues });
   };
 
   // read config from session storage & set states on mount
@@ -118,7 +122,12 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                   <FormControl>
                     <FormControlLabel
                       control={
-                        <Switch checked={!!debuggingModuleConfig?.enabled} onChange={(event) => writeConfigToLS({ enabled: event.target.checked })} />
+                        <Switch
+                          checked={!!debuggingModuleConfig?.enabled}
+                          onChange={(event) => {
+                            handleRulesFormChange(null, null, { target: { name: 'toggleEnabled', value: String(event.target.checked) } });
+                          }}
+                        />
                       }
                       label=""
                     />
@@ -132,7 +141,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sx={{ display: 'flex' }}>
+              <Grid item xs={6}>
                 <Button
                   startIcon={<AddIcon />}
                   onClick={() => {

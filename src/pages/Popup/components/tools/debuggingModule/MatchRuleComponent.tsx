@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import { IPrebidDetails, IPrebidAuctionInitEventData } from '../../../../../inject/scripts/prebid';
+import PauseSharpIcon from '@mui/icons-material/PauseSharp';
 
 export const matchRuleTargets: IMatchRuleTarget[] = [
   { value: 'adUnitCode', label: 'AdUnitCode' },
@@ -54,46 +55,54 @@ const MatchRuleComponent = ({ groupIndex, rule, ruleIndex, targetKey, handleRule
       return Array.from(new Set([...prevValue, ...newBidders]));
     }, [] as string[]);
 
-    setMatchRuleTargetOptions({ adUnitCode: adUnitCodes, mediaType: mediaTypes, bidder: bidders });
+    setMatchRuleTargetOptions((prevValue) => {
+      return {
+        adUnitCode: adUnitCodes || prevValue.adUnitCode,
+        mediaType: mediaTypes || prevValue.mediaType,
+        bidder: bidders || prevValue.bidder,
+      };
+    });
   }, [events]);
 
   return (
     <React.Fragment>
-      {groupIndex !== 0 && <Typography variant="body1"> and </Typography>}
+      {groupIndex !== 0 && (
+        <Typography variant="body1" sx={{ p: 0.5 }}>
+          and
+        </Typography>
+      )}
       <TextField
         select
         size="small"
-        label="Match-Rule Target"
+        label="MatchRule Target"
         name="matchRuleTarget"
         value={targetKey}
         onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
         children={matchRuleTargets?.map((option, key) => (
-          <MenuItem key={key} value={option.value || ''} disabled={Object.keys(rule.when).includes(option.value)}>
+          <MenuItem key={key} value={option.value} disabled={Object.keys(rule.when).includes(option.value)}>
             {option.label}
           </MenuItem>
         ))}
         sx={{ m: 0.25, width: '15ch' }}
       />
 
-      <Typography variant="h4" sx={{ h: 1 }} component="span">
-        equals
-      </Typography>
+      <IconButton size="small" color="primary" children={<PauseSharpIcon sx={{ transform: 'rotate(90deg)' }} />} />
 
       <TextField
         select
         size="small"
-        label="Match-Rule Value"
+        label="MatchRule Value"
         name="matchRule"
-        value={rule.when[targetKey]}
+        value={rule.when[targetKey] || ''}
         onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
         children={
           matchRuleTargetOptions[targetKey as keyof IMatchRuleTargetOptions]?.map((option: string, i: number) => (
             <MenuItem key={i} value={option} disabled={Object.values(rule.when).includes(option)}>
               {option}
             </MenuItem>
-          )) || <MenuItem key={0} value={''} />
+          )) || <MenuItem key={0} value={rule.when[targetKey] || ''} />
         }
-        sx={{ m: 0.25, width: '20ch' }}
+        sx={{ m: 0.25, width: '18ch' }}
       />
 
       {Object.keys(rule.when).length > 1 && (
