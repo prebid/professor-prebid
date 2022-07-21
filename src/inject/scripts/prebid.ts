@@ -155,6 +155,7 @@ export const addEventListenersForPrebid = () => {
 export interface IPrebidBidParams {
   publisherId: string;
   adSlot: string;
+
   [key: string]: string | number;
 }
 
@@ -271,6 +272,7 @@ export interface IPrebidAdUnitMediaTypes {
     contentMode: string;
   };
 }
+
 export interface IPrebidAdUnit {
   bids: IPrebidBid[];
   code: string;
@@ -446,6 +448,7 @@ export interface IPrebidConfig {
     };
     floorProvider: string;
   };
+
   [key: string]: unknown;
 }
 
@@ -460,13 +463,25 @@ export interface IPrebidDebugConfig {
   bids?: IPrebidDebugConfigBid[];
   bidders?: string[];
 }
+
 export interface IPrebidDebugModuleConfig {
   enabled?: boolean;
   intercept?: IPrebidDebugModuleConfigRule[];
 }
+
 export interface IPrebidDebugModuleConfigRule {
   when: { [key: string]: string | number };
-  then: { [key: string]: string | number };
+  then: {
+    [key: string]: string | number | INativeRules;
+    native?: INativeRules;
+  };
+}
+
+export interface INativeRules {
+  cta?: string;
+  image?: string;
+  clickUrl?: string;
+  title?: string;
 }
 
 export interface IPrebidDetails {
