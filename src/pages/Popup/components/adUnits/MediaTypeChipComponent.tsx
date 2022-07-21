@@ -21,7 +21,9 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
         color={popUpOpen ? 'success' : isWinner ? 'secondary' : 'primary'}
         label={label}
         onClick={handlePopoverOpen}
-        sx={{ maxWidth: 200 }}
+        sx={{
+          maxWidth: 123, // "fixes" weird onLooad transition bug
+        }}
       />
       <Popover
         open={popUpOpen}

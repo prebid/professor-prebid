@@ -8,12 +8,12 @@ import { IPrebidAdUnitMediaTypes, IPrebidBidWonEventData } from '../../../../inj
 
 const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentProps): JSX.Element => {
   return (
-    <Box sx={{ p: 0.5 }}>
+    <React.Fragment>
       {Object.keys(mediaTypes).map((mediaType, index) => {
         switch (mediaType) {
           case 'banner': {
             return (
-              <Box key={index}>
+              <Box key={index} sx={{ p: 0.25 }}>
                 {mediaTypes['banner'].sizes && (
                   <React.Fragment>
                     <Typography variant="caption">Banner Sizes:</Typography>
@@ -46,7 +46,7 @@ const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentPro
           }
           case 'video': {
             return (
-              <Box key={index}>
+              <Box key={index} sx={{ p: 0.25 }}>
                 <Typography variant="caption">Video:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                   {Object.keys(mediaTypes['video']).map((key, index) => (
@@ -62,7 +62,7 @@ const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentPro
           }
           case 'native': {
             return (
-              <Box key={index}>
+              <Box key={index} sx={{ p: 0.25 }}>
                 <Typography variant="caption">Native:</Typography>
                 <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                   {Object.keys(mediaTypes[mediaType]).map((key, index) => (
@@ -79,7 +79,7 @@ const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentPro
         }
         return null;
       })}
-    </Box>
+    </React.Fragment>
   );
 };
 
