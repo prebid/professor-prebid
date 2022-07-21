@@ -13,7 +13,7 @@ import Grid from '@mui/material/Grid';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { Paper } from '@mui/material';
 import OverlayControlComponent from './OverlayControlComponent';
-import gte from 'semver/functions/gte';
+import { gte } from 'semver';
 
 const dfp_open_console = async () => {
   const tabId = await getTabId();
@@ -46,7 +46,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
 
   return (
     <Box sx={{ m: 1 }}>
-      <Grid container direction="row" rowSpacing={0} columnSpacing={0.5} justifyContent="stretch" alignItems="center">
+      <Grid container direction="row" rowSpacing={0.25} columnSpacing={0.5} justifyContent="stretch" alignItems="center">
         <Grid item sx={{ height: 36 }}>
           <Paper elevation={1} sx={{ alignItems: 'center' }}>
             <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<GoogleIcon />}>
