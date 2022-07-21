@@ -16,7 +16,11 @@ export const matchRuleTargets: IMatchRuleTarget[] = [
 
 const MatchRuleComponent = ({ groupIndex, rule, ruleIndex, targetKey, handleRulesFormChange, prebid }: IMatchRuleComponentProps): JSX.Element => {
   const { events } = prebid;
-  const [matchRuleTargetOptions, setMatchRuleTargetOptions] = useState<IMatchRuleTargetOptions>({ adUnitCode: [], bidder: [], mediaType: [] });
+  const [matchRuleTargetOptions, setMatchRuleTargetOptions] = useState<IMatchRuleTargetOptions>({
+    adUnitCode: [],
+    bidder: [],
+    mediaType: [],
+  });
 
   // extract the matchRuleTargetOptions from  prebid.events
   useEffect(() => {

@@ -84,9 +84,9 @@ const RuleComponent = ({ rule, ruleIndex, handleRulesFormChange, prebid }: RuleC
                 targetKey={targetKey}
                 groupIndex={replaceRuleTargetsIndex}
                 handleRulesFormChange={handleRulesFormChange}
+                addReplaceRule={addReplaceRule}
               />
             ))}
-            {Object.keys(rule.then).length < 5 && <IconButton color="primary" size="small" children={<AddIcon />} onClick={addReplaceRule} />}
           </Box>
         </CardContent>
       </Card>

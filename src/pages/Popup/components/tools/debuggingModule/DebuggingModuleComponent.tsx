@@ -35,6 +35,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
 
   const handleRulesFormChange = async (ruleIndex: number, groupKey: string, e: { target: { value: string; name: string } }) => {
     const newFormValues = [...debuggingModuleConfig?.intercept];
+
     const { name, value } = e.target;
     switch (name) {
       case 'matchRuleTarget': {
@@ -50,7 +51,10 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
         break;
       }
       case 'replaceRuleTarget': {
-        newFormValues[ruleIndex]['then'] = { ...newFormValues[ruleIndex]['then'], [value]: newFormValues[ruleIndex]['then'][groupKey] };
+        newFormValues[ruleIndex]['then'] = {
+          ...newFormValues[ruleIndex]['then'],
+          [value]: newFormValues[ruleIndex]['then'][groupKey],
+        };
         delete newFormValues[ruleIndex]['then'][groupKey];
         break;
       }
@@ -71,6 +75,9 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
         break;
       }
       case 'removeReplaceRule': {
+        if (groupKey === 'mediaType') {
+          delete newFormValues[ruleIndex]['then'].native;
+        }
         delete newFormValues[ruleIndex]['then'][groupKey];
         break;
       }
@@ -84,6 +91,13 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
       }
       case 'enabled': {
         debuggingModuleConfig.enabled = !!value;
+        break;
+      }
+      case 'replaceNativeRule': {
+        newFormValues[ruleIndex]['then'] = {
+          ...newFormValues[ruleIndex]['then'],
+          native: { ...newFormValues[ruleIndex]['then'].native, [groupKey]: value },
+        };
         break;
       }
       default: {
@@ -118,14 +132,24 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
           <Grid item xs={12}>
             <Grid container rowSpacing={1} columnSpacing={0.5}>
               <Grid item xs={1}>
-                <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+                <Box
+                  sx={{
+                    alignContent: 'center',
+                    [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' },
+                  }}
+                >
                   <FormControl>
                     <FormControlLabel
                       control={
                         <Switch
                           checked={!!debuggingModuleConfig?.enabled}
                           onChange={(event) => {
-                            handleRulesFormChange(null, null, { target: { name: 'toggleEnabled', value: String(event.target.checked) } });
+                            handleRulesFormChange(null, null, {
+                              target: {
+                                name: 'toggleEnabled',
+                                value: String(event.target.checked),
+                              },
+                            });
                           }}
                         />
                       }
@@ -135,8 +159,21 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                 </Box>
               </Grid>
               <Grid item xs={5}>
-                <Box sx={{ border: 1, borderColor: debuggingModuleConfig?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-                  <Typography variant="h4" sx={{ width: 1, p: 1, color: debuggingModuleConfig?.enabled ? 'primary.main' : 'text.disabled' }}>
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: debuggingModuleConfig?.enabled ? 'primary.main' : 'text.disabled',
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      width: 1,
+                      p: 1,
+                      color: debuggingModuleConfig?.enabled ? 'primary.main' : 'text.disabled',
+                    }}
+                  >
                     Enable Debugging Module
                   </Typography>
                 </Box>
@@ -158,9 +195,9 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
             <Box component="form" noValidate autoComplete="off">
               <Grid container rowSpacing={1} columnSpacing={0.5}>
                 {prebid &&
-                  debuggingModuleConfig?.intercept.map((rule, index) => (
-                    <RuleComponent key={index} rule={rule} ruleIndex={index} handleRulesFormChange={handleRulesFormChange} prebid={prebid} />
-                  ))}
+                  debuggingModuleConfig?.intercept.map((rule, index) => {
+                    return <RuleComponent key={index} rule={rule} ruleIndex={index} handleRulesFormChange={handleRulesFormChange} prebid={prebid} />;
+                  })}
               </Grid>
             </Box>
           </Grid>
