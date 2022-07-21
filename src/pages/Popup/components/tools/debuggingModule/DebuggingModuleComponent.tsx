@@ -82,8 +82,8 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
         newFormValues.push({ when: { adUnitCode: '' }, then: { cpm: 20 } });
         break;
       }
-      case 'enabled': {
-        debuggingModuleConfig.enabled = !!value;
+      case 'toggleEnabled': {
+        debuggingModuleConfig.enabled = !!!debuggingModuleConfig.enabled;
         break;
       }
       default: {
@@ -125,7 +125,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                         <Switch
                           checked={!!debuggingModuleConfig?.enabled}
                           onChange={(event) => {
-                            handleRulesFormChange(null, null, { target: { name: 'toggleEnabled', value: String(event.target.checked) } });
+                            handleRulesFormChange(null, null, { target: { name: 'toggleEnabled', value: null } });
                           }}
                         />
                       }
