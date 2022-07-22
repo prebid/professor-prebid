@@ -35,6 +35,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
 
   const handleRulesFormChange = async (ruleIndex: number, groupKey: string, e: { target: { value: string; name: string } }) => {
     const newFormValues = [...debuggingModuleConfig?.intercept];
+
     const { name, value } = e.target;
     switch (name) {
       case 'matchRuleTarget': {
@@ -71,6 +72,9 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
         break;
       }
       case 'removeReplaceRule': {
+        if (groupKey === 'mediaType') {
+          delete newFormValues[ruleIndex]['then'].native;
+        }
         delete newFormValues[ruleIndex]['then'][groupKey];
         break;
       }
@@ -84,6 +88,13 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
       }
       case 'toggleEnabled': {
         debuggingModuleConfig.enabled = !!!debuggingModuleConfig.enabled;
+        break;
+      }
+      case 'replaceNativeRule': {
+        newFormValues[ruleIndex]['then'] = {
+          ...newFormValues[ruleIndex]['then'],
+          native: { ...newFormValues[ruleIndex]['then'].native, [groupKey]: value },
+        };
         break;
       }
       default: {
