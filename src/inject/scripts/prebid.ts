@@ -32,37 +32,49 @@ class Prebid {
   addEventListeners = (): void => {
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
       logger.log('[Injected] auctionInit', this.namespace, { auctionInitData });
-      if (!this.eventsApi) { this.events.push({ eventType: 'auctionInit', args: auctionInitData }) };
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'auctionInit', args: auctionInitData });
+      }
       this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
       logger.log('[Injected] auctionEnd', this.namespace, { auctionEndData });
-      if (!this.eventsApi) { this.events.push({ eventType: 'auctionEnd', args: auctionEndData }); }
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'auctionEnd', args: auctionEndData });
+      }
       this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
       logger.log('[Injected] bidRequested', this.namespace, { bidRequestedData });
-      if (!this.eventsApi) { this.events.push({ eventType: 'bidRequested', args: bidRequestedData }); }
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'bidRequested', args: bidRequestedData });
+      }
       this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
       logger.log('[Injected] bidResponse', this.namespace, { bidResponseData });
-      if (!this.eventsApi) { this.events.push({ eventType: 'bidResponse', args: bidResponseData }); }
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'bidResponse', args: bidResponseData });
+      }
       this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
       logger.log('[Injected] noBid', this.namespace, { noBidData });
-      if (!this.eventsApi) { this.events.push({ eventType: 'noBid', args: noBidData }); }
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'noBid', args: noBidData });
+      }
       this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
       logger.log('[Injected] bidWon', this.namespace, { bidWonData });
-      if (!this.eventsApi) { this.events.push({ eventType: 'bidWon', args: bidWonData }); }
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'bidWon', args: bidWonData });
+      }
       this.throttle(this.sendDetailsToContentScript);
     });
     logger.log('[Injected] event listeners added', this.namespace);
@@ -89,7 +101,8 @@ class Prebid {
     this.lastEventsObjectUrl.push({ url: objectURL, size: blob.size });
     const numberOfCachedUrls = 5;
     const totalWeight = this.lastEventsObjectUrl.reduce((acc, cur) => acc + cur.size, 0);
-    if ((this.lastEventsObjectUrl.length > numberOfCachedUrls && totalWeight > 5e+6) || totalWeight > 25e+6) {  // 5MB / 25MB
+    if ((this.lastEventsObjectUrl.length > numberOfCachedUrls && totalWeight > 5e6) || totalWeight > 25e6) {
+      // 5MB / 25MB
       const count = this.lastEventsObjectUrl.length - numberOfCachedUrls;
       const toRevoke = this.lastEventsObjectUrl.splice(0, count);
       for (const url of toRevoke) {
@@ -348,16 +361,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }
