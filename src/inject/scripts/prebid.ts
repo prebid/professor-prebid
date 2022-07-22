@@ -12,6 +12,7 @@ class Prebid {
     getUserIdsAsEids: () => IPrebidDetails['eids'];
     setConfig: (args: Object) => void;
     version: string;
+    adUnits: IPrebidAdUnit[];
   } = window.pbjs;
   namespace: string;
   debug: IPrebidDebugConfig;
@@ -19,8 +20,9 @@ class Prebid {
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 3000;
   sendToContentScriptPending: boolean = false;
-  lastEventsObjectUrl: string[] = [];
-
+  lastEventsObjectUrl: { url: string; size: number }[] = [];
+  events: any[] = [];
+  eventsApi: boolean = typeof this.globalPbjs.getEvents === 'function' || false;
   constructor(namespace: string) {
     this.namespace = namespace;
     this.globalPbjs = window[namespace as keyof Window];
@@ -30,31 +32,37 @@ class Prebid {
   addEventListeners = (): void => {
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
       logger.log('[Injected] auctionInit', this.namespace, { auctionInitData });
+      if (!this.eventsApi) { this.events.push({ eventType: 'auctionInit', args: auctionInitData }) };
       this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
       logger.log('[Injected] auctionEnd', this.namespace, { auctionEndData });
+      if (!this.eventsApi) { this.events.push({ eventType: 'auctionEnd', args: auctionEndData }); }
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    this.globalPbjs.onEvent('bidRequested', (bidRequested: IPrebidBidRequestedEventData) => {
-      logger.log('[Injected] bidRequested', this.namespace, { bidRequested });
+    this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
+      logger.log('[Injected] bidRequested', this.namespace, { bidRequestedData });
+      if (!this.eventsApi) { this.events.push({ eventType: 'bidRequested', args: bidRequestedData }); }
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    this.globalPbjs.onEvent('bidResponse', (bidResponse: IPrebidBidResponseEventData) => {
-      logger.log('[Injected] bidResponse', this.namespace, { bidResponse });
+    this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
+      logger.log('[Injected] bidResponse', this.namespace, { bidResponseData });
+      if (!this.eventsApi) { this.events.push({ eventType: 'bidResponse', args: bidResponseData }); }
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    this.globalPbjs.onEvent('noBid', (noBid: IPrebidNoBidEventData) => {
-      logger.log('[Injected] noBid', this.namespace, { noBid });
+    this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
+      logger.log('[Injected] noBid', this.namespace, { noBidData });
+      if (!this.eventsApi) { this.events.push({ eventType: 'noBid', args: noBidData }); }
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    this.globalPbjs.onEvent('bidWon', (bidWon: IPrebidBidWonEventData) => {
-      logger.log('[Injected] bidWon', this.namespace, { bidWon });
+    this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
+      logger.log('[Injected] bidWon', this.namespace, { bidWonData });
+      if (!this.eventsApi) { this.events.push({ eventType: 'bidWon', args: bidWonData }); }
       this.throttle(this.sendDetailsToContentScript);
     });
     logger.log('[Injected] event listeners added', this.namespace);
@@ -70,7 +78,7 @@ class Prebid {
   };
 
   getEventsObjUrl = () => {
-    const events = this.globalPbjs.getEvents() || [];
+    const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
     const cloned = cloneDeep(events);
     //doc in adRenderedEvents throws CORS error when JSON.stringified
     const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object') ? value : undefined);
@@ -78,13 +86,14 @@ class Prebid {
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
-    this.lastEventsObjectUrl.push(objectURL);
-    const numberOfCachedUrls = 2;
-    if (this.lastEventsObjectUrl.length > numberOfCachedUrls) {
+    this.lastEventsObjectUrl.push({ url: objectURL, size: blob.size });
+    const numberOfCachedUrls = 5;
+    const totalWeight = this.lastEventsObjectUrl.reduce((acc, cur) => acc + cur.size, 0);
+    if ((this.lastEventsObjectUrl.length > numberOfCachedUrls && totalWeight > 5e+6) || totalWeight > 25e+6) {  // 5MB / 25MB
       const count = this.lastEventsObjectUrl.length - numberOfCachedUrls;
       const toRevoke = this.lastEventsObjectUrl.splice(0, count);
       for (const url of toRevoke) {
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url.url);
       }
     }
     return objectURL;
@@ -339,16 +348,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
@@ -486,6 +495,26 @@ export interface IPrebidDetails {
   eids: IPrebidEids[];
   debug: IPrebidDebugConfig;
   namespace: string;
+}
+
+export interface IPrebidNoEventsApiEventData {
+  args: {
+    adUnitCodes: string[];
+    adUnits: IPrebidAdUnit[];
+    auctionEnd: undefined;
+    auctionId: string;
+    auctionStatus: string;
+    bidderRequests: IPrebidBidderRequest[];
+    bidsReceived: IPrebidBid[];
+    labels: [];
+    noBids: IPrebidBid[];
+    timeout: number;
+    timestamp: number;
+    winningBids: [];
+  };
+  elapsedTime: number;
+  eventType: string;
+  id: string;
 }
 
 export interface IPrebidAuctionInitEventData {
