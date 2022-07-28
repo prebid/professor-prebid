@@ -22,7 +22,7 @@ class Prebid {
   sendToContentScriptPending: boolean = false;
   lastEventsObjectUrl: { url: string; size: number }[] = [];
   events: any[] = [];
-  eventsApi: boolean = typeof this.globalPbjs.getEvents === 'function' || false;
+  eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
   constructor(namespace: string) {
     this.namespace = namespace;
     this.globalPbjs = window[namespace as keyof Window];
@@ -496,10 +496,17 @@ export interface IPrebidDebugModuleConfigRule {
   then: {
     [key: string]: string | number | INativeRules;
     native?: INativeRules;
+    video?: IVideoRules;
   };
 }
 
 export interface INativeRules {
+  cta?: string;
+  image?: string;
+  clickUrl?: string;
+  title?: string;
+}
+export interface IVideoRules {
   cta?: string;
   image?: string;
   clickUrl?: string;
