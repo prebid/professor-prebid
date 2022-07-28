@@ -1,4 +1,4 @@
-import { IPrebidDebugModuleConfigRule, INativeRules } from '../../../../../inject/scripts/prebid';
+import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../../inject/scripts/prebid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -6,161 +6,173 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import DoubleArrowIcon from '@mui/icons-material/DoubleArrow';
-import Box from '@mui/material/Box';
 import AddIcon from '@mui/icons-material/Add';
+import Select from '@mui/material/Select';
+import { firstDifferent } from '../../../utils';
 
-export const replaceRuleTargets: IReplaceRuleTarget[] = [
-  { value: 'ad', label: 'ad' },
-  // { value: 'bidderCode', label: 'bidderCode' }, //can break setup
-  { value: 'cpm', label: 'cpm' },
-  { value: 'currency', label: 'currency' },
-  { value: 'dealId', label: 'dealId' },
-  { value: 'height', label: 'height' },
-  { value: 'meta', label: 'meta' },
-  { value: 'netRevenue', label: 'netRevenue' },
-  { value: 'ttl', label: 'ttl' },
-  // { value: 'vastUrl', label: 'vastUrl' }, // not working
-  // { value: 'vastXml', label: 'vastXml' }, // not working
-  // { value: 'vastImpUrl', label: 'vastImpUrl' },// not working
-  { value: 'width', label: 'width' },
-  { value: 'mediaType', label: 'mediaType', options: ['banner', 'native', 'video'] },
+export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
+  // all mediaTypes
+  { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '' },
+  { value: 'cpm', label: 'cpm', mediaType: 'allMediaTypes', default: '20' },
+  { value: 'currency', label: 'currency', mediaType: 'allMediaTypes', default: 'USD' },
+  { value: 'dealId', label: 'dealId', mediaType: 'allMediaTypes', default: '' },
+  { value: 'mediaType', label: 'mediaType', mediaType: 'allMediaTypes', default: 'banner', options: ['banner', 'native', 'video'] },
+  { value: 'meta', label: 'meta', mediaType: 'allMediaTypes', default: '' },
+  { value: 'netRevenue', label: 'netRevenue', mediaType: 'allMediaTypes', default: '' },
+  { value: 'ttl', label: 'ttl', mediaType: 'allMediaTypes', default: '' },
+  //mediaType banner
+  { value: 'ad', label: 'ad', mediaType: 'banner', default: '' },
+  { value: 'height', label: 'height', mediaType: 'banner', default: '300' },
+  { value: 'width', label: 'width', mediaType: 'banner', default: '' },
+  //mediaType video
+  { value: 'vastUrl', label: 'vastUrl', mediaType: 'video', default: '' },
+  { value: 'vastXml', label: 'vastXml', mediaType: 'video', default: '' },
+  //mediaType native
+  { value: 'clickUrl', label: 'clickUrl', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'title', label: 'title', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'image', label: 'image', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'cta', label: 'cta', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'sponsoredBy', label: 'sponsoredBy', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'body', label: 'Body', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'price', label: 'Price', mediaType: 'native', default: '', subkey: 'native' },
 ];
 
-export const replaceNativeRuleTargets: IReplaceNativeRuleTarget[] = [
-  { value: 'clickUrl', label: 'clickUrl' },
-  { value: 'title', label: 'title' },
-  { value: 'image', label: 'image' },
-  { value: 'cta', label: 'cta' },
-];
+const sanityCheck = (rule: IPrebidDebugModuleConfigRule, mediaType: string) => {
+  if (mediaType === 'native') {
+    // if (Object.keys(rule.when).includes('mediaType') && Object.values(rule.when).includes('native')) return true; // matching on mediaType not working
+    if (Object.keys(rule.then).includes('mediaType') && Object.values(rule.then).includes('native')) return true;
+  }
+  if (mediaType === 'video') {
+    // if (Object.keys(rule.when).includes('mediaType') && Object.values(rule.when).includes('video')) return true; // matching on mediaType not working
+    if (Object.keys(rule.then).includes('mediaType') && Object.values(rule.then).includes('video')) return true;
+  }
+  if (['allMediaTypes', 'banner'].includes(mediaType)) return true;
+  return false;
+};
+
+const mediaTypes = replaceRuleTargets
+  .reduce((acc, cur) => {
+    if (!acc.includes(cur.mediaType)) {
+      return [...acc, cur.mediaType];
+    } else {
+      return acc;
+    }
+  }, [] as string[])
+  .sort((x, y) => {
+    return x == 'allMediaTypes' ? -1 : y == 'allMediaTypes' ? 1 : 0;
+  });
 
 const ReplaceRuleComponent = ({
   rule,
-  ruleIndex,
   groupIndex,
-  targetKey,
+  ruleKey,
   handleRulesFormChange,
-  addReplaceRule,
+
+  path,
 }: IReplaceRuleComponentProps): JSX.Element => {
+  const addReplaceRule = () => {
+    const newReplaceRuleTarget = firstDifferent(
+      replaceRuleTargets.map(({ value }) => value),
+      Object.keys(rule.then)
+    );
+    if (!newReplaceRuleTarget) return;
+    handleRulesFormChange('update', '', [...path.slice(0, path.length - 1), newReplaceRuleTarget]);
+  };
   return (
-    <React.Fragment key={groupIndex}>
-      {groupIndex !== 0 && targetKey !== 'native' && (
+    <React.Fragment>
+      {groupIndex !== 0 && (
         <Typography variant="body1" sx={{ p: 0.5 }}>
           and
         </Typography>
       )}
-
-      {targetKey !== 'native' && (
-        <>
-          <TextField
-            size="small"
-            select
-            label="Replace-Rule Target"
-            value={targetKey}
-            name="replaceRuleTarget"
-            onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
-            children={replaceRuleTargets?.map((option, index) => (
-              <MenuItem key={index} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-            sx={{ m: 0.25, minWidth: '17ch' }}
-          />
-
-          <IconButton size="small" color="primary" children={<DoubleArrowIcon />} />
-          {targetKey === 'mediaType' ? (
-            <TextField
-              size="small"
-              select
-              label="Replace Rule Value"
-              value={rule.then[targetKey] || ''}
-              name="replaceRule"
-              onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
-              sx={{ m: 0.25, minWidth: '17ch' }}
-              children={
-                targetKey === 'mediaType' &&
-                replaceRuleTargets
-                  .find((target) => target.value === targetKey)
-                  ?.options.map((option, index) => (
-                    <MenuItem key={index} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))
-              }
-            />
-          ) : (
-            <TextField
-              size="small"
-              label="Replace Rule Value"
-              value={rule.then[targetKey] || ''}
-              name="replaceRule"
-              onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
-              sx={{ m: 0.25, width: '17ch' }}
-            />
-          )}
-
-          {Object.keys(rule.then).length > 1 && (
-            <IconButton
-              size="small"
-              color="primary"
-              children={<DeleteForever />}
-              onClick={() => {
-                handleRulesFormChange(ruleIndex, targetKey, {
-                  target: {
-                    name: 'removeReplaceRule',
-                    value: null,
-                  },
-                });
-              }}
-            />
-          )}
-
-          {Object.keys(rule.then).length < 5 && <IconButton color="primary" size="small" children={<AddIcon />} onClick={addReplaceRule} />}
-        </>
-      )}
-
-      {rule.then?.mediaType === 'native' && targetKey !== 'native' && targetKey === 'mediaType' && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '5px',
-            marginTop: '5px',
-          }}
-        >
-          {replaceNativeRuleTargets.map((target) => (
-            <TextField
-              size="small"
-              label={`native ${target.label}`}
-              name="replaceNativeRule"
-              onChange={(e) => handleRulesFormChange(ruleIndex, target.value, e)}
-              sx={{ m: 0.25, minWidth: '17ch' }}
-              value={rule.then?.native ? rule.then?.native[target.value] : ''}
-            />
+      <Select
+        sx={{ m: 0.25, minWidth: '17ch' }}
+        native
+        size="small"
+        label="Replace-Rule Target"
+        value={ruleKey}
+        onChange={(e) => {
+          const subkeys = replaceRuleTargets.map((x) => x.subkey).filter((x) => x);
+          const newKey = replaceRuleTargets.find((keyOption) => keyOption.value === e.target.value);
+          const newPath = [...path.slice(0, path.length - 1), e.target.value];
+          if (newKey.subkey && newPath[3] !== newKey.subkey) {
+            newPath.splice(3, 0, newKey.subkey);
+          }
+          if (!newKey.subkey && subkeys.includes(newPath[2])) {
+            newPath.splice(3, 1);
+          }
+          handleRulesFormChange('update', '', newPath, [...path.slice(0, path.length - 1), ruleKey]);
+        }}
+      >
+        {mediaTypes
+          .filter((mediaType) => sanityCheck(rule, mediaType))
+          ?.map((group, index) => (
+            <optgroup key={index} label={group !== 'allMediaTypes' ? `mediaType: ${group}` : 'all mediaTypes'}>
+              {replaceRuleTargets
+                ?.filter((replaceRuleTarget) => replaceRuleTarget.mediaType === group)
+                .map((option, index) => (
+                  <option key={index} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+            </optgroup>
           ))}
-        </Box>
+      </Select>
+
+      <IconButton size="small" color="primary" children={<DoubleArrowIcon />} />
+
+      <TextField
+        sx={{ m: 0.25, width: '17ch' }}
+        size="small"
+        select={ruleKey === 'mediaType'}
+        label="Replace-Rule Value"
+        value={path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || ''}
+        onChange={(event) => {
+          handleRulesFormChange('update', event.target.value, path);
+        }}
+        children={
+          ruleKey === 'mediaType' &&
+          replaceRuleTargets
+            .find((target) => target.value === ruleKey)
+            ?.options.map((option, index) => (
+              <MenuItem key={index} value={option} dense>
+                {option}
+              </MenuItem>
+            ))
+        }
+      />
+
+      {Object.keys(rule.then).length > 1 && (
+        <IconButton
+          size="small"
+          color="primary"
+          children={<DeleteForever />}
+          onClick={() => {
+            handleRulesFormChange('update', null, path, path);
+          }}
+        />
       )}
+
+      {Object.keys(rule.then).length < 5 && <IconButton color="primary" size="small" children={<AddIcon />} onClick={addReplaceRule} />}
     </React.Fragment>
   );
 };
 
-interface IReplaceRuleTarget {
-  value: string;
+interface IReplaceRuleKeyOptions {
+  default: string;
   label: string;
+  mediaType: string;
   options?: string[];
-}
-
-interface IReplaceNativeRuleTarget {
-  value: keyof INativeRules;
-  label: string;
+  subkey?: string;
+  value: string;
 }
 
 interface IReplaceRuleComponentProps {
-  rule: IPrebidDebugModuleConfigRule;
-  ruleIndex: number;
   groupIndex: number;
-  targetKey: string;
-  handleRulesFormChange: (ruleIndex: number, groupKey: string, e: { target: { name: string; value: string } }) => void;
-  addReplaceRule: () => void;
+  rule: IPrebidDebugModuleConfigRule;
+  ruleKey: string;
+  handleRulesFormChange: (action: string, value: string, path: string[], deletePath?: any[]) => void;
+  path: string[];
 }
 
 export default ReplaceRuleComponent;

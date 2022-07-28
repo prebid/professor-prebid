@@ -1,65 +1,66 @@
-import { IPrebidDebugModuleConfigRule } from '../../../../../inject/scripts/prebid';
+import { IPrebidDebugModuleConfigRule, IPrebidDetails, IPrebidAuctionInitEventData } from '../../../../../inject/scripts/prebid';
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import DeleteForever from '@mui/icons-material/DeleteForever';
-import { IPrebidDetails, IPrebidAuctionInitEventData } from '../../../../../inject/scripts/prebid';
 import PauseSharpIcon from '@mui/icons-material/PauseSharp';
+import AddIcon from '@mui/icons-material/Add';
+import { firstDifferent } from '../../../utils';
 
-export const matchRuleTargets: IMatchRuleTarget[] = [
+export const matchRuleTargets: { value: string; label: string }[] = [
   { value: 'adUnitCode', label: 'AdUnitCode' },
   { value: 'bidder', label: 'Bidder' },
-  { value: 'mediaType', label: 'Mediatype' },
+  // { value: 'mediaType', label: 'Mediatype' }, // match on mediaType not working
 ];
 
-const MatchRuleComponent = ({ groupIndex, rule, ruleIndex, targetKey, handleRulesFormChange, prebid }: IMatchRuleComponentProps): JSX.Element => {
+const MatchRuleComponent = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, path }: IMatchRuleComponentProps): JSX.Element => {
   const { events } = prebid;
-  const [matchRuleTargetOptions, setMatchRuleTargetOptions] = useState<IMatchRuleTargetOptions>({
-    adUnitCode: [],
-    bidder: [],
-    mediaType: [],
-  });
+  const [options, setOptions] = useState<IMatchRuleKeyOptions>({ adUnitCode: [], bidder: [], mediaType: [] });
 
-  // extract the matchRuleTargetOptions from  prebid.events
+  const addMatchRule = () => {
+    const newMatchRuleTarget = firstDifferent(
+      matchRuleTargets.map(({ value }) => value),
+      Object.keys(rule.when)
+    );
+    if (!newMatchRuleTarget) return;
+    handleRulesFormChange('update', '', [...path.slice(0, path.length - 1), newMatchRuleTarget]);
+  };
+
   useEffect(() => {
+    // extract the matchRuleTargetOptions from  prebid.events
     const adUnitCodes = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
-      if (!args || !args.adUnitCodes) {
-        return prevValue;
-      }
+      if (!args || !args.adUnitCodes) return prevValue;
+
       return Array.from(new Set([...prevValue, ...args.adUnitCodes]));
     }, [] as string[]);
 
     const mediaTypes = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
-      if (!args || !args.adUnits) {
-        return prevValue;
-      }
+      if (!args || !args.adUnits) return prevValue;
 
       const newMediaTypes = args.adUnits?.reduce((prevValue, { mediaTypes }) => {
-        if (!mediaTypes) {
-          return prevValue;
-        }
+        if (!mediaTypes) return prevValue;
+
         return Array.from(new Set([...prevValue, ...Object.keys(mediaTypes)]));
       }, [] as string[]);
+
       return Array.from(new Set([...prevValue, ...newMediaTypes]));
     }, [] as string[]);
 
     const bidders = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
-      if (!args || !args.adUnits) {
-        return prevValue;
-      }
+      if (!args || !args.adUnits) return prevValue;
 
       const newBidders = args.adUnits?.reduce((prevValue, { bids }) => {
-        if (!bids) {
-          return prevValue;
-        }
+        if (!bids) return prevValue;
+
         return Array.from(new Set([...prevValue, ...bids.map(({ bidder }) => bidder)]));
       }, [] as string[]);
+
       return Array.from(new Set([...prevValue, ...newBidders]));
     }, [] as string[]);
 
-    setMatchRuleTargetOptions((prevValue) => {
+    setOptions((prevValue) => {
       return {
         adUnitCode: adUnitCodes || prevValue.adUnitCode,
         mediaType: mediaTypes || prevValue.mediaType,
@@ -75,38 +76,41 @@ const MatchRuleComponent = ({ groupIndex, rule, ruleIndex, targetKey, handleRule
           and
         </Typography>
       )}
+
       <TextField
+        sx={{ m: 0.25, width: '15ch' }}
         select
         size="small"
         label="MatchRule Target"
-        name="matchRuleTarget"
-        value={targetKey}
-        onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
+        value={ruleKey}
+        onChange={(e) => {
+          handleRulesFormChange('update', null, [...path.slice(0, path.length - 1), e.target.value], [...path.slice(0, path.length - 1), ruleKey]);
+        }}
         children={matchRuleTargets?.map((option, key) => (
           <MenuItem key={key} value={option.value} disabled={Object.keys(rule.when).includes(option.value)}>
             {option.label}
           </MenuItem>
         ))}
-        sx={{ m: 0.25, width: '15ch' }}
       />
 
       <IconButton size="small" color="primary" children={<PauseSharpIcon sx={{ transform: 'rotate(90deg)' }} />} />
 
       <TextField
+        sx={{ m: 0.25, width: '18ch' }}
         select
         size="small"
         label="MatchRule Value"
-        name="matchRule"
-        value={rule.when[targetKey] || ''}
-        onChange={(e) => handleRulesFormChange(ruleIndex, targetKey, e)}
+        value={rule.when[ruleKey]}
+        onChange={(e) => {
+          handleRulesFormChange('update', e.target.value, path);
+        }}
         children={
-          matchRuleTargetOptions[targetKey as keyof IMatchRuleTargetOptions]?.map((option: string, i: number) => (
+          options[ruleKey as keyof IMatchRuleKeyOptions]?.map((option: string, i: number) => (
             <MenuItem key={i} value={option} disabled={Object.values(rule.when).includes(option)}>
               {option}
             </MenuItem>
-          )) || <MenuItem key={0} value={rule.when[targetKey] || ''} />
+          )) || <MenuItem key={0} value={rule.when[ruleKey] || ''} />
         }
-        sx={{ m: 0.25, width: '18ch' }}
       />
 
       {Object.keys(rule.when).length > 1 && (
@@ -115,32 +119,28 @@ const MatchRuleComponent = ({ groupIndex, rule, ruleIndex, targetKey, handleRule
           color="primary"
           children={<DeleteForever />}
           onClick={() => {
-            handleRulesFormChange(ruleIndex, targetKey, { target: { name: 'removeMatchRule', value: null } });
+            handleRulesFormChange('update', null, path, path);
           }}
         />
       )}
+      {Object.keys(rule.when).length < 2 && <IconButton size="small" color="primary" children={<AddIcon />} onClick={addMatchRule} />}
     </React.Fragment>
   );
 };
 
-export interface IMatchRuleTargetOptions {
+export interface IMatchRuleKeyOptions {
   adUnitCode: string[];
   mediaType: string[];
   bidder: string[];
 }
 
-interface IMatchRuleTarget {
-  value: string;
-  label: string;
-}
-
 interface IMatchRuleComponentProps {
   groupIndex: number;
   rule: IPrebidDebugModuleConfigRule;
-  ruleIndex: number;
-  targetKey: string;
+  ruleKey: string;
   prebid: IPrebidDetails;
-  handleRulesFormChange: (ruleIndex: number, groupKey: string, e: { target: { name: string; value: any } }) => void;
+  handleRulesFormChange: (action: string, value: string, path: string[], deletePath?: any[]) => void;
+  path: string[];
 }
 
 export default MatchRuleComponent;

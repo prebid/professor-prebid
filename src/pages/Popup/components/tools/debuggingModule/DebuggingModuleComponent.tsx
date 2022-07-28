@@ -1,27 +1,25 @@
-import { IPrebidDetails, IPrebidDebugModuleConfig } from '../../../../../inject/scripts/prebid';
+import { IPrebidDetails, IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../../inject/scripts/prebid';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { getTabId } from '../../../utils';
-import { useTheme } from '@mui/material';
+import useTheme from '@mui/material/styles/useTheme';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import RuleComponent from './RuleComponent';
-
 import AddIcon from '@mui/icons-material/Add';
+import set from 'lodash/set';
+import get from 'lodash/get';
 
 const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JSX.Element => {
   const theme = useTheme();
-  const [debuggingModuleConfig, setDebuggingModuleConfig] = useState<IPrebidDebugModuleConfig>({
-    enabled: null,
-    intercept: [],
-  });
+  const [debuggingModuleConfig, setDebuggingModuleConfig] = useState<IPrebidDebugModuleConfig>({ enabled: false, intercept: [] });
 
   const writeConfigToLS = async (input: IPrebidDebugModuleConfig) => {
-    input = { ...debuggingModuleConfig, ...input };
+    // input = { ...debuggingModuleConfig, ...input };
     setDebuggingModuleConfig(input);
     const tabId = await getTabId();
     await chrome.scripting.executeScript({
@@ -33,75 +31,29 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
     });
   };
 
-  const handleRulesFormChange = async (ruleIndex: number, groupKey: string, e: { target: { value: string; name: string } }) => {
-    const newFormValues = [...debuggingModuleConfig?.intercept];
+  const handleRulesFormChange = async (
+    action: string,
+    value: string | boolean | IPrebidDebugModuleConfigRule[],
+    path: string[],
+    deletePath?: string[]
+  ) => {
+    const newFormValues = { ...debuggingModuleConfig };
+    set(newFormValues, path, value);
 
-    const { name, value } = e.target;
-    switch (name) {
-      case 'matchRuleTarget': {
-        newFormValues[ruleIndex]['when'] = {
-          ...newFormValues[ruleIndex]['when'],
-          [value]: newFormValues[ruleIndex]['when'][groupKey],
-        };
-        delete newFormValues[ruleIndex]['when'][groupKey];
-        break;
-      }
-      case 'matchRule': {
-        newFormValues[ruleIndex]['when'] = { ...newFormValues[ruleIndex]['when'], [groupKey]: value };
-        break;
-      }
-      case 'replaceRuleTarget': {
-        newFormValues[ruleIndex]['then'] = { ...newFormValues[ruleIndex]['then'], [value]: newFormValues[ruleIndex]['then'][groupKey] };
-        delete newFormValues[ruleIndex]['then'][groupKey];
-        break;
-      }
-      case 'replaceRule': {
-        newFormValues[ruleIndex]['then'] = { ...newFormValues[ruleIndex]['then'], [groupKey]: value };
-        break;
-      }
-      case 'addMatchRule': {
-        newFormValues[ruleIndex]['when'][groupKey] = value;
-        break;
-      }
-      case 'addReplaceRule': {
-        newFormValues[ruleIndex]['then'][groupKey] = value;
-        break;
-      }
-      case 'removeMatchRule': {
-        delete newFormValues[ruleIndex]['when'][groupKey];
-        break;
-      }
-      case 'removeReplaceRule': {
-        if (groupKey === 'mediaType') {
-          delete newFormValues[ruleIndex]['then'].native;
+    if (deletePath) {
+      const last = deletePath.pop();
+      delete get(newFormValues, deletePath)[last];
+      if (Object.keys(get(newFormValues, deletePath)).length === 0) {
+        const last = deletePath.pop();
+        // don't leave empty native object
+        if (last === 'native') {
+          delete get(newFormValues, deletePath)[last];
         }
-        delete newFormValues[ruleIndex]['then'][groupKey];
-        break;
-      }
-      case 'removeRule': {
-        newFormValues.splice(ruleIndex, 1);
-        break;
-      }
-      case 'addRule': {
-        newFormValues.push({ when: { adUnitCode: '' }, then: { cpm: 20 } });
-        break;
-      }
-      case 'toggleEnabled': {
-        debuggingModuleConfig.enabled = !!!debuggingModuleConfig.enabled;
-        break;
-      }
-      case 'replaceNativeRule': {
-        newFormValues[ruleIndex]['then'] = {
-          ...newFormValues[ruleIndex]['then'],
-          native: { ...newFormValues[ruleIndex]['then'].native, [groupKey]: value },
-        };
-        break;
-      }
-      default: {
       }
     }
-    setDebuggingModuleConfig({ ...debuggingModuleConfig, intercept: newFormValues });
-    await writeConfigToLS({ ...debuggingModuleConfig, intercept: newFormValues });
+
+    setDebuggingModuleConfig(newFormValues);
+    await writeConfigToLS(newFormValues);
   };
 
   // read config from session storage & set states on mount
@@ -136,7 +88,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                         <Switch
                           checked={!!debuggingModuleConfig?.enabled}
                           onChange={(event) => {
-                            handleRulesFormChange(null, null, { target: { name: 'toggleEnabled', value: null } });
+                            handleRulesFormChange('update', !debuggingModuleConfig.enabled, ['enabled']);
                           }}
                         />
                       }
@@ -156,7 +108,12 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                 <Button
                   startIcon={<AddIcon />}
                   onClick={() => {
-                    handleRulesFormChange(null, null, { target: { name: 'addRule', value: '' } });
+                    // handleRulesFormChange('addRule', '', [])}
+                    handleRulesFormChange(
+                      'update',
+                      [...debuggingModuleConfig.intercept, { when: { adUnitCode: '' }, then: { cpm: 20 } }],
+                      ['intercept']
+                    );
                   }}
                   sx={{ width: 1, height: 1 }}
                 >
@@ -170,7 +127,17 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
               <Grid container rowSpacing={1} columnSpacing={0.5}>
                 {prebid &&
                   debuggingModuleConfig?.intercept.map((rule, index) => (
-                    <RuleComponent key={index} rule={rule} ruleIndex={index} handleRulesFormChange={handleRulesFormChange} prebid={prebid} />
+                    <RuleComponent
+                      key={index}
+                      rule={rule}
+                      ruleIndex={index}
+                      handleRulesFormChange={handleRulesFormChange}
+                      prebid={prebid}
+                      removeRule={() => {
+                        debuggingModuleConfig.intercept.splice(index, 1);
+                        handleRulesFormChange('update', debuggingModuleConfig.intercept, ['intercept']);
+                      }}
+                    />
                   ))}
               </Grid>
             </Box>
