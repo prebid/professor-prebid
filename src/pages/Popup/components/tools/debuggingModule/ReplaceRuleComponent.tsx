@@ -123,6 +123,7 @@ const ReplaceRuleComponent = ({
       <IconButton size="small" color="primary" children={<DoubleArrowIcon />} />
 
       <TextField
+        error={(path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || '') === ''}
         sx={{ m: 0.25, width: '17ch' }}
         size="small"
         select={ruleKey === 'mediaType'}
