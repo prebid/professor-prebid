@@ -77,7 +77,7 @@ interface RuleComponentProps {
   rule: IPrebidDebugModuleConfigRule;
   ruleIndex: number;
   prebid: IPrebidDetails;
-  handleRulesFormChange: (action: string, value: string, path: string[], deletePath?: any[]) => void;
+  handleRulesFormChange: (action: string, value: string | number, path: string[], deletePath?: any[]) => void;
   removeRule: () => void;
 }
 

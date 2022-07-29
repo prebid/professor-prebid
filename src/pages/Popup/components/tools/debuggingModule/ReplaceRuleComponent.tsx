@@ -12,29 +12,29 @@ import { firstDifferent } from '../../../utils';
 
 export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   // all mediaTypes
-  { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '' },
-  { value: 'cpm', label: 'cpm', mediaType: 'allMediaTypes', default: '20' },
-  { value: 'currency', label: 'currency', mediaType: 'allMediaTypes', default: 'USD' },
-  { value: 'dealId', label: 'dealId', mediaType: 'allMediaTypes', default: '' },
-  { value: 'mediaType', label: 'mediaType', mediaType: 'allMediaTypes', default: 'banner', options: ['banner', 'native', 'video'] },
-  { value: 'meta', label: 'meta', mediaType: 'allMediaTypes', default: '' },
-  { value: 'netRevenue', label: 'netRevenue', mediaType: 'allMediaTypes', default: '' },
-  { value: 'ttl', label: 'ttl', mediaType: 'allMediaTypes', default: '' },
+  { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '', type: 'string' },
+  { value: 'cpm', label: 'cpm', mediaType: 'allMediaTypes', default: '20', type: 'number' },
+  { value: 'currency', label: 'currency', mediaType: 'allMediaTypes', default: 'USD', type: 'string' },
+  { value: 'dealId', label: 'dealId', mediaType: 'allMediaTypes', default: '', type: 'string' },
+  { value: 'mediaType', label: 'mediaType', mediaType: 'allMediaTypes', default: 'banner', options: ['banner', 'native', 'video'], type: 'string' },
+  { value: 'meta', label: 'meta', mediaType: 'allMediaTypes', default: '', type: 'string' },
+  { value: 'netRevenue', label: 'netRevenue', mediaType: 'allMediaTypes', default: '', type: 'number' },
+  { value: 'ttl', label: 'ttl', mediaType: 'allMediaTypes', default: '', type: 'number' },
   //mediaType banner
-  { value: 'ad', label: 'ad', mediaType: 'banner', default: '' },
-  { value: 'height', label: 'height', mediaType: 'banner', default: '300' },
-  { value: 'width', label: 'width', mediaType: 'banner', default: '' },
+  { value: 'ad', label: 'ad', mediaType: 'banner', default: '', type: 'string' },
+  { value: 'height', label: 'height', mediaType: 'banner', default: '300', type: 'number' },
+  { value: 'width', label: 'width', mediaType: 'banner', default: '', type: 'number' },
   //mediaType video
-  { value: 'vastUrl', label: 'vastUrl', mediaType: 'video', default: '' },
-  { value: 'vastXml', label: 'vastXml', mediaType: 'video', default: '' },
+  { value: 'vastUrl', label: 'vastUrl', mediaType: 'video', default: '', type: 'string' },
+  { value: 'vastXml', label: 'vastXml', mediaType: 'video', default: '', type: 'string' },
   //mediaType native
-  { value: 'clickUrl', label: 'clickUrl', mediaType: 'native', default: '', subkey: 'native' },
-  { value: 'title', label: 'title', mediaType: 'native', default: '', subkey: 'native' },
-  { value: 'image', label: 'image', mediaType: 'native', default: '', subkey: 'native' },
-  { value: 'cta', label: 'cta', mediaType: 'native', default: '', subkey: 'native' },
-  { value: 'sponsoredBy', label: 'sponsoredBy', mediaType: 'native', default: '', subkey: 'native' },
-  { value: 'body', label: 'Body', mediaType: 'native', default: '', subkey: 'native' },
-  { value: 'price', label: 'Price', mediaType: 'native', default: '', subkey: 'native' },
+  { value: 'clickUrl', label: 'clickUrl', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'title', label: 'title', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'image', label: 'image', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'cta', label: 'cta', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'sponsoredBy', label: 'sponsoredBy', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'body', label: 'Body', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'price', label: 'Price', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
 ];
 
 const sanityCheck = (rule: IPrebidDebugModuleConfigRule, mediaType: string) => {
@@ -85,6 +85,7 @@ const ReplaceRuleComponent = ({
           and
         </Typography>
       )}
+
       <Select
         sx={{ m: 0.25, minWidth: '17ch' }}
         native
@@ -127,8 +128,10 @@ const ReplaceRuleComponent = ({
         select={ruleKey === 'mediaType'}
         label="Replace-Rule Value"
         value={path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || ''}
+        type={ruleKey === 'mediaType' ? 'text' : replaceRuleTargets.find((x) => x.value === ruleKey)?.type}
         onChange={(event) => {
-          handleRulesFormChange('update', event.target.value, path);
+          const type = replaceRuleTargets.find((x) => x.value === ruleKey)?.type;
+          handleRulesFormChange('update', type === 'number' ? Number(event.target.value) : event.target.value, path);
         }}
         children={
           ruleKey === 'mediaType' &&
@@ -165,13 +168,14 @@ interface IReplaceRuleKeyOptions {
   options?: string[];
   subkey?: string;
   value: string;
+  type: string;
 }
 
 interface IReplaceRuleComponentProps {
   groupIndex: number;
   rule: IPrebidDebugModuleConfigRule;
   ruleKey: string;
-  handleRulesFormChange: (action: string, value: string, path: string[], deletePath?: any[]) => void;
+  handleRulesFormChange: (action: string, value: string | number, path: string[], deletePath?: any[]) => void;
   path: string[];
 }
 
