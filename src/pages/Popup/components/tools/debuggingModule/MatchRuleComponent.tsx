@@ -123,7 +123,9 @@ const MatchRuleComponent = ({ groupIndex, rule, ruleKey, handleRulesFormChange, 
           }}
         />
       )}
-      {Object.keys(rule.when).length < 2 && <IconButton size="small" color="primary" children={<AddIcon />} onClick={addMatchRule} />}
+      {Object.keys(rule.when).length < matchRuleTargets.length && (
+        <IconButton size="small" color="primary" children={<AddIcon />} onClick={addMatchRule} />
+      )}
     </React.Fragment>
   );
 };

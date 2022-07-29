@@ -19,7 +19,6 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
   const [debuggingModuleConfig, setDebuggingModuleConfig] = useState<IPrebidDebugModuleConfig>({ enabled: false, intercept: [] });
 
   const writeConfigToLS = async (input: IPrebidDebugModuleConfig) => {
-    // input = { ...debuggingModuleConfig, ...input };
     setDebuggingModuleConfig(input);
     const tabId = await getTabId();
     await chrome.scripting.executeScript({
@@ -33,13 +32,12 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
 
   const handleRulesFormChange = async (
     action: string,
-    value: string | boolean | IPrebidDebugModuleConfigRule[],
+    value: string | number | boolean | IPrebidDebugModuleConfigRule[],
     path: string[],
     deletePath?: string[]
   ) => {
     const newFormValues = { ...debuggingModuleConfig };
     set(newFormValues, path, value);
-
     if (deletePath) {
       const last = deletePath.pop();
       delete get(newFormValues, deletePath)[last];
@@ -108,7 +106,6 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
                 <Button
                   startIcon={<AddIcon />}
                   onClick={() => {
-                    // handleRulesFormChange('addRule', '', [])}
                     handleRulesFormChange(
                       'update',
                       [...debuggingModuleConfig.intercept, { when: { adUnitCode: '' }, then: { cpm: 20 } }],
@@ -153,3 +150,8 @@ interface DebuggingModuleComponentProps {
 }
 
 export default DebuggingModuleComponent;
+
+
+export interface IHandleRulesFormChangeProps {
+
+}
