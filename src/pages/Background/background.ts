@@ -108,8 +108,8 @@ class Background {
     if (!tabId || tabId !== activeTabId) return;
     logger.log('[Background] updateBadge', tabId);
     if (tabId && this.tabInfos[tabId]?.prebids) {
-      chrome.action.setBadgeBackgroundColor({ color: '#1ba9e1' });
-      chrome.action.setBadgeText({ text: `✓` });
+      chrome.action.setBadgeBackgroundColor({ color: '#1ba9e1', tabId: activeTabId });
+      chrome.action.setBadgeText({ text: `✓`, tabId: activeTabId });
     } else {
       chrome.action.setBadgeBackgroundColor({ color: '#ecf3f5' });
       chrome.action.setBadgeText({ text: `` });
