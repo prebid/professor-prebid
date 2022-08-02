@@ -136,7 +136,7 @@ export const Popup = (): JSX.Element => {
   return (
     <BrowserRouter>
       <ThemeProvider theme={popupTheme}>
-        <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light', opacity: 0.7 }}>
+        <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light' }}>
           <AppBar
             sx={{
               p: 1,
@@ -247,11 +247,11 @@ export const Popup = (): JSX.Element => {
           </AppBar>
           {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
             <Card onClick={refresh}>
-              <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
+              <CardContent sx={{ backgroundColor: 'primary.light' }}>
                 <Grid container justifyContent="center">
                   <Grid item>
                     <Paper elevation={4} sx={{ p: 2 }}>
-                      <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.</Typography>
+                      <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or  here to refresh the page.</Typography>
                     </Paper>
                   </Grid>
                 </Grid>

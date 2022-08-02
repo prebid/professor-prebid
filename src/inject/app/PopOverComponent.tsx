@@ -38,7 +38,13 @@ const PopOverComponent = ({
       sx={{ zIndex: getMaxZIndex() + 1, p: 1, width: 0.33 }}
     >
       <CacheProvider value={cacheTopPage}>
-        <Card sx={{ w: 1, backgroundColor: 'primary.light', opacity: 0.7, color: 'text.primary' }}>
+        <Card
+          sx={{
+            w: 1,
+            backgroundColor: 'primary.light',
+            color: 'text.primary',
+          }}
+        >
           <CardHeader
             action={
               <IconButton sx={{ p: 0 }} onClick={closePopOver}>
