@@ -5,6 +5,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 class Prebid {
   globalPbjs: {
+    bidderSettings: IPrebidBidderSettings;
     getEvents: () => IPrebidDetails['events'];
     onEvent: Function;
     que: Function[];
@@ -124,6 +125,7 @@ class Prebid {
       namespace: this.namespace,
       timeout,
       version: this.globalPbjs.version,
+      bidderSettings: this.globalPbjs.bidderSettings,
     };
 
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
@@ -363,16 +365,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
@@ -530,6 +532,13 @@ export interface IPrebidDetails {
   eids: IPrebidEids[];
   debug: IPrebidDebugConfig;
   namespace: string;
+  bidderSettings: IPrebidBidderSettings;
+}
+
+export interface IPrebidBidderSettings {
+  [key: string]: {
+    [key: string]: string | number | boolean;
+  };
 }
 
 export interface IPrebidNoEventsApiEventData {

@@ -6,6 +6,7 @@ import Server2ServerComponent from './Server2ServerComponent';
 import AnalyticsComponent from './AnalyticsComponent';
 import ConsentManagementComponent from './ConsentManagementComponent';
 import BidderSettingsComponent from './BidderSettingsComponent';
+import PrebidConfigComponent from './PrebidConfigComponent';
 import FloorsModuleComponent from './FloorsModuleComponent';
 import GptPreAuctionComponent from './GptPreAuctionComponent';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
@@ -23,7 +24,8 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
         <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} />
       )}
 
-      {prebid.config && <BidderSettingsComponent config={prebid.config} />}
+      {prebid.config && <PrebidConfigComponent config={prebid.config} />}
+      {prebid.bidderSettings && <BidderSettingsComponent prebid={prebid} />}
 
       {prebid.config.s2sConfig && Array.isArray(prebid.config.s2sConfig)
         ? prebid.config.s2sConfig.map((s2sConfig, index) => <Server2ServerComponent s2sConfig={s2sConfig} key={index} />)
