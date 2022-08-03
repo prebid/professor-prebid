@@ -7,7 +7,7 @@ import CardContent from '@mui/material/CardContent';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DnsIcon from '@mui/icons-material/Dns';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 
@@ -109,11 +109,10 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
             )}
             {expanded && s2sConfig.app && (
               <Grid item xs={12} sm={expanded ? 4 : 12}>
-                <ReactJson
+                <JSONViewerComponent
                   src={s2sConfig.app}
                   name={false}
                   collapsed={false}
-                  enableClipboard={false}
                   displayObjectSize={false}
                   displayDataTypes={false}
                   sortKeys={false}
@@ -133,11 +132,10 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
             )}
             {expanded && s2sConfig.adapterOptions && JSON.stringify(s2sConfig.adapterOptions) !== '{}' && (
               <Grid item xs={12}>
-                <ReactJson
+                <JSONViewerComponent
                   src={s2sConfig.adapterOptions}
                   name={false}
                   collapsed={false}
-                  enableClipboard={false}
                   displayObjectSize={false}
                   displayDataTypes={false}
                   sortKeys={false}
@@ -158,11 +156,10 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
             )}
             {expanded && s2sConfig.endpoint && typeof s2sConfig.endpoint === 'object' && JSON.stringify(s2sConfig.endpoint) !== '{}' && (
               <Grid item xs={12}>
-                <ReactJson
+                <JSONViewerComponent
                   src={s2sConfig.endpoint}
                   name={false}
                   collapsed={false}
-                  enableClipboard={false}
                   displayObjectSize={false}
                   displayDataTypes={false}
                   sortKeys={false}
@@ -183,11 +180,10 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
             )}
             {expanded && s2sConfig.syncEndpoint && typeof s2sConfig.syncEndpoint === 'object' && JSON.stringify(s2sConfig.syncEndpoint) !== '{}' && (
               <Grid item xs={12}>
-                <ReactJson
+                <JSONViewerComponent
                   src={s2sConfig.syncEndpoint}
                   name={false}
                   collapsed={false}
-                  enableClipboard={false}
                   displayObjectSize={false}
                   displayDataTypes={false}
                   sortKeys={false}
@@ -207,11 +203,10 @@ const Server2ServerComponent = ({ s2sConfig }: Server2ServerComponentProps): JSX
             )}
             {expanded && s2sConfig.syncUrlModifier && JSON.stringify(s2sConfig.syncUrlModifier) !== '{}' && (
               <Grid item xs={12}>
-                <ReactJson
+                <JSONViewerComponent
                   src={s2sConfig.syncUrlModifier}
                   name={false}
                   collapsed={false}
-                  enableClipboard={false}
                   displayObjectSize={false}
                   displayDataTypes={false}
                   sortKeys={false}

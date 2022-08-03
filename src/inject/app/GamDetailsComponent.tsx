@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
-import ReactJson from 'react-json-view';
+import JSONViewer from '../../pages/Shared/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
-  const [networktId, setNetworkId] = useState<string>(null);
+  const [networktId, setNetworkId] = useState<string[]>(null);
   const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
   const [queryId, setQueryId] = useState<string>(null);
@@ -24,7 +24,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
-        setNetworkId(slot.getAdUnitPath()?.split('/')[1]);
+        setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
         setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
         setSlotResponseInfo(slot.getResponseInformation());
         setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute('data-google-query-id') || null);
@@ -95,9 +95,32 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
               Query-ID:{' '}
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a href={`https://admanager.google.com/${networktId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
+              <a
+                href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`}
+                rel="noreferrer"
+                target="_blank"
+              >
                 {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
               </a>
+              {networktId[1] &&
+                networktId.map((nwId, index) => {
+                  if (index === 0) return null;
+                  return (
+                    <React.Fragment key={index}>
+                      <Typography component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                        {index === 0 && ' ('}
+                        <a
+                          href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          {`${index}`}
+                        </a>
+                        {index === networktId.length - 1 ? ')' : ', '}
+                      </Typography>
+                    </React.Fragment>
+                  );
+                })}
             </Typography>
           </Paper>
         </Grid>
@@ -137,11 +160,10 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                 <Grid item>
                   <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Response-Info:</Typography>
-                    <ReactJson
+                    <JSONViewer
                       name={false}
                       src={slotResponseInfo}
                       collapsed={false}
-                      enableClipboard={false}
                       displayObjectSize={true}
                       displayDataTypes={false}
                       sortKeys={false}

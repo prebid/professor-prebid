@@ -11,7 +11,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BusinessIcon from '@mui/icons-material/Business';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 import List from '@mui/material/List';
@@ -240,11 +240,10 @@ const TcfComponent = ({ tcf, tcfKey, expanded }: TcfComponentProps): JSX.Element
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <ReactJson
+          <JSONViewerComponent
             src={decodedTcfString}
             name={false}
             collapsed={false}
-            enableClipboard={false}
             displayObjectSize={false}
             displayDataTypes={false}
             sortKeys={false}

@@ -9,7 +9,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -95,11 +95,10 @@ const UserIdModuleComponent = ({ userSync }: UserIdModuleComponentProps): JSX.El
                           <TableCell>{userId.storage?.expires}</TableCell>
                           <TableCell>{userId.storage?.name}</TableCell>
                           <TableCell>
-                            <ReactJson
+                            <JSONViewerComponent
                               src={userId.params}
                               name={false}
                               collapsed={1}
-                              enableClipboard={false}
                               displayObjectSize={false}
                               displayDataTypes={false}
                               sortKeys={false}

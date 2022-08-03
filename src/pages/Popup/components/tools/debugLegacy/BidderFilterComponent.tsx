@@ -40,7 +40,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
       debugConfigState.bidders = biddersArray;
     }
     setDebugConfigState({ ...debugConfigState });
-  }
+  };
 
   const handleBidderFilterEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     debugConfigState = debugConfigState || {};
@@ -86,6 +86,7 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {selected.map((value) => (
                   <Chip
+                    size="small"
                     color="primary"
                     variant="outlined"
                     key={value}

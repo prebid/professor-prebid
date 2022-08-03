@@ -8,7 +8,7 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 
 const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX.Element => {
@@ -50,11 +50,10 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
         </Grid>
         {expanded && (
           <Grid item xs={12}>
-            <ReactJson
+            <JSONViewerComponent
               src={floors}
               name={false}
               collapsed={false}
-              enableClipboard={false}
               displayObjectSize={false}
               displayDataTypes={false}
               sortKeys={false}

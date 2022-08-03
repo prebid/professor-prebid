@@ -9,7 +9,7 @@ import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import BorderBottomIcon from '@mui/icons-material/BorderBottom';
 
 const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps): JSX.Element => {
@@ -53,11 +53,10 @@ const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps)
             </Grid>
           </Grid>
           <Grid item xs={12}>
-            <ReactJson
+            <JSONViewerComponent
               src={gptPreAuction}
               name={false}
               collapsed={false}
-              enableClipboard={false}
               displayObjectSize={false}
               displayDataTypes={false}
               sortKeys={false}

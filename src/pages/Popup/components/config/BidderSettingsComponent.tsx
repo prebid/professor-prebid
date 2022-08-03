@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidConfig } from '../../../../inject/scripts/prebid';
+import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
@@ -11,7 +11,7 @@ import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 
-const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX.Element => {
+const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
   const ref = React.useRef<HTMLInputElement>(null);
@@ -32,7 +32,7 @@ const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX
             </Avatar>
           }
           title={<Typography variant="h3">Bidder Settings</Typography>}
-          subheader={<Typography variant="subtitle1">Timeouts and more...</Typography>}
+          subheader={<Typography variant="subtitle1">LocalStorageAccess</Typography>}
           action={
             <ExpandMoreIcon
               sx={{
@@ -47,48 +47,16 @@ const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX
           <Grid container spacing={2}>
             <Grid item xs={12} sm={expanded ? 6 : 12}>
               <Typography variant="body1">
-                <strong> Bidder Sequence: </strong>
-                {config.bidderSequence}
+                <strong> StorageAccess: </strong>
+                {Object.keys(prebid.bidderSettings)
+                  .slice(0, !expanded ? 7 : Object.keys(prebid.bidderSettings).length)
+                  .map((bidder) => (
+                    <Typography key={bidder} variant="body1">
+                      {bidder}: {String(prebid.bidderSettings[bidder].storageAllowed)}
+                    </Typography>
+                  ))}
               </Typography>
             </Grid>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
-              <Typography variant="body1">
-                <strong> Bidder Timeout: </strong>
-                {config.bidderTimeout}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
-              <Typography variant="body1">
-                <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
-              <Typography variant="body1">
-                <strong> Timeout Buffer: </strong>
-                {config.timeoutBuffer}
-              </Typography>
-            </Grid>
-            {expanded && (
-              <Grid item xs={12} sm={expanded ? 6 : 12}>
-                <Typography variant="body1">
-                  <strong> Max Nested Iframes:</strong> {config.maxNestedIframes}
-                </Typography>
-              </Grid>
-            )}
-            {expanded && (
-              <Grid item xs={12} sm={expanded ? 6 : 12}>
-                <Typography variant="body1">
-                  <strong> Use Bid Cache:</strong> {String(config.useBidCache)}
-                </Typography>
-              </Grid>
-            )}
-            {expanded && (
-              <Grid item xs={12} sm={expanded ? 6 : 12}>
-                <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
-                  <strong> Bid Cache Url:</strong> {config.cache?.url}
-                </Typography>
-              </Grid>
-            )}
           </Grid>
         </CardContent>
       </Card>
@@ -97,7 +65,7 @@ const BidderSettingsComponent = ({ config }: IBidderSettingsComponentProps): JSX
 };
 
 interface IBidderSettingsComponentProps {
-  config: IPrebidConfig;
+  prebid: IPrebidDetails;
 }
 
 export default BidderSettingsComponent;

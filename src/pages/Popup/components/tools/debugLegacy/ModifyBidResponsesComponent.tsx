@@ -53,24 +53,32 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
 
   logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (
-    <React.Fragment>
-      <Grid item md={1} xs={1}>
-        <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
-          <FormControl>
-            <FormControlLabel control={<Switch checked={!!debugConfgigState?.enabled || false} onChange={handleEnabledChange} />} label="" />
-          </FormControl>
-        </Box>
-      </Grid>
-      <Grid item xs={11} md={11}>
-        <Box sx={{ border: 1, borderColor: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-          <Typography variant="h4" sx={{ width: 1, p: 1.5, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
-            Enable Debugging
-          </Typography>
-        </Box>
-      </Grid>
-      <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />
-      <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />
-    </React.Fragment>
+    <Grid item xs={12}>
+      <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
+        <Grid container rowSpacing={1} columnSpacing={0.5}>
+          <Grid item xs={12}>
+            <Grid container rowSpacing={1} columnSpacing={0.5}>
+              <Grid item md={1} xs={1}>
+                <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
+                  <FormControl>
+                    <FormControlLabel control={<Switch checked={!!debugConfgigState?.enabled} onChange={handleEnabledChange} />} label="" />
+                  </FormControl>
+                </Box>
+              </Grid>
+              <Grid item xs={11} md={11}>
+                <Box sx={{ border: 1, borderColor: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
+                  <Typography variant="h4" sx={{ width: 1, p: 1, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
+                    Enable Debugging
+                  </Typography>
+                </Box>
+              </Grid>
+              <BidderFilterComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />
+              <BidOverWriteComponent prebid={prebid} debugConfigState={debugConfgigState} setDebugConfigState={handleChange} />
+            </Grid>
+          </Grid>
+        </Grid>
+      </Box>
+    </Grid>
   );
 };
 

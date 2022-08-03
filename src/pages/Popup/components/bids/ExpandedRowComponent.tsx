@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 
 const ExpandedRowComponent = ({ bid }: IRowComponentProps) => {
@@ -137,11 +137,10 @@ const ExpandedRowComponent = ({ bid }: IRowComponentProps) => {
                   <strong>Params: </strong>
                 </Typography>
                 {bid.params && (
-                  <ReactJson
+                  <JSONViewerComponent
                     src={bid.params}
                     name={false}
                     collapsed={3}
-                    enableClipboard={false}
                     displayObjectSize={false}
                     displayDataTypes={false}
                     sortKeys={false}

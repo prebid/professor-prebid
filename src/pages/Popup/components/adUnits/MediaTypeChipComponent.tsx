@@ -1,7 +1,7 @@
 import React from 'react';
 import { IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
 import Chip from '@mui/material/Chip';
-import ReactJson from 'react-json-view';
+import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Popover from '@mui/material/Popover';
 
 const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipComponentProps): JSX.Element => {
@@ -19,9 +19,8 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
         size="small"
         variant="outlined"
         color={popUpOpen ? 'success' : isWinner ? 'secondary' : 'primary'}
-        label={label || JSON.stringify(input)}
+        label={label}
         onClick={handlePopoverOpen}
-        sx={{ maxWidth: 200 }}
       />
       <Popover
         open={popUpOpen}
@@ -31,11 +30,10 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         onClose={handlePopoverClose}
       >
-        <ReactJson
+        <JSONViewerComponent
           src={input}
           name={false}
           collapsed={false}
-          enableClipboard={false}
           displayObjectSize={false}
           displayDataTypes={false}
           sortKeys={false}

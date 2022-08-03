@@ -24,7 +24,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
 
   useEffect(() => {
     const auctionEndEvents = ((prebid.events || []) as IPrebidAuctionEndEventData[])
-      .filter((event) => event.eventType === 'auctionInit' || event.eventType === 'auctionEnd')
+      .filter((event) => event.eventType === 'auctionInit' || event.eventType === 'auctionEnd' || event.eventType === 'noEventsApi')
       .sort((a, b) => a.args.timestamp - b.args.timestamp);
     const adUnits = auctionEndEvents
       .reduce((previousValue, currentValue) => {
@@ -48,7 +48,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     const allAdUnitCodes = Array.from(
       new Set(
         prebid.events?.reduce((acc, event) => {
-          if (event.eventType === 'auctionInit' || event.eventType === 'auctionEnd') {
+          if (event.eventType === 'auctionInit' || event.eventType === 'auctionEnd' || event.eventType === 'noEventsApi') {
             const adUnitCodes = (event as IPrebidAuctionInitEventData).args.adUnitCodes;
             acc = [...acc, ...adUnitCodes];
           }

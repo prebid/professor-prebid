@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
-import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import { ITabInfo } from '../Background/background';
 import { getTabId } from './utils';
 import { ThemeProvider } from '@mui/material/styles';
@@ -36,6 +35,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
 import { popupTheme } from '../theme';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { IconButton } from '@mui/material';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
@@ -71,7 +74,7 @@ const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => 
     const prebids = (tabInfo as ITabInfo).prebids;
     if (prebids) {
       for (const [_, prebid] of Object.entries(prebids)) {
-        prebid.events =  await fetchEvents(prebid.eventsUrl);
+        prebid.events = await fetchEvents(prebid.eventsUrl);
       }
     }
   }
@@ -83,6 +86,12 @@ export const Popup = (): JSX.Element => {
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
   const [pbjsNameSpace, setPbjsNamespace] = React.useState<string>(null);
   const [tabInfo, setTabInfo] = useState<ITabInfo>({});
+
+  const refresh = async () => {
+    const tabId = await getTabId();
+    await chrome.tabs.reload(tabId);
+    await initialLoad(setPbjsNamespace, setTabInfo);
+  };
 
   const handleRouteChange = (input: any) => {
     setActiveRoute(input);
@@ -125,150 +134,184 @@ export const Popup = (): JSX.Element => {
 
   logger.log(`[PopUp]: render `, tabInfo?.prebids, tabInfo, pbjsNameSpace);
   return (
-    <ThemeProvider theme={popupTheme}>
-      <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light', opacity: 0.7 }}>
-        <Router>
-          <AppBar sx={{ p: 1, position: 'relative', backgroundColor: 'background.paper' }}>
-            <Stack sx={{ justifyContent: 'center', flexWrap: 'wrap', gap: 1, '&> a  ': { textDecoration: 'none' } }} direction="row">
-              <Badge
-                invisible={tabInfo?.prebids && Object.keys(tabInfo.prebids).length < 2}
-                badgeContent={(tabInfo?.prebids && Object.keys(tabInfo.prebids).length) || null}
-                color="primary"
-                sx={{ width: '14%' }}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                onClick={handleClickOpen}
+    <BrowserRouter>
+      <ThemeProvider theme={popupTheme}>
+        <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light' }}>
+          <AppBar
+            sx={{
+              p: 1,
+              position: 'relative',
+              backgroundColor: 'background.paper',
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              '&> a  ': { textDecoration: 'none' },
+            }}
+          >
+            <Badge
+              invisible={tabInfo?.prebids && Object.keys(tabInfo.prebids).length < 2}
+              badgeContent={(tabInfo?.prebids && Object.keys(tabInfo.prebids).length) || null}
+              color="primary"
+              sx={{ width: '14%' }}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              onClick={handleClickOpen}
+            >
+              <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width={'100%'} alt="prebid logo" />
+            </Badge>
+            {tabInfo?.prebids && (
+              <Dialog disableEscapeKeyDown open={pbjsNamespaceDialogOpen} onClose={handleClose}>
+                <DialogTitle>Select Prebid Instance</DialogTitle>
+                <DialogContent>
+                  <Box component="form">
+                    <FormControl sx={{ m: 1, minWidth: 180 }}>
+                      <Select value={pbjsNameSpace || undefined} onChange={handlePbjsNamespaceChange} autoWidth>
+                        {Object.keys(tabInfo?.prebids).map((global, index) => (
+                          <MenuItem key={index} value={global}>
+                            {global}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </DialogContent>
+                <DialogActions sx={{ justifyContent: 'space-around' }}>
+                  <Button onClick={handleClose}>Cancel</Button>
+                  <Button onClick={handleClose}>Ok</Button>
+                </DialogActions>
+              </Dialog>
+            )}
+            <Link to="/">
+              <Button
+                size="small"
+                variant={activeRoute === '/' ? 'contained' : 'outlined'}
+                onClick={() => handleRouteChange('/')}
+                startIcon={<AdUnitsOutlinedIcon />}
               >
-                <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width={'100%'} alt="prebid logo" />
-              </Badge>
-              {tabInfo?.prebids && (
-                <Dialog disableEscapeKeyDown open={pbjsNamespaceDialogOpen} onClose={handleClose}>
-                  <DialogTitle>Select Prebid Instance</DialogTitle>
-                  <DialogContent>
-                    <Box component="form">
-                      <FormControl sx={{ m: 1, minWidth: 180 }}>
-                        <Select value={pbjsNameSpace || undefined} onChange={handlePbjsNamespaceChange} autoWidth>
-                          {Object.keys(tabInfo?.prebids).map((global, index) => (
-                            <MenuItem key={index} value={global}>
-                              {global}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Box>
-                  </DialogContent>
-                  <DialogActions sx={{ justifyContent: 'space-around' }}>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleClose}>Ok</Button>
-                  </DialogActions>
-                </Dialog>
-              )}
-              <Link to="/">
-                <Button
-                  size="small"
-                  variant={activeRoute === '/' ? 'contained' : 'outlined'}
-                  onClick={() => handleRouteChange('/')}
-                  startIcon={<AdUnitsOutlinedIcon />}
-                >
-                  AdUnits
-                </Button>
-              </Link>
-              <Link to="/bids">
-                <Button
-                  size="small"
-                  variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
-                  onClick={() => handleRouteChange('/bids')}
-                  startIcon={<AccountBalanceOutlinedIcon />}
-                >
-                  Bids
-                </Button>
-              </Link>
-              <Link to="/timeline">
-                <Button
-                  size="small"
-                  variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
-                  onClick={() => handleRouteChange('/timeline')}
-                  startIcon={<TimelineOutlinedIcon />}
-                >
-                  Timeline
-                </Button>
-              </Link>
-              <Link to="/config">
-                <Button
-                  size="small"
-                  variant={activeRoute === '/config' ? 'contained' : 'outlined'}
-                  onClick={() => handleRouteChange('/config')}
-                  startIcon={<SettingsOutlinedIcon />}
-                >
-                  Config
-                </Button>
-              </Link>
-              <Link to="/userId">
-                <Button
-                  size="small"
-                  variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
-                  onClick={() => handleRouteChange('/userId')}
-                  startIcon={<ContactPageOutlinedIcon />}
-                >
-                  UserID
-                </Button>
-              </Link>
-              <Link to="/tools">
-                <Button
-                  size="small"
-                  variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
-                  onClick={() => handleRouteChange('/tools')}
-                  startIcon={<DnsOutlinedIcon />}
-                >
-                  Tools
-                </Button>
-              </Link>
-            </Stack>
+                AdUnits
+              </Button>
+            </Link>
+            <Link to="bids">
+              <Button
+                size="small"
+                variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
+                onClick={() => handleRouteChange('/bids')}
+                startIcon={<AccountBalanceOutlinedIcon />}
+              >
+                Bids
+              </Button>
+            </Link>
+            <Link to="timeline">
+              <Button
+                size="small"
+                variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
+                onClick={() => handleRouteChange('/timeline')}
+                startIcon={<TimelineOutlinedIcon />}
+              >
+                Timeline
+              </Button>
+            </Link>
+            <Link to="config">
+              <Button
+                size="small"
+                variant={activeRoute === '/config' ? 'contained' : 'outlined'}
+                onClick={() => handleRouteChange('/config')}
+                startIcon={<SettingsOutlinedIcon />}
+              >
+                Config
+              </Button>
+            </Link>
+            <Link to="userId">
+              <Button
+                size="small"
+                variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
+                onClick={() => handleRouteChange('/userId')}
+                startIcon={<ContactPageOutlinedIcon />}
+              >
+                UserID
+              </Button>
+            </Link>
+            <Link to="tools">
+              <Button
+                size="small"
+                variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
+                onClick={() => handleRouteChange('/tools')}
+                startIcon={<DnsOutlinedIcon />}
+              >
+                Tools
+              </Button>
+            </Link>
+            <IconButton aria-label="refresh" onClick={refresh}>
+              <RefreshIcon />
+            </IconButton>
           </AppBar>
-          <Switch>
-            <Route exact path="/">
-              {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
-                <Card
-                  onClick={async () => {
-                    const tabId = await getTabId();
-                    await chrome.tabs.reload(tabId);
-                    await initialLoad(setPbjsNamespace, setTabInfo);
-                  }}
-                >
-                  <CardContent sx={{ backgroundColor: 'primary.light', opacity: 0.7 }}>
-                    <Grid container justifyContent="center">
-                      <Grid item>
-                        <Paper elevation={4} sx={{ p: 2 }}>
-                          <Typography variant="h2">
-                            No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.
-                          </Typography>
-                        </Paper>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              )}
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/bids">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/timeline">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/config">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
-                <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo?.tcf} />
-              )}
-            </Route>
-            <Route exact path="/userId">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
-            </Route>
-            <Route exact path="/tools">
-              {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo?.prebids[pbjsNameSpace]} />}
-            </Route>
-          </Switch>
-        </Router>
-      </Box>
-    </ThemeProvider>
+          {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
+            <Card onClick={refresh}>
+              <CardContent sx={{ backgroundColor: 'primary.light' }}>
+                <Grid container justifyContent="center">
+                  <Grid item>
+                    <Paper elevation={4} sx={{ p: 2 }}>
+                      <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or  here to refresh the page.</Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          )}
+          <Routes>
+            <Route
+              path="/"
+              element={tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+            />
+            <Route
+              path="/popup.html"
+              element={tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <AdUnitsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+            />
+            <Route
+              path="bids"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <BidsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="timeline"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <TimelineComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="config"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace]?.config && (
+                    <ConfigComponent prebid={tabInfo.prebids[pbjsNameSpace]} tcf={tabInfo?.tcf} />
+                  )}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="userId"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <UserIdsComponent prebid={tabInfo.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+            <Route
+              path="tools"
+              element={
+                <React.Fragment>
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo?.prebids[pbjsNameSpace]} />}
+                </React.Fragment>
+              }
+            ></Route>
+          </Routes>
+        </Box>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 };

@@ -46,8 +46,10 @@ const AdOverlayComponent = ({
     }
   }, [elementId]);
   useEffect(() => {
-    setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
-  }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight]);
+    if (!truncate) {
+      setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
+    }
+  }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight, truncate]);
   return (
     <ThemeProvider theme={overlayTheme}>
       <PopOverComponent
@@ -78,12 +80,20 @@ const AdOverlayComponent = ({
             overflow: 'hidden',
           }}
         >
-          <Grid container justifyContent="flex-start" alignItems="flex-start" ref={gridRef}>
+          <Grid container justifyContent="flex-start" alignItems="flex-start" ref={gridRef} rowSpacing={0.2}>
             <Grid container item justifyContent="space-between" alignItems="flex-start">
-              <Grid item xs={7}>
-                <Typography variant="h3" sx={{ wordWrap: 'break-word', textAlign: 'left' }}>
-                  {elementId}
-                </Typography>
+              <Grid item xs={7} lg={3.5} xl={1.5}>
+                <Paper elevation={1} sx={{ p: 0.25 }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      wordWrap: 'break-word',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {elementId}
+                  </Typography>
+                </Paper>
               </Grid>
               <Grid
                 item
