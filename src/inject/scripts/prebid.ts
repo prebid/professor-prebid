@@ -1,7 +1,6 @@
 import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
-import cloneDeep from 'lodash/cloneDeep';
 
 class Prebid {
   globalPbjs: {
@@ -92,10 +91,8 @@ class Prebid {
 
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    const cloned = cloneDeep(events);
-    //doc in adRenderedEvents throws CORS error when JSON.stringified
-    const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object') ? value : undefined);
-    const string = JSON.stringify(cloned, replacer, 2);
+    const safeEvents = events.map(event => JSON.parse(JSON.stringify(event)));
+    const string = JSON.stringify(safeEvents);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
