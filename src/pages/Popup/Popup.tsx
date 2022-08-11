@@ -38,6 +38,8 @@ import { popupTheme } from '../theme';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { IconButton } from '@mui/material';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
@@ -55,37 +57,47 @@ const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {
   }
 };
 
-const fetchEvents = async (url: string) => {
-  try {
-    const response = await fetch(url);
-    const json = await response.json();
-    return json;
-  } catch (error) {
-    return [];
-  }
-};
-
-const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => {
-  const tabId = await getTabId();
-  const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
-  const newTabInfo = tabInfos[tabId];
-  setPbjsNamespace((previous: string) => getNameSpace(previous, newTabInfo));
-  for (const [_, tabInfo] of Object.entries(tabInfos)) {
-    const prebids = (tabInfo as ITabInfo).prebids;
-    if (prebids) {
-      for (const [_, prebid] of Object.entries(prebids)) {
-        prebid.events = await fetchEvents(prebid.eventsUrl);
-      }
-    }
-  }
-  setTabInfo(newTabInfo);
-};
-
 export const Popup = (): JSX.Element => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
   const [pbjsNameSpace, setPbjsNamespace] = React.useState<string>(null);
   const [tabInfo, setTabInfo] = useState<ITabInfo>({});
+  const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
+  const timer = React.useRef<ReturnType<typeof setTimeout>>(null);
+
+  const fetchEvents = async (url: string) => {
+    try {
+      setDownloading('true');
+      const response = await fetch(url);
+      const json = await response.json();
+      if (timer) {
+        clearTimeout(timer.current);
+      }
+      timer.current = setTimeout(() => {
+        setDownloading('false');
+      }, 1000);
+      return json;
+    } catch (error) {
+      setDownloading('error');
+      return [];
+    }
+  };
+
+  const initialLoad = async (setPbjsNamespace: Function, setTabInfo: Function) => {
+    const tabId = await getTabId();
+    const { tabInfos } = await chrome.storage.local.get(['tabInfos']);
+    const newTabInfo = tabInfos[tabId];
+    setPbjsNamespace((previous: string) => getNameSpace(previous, newTabInfo));
+    for (const [_, tabInfo] of Object.entries(tabInfos)) {
+      const prebids = (tabInfo as ITabInfo).prebids;
+      if (prebids) {
+        for (const [_, prebid] of Object.entries(prebids)) {
+          prebid.events = await fetchEvents(prebid.eventsUrl);
+        }
+      }
+    }
+    setTabInfo(newTabInfo);
+  };
 
   const refresh = async () => {
     const tabId = await getTabId();
@@ -129,10 +141,10 @@ export const Popup = (): JSX.Element => {
     initialLoad(setPbjsNamespace, setTabInfo);
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
+      clearTimeout(timer.current);
     };
   }, []);
 
-  logger.log(`[PopUp]: render `, tabInfo?.prebids, tabInfo, pbjsNameSpace);
   return (
     <BrowserRouter>
       <ThemeProvider theme={popupTheme}>
@@ -241,8 +253,30 @@ export const Popup = (): JSX.Element => {
                 Tools
               </Button>
             </Link>
-            <IconButton aria-label="refresh" onClick={refresh}>
-              <RefreshIcon />
+            <IconButton
+              aria-label="refresh"
+              onClick={refresh}
+              color={downloading === 'true' ? 'primary' : downloading === 'error' ? 'error' : 'default'}
+            >
+              {downloading === 'true' ? (
+                <AutorenewIcon
+                  sx={{
+                    animation: 'spin 1s linear infinite',
+                    '@keyframes spin': {
+                      '0%': {
+                        transform: 'rotate(-390deg)',
+                      },
+                      '100%': {
+                        transform: 'rotate(-30deg)',
+                      },
+                    },
+                  }}
+                />
+              ) : downloading === 'error' ? (
+                <ErrorOutlineIcon />
+              ) : (
+                <RefreshIcon />
+              )}
             </IconButton>
           </AppBar>
           {(!tabInfo?.prebids || !tabInfo?.prebids[pbjsNameSpace]) && (
@@ -251,7 +285,7 @@ export const Popup = (): JSX.Element => {
                 <Grid container justifyContent="center">
                   <Grid item>
                     <Paper elevation={4} sx={{ p: 2 }}>
-                      <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or  here to refresh the page.</Typography>
+                      <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.</Typography>
                     </Paper>
                   </Grid>
                 </Grid>

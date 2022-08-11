@@ -102,7 +102,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
       writeConfigToStorage(savedConfig);
     };
     getInitialState();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prebid.namespace]);
 
   return (

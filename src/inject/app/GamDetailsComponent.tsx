@@ -58,12 +58,28 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
               <a
-                href={`https://admanager.google.com/${networktId}#delivery/LineItemDetail/lineItemId=${lineItemId}`}
+                href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`}
                 rel="noreferrer"
                 target="_blank"
               >
                 {lineItemId}
               </a>
+              {networktId[1] &&
+                networktId.map((nwId, index) => (
+                  <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                    {index === 0 && ' ('}
+                    {index > 0 && (
+                      <a
+                        href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {`${index}`}
+                      </a>
+                    )}
+                    {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                  </Typography>
+                ))}
             </Typography>
           </Paper>
         </Grid>
@@ -77,12 +93,28 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
               <a
-                href={`https://admanager.google.com/${networktId}#delivery/CreativeDetail/creativeId=${creativeId}`}
+                href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`}
                 rel="noreferrer"
                 target="_blank"
               >
                 {creativeId}
               </a>
+              {networktId[1] &&
+                networktId.map((nwId, index) => (
+                  <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                    {index === 0 && ' ('}
+                    {index > 0 && (
+                      <a
+                        href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {`${index}`}
+                      </a>
+                    )}
+                    {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                  </Typography>
+                ))}
             </Typography>
           </Paper>
         </Grid>
@@ -103,24 +135,21 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                 {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
               </a>
               {networktId[1] &&
-                networktId.map((nwId, index) => {
-                  if (index === 0) return null;
-                  return (
-                    <React.Fragment key={index}>
-                      <Typography component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
-                        {index === 0 && ' ('}
-                        <a
-                          href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
-                          {`${index}`}
-                        </a>
-                        {index === networktId.length - 1 ? ')' : ', '}
-                      </Typography>
-                    </React.Fragment>
-                  );
-                })}
+                networktId.map((nwId, index) => (
+                  <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                    {index === 0 && ' ('}
+                    {index > 0 && (
+                      <a
+                        href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {`${index}`}
+                      </a>
+                    )}
+                    {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                  </Typography>
+                ))}
             </Typography>
           </Paper>
         </Grid>

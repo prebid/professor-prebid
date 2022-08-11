@@ -35,6 +35,16 @@ export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   { value: 'sponsoredBy', label: 'sponsoredBy', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
   { value: 'body', label: 'Body', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
   { value: 'price', label: 'Price', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'privacyLink', label: 'privacyLink', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'icon', label: 'icon', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'displayUrl', label: 'displayUrl', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'rating', label: 'rating', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'address', label: 'address', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'downloads', label: 'downloads', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'likes', label: 'likes', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'phone', label: 'phone', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'salePrice', label: 'salePrice', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
+  { value: 'rendererUrl', label: 'rendererUrl', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
 ];
 
 const sanityCheck = (rule: IPrebidDebugModuleConfigRule, mediaType: string) => {
