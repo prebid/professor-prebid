@@ -120,7 +120,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           </Grid>
         </React.Fragment>
       )}
-      {!allAdUnitCodes[0] && (
+      {/* {!allAdUnitCodes[0] && (
         <Grid container direction="row" justifyContent="space-evenly">
           <Grid item>
             <Paper elevation={1} sx={{ p: 1 }}>
@@ -128,7 +128,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
             </Paper>
           </Grid>
         </Grid>
-      )}
+      )} */}
     </React.Fragment>
   );
 };
