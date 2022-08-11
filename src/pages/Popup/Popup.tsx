@@ -141,7 +141,7 @@ export const Popup = (): JSX.Element => {
     initialLoad(setPbjsNamespace, setTabInfo);
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
-      clearTimeout(timer.current);  
+      clearTimeout(timer.current);
     };
   }, []);
 
