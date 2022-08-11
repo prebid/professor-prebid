@@ -91,7 +91,8 @@ class Prebid {
 
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    const safeEvents = events.map(event => JSON.parse(JSON.stringify(event)));
+    const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object') ? value : undefined);
+    const safeEvents = events.map(event => JSON.parse(JSON.stringify(event, replacer)));
     const string = JSON.stringify(safeEvents);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
