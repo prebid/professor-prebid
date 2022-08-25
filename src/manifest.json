@@ -14,6 +14,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "<all_urls>"],
+      "run_at": "document_start",
       "js": ["inject.bundle.js", "contentScript.bundle.js"]
     }
   ],
@@ -25,5 +26,6 @@
     }
   ],
   "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
-  "host_permissions": ["https://*/", "http://*/"]
+  "host_permissions": ["https://*/", "http://*/"],
+  "incognito": "split"
 }
