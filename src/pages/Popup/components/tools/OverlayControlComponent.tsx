@@ -22,15 +22,13 @@ const OverlayControlComponent = (): JSX.Element => {
   const handleShowOverlayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowOverlay(event.target.checked);
     const { checked } = event.target;
-    try {
-      chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
-        chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-          const tab = tabs[0];
-          chrome.tabs.sendMessage(tab.id as number, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
-        });
+    chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
+      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+        const tab = tabs[0];
+        logger.log('[PopupHandler] Send onConsoleToggle', { tab }, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
+        chrome.tabs.sendMessage(tab.id as number, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
       });
-    } catch (e) {
-    }
+    });
   };
 
   return (
