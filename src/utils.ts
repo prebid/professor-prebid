@@ -1,7 +1,5 @@
-import logger from './logger';
 
 export const sendToContentScript = (type: string, payload: object): void => {
-  logger.log('[sendToContentScript] postMessage ', type);
   // work-around for
   // DOMException:xyz could not be cloned.
   // in window.postMessage

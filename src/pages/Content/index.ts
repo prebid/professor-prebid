@@ -2,21 +2,18 @@
 // injected script, build auction data structure. Also listens for
 // (chrome) messages from Popup.js when it runs and responds to it
 // with the auction data it collected so far
-import logger from '../../logger';
 import constants from '../../constants.json';
 import { IPrebidDetails } from '../../inject/scripts/prebid';
 
 class Content {
   pbjsNamespace: string = null;
   constructor() {
-    logger.log('[Content] init()');
     this.listenToInjectedScript();
     this.listenToPopupScript();
   }
 
   listenToInjectedScript = () => {
     window.addEventListener('message', this.processMessageFromInjected, false);
-    logger.log('[Content] listenToInjectedScript()');
   };
 
   listenToPopupScript = () => {
@@ -30,7 +27,6 @@ class Content {
       }
       sendResponse();
     });
-    logger.log('[Content] listenToPopupScript()');
   };
 
   processMessageFromInjected = (event: MessageEvent<{ type: string; payload: object }>) => {
@@ -46,28 +42,23 @@ class Content {
     }
     this.updateBackgroundPage(type, payload);
     this.updateOverlays();
-    logger.log('[Content] processMessageFromInjected()', { type, payload });
   };
 
   sendConsoleStateToInjected = async () => {
     const result = await chrome.storage.local.get(constants.CONSOLE_TOGGLE);
     const checked = result[constants.CONSOLE_TOGGLE];
     document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: !!checked }));
-    logger.log('[Content] sendConsoleStateToInjected()');
   };
 
   updateBackgroundPage = (type: string, payload: object) => {
     if (!type || !payload || !chrome.runtime?.id) return;
-    logger.log('[Content] updateBackgroundPage', type, payload);
     chrome.runtime.sendMessage({ type, payload });
   };
 
   updateOverlays = () => {
-    logger.log('[Content] update Overlays', this.pbjsNamespace);
     if (this.pbjsNamespace) {
       document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: this.pbjsNamespace }));
     }
-    logger.log('[Content] update Overlays()');
   };
 }
 

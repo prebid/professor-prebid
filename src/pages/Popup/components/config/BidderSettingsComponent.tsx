@@ -1,7 +1,6 @@
 import React from 'react';
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
-import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
@@ -21,7 +20,6 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
     setMaxWidth(expanded ? 4 : 8);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
-  logger.log(`[PopUp][BidderSettingsComponent]: render `);
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
-import logger from '../../logger';
 import { createPortal } from 'react-dom';
 
 export const getMaxZIndex = () =>
@@ -21,7 +20,6 @@ const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, ma
   };
 
   useEffect(() => {
-    logger.log('[AdMaskPortal] Mounting AdMaskPortal');
     const slotMaskElement = document.getElementById(`prpb-mask--container-${mask.elementId}`);
     if (consoleState) {
       if (!slotMaskElement) {

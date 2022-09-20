@@ -3,7 +3,6 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Typography from '@mui/material/Typography';
-import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
@@ -28,7 +27,6 @@ const UserIdsComponent = ({ prebid }: IUserIdsComponentProps): JSX.Element => {
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  logger.log(`[PopUp][UserIdsComponent]: render `);
   if (prebid.eids && prebid.eids[0]) {
     return (
       <React.Fragment>

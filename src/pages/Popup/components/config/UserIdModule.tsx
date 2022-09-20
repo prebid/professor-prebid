@@ -10,7 +10,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
-import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
@@ -28,7 +27,6 @@ const UserIdModuleComponent = ({ userSync }: UserIdModuleComponentProps): JSX.El
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 
-  logger.log(`[PopUp][ModulesComponent]: render `);
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>

@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
 import { TCString } from '@iabtcf/core';
 import TextField from '@mui/material/TextField';
-import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -28,7 +27,6 @@ const PrivacyComponent = ({ consentManagement, tcf }: IPrivacyComponentProps): J
     setMaxWidth(expanded ? 4 : 12);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
-  logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf);
   const tileWidth = expanded ? 4 : 12;
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
@@ -209,7 +207,6 @@ const TcfComponent = ({ tcf, tcfKey, expanded }: TcfComponentProps): JSX.Element
     } catch (e) {}
     setDecodedTcfString(decodedTcfString);
   }, [tcf, tcfKey]);
-  logger.log(`[PopUp][PriceGranularityComponent]: render `, tcf, tcfKey);
   return (
     expanded && (
       <React.Fragment>

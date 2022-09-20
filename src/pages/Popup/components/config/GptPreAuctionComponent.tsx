@@ -1,7 +1,6 @@
 import React from 'react';
 import { IPrebidConfig } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
-import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Card from '@mui/material/Card';
@@ -22,7 +21,6 @@ const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps)
     setMaxWidth(expanded ? 4 : 4);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
-  logger.log(`[PopUp][GptPreAuctionModule]: render `, gptPreAuction);
   return (
     <Grid item md={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>

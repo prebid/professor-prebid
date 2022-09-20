@@ -9,7 +9,6 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
-import logger from '../../../../../logger';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material';
 
@@ -64,7 +63,6 @@ const BidderFilterComponent = ({ prebid, debugConfigState, setDebugConfigState }
     setDetectedBidderNames(Array.from(bidderNamesSet));
   }, [prebid.events]);
 
-  logger.log(`[PopUp][BidderFilterComponent]: render `, detectedBidderNames, bidderFilterEnabled, selectedBidders);
   return (
     <React.Fragment>
       <Grid item md={1} xs={1}>

@@ -1,4 +1,3 @@
-import logger from '../../logger';
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 
@@ -31,7 +30,6 @@ class Prebid {
 
   addEventListeners = (): void => {
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
-      logger.log('[Injected] auctionInit', this.namespace, { auctionInitData });
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionInit', args: auctionInitData });
       }
@@ -39,7 +37,6 @@ class Prebid {
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
-      logger.log('[Injected] auctionEnd', this.namespace, { auctionEndData });
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionEnd', args: auctionEndData });
       }
@@ -47,7 +44,6 @@ class Prebid {
     });
 
     this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
-      logger.log('[Injected] bidRequested', this.namespace, { bidRequestedData });
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidRequested', args: bidRequestedData });
       }
@@ -55,7 +51,6 @@ class Prebid {
     });
 
     this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
-      logger.log('[Injected] bidResponse', this.namespace, { bidResponseData });
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidResponse', args: bidResponseData });
       }
@@ -63,7 +58,6 @@ class Prebid {
     });
 
     this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
-      logger.log('[Injected] noBid', this.namespace, { noBidData });
       if (!this.eventsApi) {
         this.events.push({ eventType: 'noBid', args: noBidData });
       }
@@ -71,13 +65,11 @@ class Prebid {
     });
 
     this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
-      logger.log('[Injected] bidWon', this.namespace, { bidWonData });
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidWon', args: bidWonData });
       }
       this.throttle(this.sendDetailsToContentScript);
     });
-    logger.log('[Injected] event listeners added', this.namespace);
   };
 
   getDebugConfig = () => {
@@ -128,7 +120,6 @@ class Prebid {
 
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     const time = new Date().toJSON();
-    logger.log(`[Injected] sendDetailsToContentScript`, prebidDetail, time);
     this.sendToContentScriptPending = false;
   };
 
@@ -150,14 +141,12 @@ class Prebid {
 }
 
 export const addEventListenersForPrebid = () => {
-  logger.log('[Injected] addEventListenersForPrebid', window._pbjsGlobals);
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(() => {
     stopLoop = true;
   }, 8000);
   const isPrebidInPage = () => {
-    logger.log('[Injected] isPrebidInPage', window.top);
     const pbjsGlobals = window._pbjsGlobals || [];
     if (pbjsGlobals.length > 0) {
       pbjsGlobals.forEach((global: string) => {

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { ITabInfo } from '../Background/background';
 import { getTabId } from './utils';
 import { ThemeProvider } from '@mui/material/styles';
-import logger from '../../logger';
 import AdUnitsComponent from './components/adUnits/AdUnitsComponent';
 import UserIdsComponent from './components/userIds/UserIdsComponent';
 import ConfigComponent from './components/config/ConfigComponent';
@@ -44,7 +43,6 @@ import { IconButton } from '@mui/material';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
-  logger.log('[PopupHandler] Send pbjsNamespace', { tabId }, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
   chrome.tabs.sendMessage(tabId, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
 };
 
