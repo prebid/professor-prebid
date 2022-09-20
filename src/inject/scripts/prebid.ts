@@ -525,6 +525,7 @@ export interface IPrebidDetails {
     | IPrebidBidWonEventData
     | IPrebidBidResponseEventData
     | IPrebidAdRenderSucceededEventData
+    | IPrebidAuctionDebugEventData
   )[];
   config: IPrebidConfig;
   eids: IPrebidEids[];
@@ -557,6 +558,17 @@ export interface IPrebidNoEventsApiEventData {
   elapsedTime: number;
   eventType: string;
   id: string;
+}
+
+export interface IPrebidAuctionDebugEventData {
+  "eventType": "auctionDebug",
+  "args": {
+    "type": "ERROR" | "WARNING",
+    "arguments": {
+      [key: string]: string | number
+    }
+  },
+  "elapsedTime": 7272
 }
 
 export interface IPrebidAuctionInitEventData {
