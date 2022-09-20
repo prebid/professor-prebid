@@ -15,6 +15,15 @@ import { Paper } from '@mui/material';
 import OverlayControlComponent from './OverlayControlComponent';
 import { gte } from 'semver';
 
+const isNewDebugVersion = (input: string): boolean => {
+  try {
+    return gte(input, '7.3.0');
+  } catch (error) {
+    console.warn('invalid version string! enable legacy debug module');
+    return false;
+  }
+};
+
 const dfp_open_console = async () => {
   const tabId = await getTabId();
   const fileUrl = chrome.runtime.getURL('openDfpConsole.bundle.js');
@@ -70,8 +79,8 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
         </Grid>
 
         <OverlayControlComponent />
-        {prebid && !gte(prebid.version, '7.3.0') && <ModifyBidResponsesComponent prebid={prebid} />}
-        {prebid && gte(prebid.version, '7.3.0') && <DebuggingModuleComponent prebid={prebid} />}
+        {prebid && !isNewDebugVersion(prebid.version) && <ModifyBidResponsesComponent prebid={prebid} />}
+        {prebid && isNewDebugVersion(prebid.version) && <DebuggingModuleComponent prebid={prebid} />}
       </Grid>
     </Box>
   );
