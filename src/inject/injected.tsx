@@ -25,7 +25,9 @@ const injectApp = () => {
     document.body.appendChild(root);
     ReactDOM.render(<InjectedApp />, document.getElementById(root.id));
   } else {
-    requestIdleCallback(injectApp);
+    if (requestIdleCallback && typeof requestIdleCallback === 'function') {
+      requestIdleCallback(injectApp);
+    }
   }
 };
 injectApp();
