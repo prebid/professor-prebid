@@ -1,10 +1,3 @@
-/**
-  This script is injected into the original page and is the ONLY
-  way to gain access to the JS context of the page (namely pbjs)
-  The only way for an injected script to message to the content.js
-  script is via window.postMessage() 
- */
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import InjectedApp from './app/InjectedApp';

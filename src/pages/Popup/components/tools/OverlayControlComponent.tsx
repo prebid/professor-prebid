@@ -25,7 +25,6 @@ const OverlayControlComponent = (): JSX.Element => {
     chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
       chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
         const tab = tabs[0];
-        logger.log('[PopupHandler] Send onConsoleToggle', { tab }, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
         chrome.tabs.sendMessage(tab.id as number, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
       });
     });
