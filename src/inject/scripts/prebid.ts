@@ -26,6 +26,7 @@ class Prebid {
     this.namespace = namespace;
     this.globalPbjs = window[namespace as keyof Window];
     this.globalPbjs.que.push(() => this.addEventListeners());
+    this.globalPbjs.que.push(() => this.throttle(this.sendDetailsToContentScript));
   }
 
   addEventListeners = (): void => {
@@ -119,7 +120,6 @@ class Prebid {
     };
 
     sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-    const time = new Date().toJSON();
     this.sendToContentScriptPending = false;
   };
 
@@ -352,16 +352,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
