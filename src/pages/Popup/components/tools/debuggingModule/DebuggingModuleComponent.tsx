@@ -156,7 +156,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
             <Box component="form" noValidate autoComplete="off">
               <Grid container rowSpacing={1} columnSpacing={0.5}>
                 {prebid &&
-                  debuggingModuleConfig?.intercept.map((rule, index) => (
+                  debuggingModuleConfig?.intercept?.map((rule, index) => (
                     <RuleComponent
                       key={index}
                       rule={rule}

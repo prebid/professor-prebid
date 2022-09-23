@@ -11,7 +11,6 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
-import logger from '../../../../../logger';
 import Grid from '@mui/material/Grid';
 
 const ITEM_HEIGHT = 48;
@@ -119,7 +118,6 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
     setDetectedAdUnitCodes(Array.from(adUnitCodesSet));
   }, [prebid.events]);
 
-  logger.log(`[PopUp][BidOverWriteComponent]: render `, detectedBidderNames, bidsOverwriteEnabled, cpm);
 
   return (
     <React.Fragment>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { IPrebidDetails } from '../../../../inject/scripts/prebid';
 import Typography from '@mui/material/Typography';
-import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete';
@@ -14,7 +13,6 @@ import { useTheme } from '@mui/material';
 const LISTBOX_PADDING = 8; // px
 
 const SearchBarComponent = ({ config }: SearchBarComponentProps): JSX.Element => {
-  logger.log(`[PopUp][SearchBarComponent]: render `);
   const options = new Set<string>();
   const loop = (obj: any) => {
     for (var k in obj) {

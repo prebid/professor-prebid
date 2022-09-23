@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import logger from '../../../../../logger';
 import { getTabId } from '../../../utils';
 import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -51,7 +50,6 @@ const ModifyBidResponsesComponent = ({ prebid }: ModifyBidResponsesComponentProp
     getInitialState();
   }, [prebid.namespace]);
 
-  logger.log(`[PopUp][ModifyBidResponsesComponent]: render `, debugConfgigState);
   return (
     <Grid item xs={12}>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>

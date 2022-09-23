@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import logger from '../../logger';
 import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
 import AdOverlayPortal from './AdOverlayPortal';
@@ -52,7 +51,6 @@ const InjectedApp = (): JSX.Element => {
             timeToRespond: slotsBidWonEvent?.args.timeToRespond,
           };
         });
-      logger.log('[InjectedApp] New masks prepared to set', masks);
       setMasks(masks);
     }
   };

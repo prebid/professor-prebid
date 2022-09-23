@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
 import Paper from '@mui/material/Paper';
-import logger from '../../../../logger';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
@@ -126,7 +125,6 @@ export const PriceGranularityComponent = ({ priceGranularity, customPriceBucket 
     setRows(rows);
   }, [priceGranularity, customPriceBucket?.buckets]);
 
-  logger.log(`[PopUp][PriceGranularityComponent]: render `, type, rows);
   return (
     <Box sx={{ backgroundColor: 'text.disabled', p: 0.25, borderRadius: 1 }}>
       <Grid container spacing={0.2}>

@@ -41,20 +41,28 @@ const AdUnitRowComponent = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events:
                 (bidReceived) =>
                   bidReceived.args?.adUnitCode === adUnit.code &&
                   bidReceived.args.bidder === bid.bidder &&
-                  adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args?.size)
+                  (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args?.size) ||
+                    (Object.keys(adUnit.mediaTypes).includes('native') && bidReceived.args.mediaType === 'native') ||
+                    (Object.keys(adUnit.mediaTypes).includes('video') && bidReceived.args.mediaType === 'video'))
               );
+
               const isWinner = winningBids.some(
                 (winningBid) =>
                   winningBid.args.adUnitCode === adUnit.code &&
                   winningBid.args.bidder === bid.bidder &&
-                  adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
+                  (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(winningBid?.args?.size) ||
+                    (Object.keys(adUnit.mediaTypes).includes('native') && winningBid.args.mediaType === 'native') ||
+                    (Object.keys(adUnit.mediaTypes).includes('video') && winningBid.args.mediaType === 'video'))
               );
+
               const isRendered = adsRendered.some(
                 (renderedAd) => renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bid.bidder
               );
+
               const label = bidReceived?.args.cpm
                 ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
                 : `${bid.bidder}`;
+
               return <BidChipComponent input={bid} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} isRendered={isRendered} />;
             })}
           </Stack>

@@ -1,6 +1,5 @@
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
-import logger from '../../logger';
 
 declare global {
   interface Window {
@@ -36,7 +35,6 @@ class GoogleAdManager {
       const timestamp = Date.now();
       this.updatePostAuctionTimestamps(timestamp);
       this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotRequested', timestamp }];
-      logger.log('GPT EVENT: slotRequested', { slotElementId, event });
       // this.sendDetailsToContentScript()
     });
 
@@ -45,7 +43,6 @@ class GoogleAdManager {
       const timestamp = Date.now();
       this.updatePostAuctionTimestamps(timestamp);
       this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotResponseReceived', timestamp }];
-      logger.log('GPT EVENT: slotResponseReceived', { slotElementId, event });
       this.sendDetailsToContentScript();
     });
 
@@ -53,7 +50,6 @@ class GoogleAdManager {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotRenderEnded', timestamp }];
-      logger.log('GPT EVENT: slotRenderEnded', { slotElementId, event });
       // this.sendDetailsToContentScript()
     });
 
@@ -61,7 +57,6 @@ class GoogleAdManager {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotOnload', timestamp }];
-      logger.log('GPT EVENT: slotOnload', { slotElementId, event });
       // this.sendDetailsToContentScript()
     });
 
@@ -69,7 +64,6 @@ class GoogleAdManager {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotVisibilityChanged', timestamp }];
-      logger.log('GPT EVENT: slotVisibilityChanged', { slotElementId, event });
       // this.sendDetailsToContentScript()
     });
 
@@ -77,7 +71,6 @@ class GoogleAdManager {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'impressionViewable', timestamp }];
-      logger.log('GPT EVENT: impressionViewable', { slotElementId, event });
       this.sendDetailsToContentScript();
     });
   }

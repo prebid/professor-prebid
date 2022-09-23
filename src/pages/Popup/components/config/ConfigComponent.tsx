@@ -10,13 +10,11 @@ import PrebidConfigComponent from './PrebidConfigComponent';
 import FloorsModuleComponent from './FloorsModuleComponent';
 import GptPreAuctionComponent from './GptPreAuctionComponent';
 import { ITcfDetails } from '../../../../inject/scripts/tcf';
-import logger from '../../../../logger';
 import Grid from '@mui/material/Grid';
 import SearchBarComponent from './SearchBarComponent';
 export const tileHeight = 255;
 
 const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element => {
-  logger.log(`[PopUp][BidderSettingsComponent]: render `, prebid.config, tcf);
   return (
     <Grid container spacing={0.25} padding={1}>
       {false && <SearchBarComponent config={prebid.config}></SearchBarComponent>}

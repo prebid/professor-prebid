@@ -5,22 +5,28 @@ import {
   IPrebidNoBidEventData,
   IPrebidBidResponseEventData,
   IPrebidAuctionEndEventData,
+  IPrebidAuctionDebugEventData,
   IPrebidAdUnit,
 } from '../../../../inject/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import logger from '../../../../logger';
 import merge from 'lodash/merge';
+import Badge from '@mui/material/Badge';
+import Popover from '@mui/material/Popover';
+import EventsPopOverComponent from './EventsPopOverComponent';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
+  const [eventsPopUpOpen, setEventsPopUpOpen] = React.useState<boolean>(false);
   const [allBidResponseEvents, setAllBidResponseEvents] = React.useState<IPrebidBidResponseEventData[]>([]);
   const [allNoBidEvents, setAllNoBidEvents] = React.useState<IPrebidNoBidEventData[]>([]);
   const [allBidderEvents, setAllBidderEvents] = React.useState<IPrebidDetails['events'][]>([]);
   const [allAdUnitCodes, setAllAdUnitCodes] = React.useState<string[]>([]);
   const [auctionEndEvents, setAuctionEndEvents] = React.useState<IPrebidAuctionEndEventData[]>([]);
   const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
+  const [errors, setErrors] = React.useState<IPrebidAuctionDebugEventData[]>([]);
+  const [warnings, setWarnings] = React.useState<IPrebidAuctionDebugEventData[]>([]);
 
   useEffect(() => {
     const auctionEndEvents = ((prebid.events || []) as IPrebidAuctionEndEventData[])
@@ -57,6 +63,14 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
       )
     );
     setAllAdUnitCodes(allAdUnitCodes);
+    const warnings = ((prebid.events?.filter((event) => event.eventType === 'auctionDebug') || []) as IPrebidAuctionDebugEventData[]).filter(
+      ({ args }) => args.type === 'WARNING'
+    );
+    setWarnings(warnings);
+    const errors = (prebid.events?.filter((event) => event.eventType === 'auctionDebug') as IPrebidAuctionDebugEventData[]).filter(
+      ({ args }) => (args as any).type === 'ERROR'
+    );
+    setErrors(errors);
   }, [prebid.events]);
 
   useEffect(() => {
@@ -65,7 +79,13 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     setAllBidderEvents(allBidderEventsBidders);
   }, [allBidResponseEvents, allNoBidEvents, auctionEndEvents]);
 
-  logger.log(`[PopUp][AdUnitsComponent]: render `, allBidResponseEvents, allNoBidEvents, allBidderEvents, allAdUnitCodes);
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setEventsPopUpOpen(true);
+  };
+  const handleEventsPopoverClose = () => {
+    setEventsPopUpOpen(false);
+  };
+
   return (
     <React.Fragment>
       {allAdUnitCodes[0] && (
@@ -106,11 +126,29 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
               </Paper>
             </Grid>
             <Grid item>
-              <Paper sx={{ p: 1 }} elevation={1}>
-                <Typography variant="h2">
-                  Event{prebid.events?.length > 1 ? 's' : ''} : {prebid.events?.length}
-                </Typography>
-              </Paper>
+              <Badge
+                // invisible={errors.length === 0 && warnings.length === 0}
+                invisible={true}
+                badgeContent={errors.length + '!' || warnings.length + '!' || ''}
+                anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                onClick={handlePopoverOpen}
+                sx={{
+                  color: errors.length > 0 ? 'error.main' : warnings.length > 0 ? 'warning.main' : 'primary.light',
+                  '& .MuiBadge-badge': {
+                    borderWidth: 0,
+                    borderStyle: 'solid',
+                    borderColor: errors.length > 0 ? 'error.main' : warnings.length > 0 ? 'warning.main' : 'primary.light',
+                    borderRadius: '50%',
+                    backgroundColor: 'white',
+                  },
+                }}
+              >
+                <Paper sx={{ p: 1 }} elevation={1}>
+                  <Typography variant="h2" noWrap>
+                    Event{prebid.events?.length > 1 ? 's' : ''} : {prebid.events?.length}
+                  </Typography>
+                </Paper>
+              </Badge>
             </Grid>
             <Grid item xs={12}>
               <Grid spacing={0.25} container direction="row">
@@ -129,6 +167,19 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           </Grid>
         </Grid>
       )} */}
+      <Popover
+        open={eventsPopUpOpen}
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: 1, left: 1 }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        onClose={handleEventsPopoverClose}
+        PaperProps={{
+          style: { width: '100%', padding: 1 },
+        }}
+      >
+        <EventsPopOverComponent errors={errors} warnings={warnings} close={handleEventsPopoverClose} />
+      </Popover>
     </React.Fragment>
   );
 };
