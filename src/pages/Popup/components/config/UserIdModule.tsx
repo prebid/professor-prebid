@@ -93,15 +93,17 @@ const UserIdModuleComponent = ({ userSync }: UserIdModuleComponentProps): JSX.El
                           <TableCell>{userId.storage?.expires}</TableCell>
                           <TableCell>{userId.storage?.name}</TableCell>
                           <TableCell>
-                            <JSONViewerComponent
-                              src={userId.params}
-                              name={false}
-                              collapsed={1}
-                              displayObjectSize={false}
-                              displayDataTypes={false}
-                              sortKeys={false}
-                              quotesOnKeys={false}
-                            />
+                            {userId.params && JSON.stringify(userId.params) !== '{}' && (
+                              <JSONViewerComponent
+                                src={userId.params}
+                                name={false}
+                                collapsed={1}
+                                displayObjectSize={false}
+                                displayDataTypes={false}
+                                sortKeys={false}
+                                quotesOnKeys={false}
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
