@@ -63,11 +63,11 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
       )
     );
     setAllAdUnitCodes(allAdUnitCodes);
-    const warnings = ((prebid.events?.filter((event) => event.eventType === 'auctionDebug') || []) as IPrebidAuctionDebugEventData[]).filter(
+    const warnings = ((prebid.events?.filter((event) => event.eventType === 'auctionDebug') || []) as IPrebidAuctionDebugEventData[])?.filter(
       ({ args }) => args.type === 'WARNING'
     );
     setWarnings(warnings);
-    const errors = (prebid.events?.filter((event) => event.eventType === 'auctionDebug') as IPrebidAuctionDebugEventData[]).filter(
+    const errors = (prebid.events?.filter((event) => event.eventType === 'auctionDebug') as IPrebidAuctionDebugEventData[])?.filter(
       ({ args }) => (args as any).type === 'ERROR'
     );
     setErrors(errors);
