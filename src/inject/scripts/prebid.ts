@@ -467,6 +467,7 @@ export interface IPrebidDebugConfigBid {
   cpm?: number;
   bidder?: string;
   adUnitCode?: string;
+  currency?: string;
 }
 
 export interface IPrebidDebugConfig {
