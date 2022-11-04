@@ -2,17 +2,7 @@ import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
 
 class Prebid {
-  globalPbjs: {
-    bidderSettings: IPrebidBidderSettings;
-    getEvents: () => IPrebidDetails['events'];
-    onEvent: Function;
-    que: Function[];
-    getConfig: () => IPrebidDetails['config'];
-    getUserIdsAsEids: () => IPrebidDetails['eids'];
-    setConfig: (args: Object) => void;
-    version: string;
-    adUnits: IPrebidAdUnit[];
-  } = window.pbjs;
+  globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
   debug: IPrebidDebugConfig;
   lastTimeUpdateSentToContentScript: number;
@@ -170,8 +160,22 @@ export interface IPrebidBidParams {
   [key: string]: string | number;
 }
 
+export interface IGlobalPbjs {
+  bidderSettings: IPrebidBidderSettings;
+  getEvents: () => IPrebidDetails['events'];
+  onEvent: Function;
+  que: Function[];
+  getConfig: () => IPrebidDetails['config'];
+  getUserIdsAsEids: () => IPrebidDetails['eids'];
+  setConfig: (args: Object) => void;
+  version: string;
+  adUnits: IPrebidAdUnit[];
+  getBidResponsesForAdUnitCode: (elementId: string) => { bids: IPrebidBid[] };
+  getAllWinningBids: () => IPrebidBid[];
+}
+
 export interface IPrebidBid {
-  ad: string;
+  ad?: string;
   adId: string;
   adUnitCode: string;
   adUrl: string;
@@ -200,6 +204,7 @@ export interface IPrebidBid {
     advertiserDomains: string[];
     clickUrl: string;
   };
+  native: object;
   netRevenue: true;
   originalCpm: number;
   originalCurrency: string;
@@ -352,16 +357,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }
@@ -551,14 +556,14 @@ export interface IPrebidNoEventsApiEventData {
 }
 
 export interface IPrebidAuctionDebugEventData {
-  "eventType": "auctionDebug",
-  "args": {
-    "type": "ERROR" | "WARNING",
-    "arguments": {
-      [key: string]: string | number
-    }
-  },
-  "elapsedTime": 7272
+  eventType: 'auctionDebug';
+  args: {
+    type: 'ERROR' | 'WARNING';
+    arguments: {
+      [key: string]: string | number;
+    };
+  };
+  elapsedTime: 7272;
 }
 
 export interface IPrebidAuctionInitEventData {
