@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
-import JSONViewer from '../../pages/Shared/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
+import JSONViewerComponent from '../../pages/Shared/JSONViewerComponent';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
   const [networktId, setNetworkId] = useState<string[]>(null);
@@ -189,7 +189,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                 <Grid item>
                   <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Response-Info:</Typography>
-                    <JSONViewer
+                    <JSONViewerComponent
                       name={false}
                       src={slotResponseInfo}
                       collapsed={false}
@@ -199,14 +199,6 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                       quotesOnKeys={false}
                       indentWidth={2}
                       collapseStringsAfterLength={100}
-                      style={{
-                        fontSize: '12px',
-                        fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
-                        fontWeight: 400,
-                        lineHeight: 1.5,
-                        letterSpacing: '0.00938em',
-                        borderRadius: '4px',
-                      }}
                     />
                   </Paper>
                 </Grid>
