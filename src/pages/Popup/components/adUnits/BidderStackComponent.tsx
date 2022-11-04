@@ -30,7 +30,9 @@ const BidderStack = ({
             renderedAd.args.bid.bidder === bid.bidder &&
             renderedAd.args.bid.auctionId === bid.auctionId
         );
-        const label = bidReceived?.args.cpm ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})` : `${bid.bidder}`;
+        const label = bidReceived?.args.cpm
+          ? `${bid.bidder} (${Number(bidReceived?.args.cpm).toFixed(2)} ${bidReceived?.args.currency})`
+          : `${bid.bidder}`;
         return <BidChipComponent input={bid} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} isRendered={isRendered} />;
       })}
     </Stack>

@@ -60,7 +60,7 @@ const AdUnitRowComponent = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events:
               );
 
               const label = bidReceived?.args.cpm
-                ? `${bid.bidder} (${bidReceived?.args.cpm.toFixed(2)} ${bidReceived?.args.currency})`
+                ? `${bid.bidder} (${Number(bidReceived?.args.cpm).toFixed(2)} ${bidReceived?.args.currency})`
                 : `${bid.bidder}`;
 
               return <BidChipComponent input={bid} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} isRendered={isRendered} />;
