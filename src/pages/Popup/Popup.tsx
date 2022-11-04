@@ -35,11 +35,11 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
 import { popupTheme } from '../theme';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { IconButton } from '@mui/material';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
@@ -252,6 +252,15 @@ export const Popup = (): JSX.Element => {
               </Button>
             </Link>
             <IconButton
+              aria-label="refresh"
+              color="default"
+              sx={{ p: 0 }}
+              onClick={() => chrome.tabs.create({ url: 'https://github.com/prebid/professor-prebid/issues' })}
+            >
+              <HelpOutlineOutlinedIcon />
+            </IconButton>
+            <IconButton
+              sx={{ p: 0 }}
               aria-label="refresh"
               onClick={refresh}
               color={downloading === 'true' ? 'primary' : downloading === 'error' ? 'error' : 'default'}
