@@ -8,7 +8,7 @@ export const getMaxZIndex = () =>
     0
   );
 
-const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, mask, consoleState }) => {
+const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, mask, consoleState, pbjsNameSpace }) => {
   const [contentRef, setContentRef] = useState(null);
   const iFrameBody = contentRef?.contentWindow?.document?.body;
   if (iFrameBody) iFrameBody.style.margin = '0';
@@ -57,6 +57,7 @@ const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, ma
             timeToRespond={timeToRespond}
             closePortal={closePortal}
             contentRef={contentRef}
+            pbjsNameSpace={pbjsNameSpace}
           />,
           iFrameBody
         )}
@@ -65,10 +66,11 @@ const AdOverlayPortal: React.FC<AdOverlayComponentPropsProps> = ({ container, ma
   );
 };
 
-interface AdOverlayComponentPropsProps {
+interface AdOverlayPortalComponentProps {
   mask: AdOverlayComponentProps;
   consoleState: boolean;
   container: HTMLElement;
+  pbjsNameSpace: string;
 }
 
 export default AdOverlayPortal;
