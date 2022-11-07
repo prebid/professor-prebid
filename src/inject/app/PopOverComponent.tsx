@@ -1,5 +1,5 @@
 import React from 'react';
-import { IGlobalPbjs } from '../scripts/prebid';
+import { IGlobalPbjs, IPrebidAdUnit } from '../scripts/prebid';
 import Grid from '@mui/material/Grid';
 import Popover from '@mui/material/Popover';
 import { getMaxZIndex } from './AdOverlayPortal';
@@ -22,19 +22,22 @@ import HelpIcon from '@mui/icons-material/Help';
 import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 
-const ExpandableItem = ({ avatar, children, title }: { avatar: JSX.Element; children: JSX.Element; title: string }): JSX.Element => {
+const ExpandableItem = ({
+  avatar,
+  children,
+  title,
+  json,
+}: {
+  avatar: JSX.Element;
+  title: string;
+  children?: JSX.Element;
+  json?: object;
+}): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
-  const ref = React.useRef<HTMLInputElement>(null);
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-    setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
-  };
-
   return (
     <Grid item xs={12} sm={8} md={expanded ? 12 : 6} sx={{ minHeight: 250, height: expanded ? 'unset' : 250, overflow: 'hidden' }}>
       <Box sx={{ height: 1 }}>
-        <Box elevation={0} sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }} onClick={handleExpandClick}>
+        <Box elevation={0} sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }} onClick={() => setExpanded(!expanded)}>
           <Avatar sx={{ bgcolor: 'primary.main' }}>{avatar}</Avatar>
           <Typography variant="h3">{title}</Typography>
           <ExpandMoreIcon
@@ -43,7 +46,20 @@ const ExpandableItem = ({ avatar, children, title }: { avatar: JSX.Element; chil
             }}
           />
         </Box>
-        {children}
+        {children && children}
+        {json && (
+          <JSONViewerComponent
+            src={json}
+            name={false}
+            displayObjectSize={true}
+            displayDataTypes={false}
+            sortKeys={false}
+            quotesOnKeys={false}
+            indentWidth={2}
+            collapsed={false}
+            collapseStringsAfterLength={expanded ? false : 30}
+          />
+        )}
       </Box>
     </Grid>
   );
@@ -67,6 +83,7 @@ const PopOverComponent = ({
   setAnchorEl,
   pbjsNameSpace,
 }: PopOverComponentProps): JSX.Element => {
+  const [adUnit, setAdunit] = useState<IPrebidAdUnit>(null);
   const open = Boolean(anchorEl);
   const closePopOver = () => {
     setAnchorEl(null);
@@ -76,6 +93,9 @@ const PopOverComponent = ({
   const { bids } = pbjs.getBidResponsesForAdUnitCode(elementId);
   const bidsSorted = bids.sort((a: any, b: any) => b.cpm - a.cpm);
   const { 0: winningBid } = pbjs.getAllWinningBids().filter(({ adUnitCode }) => adUnitCode === elementId);
+  useEffect(() => {
+    setAdunit(pbjs.adUnits.find((el) => el.code === elementId));
+  }, [elementId, pbjs.adUnits]);
 
   // gam stuff
   const [networktId, setNetworkId] = useState<string[]>(null);
@@ -92,32 +112,32 @@ const PopOverComponent = ({
       const pubads = googletag.pubads();
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
-      if (slot) {
-        setSlotElementId(slot.getSlotElementId());
-        setSlotAdUnitPath(slot.getAdUnitPath());
-        setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-        setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
-        setSlotResponseInfo(slot.getResponseInformation());
-        setQueryId(document.getElementById(slot.getSlotElementId()).getAttribute('data-google-query-id') || null);
-        if (slotResponseInfo) {
-          const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
-          setCreativeId(creativeId || sourceAgnosticCreativeId);
-          setLineItemId(lineItemId || sourceAgnosticLineItemId);
-        }
-        const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
-          if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
-            setSlotResponseInfo(slot.getResponseInformation());
-          }
-        };
-        pubads.addEventListener('slotResponseReceived', eventHandler);
-        pubads.addEventListener('slotRenderEnded', eventHandler);
-        return () => {
-          pubads.removeEventListener('slotResponseReceived', eventHandler);
-          pubads.removeEventListener('slotRenderEnded', eventHandler);
-        };
+
+      setSlotElementId(slot?.getSlotElementId());
+      setSlotAdUnitPath(slot?.getAdUnitPath());
+      setNetworkId(slot?.getAdUnitPath()?.split('/')[1]?.split(','));
+      setSlotTargeting(slot?.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
+      setSlotResponseInfo(slot?.getResponseInformation());
+      setQueryId(document.getElementById(slot?.getSlotElementId()).getAttribute('data-google-query-id') || null);
+      if (slotResponseInfo) {
+        const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
+        setCreativeId(creativeId || sourceAgnosticCreativeId);
+        setLineItemId(lineItemId || sourceAgnosticLineItemId);
       }
+      const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
+        if (slot?.getSlotElementId() === event.slot.getSlotElementId()) {
+          setSlotResponseInfo(slot.getResponseInformation());
+        }
+      };
+      pubads.addEventListener('slotResponseReceived', eventHandler);
+      pubads.addEventListener('slotRenderEnded', eventHandler);
+      return () => {
+        pubads.removeEventListener('slotResponseReceived', eventHandler);
+        pubads.removeEventListener('slotRenderEnded', eventHandler);
+      };
     }
   }, [elementId, slotResponseInfo]);
+
   return (
     <Popover
       open={open}
@@ -345,115 +365,31 @@ const PopOverComponent = ({
           {(winningBid || bidsSorted || winningBid || slotResponseInfo || slotTargeting) && (
             <Grid item xs={4} sm={8} md={12} children={<Divider />} />
           )}
-          {pbjs.adUnits.find((el) => el.code === elementId) && (
-            <ExpandableItem
-              title="Ad Unit Setup"
-              avatar={<SettingsOutlinedIcon />}
-              children={
-                <JSONViewerComponent
-                  src={pbjs.adUnits.find((el) => el.code === elementId)}
-                  name={false}
-                  displayObjectSize={true}
-                  displayDataTypes={false}
-                  sortKeys={false}
-                  quotesOnKeys={false}
-                  indentWidth={2}
-                  collapsed={false}
-                  collapseStringsAfterLength={30}
-                />
-              }
-            />
-          )}
+          {adUnit && <ExpandableItem title="AdUnit Info" avatar={<SettingsOutlinedIcon />} json={adUnit} />}
+          {winningBid && <ExpandableItem title="Winning Bid" avatar={<GavelIcon />} json={winningBid} />}
+          {bidsSorted && bidsSorted[0] && <ExpandableItem title="All Bids for AdUnit" avatar={<AttachMoneyIcon />} json={bidsSorted} />}
           {winningBid && (
             <ExpandableItem
-              title="Winning Bid"
-              avatar={<GavelIcon />}
-              children={
-                <JSONViewerComponent
-                  src={winningBid}
-                  name={false}
-                  displayObjectSize={true}
-                  displayDataTypes={false}
-                  sortKeys={false}
-                  quotesOnKeys={false}
-                  indentWidth={2}
-                  collapsed={1}
-                  collapseStringsAfterLength={30}
-                />
-              }
-            />
-          )}
-          {bidsSorted && bidsSorted[0] && (
-            <ExpandableItem
-              title="All Bids for AdUnit"
-              avatar={<AttachMoneyIcon />}
-              children={
-                <JSONViewerComponent
-                  src={bidsSorted}
-                  name={false}
-                  displayObjectSize={true}
-                  displayDataTypes={false}
-                  sortKeys={false}
-                  quotesOnKeys={false}
-                  indentWidth={2}
-                  collapsed={3}
-                  collapseStringsAfterLength={30}
-                />
-              }
-            />
-          )}
-          {winningBid && (
-            <ExpandableItem
-              title="Preview"
+              title="Creative Preview"
               avatar={<PreviewIcon />}
+              json={winningBid && winningBid.native}
               children={
-                <>
-                  {winningBid && winningBid.ad && (
-                    <Box
-                      elevation={0}
-                      sx={{ display: 'flex', justifyContent: 'center' }}
-                      component="div"
-                      dangerouslySetInnerHTML={{ __html: winningBid?.ad || JSON.stringify(winningBid.native) }}
-                    />
-                  )}
-                  {winningBid && winningBid.native && (
-                    <JSONViewerComponent
-                      src={winningBid.native}
-                      collapsed={false}
-                      displayObjectSize={true}
-                      displayDataTypes={false}
-                      sortKeys={false}
-                      quotesOnKeys={false}
-                      indentWidth={2}
-                      collapseStringsAfterLength={100}
-                    />
-                  )}
-                </>
+                winningBid &&
+                winningBid.ad && (
+                  <Box
+                    elevation={0}
+                    sx={{ display: 'flex', justifyContent: 'center' }}
+                    component="div"
+                    dangerouslySetInnerHTML={{ __html: winningBid?.ad || JSON.stringify(winningBid.native) }}
+                  />
+                )
               }
             />
           )}
-          {slotResponseInfo && (
-            <ExpandableItem
-              title="Response-Info"
-              avatar={<HelpIcon />}
-              children={
-                <JSONViewerComponent
-                  name={false}
-                  src={slotResponseInfo}
-                  collapsed={false}
-                  displayObjectSize={true}
-                  displayDataTypes={false}
-                  sortKeys={false}
-                  quotesOnKeys={false}
-                  indentWidth={2}
-                  collapseStringsAfterLength={100}
-                />
-              }
-            />
-          )}
+          {slotResponseInfo && <ExpandableItem title="Response Info" avatar={<HelpIcon />} json={slotResponseInfo} />}
           {slotTargeting && (
             <ExpandableItem
-              title="Targeting"
+              title="Adserver Targeting"
               avatar={<CrisisAlertIcon />}
               children={
                 <Box elevation={0} sx={{ display: 'flex', flexGrow: 1 }}>
