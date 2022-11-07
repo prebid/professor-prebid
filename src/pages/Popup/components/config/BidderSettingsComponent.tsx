@@ -46,14 +46,14 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
             <Grid item xs={12} sm={expanded ? 6 : 12}>
               <Typography variant="body1">
                 <strong> StorageAccess: </strong>
-                {Object.keys(prebid.bidderSettings)
-                  .slice(0, !expanded ? 7 : Object.keys(prebid.bidderSettings).length)
-                  .map((bidder) => (
-                    <Typography key={bidder} variant="body1">
-                      {bidder}: {String(prebid.bidderSettings[bidder].storageAllowed)}
-                    </Typography>
-                  ))}
               </Typography>
+              {Object.keys(prebid.bidderSettings)
+                .slice(0, !expanded ? 7 : Object.keys(prebid.bidderSettings).length)
+                .map((bidder) => (
+                  <Typography key={bidder} variant="body1">
+                    {bidder}: {String(prebid.bidderSettings[bidder].storageAllowed)}
+                  </Typography>
+                ))}
             </Grid>
           </Grid>
         </CardContent>
