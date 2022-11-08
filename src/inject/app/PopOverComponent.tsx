@@ -121,7 +121,7 @@ const PopOverComponent = ({
       setNetworkId(slot?.getAdUnitPath()?.split('/')[1]?.split(','));
       setSlotTargeting(slot?.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
       setSlotResponseInfo(slot?.getResponseInformation());
-      setQueryId(document.getElementById(slot?.getSlotElementId()).getAttribute('data-google-query-id') || null);
+      setQueryId(document.getElementById(slot?.getSlotElementId())?.getAttribute('data-google-query-id') || null);
 
       if (slotResponseInfo) {
         const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
