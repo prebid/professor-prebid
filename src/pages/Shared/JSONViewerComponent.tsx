@@ -41,7 +41,7 @@ interface IJSONViewerComponentProps {
   sortKeys?: boolean;
   quotesOnKeys?: boolean;
   indentWidth?: number;
-  collapseStringsAfterLength?: number;
+  collapseStringsAfterLength?: number | false;
   style?: Object;
 }
 

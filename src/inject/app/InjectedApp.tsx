@@ -15,6 +15,7 @@ declare global {
 const InjectedApp = (): JSX.Element => {
   const [consoleState, setConsoleState] = useState(false);
   const [masks, setMasks] = useState<AdOverlayComponentProps[]>([]);
+  const [pbjsNameSpace, setPbjsNameSpace] = useState<string>();
 
   const handleConsoleStateChange = (event: Event) => {
     const checked = (event as CustomEvent).detail;
@@ -25,6 +26,7 @@ const InjectedApp = (): JSX.Element => {
     const customEvent = event as CustomEvent;
     const pbjsNameSpace: string = customEvent.detail;
     if (pbjsNameSpace) {
+      setPbjsNameSpace(pbjsNameSpace);
       const pbsjsEvents = (window[pbjsNameSpace]?.getEvents ? window[pbjsNameSpace].getEvents() : []) as unknown[];
       const auctionEndEvents = (pbsjsEvents as IPrebidAuctionEndEventData[]).filter((event) => event.eventType === 'auctionEnd');
       const allAdunitCodes = Array.from(
@@ -70,7 +72,7 @@ const InjectedApp = (): JSX.Element => {
       {masks.map((mask, index) => {
         const container =
           document.getElementById(mask.elementId) || document.querySelector(`[id*="${mask.elementId}"]:not([id^=prpb-mask--container-])`);
-        return <AdOverlayPortal key={index} mask={mask} consoleState={consoleState} container={container} />;
+        return <AdOverlayPortal key={index} mask={mask} consoleState={consoleState} container={container} pbjsNameSpace={pbjsNameSpace} />;
       })}
     </React.Fragment>
   );

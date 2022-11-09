@@ -24,6 +24,7 @@ const AdOverlayComponent = ({
   timeToRespond,
   closePortal,
   contentRef,
+  pbjsNameSpace,
 }: AdOverlayComponentProps): JSX.Element => {
   const gridRef = React.useRef<HTMLDivElement>(null);
   const boxRef = React.useRef<HTMLDivElement>(null);
@@ -61,6 +62,7 @@ const AdOverlayComponent = ({
         closePortal={closePortal}
         anchorEl={anchorEl}
         setAnchorEl={setAnchorEl}
+        pbjsNameSpace={pbjsNameSpace}
       />
       <CacheProvider value={cache}>
         <Box
@@ -181,6 +183,7 @@ export interface AdOverlayComponentProps {
   timeToRespond: number;
   closePortal?: () => void;
   contentRef?: any;
+  pbjsNameSpace?: string;
 }
 
 export default AdOverlayComponent;

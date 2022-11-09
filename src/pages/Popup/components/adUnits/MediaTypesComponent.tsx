@@ -29,18 +29,21 @@ const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentPro
                     </Stack>
                   </React.Fragment>
                 )}
-                {mediaTypes['banner'].sizeConfig?.map((item, index) => (
-                  <React.Fragment key={index}>
-                    <Typography variant="caption">
-                      minViewPort {item.minViewPort[0]}x{item.minViewPort[1]}:
-                    </Typography>
-                    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-                      {item.sizes.map((size, index) => (
-                        <Chip size="small" variant="outlined" color="primary" label={`${size[0]}x${size[1]}`} key={index} />
-                      ))}
-                    </Stack>
-                  </React.Fragment>
-                ))}
+                {mediaTypes['banner'].sizeConfig?.map((item, index) => {
+                  if (!item.sizes[0][0]) return null;
+                  return (
+                    <React.Fragment key={index}>
+                      <Typography variant="caption">
+                        minViewPort {item.minViewPort[0]}x{item.minViewPort[1]}:
+                      </Typography>
+                      <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
+                        {item.sizes.map((size, index) => (
+                          <Chip size="small" variant="outlined" color="primary" label={`${size[0]}x${size[1]}`} key={index} />
+                        ))}
+                      </Stack>
+                    </React.Fragment>
+                  );
+                })}
               </Box>
             );
           }

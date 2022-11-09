@@ -28,31 +28,32 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
   const [detectedAdUnitCodes, setDetectedAdUnitCodes] = useState<string[]>([]);
 
   const [bidsOverwriteEnabled, setBidOverwriteEnabled] = useState<boolean>(false);
-  const [cpm, setCpm] = React.useState(20.0);
+  const [cpm, setCpm] = useState<number>(20.0);
+  const [currency, setCurrency] = useState<string>('USD');
 
   const [selectedBidders, setSelectedBidders] = React.useState<string[]>(debugConfigState?.bidders || []);
   const [selectedAdUnitCodes, setSelectedAdUnitCodes] = React.useState<string[]>(debugConfigState?.bids?.map((bid) => bid.adUnitCode) || []);
 
   const handleAdunitSelectionChange = (event: SelectChangeEvent<string[]>) => {
     const selectedAdUnitCodesArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-    updateDebugConfig(selectedAdUnitCodesArray, selectedBidders, cpm);
+    updateDebugConfig(selectedAdUnitCodesArray, selectedBidders, cpm, currency);
   };
 
   const handleBidderSelectionChange = (event: SelectChangeEvent<string[]>) => {
     const selectedBiddersArray = typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-    updateDebugConfig(selectedAdUnitCodes, selectedBiddersArray, cpm);
+    updateDebugConfig(selectedAdUnitCodes, selectedBiddersArray, cpm, currency);
   };
 
   const handleBidderDelete = (bidderToDelete: string) => () => {
     const newBidderArray = selectedBidders.filter((bidder) => bidder !== bidderToDelete);
     setSelectedBidders(newBidderArray);
-    updateDebugConfig(selectedAdUnitCodes, newBidderArray, cpm);
+    updateDebugConfig(selectedAdUnitCodes, newBidderArray, cpm, currency);
   };
 
   const handleAdUnitDelete = (adUnitCodeToDelete: string) => () => {
     const newAdUnitCodeArray = selectedAdUnitCodes.filter((adUnitCode) => adUnitCode !== adUnitCodeToDelete);
     setSelectedAdUnitCodes(newAdUnitCodeArray);
-    updateDebugConfig(newAdUnitCodeArray, selectedBidders, cpm);
+    updateDebugConfig(newAdUnitCodeArray, selectedBidders, cpm, currency);
   };
 
   const handleBidOverWriteEnabledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,19 +65,24 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
 
   const handleCpmChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCpm(Number(event.target.value));
-    updateDebugConfig(selectedAdUnitCodes, selectedBidders, Number(event.target.value));
+    updateDebugConfig(selectedAdUnitCodes, selectedBidders, Number(event.target.value), currency);
   };
 
-  const updateDebugConfig = (selectedAdUnitCodes: string[], selectedBidders: string[], cpm: number): void => {
+  const handleCurrencyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrency(event.target.value);
+    updateDebugConfig(selectedAdUnitCodes, selectedBidders, cpm, event.target.value);
+  };
+
+  const updateDebugConfig = (selectedAdUnitCodes: string[], selectedBidders: string[], cpm: number, currency: string): void => {
     const bids: IPrebidDebugConfigBid[] = [];
     if (selectedAdUnitCodes.length === 0) {
       selectedBidders.forEach((bidder: string) => {
-        bids.push({ bidder, cpm });
+        bids.push({ bidder, cpm, currency });
       });
     } else {
       selectedAdUnitCodes.forEach((adUnitCode: string) => {
         selectedBidders.forEach((bidder: string) => {
-          bids.push({ adUnitCode, bidder, cpm });
+          bids.push({ adUnitCode, bidder, cpm, currency });
         });
       });
     }
@@ -92,6 +98,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
       setBidOverwriteEnabled(!!Array.isArray(debugConfigState?.bids));
     }
     setCpm(debugConfigState?.bids?.length > 0 ? Number(debugConfigState?.bids[0].cpm) : 20.0);
+    setCurrency(debugConfigState?.bids?.length > 0 ? debugConfigState?.bids[0].currency : 'USD');
     setSelectedBidders(debugConfigState?.bids?.map((item) => item.bidder).filter((v, i, a) => a.indexOf(v) === i) || []);
     setSelectedAdUnitCodes(
       debugConfigState?.bids
@@ -118,7 +125,6 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
     setDetectedAdUnitCodes(Array.from(adUnitCodesSet));
   }, [prebid.events]);
 
-
   return (
     <React.Fragment>
       <Grid item md={1} xs={1}>
@@ -129,7 +135,7 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
         </Box>
       </Grid>
 
-      <Grid item md={2} xs={2}>
+      <Grid item md={1} xs={1}>
         <FormControl sx={{ height: 1 }}>
           <Box component="form" noValidate autoComplete="off" sx={{ height: 1 }}>
             <TextField
@@ -144,6 +150,23 @@ const BidOverWriteComponent = ({ prebid, debugConfigState, setDebugConfigState }
           </Box>
         </FormControl>
       </Grid>
+
+      <Grid item md={1} xs={1}>
+        <FormControl sx={{ height: 1 }}>
+          <Box component="form" noValidate autoComplete="off" sx={{ height: 1 }}>
+            <TextField
+              sx={{ height: 1, '& div': { height: 1 } }}
+              type="string"
+              label="currency"
+              value={currency}
+              onChange={handleCurrencyChange}
+              variant="outlined"
+              disabled={!bidsOverwriteEnabled}
+            />
+          </Box>
+        </FormControl>
+      </Grid>
+
       <Grid item md={4.5} xs={4.5}>
         <FormControl sx={{ height: 1, width: 1, '& .MuiOutlinedInput-root': { height: 1, alignItems: 'baseline' } }}>
           <InputLabel>Select Bidder(s)</InputLabel>
