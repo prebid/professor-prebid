@@ -50,7 +50,11 @@ const AdUnitRowComponent = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events:
                 (winningBid) =>
                   winningBid.args.adUnitCode === adUnit.code &&
                   winningBid.args.bidder === bid.bidder &&
-                  (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(winningBid?.args?.size) ||
+                  ((
+                    adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`) ||
+                    adUnit.mediaTypes.banner.sizes.map((size) => `${size[0]}x${size[1]}`) ||
+                    []
+                  ).includes(winningBid?.args?.size) ||
                     (Object.keys(adUnit.mediaTypes).includes('native') && winningBid.args.mediaType === 'native') ||
                     (Object.keys(adUnit.mediaTypes).includes('video') && winningBid.args.mediaType === 'video'))
               );
@@ -62,7 +66,6 @@ const AdUnitRowComponent = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events:
               const label = bidReceived?.args.cpm
                 ? `${bid.bidder} (${Number(bidReceived?.args.cpm).toFixed(2)} ${bidReceived?.args.currency})`
                 : `${bid.bidder}`;
-
               return <BidChipComponent input={bid} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} isRendered={isRendered} />;
             })}
           </Stack>
