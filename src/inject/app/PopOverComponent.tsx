@@ -145,11 +145,12 @@ const PopOverComponent = ({
 
   return (
     <Popover
-      open={open}
       anchorEl={anchorEl}
       anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'center', horizontal: 'center' }}
+      open={open}
+      onClose={() => setAnchorEl(null)}
       sx={{ zIndex: getMaxZIndex() + 1, maxWidth: 0.5 }}
+      transformOrigin={{ vertical: 'center', horizontal: 'center' }}
       children={
         <CacheProvider
           value={cacheTopPage}
