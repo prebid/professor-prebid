@@ -7,6 +7,7 @@ import MediaTypeChipComponent from './MediaTypeChipComponent';
 import { IPrebidAdUnitMediaTypes, IPrebidBidWonEventData } from '../../../../inject/scripts/prebid';
 
 const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentProps): JSX.Element => {
+  console.log({ mediaTypes });
   return (
     <React.Fragment>
       {Object.keys(mediaTypes).map((mediaType, index) => {
@@ -30,7 +31,7 @@ const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentPro
                   </React.Fragment>
                 )}
                 {mediaTypes['banner'].sizeConfig?.map((item, index) => {
-                  if (!item.sizes[0][0]) return null;
+                  if (!item?.sizes[0] || !item?.sizes[0][0]) return null;
                   return (
                     <React.Fragment key={index}>
                       <Typography variant="caption">
