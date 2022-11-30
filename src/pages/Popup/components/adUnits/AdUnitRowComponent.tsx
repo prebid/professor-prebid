@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material';
 
 const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): boolean => {
   return (
-    (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`) || adUnit.mediaTypes.banner.sizes.map((size) => `${size[0]}x${size[1]}`) || []).includes(
+    (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`) || adUnit.mediaTypes?.banner?.sizes.map((size) => `${size[0]}x${size[1]}`) || []).includes(
       bidEvent?.args?.size
     ) ||
     (Object.keys(adUnit.mediaTypes).includes('native') && bidEvent.args.mediaType === 'native') ||

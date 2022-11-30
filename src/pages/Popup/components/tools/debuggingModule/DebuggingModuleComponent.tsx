@@ -16,7 +16,7 @@ import FormGroup from '@mui/material/FormGroup';
 
 const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JSX.Element => {
   const [debuggingModuleConfig, setDebuggingModuleConfig] = useState<IPrebidDebugModuleConfig>({ enabled: false, intercept: [] });
-  const [storeRules, setStoreRules] = useState<boolean>(null);
+  const [storeRules, setStoreRules] = useState<boolean>(false);
 
   useEffect(() => {
     chrome.storage.local.get(constants.STORE_RULES_TOGGLE, (result) => {
@@ -109,7 +109,7 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
     <Grid item xs={12}>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
         <Grid container rowSpacing={1} columnSpacing={0.5}>
-          <Grid item xs={12} direction="row">
+          <Grid item xs={12}>
             <FormGroup sx={{ flexDirection: 'row' }}>
               <FormControlLabel
                 sx={{ width: 0.33 }}
