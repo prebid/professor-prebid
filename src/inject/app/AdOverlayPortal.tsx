@@ -27,6 +27,11 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
         element.current.style.position = 'absolute';
         element.current.style.wordBreak = 'break-all';
         element.current.id = `prpb-mask--container-${mask.elementId}`;
+        element.current.style.top = '0';
+        element.current.style.left = '0';
+        if (container.style.position === '') {
+          container.style.position = 'relative';
+        }
         container?.append(element.current);
       } else {
         slotMaskElement.style.width = `${container?.offsetWidth || container?.clientWidth}px`;
