@@ -48,6 +48,7 @@ const BidderSettingsComponent = ({ prebid }: IBidderSettingsComponentProps): JSX
                 <strong> StorageAccess: </strong>
               </Typography>
               {Object.keys(prebid.bidderSettings)
+                .filter((bidder) => prebid.bidderSettings[bidder].storageAllowed !== undefined)
                 .slice(0, !expanded ? 7 : Object.keys(prebid.bidderSettings).length)
                 .map((bidder) => (
                   <Typography key={bidder} variant="body1">
