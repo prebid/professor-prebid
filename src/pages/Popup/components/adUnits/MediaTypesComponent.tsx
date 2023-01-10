@@ -7,7 +7,6 @@ import MediaTypeChipComponent from './MediaTypeChipComponent';
 import { IPrebidAdUnitMediaTypes, IPrebidBidWonEventData } from '../../../../inject/scripts/prebid';
 
 const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentProps): JSX.Element => {
-  console.log({ mediaTypes });
   return (
     <React.Fragment>
       {Object.keys(mediaTypes).map((mediaType, index) => {
