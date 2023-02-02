@@ -16,6 +16,7 @@ import merge from 'lodash/merge';
 import Badge from '@mui/material/Badge';
 import Popover from '@mui/material/Popover';
 import EventsPopOverComponent from './EventsPopOverComponent';
+import Tooltip from '@mui/material/Tooltip';
 
 const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const [eventsPopUpOpen, setEventsPopUpOpen] = React.useState<boolean>(false);
@@ -71,6 +72,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
       ({ args }) => (args as any).type === 'ERROR'
     );
     setErrors(errors);
+    console.log({ warnings: warnings.length, errors: errors.length });
   }, [prebid.events]);
 
   useEffect(() => {
@@ -126,29 +128,31 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
               </Paper>
             </Grid>
             <Grid item>
-              <Badge
-                // invisible={errors.length === 0 && warnings.length === 0}
-                invisible={true}
-                badgeContent={errors.length + '!' || warnings.length + '!' || ''}
-                anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-                onClick={handlePopoverOpen}
-                sx={{
-                  color: errors.length > 0 ? 'error.main' : warnings.length > 0 ? 'warning.main' : 'primary.light',
-                  '& .MuiBadge-badge': {
-                    borderWidth: 0,
-                    borderStyle: 'solid',
-                    borderColor: errors.length > 0 ? 'error.main' : warnings.length > 0 ? 'warning.main' : 'primary.light',
-                    borderRadius: '50%',
-                    backgroundColor: 'white',
-                  },
-                }}
-              >
-                <Paper sx={{ p: 1 }} elevation={1}>
-                  <Typography variant="h2" noWrap>
-                    Event{prebid.events?.length > 1 ? 's' : ''} : {prebid.events?.length}
-                  </Typography>
-                </Paper>
-              </Badge>
+              <Tooltip title="Click to show auction debug events">
+                <Badge
+                  invisible={errors.length === 0 && warnings.length === 0}
+                  // invisible={true}
+                  badgeContent={errors.length || warnings.length ? '!' : ''}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  onClick={handlePopoverOpen}
+                  sx={{
+                    color: errors.length > 0 ? 'error.main' : warnings.length > 0 ? 'warning.main' : 'primary.light',
+                    '& .MuiBadge-badge': {
+                      borderWidth: 0,
+                      borderStyle: 'solid',
+                      borderColor: errors.length > 0 ? 'error.main' : warnings.length > 0 ? 'warning.main' : 'primary.light',
+                      borderRadius: '50%',
+                      backgroundColor: 'background.paper',
+                    },
+                  }}
+                >
+                  <Paper sx={{ p: 1 }} elevation={1}>
+                    <Typography variant="h2" noWrap>
+                      Event{prebid.events?.length > 1 ? 's' : ''} : {prebid.events?.length}
+                    </Typography>
+                  </Paper>
+                </Badge>
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
               <Grid spacing={0.25} container direction="row">
@@ -158,15 +162,6 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           </Grid>
         </React.Fragment>
       )}
-      {/* {!allAdUnitCodes[0] && (
-        <Grid container direction="row" justifyContent="space-evenly">
-          <Grid item>
-            <Paper elevation={1} sx={{ p: 1 }}>
-              <Typography variant="h1">Prebid.js detected but no AdUnits</Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      )} */}
       <Popover
         open={eventsPopUpOpen}
         anchorReference="anchorPosition"

@@ -3,6 +3,8 @@ import { IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Popover from '@mui/material/Popover';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
 const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipComponentProps): JSX.Element => {
   const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
@@ -30,6 +32,11 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         onClose={handlePopoverClose}
       >
+        <Box sx={{ p: 0, w: 1, display: 'flex', flexDirection: 'row-reverse' }}>
+          <Button sx={{ p: 0 }} onClick={() => handlePopoverClose()}>
+            X
+          </Button>
+        </Box>
         <JSONViewerComponent
           src={input}
           name={false}
