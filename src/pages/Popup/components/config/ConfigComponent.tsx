@@ -19,7 +19,7 @@ const ConfigComponent = ({ prebid, tcf }: IConfigComponentProps): JSX.Element =>
     <Grid container spacing={0.25} padding={1}>
       {false && <SearchBarComponent config={prebid.config}></SearchBarComponent>}
       {prebid.config.priceGranularity && (
-        <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} />
+        <PriceGranularityCard priceGranularity={prebid.config.priceGranularity} customPriceBucket={prebid.config.customPriceBucket} mediaTypePriceGranularity={prebid.config.mediaTypePriceGranularity}/>
       )}
 
       {prebid.config && <PrebidConfigComponent config={prebid.config} />}
