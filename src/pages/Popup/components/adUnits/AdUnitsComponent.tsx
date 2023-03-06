@@ -23,21 +23,30 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
   const [allNoBidEvents, setAllNoBidEvents] = React.useState<IPrebidNoBidEventData[]>([]);
   const [allBidderEvents, setAllBidderEvents] = React.useState<IPrebidDetails['events'][]>([]);
   const [allAdUnitCodes, setAllAdUnitCodes] = React.useState<string[]>([]);
-  const [auctionEndEvents, setAuctionEndEvents] = React.useState<IPrebidAuctionEndEventData[]>([]);
+  const [auctionInitEvents, setAuctionInitEvents] = React.useState<IPrebidAuctionEndEventData[]>([]);
   const [adUnits, setAdUnits] = React.useState<IPrebidAdUnit[]>([]);
   const [errors, setErrors] = React.useState<IPrebidAuctionDebugEventData[]>([]);
   const [warnings, setWarnings] = React.useState<IPrebidAuctionDebugEventData[]>([]);
 
   useEffect(() => {
-    const auctionEndEvents = ((prebid.events || []) as IPrebidAuctionEndEventData[])
-      .filter((event) => event.eventType === 'auctionInit' || event.eventType === 'auctionEnd' || event.eventType === 'noEventsApi')
+    const auctionInitEvents = ((prebid.events || []) as IPrebidAuctionEndEventData[])
+      .filter((event) => event.eventType === 'auctionInit')
       .sort((a, b) => a.args.timestamp - b.args.timestamp);
-    const adUnits = auctionEndEvents
+    const adUnits = auctionInitEvents
       .reduce((previousValue, currentValue) => {
         return [...previousValue, ...currentValue.args.adUnits];
-      }, [] as IPrebidAdUnit[]) //TODO: 1 reducer only
+      }, [] as IPrebidAdUnit[])
       .reduce((previousValue, currentValue) => {
-        let toUpdate = previousValue.find((adUnit) => adUnit.code === currentValue.code);
+        let toUpdate = previousValue.find((adUnit) => {
+          const adUnitBids = adUnit.bids.map(({ bidder, params }: any) => ({ bidder, params })) || [];
+          const currentValueBids = currentValue.bids.map(({ bidder, params }: any) => ({ bidder, params })) || [];
+          return (
+            adUnit.code === currentValue.code &&
+            JSON.stringify(adUnit.mediaTypes) === JSON.stringify(currentValue.mediaTypes) &&
+            JSON.stringify(adUnit.sizes) === JSON.stringify(currentValue.sizes) &&
+            JSON.stringify(adUnitBids) === JSON.stringify(currentValueBids)
+          );
+        });
         if (toUpdate) {
           toUpdate = merge(toUpdate, currentValue);
           return previousValue;
@@ -45,7 +54,8 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
           return [...previousValue, currentValue];
         }
       }, [])
-      .sort((a, b) => (a.code > b.code ? 1 : -1));
+      .sort((a, b) => a.code.localeCompare(b.code));
+
     const allBidResponseEvents = (prebid.events?.filter((event) => event.eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
     const allNoBidEvents = (prebid.events?.filter((event) => event.eventType === 'noBid') || []) as IPrebidNoBidEventData[];
     setAllBidResponseEvents(allBidResponseEvents);
@@ -54,7 +64,7 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
     const allAdUnitCodes = Array.from(
       new Set(
         prebid.events?.reduce((acc, event) => {
-          if (event.eventType === 'auctionInit' || event.eventType === 'auctionEnd' || event.eventType === 'noEventsApi') {
+          if (event.eventType === 'auctionInit') {
             const adUnitCodes = (event as IPrebidAuctionInitEventData).args.adUnitCodes;
             acc = [...acc, ...adUnitCodes];
           }
@@ -75,9 +85,9 @@ const AdUnitsComponent = ({ prebid }: IAdUnitsComponentProps): JSX.Element => {
 
   useEffect(() => {
     const allBidderEventsBidders = Array.from(new Set([].concat(allBidResponseEvents, allNoBidEvents).map((event) => event?.args.bidder)));
-    setAuctionEndEvents(auctionEndEvents);
+    setAuctionInitEvents(auctionInitEvents);
     setAllBidderEvents(allBidderEventsBidders);
-  }, [allBidResponseEvents, allNoBidEvents, auctionEndEvents]);
+  }, [allBidResponseEvents, allNoBidEvents, auctionInitEvents]);
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setEventsPopUpOpen(true);
