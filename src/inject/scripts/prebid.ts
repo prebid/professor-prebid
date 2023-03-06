@@ -1,5 +1,6 @@
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
+import { isArray } from 'lodash';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -72,11 +73,24 @@ class Prebid {
     }
   };
 
+  decylce = (obj: any) => {
+    const cache = new WeakSet();
+    return JSON.stringify(obj, (key, value) => {
+      if (typeof value === 'object' && !isArray(value) && value !== null) {
+        if (value['location']) {
+          // document object found, discard key  
+          return;
+        }
+        // Store value in our set
+        cache.add(value);
+      }
+      return value;
+    });
+  };
+
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    const replacer = (key: number | string, value: any) => (!(key === 'doc' && typeof value === 'object') ? value : undefined);
-    const safeEvents = events.map((event) => JSON.parse(JSON.stringify(event, replacer)));
-    const string = JSON.stringify(safeEvents);
+    const string = this.decylce(events);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
@@ -357,16 +371,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
