@@ -10,7 +10,7 @@ import { useTheme } from '@mui/material';
 
 const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): boolean => {
   return (
-    (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`) || adUnit.mediaTypes?.banner?.sizes.map((size) => `${size[0]}x${size[1]}`) || []).includes(
+    (adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`) || adUnit.mediaTypes?.banner?.sizes?.map((size) => `${size[0]}x${size[1]}`) || []).includes(
       bidEvent?.args?.size
     ) ||
     (Object.keys(adUnit.mediaTypes).includes('native') && bidEvent.args.mediaType === 'native') ||
@@ -46,7 +46,7 @@ const AdUnitRowComponent = ({ adUnit, events }: { adUnit: IPrebidAdUnit; events:
       <Grid item xs={4} sx={{ [theme.breakpoints.down('sm')]: { display: 'none' } }}>
         <Paper sx={{ height: '100%' }}>
           <Stack direction="row" flexWrap={'wrap'} gap={0.5} sx={{ p: 0.5 }}>
-            {adUnit.bids.map((bid, index) => {
+            {adUnit?.bids?.map((bid, index) => {
               const bidReceived = bidsReceived.find(
                 (bidReceived) =>
                   bidReceived.args?.adUnitCode === adUnit.code && bidReceived.args.bidder === bid.bidder && matchesSizes(bidReceived, adUnit)
