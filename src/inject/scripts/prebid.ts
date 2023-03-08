@@ -1,6 +1,5 @@
 import { sendToContentScript } from '../../utils';
 import constants from '../../constants.json';
-import { isArray } from 'lodash';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -76,7 +75,7 @@ class Prebid {
   decylce = (obj: any) => {
     const cache = new WeakSet();
     return JSON.stringify(obj, (key, value) => {
-      if (typeof value === 'object' && !isArray(value) && value !== null) {
+      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
         if (value['location']) {
           // document object found, discard key  
           return;
