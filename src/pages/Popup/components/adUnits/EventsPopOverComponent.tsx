@@ -27,7 +27,7 @@ const Args2Typo = ({ input }: any): JSX.Element => {
       {Object.values(input).map((value, index, arr) => {
         return (
           <React.Fragment key={index}>
-            <Typography component={'span'}>{value}</Typography>
+            <Typography component={'span'}>{typeof value === 'object' ? JSON.stringify(value) : value}</Typography>
             {index + 1 < arr.length && <Typography component={'span'}> </Typography>}
             {index + 1 === arr.length && (
               <Typography component={'span'}>
