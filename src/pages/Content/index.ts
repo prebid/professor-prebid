@@ -3,7 +3,7 @@
 // (chrome) messages from Popup.js when it runs and responds to it
 // with the auction data it collected so far
 import constants from '../../constants.json';
-import { IPrebidDetails } from '../../inject/scripts/prebid';
+import { IPrebidDetails } from './scripts/prebid';
 
 class Content {
   pbjsNamespace: string = null;
@@ -63,3 +63,17 @@ class Content {
 }
 
 new Content();
+const inject = () => {
+  const script = document.createElement('script');
+  script.src = chrome.runtime.getURL('/injected.bundle.js');
+  script.id = 'professor prebid injected bundle';
+  if (document.head || document.documentElement) {
+    (document.head || document.documentElement).appendChild(script);
+    script.onload = () => {
+      script.remove();
+    };
+  } else {
+    requestIdleCallback(inject);
+  }
+};
+inject();

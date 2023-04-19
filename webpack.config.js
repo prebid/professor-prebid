@@ -33,9 +33,8 @@ var options = {
     contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.ts'),
     devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.js'),
     panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.jsx'),
-    inject: path.join(__dirname, 'src', 'inject', 'inject.ts'),
-    injected: path.join(__dirname, 'src', 'inject', 'injected.tsx'),
-    openDfpConsole: path.join(__dirname, 'src', 'inject', 'scripts', 'openDfpConsole.ts'),
+    injected: path.join(__dirname, 'src', 'pages', 'App', 'injected.tsx'),
+    openDfpConsole: path.join(__dirname, 'src', 'pages', 'Content', 'scripts', 'openDfpConsole.ts'),
   },
   chromeExtensionBoilerplate: {
     notHotReload: [

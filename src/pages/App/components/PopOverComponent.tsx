@@ -1,5 +1,5 @@
 import React from 'react';
-import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../scripts/prebid';
+import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../../Content/scripts/prebid';
 import { getMaxZIndex } from './AdOverlayPortal';
 import { CacheProvider } from '@emotion/react/';
 import { useState, useEffect } from 'react';
@@ -12,7 +12,7 @@ import Close from '@mui/icons-material/Close';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import JSONViewerComponent from '../../pages/Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../Shared/JSONViewerComponent';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GavelIcon from '@mui/icons-material/Gavel';

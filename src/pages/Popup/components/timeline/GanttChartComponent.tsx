@@ -5,7 +5,7 @@ import {
   IPrebidBidResponseEventData,
   IPrebidNoBidEventData,
   IPrebidBidderRequest,
-} from '../../../../inject/scripts/prebid';
+} from '../../../Content/scripts/prebid';
 import React, { useEffect, useRef } from 'react';
 import { createRangeArray } from '../../../../utils';
 import List from '@mui/material/List';

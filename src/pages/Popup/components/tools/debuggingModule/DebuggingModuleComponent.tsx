@@ -1,4 +1,4 @@
-import { IPrebidDetails, IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../../inject/scripts/prebid';
+import { IPrebidDetails, IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../Content/scripts/prebid';
 import { getTabId } from '../../../utils';
 import constants from '../../../../../constants.json';
 import Box from '@mui/material/Box';

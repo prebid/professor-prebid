@@ -1,4 +1,4 @@
-import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidDebugConfig, IPrebidDebugConfigBid } from '../../../../../inject/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidDetails, IPrebidDebugConfig, IPrebidDebugConfigBid } from '../../../../Content/scripts/prebid';
 import TextField from '@mui/material/TextField';
 import React, { useEffect, useState } from 'react';
 import Switch from '@mui/material/Switch';

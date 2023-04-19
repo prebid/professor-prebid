@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import MediaTypeChipComponent from './MediaTypeChipComponent';
-import { IPrebidAdUnitMediaTypes, IPrebidBidWonEventData } from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnitMediaTypes, IPrebidBidWonEventData } from '../../../Content/scripts/prebid';
 
 const MediaTypesComponent = ({ mediaTypes, winningBid }: IMediaTypesComponentProps): JSX.Element => {
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidDetails } from '../../../Content/scripts/prebid';
 import { PriceGranularityCard } from './PriceGranularityComponent';
 import UserIdModule from './UserIdModule';
 import Server2ServerComponent from './Server2ServerComponent';
@@ -9,7 +9,7 @@ import BidderSettingsComponent from './BidderSettingsComponent';
 import PrebidConfigComponent from './PrebidConfigComponent';
 import FloorsModuleComponent from './FloorsModuleComponent';
 import GptPreAuctionComponent from './GptPreAuctionComponent';
-import { ITcfDetails } from '../../../../inject/scripts/tcf';
+import { ITcfDetails } from '../../../Content/scripts/tcf';
 import Grid from '@mui/material/Grid';
 import SearchBarComponent from './SearchBarComponent';
 export const tileHeight = 255;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidConfigUserSync } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigUserSync } from '../../../Content/scripts/prebid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAdUnit, IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnit, IPrebidDetails } from '../../../Content/scripts/prebid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';

@@ -1,4 +1,4 @@
-import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../../inject/scripts/prebid';
+import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../Content/scripts/prebid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';

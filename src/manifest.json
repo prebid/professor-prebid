@@ -15,7 +15,7 @@
     {
       "matches": ["http://*/*", "https://*/*", "<all_urls>"],
       "run_at": "document_idle",
-      "js": ["inject.bundle.js", "contentScript.bundle.js"]
+      "js": ["contentScript.bundle.js"]
     }
   ],
   "devtools_page": "devtools.html",

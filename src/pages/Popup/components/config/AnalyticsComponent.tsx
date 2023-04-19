@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidDetails } from '../../../Content/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';

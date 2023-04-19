@@ -1,7 +1,7 @@
 import constants from '../../constants.json';
-import { IGoogleAdManagerDetails } from '../../inject/scripts/googleAdManager';
-import { IPrebidDetails } from '../../inject/scripts/prebid';
-import { ITcfDetails } from '../../inject/scripts/tcf';
+import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
+import { IPrebidDetails } from '../Content/scripts/prebid';
+import { ITcfDetails } from '../Content/scripts/tcf';
 import { getTabId } from '../Popup/utils';
 class Background {
   tabInfos: ITabInfos = {};
