@@ -1,7 +1,6 @@
 import React from 'react';
-import { IPrebidConfig } from '../../../../inject/scripts/prebid';
+import { IPrebidConfig } from '../../../Content/scripts/prebid';
 import Typography from '@mui/material/Typography';
-import logger from '../../../../logger';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';

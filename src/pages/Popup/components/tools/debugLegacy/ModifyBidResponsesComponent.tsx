@@ -1,4 +1,4 @@
-import { IPrebidDetails, IPrebidDebugConfig } from '../../../../../inject/scripts/prebid';
+import { IPrebidDetails, IPrebidDebugConfig } from '../../../../Content/scripts/prebid';
 import BidderFilterComponent from './BidderFilterComponent';
 import BidOverWriteComponent from './BidOverWriteComponent';
 import Box from '@mui/material/Box';

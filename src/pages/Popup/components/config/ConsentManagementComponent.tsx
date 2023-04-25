@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { IPrebidConfigConsentManagement } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigConsentManagement } from '../../../Content/scripts/prebid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { ITcfDetails } from '../../../../inject/scripts/tcf';
+import { ITcfDetails } from '../../../Content/scripts/tcf';
 import { TCString } from '@iabtcf/core';
 import TextField from '@mui/material/TextField';
 import Avatar from '@mui/material/Avatar';

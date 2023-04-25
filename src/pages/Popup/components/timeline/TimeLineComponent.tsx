@@ -1,4 +1,4 @@
-import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../Content/scripts/prebid';
 import React, { useEffect } from 'react';
 import GanttChartComponent from './GanttChartComponent';
 

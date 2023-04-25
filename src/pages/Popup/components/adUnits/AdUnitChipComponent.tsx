@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { IPrebidAdUnit } from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnit } from '../../../Content/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import { getTabId } from '../../utils';
 import Stack from '@mui/material/Stack';

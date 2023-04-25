@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box } from '@mui/system';
 import { Paper } from '@mui/material';
-import JSONViewerComponent from '../../pages/Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../Shared/JSONViewerComponent';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
   const [networktId, setNetworkId] = useState<string[]>(null);

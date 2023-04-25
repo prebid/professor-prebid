@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAdUnitMediaTypes } from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnitMediaTypes } from '../../../Content/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
 import Popover from '@mui/material/Popover';

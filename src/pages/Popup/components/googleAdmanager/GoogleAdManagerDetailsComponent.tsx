@@ -1,4 +1,4 @@
-import { IGoogleAdManagerDetails } from '../../../../inject/scripts/googleAdManager';
+import { IGoogleAdManagerDetails } from '../../../Content/scripts/googleAdManager';
 import React from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';

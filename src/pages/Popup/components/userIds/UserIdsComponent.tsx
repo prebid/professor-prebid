@@ -1,4 +1,4 @@
-import { IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidDetails } from '../../../Content/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';

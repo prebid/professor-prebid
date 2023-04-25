@@ -7,7 +7,7 @@ import {
   IPrebidAuctionEndEventData,
   IPrebidAuctionDebugEventData,
   IPrebidAdUnit,
-} from '../../../../inject/scripts/prebid';
+} from '../../../Content/scripts/prebid';
 import SlotsComponent from './SlotsComponent';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';

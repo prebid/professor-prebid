@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../../inject/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidDetails } from '../../../Content/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import AppsIcon from '@mui/icons-material/Apps';

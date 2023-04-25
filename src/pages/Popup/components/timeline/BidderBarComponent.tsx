@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
-import { IPrebidAuctionEndEventData, IPrebidBidderRequest } from '../../../../inject/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidBidderRequest } from '../../../Content/scripts/prebid';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import Popover from '@mui/material/Popover';

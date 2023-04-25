@@ -1,5 +1,5 @@
-import { sendToContentScript } from '../../utils';
-import constants from '../../constants.json';
+import { sendToContentScript } from '../../../utils';
+import constants from '../../../constants.json';
 
 declare global {
   interface Window {

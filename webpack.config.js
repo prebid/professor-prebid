@@ -9,14 +9,14 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 const ASSET_PATH = process.env.ASSET_PATH || '/';
 
-var alias = {
+const alias = {
   'react-dom': '@hot-loader/react-dom',
 };
 
 // load the secrets
-var secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
+const secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
 
-var fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2'];
+const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2'];
 
 if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
@@ -33,9 +33,8 @@ var options = {
     contentScript: path.join(__dirname, 'src', 'pages', 'Content', 'index.ts'),
     devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.js'),
     panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.jsx'),
-    inject: path.join(__dirname, 'src', 'inject', 'inject.ts'),
-    injected: path.join(__dirname, 'src', 'inject', 'injected.tsx'),
-    openDfpConsole: path.join(__dirname, 'src', 'inject', 'scripts', 'openDfpConsole.ts'),
+    injected: path.join(__dirname, 'src', 'pages', 'Content', 'scripts', 'injected.tsx'),
+    openDfpConsole: path.join(__dirname, 'src', 'pages', 'Content', 'scripts', 'openDfpConsole.ts'),
   },
   chromeExtensionBoilerplate: {
     notHotReload: [
@@ -44,7 +43,7 @@ var options = {
       'contentScript',
       'contentScript.bundle.js',
       'devtools',
-      'inject',
+      // 'inject',
       'injected',
       'openDfpConsole',
     ],
@@ -96,15 +95,6 @@ var options = {
     new webpack.ProgressPlugin(),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(['NODE_ENV']),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: 'src/pages/Popup/index.scss',
-          to: path.join(__dirname, 'build'),
-          force: true,
-        },
-      ],
-    }),
     new CopyWebpackPlugin({
       patterns: [
         {

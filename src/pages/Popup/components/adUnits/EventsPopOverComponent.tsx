@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { IPrebidAuctionDebugEventData } from '../../../../inject/scripts/prebid';
+import { IPrebidAuctionDebugEventData } from '../../../Content/scripts/prebid';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';

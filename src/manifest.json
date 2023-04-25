@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Professor Prebid",
-  "version": "0.2.60",
+  "version": "0.2.61",
   "options_page": "options.html",
   "background": { "service_worker": "background.bundle.js" },
   "action": {
@@ -15,7 +15,7 @@
     {
       "matches": ["http://*/*", "https://*/*", "<all_urls>"],
       "run_at": "document_idle",
-      "js": ["inject.bundle.js", "contentScript.bundle.js"]
+      "js": ["contentScript.bundle.js"]
     }
   ],
   "devtools_page": "devtools.html",

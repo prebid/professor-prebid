@@ -1,4 +1,4 @@
-import { IPrebidDebugModuleConfigRule, IPrebidDetails, IPrebidAuctionInitEventData } from '../../../../../inject/scripts/prebid';
+import { IPrebidDebugModuleConfigRule, IPrebidDetails, IPrebidAuctionInitEventData } from '../../../../Content/scripts/prebid';
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';

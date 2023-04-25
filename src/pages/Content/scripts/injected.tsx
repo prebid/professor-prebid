@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import InjectedApp from './app/InjectedApp';
-import { googleAdManager } from './scripts/googleAdManager';
-import { addEventListenersForPrebid } from './scripts/prebid';
-import { iabTcf } from './scripts/tcf';
+import InjectedApp from '../../App/InjectedApp'; 
+import { googleAdManager } from './googleAdManager';
+import { addEventListenersForPrebid } from './prebid';
+import { iabTcf } from './tcf';
 
 googleAdManager.init();
 addEventListenersForPrebid();

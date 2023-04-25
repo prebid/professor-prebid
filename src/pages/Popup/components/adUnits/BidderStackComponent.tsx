@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidAdUnit, IPrebidBidWonEventData, IPrebidAdRenderSucceededEventData } from '../../../../inject/scripts/prebid';
+import { IPrebidAdUnit, IPrebidBidWonEventData, IPrebidAdRenderSucceededEventData } from '../../../Content/scripts/prebid';
 import Stack from '@mui/material/Stack';
 import BidChipComponent from './BidChipComponent';
 

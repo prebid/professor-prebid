@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import constants from '../../constants.json';
 import { sendToContentScript } from '../../utils';
-import AdOverlayPortal from './AdOverlayPortal';
-import { AdOverlayComponentProps } from './AdOverlayComponent';
+import AdOverlayPortal from './components/AdOverlayPortal';
+import { AdOverlayComponentProps } from './components/AdOverlayComponent';
 
-import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../Content/scripts/prebid';
 
 declare global {
   interface Window {

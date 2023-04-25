@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { IPrebidConfigPriceBucket } from '../../../../inject/scripts/prebid';
+import { IPrebidConfigPriceBucket } from '../../../Content/scripts/prebid';
 import Paper from '@mui/material/Paper';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
