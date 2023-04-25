@@ -1,79 +1,75 @@
-// Extension content.js script, listens for (window) messages from
-// injected script, build auction data structure. Also listens for
-// (chrome) messages from Popup.js when it runs and responds to it
-// with the auction data it collected so far
 import constants from '../../constants.json';
 import { IPrebidDetails } from './scripts/prebid';
 
-class Content {
-  pbjsNamespace: string = null;
-  constructor() {
-    this.listenToInjectedScript();
-    this.listenToPopupScript();
-  }
+const ContentScript = () => {
+  let pbjsNamespace: string = null;
 
-  listenToInjectedScript = () => {
-    window.addEventListener('message', this.processMessageFromInjected, false);
+  const injectScript = () => {
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL('/injected.bundle.js');
+    script.id = 'professor prebid injected bundle';
+    const node = document.head || document.documentElement;
+    if (node) {
+      node.appendChild(script);
+      script.onload = () => {
+        script.remove();
+      };
+    } else {
+      requestIdleCallback(injectScript);
+    }
   };
 
-  listenToPopupScript = () => {
+  const listenToWindowMessages = () => {
+    window.addEventListener('message', processWindowMessages, false);
+  };
+
+  const listenToChromeRuntimeMessages = () => {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       if (request.type === constants.CONSOLE_TOGGLE) {
         document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: request.consoleState }));
       }
       if (request.type === constants.PBJS_NAMESPACE_CHANGE) {
-        this.pbjsNamespace = request.pbjsNamespace;
+        pbjsNamespace = request.pbjsNamespace;
         document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: request.pbjsNamespace }));
       }
       sendResponse();
     });
   };
 
-  processMessageFromInjected = (event: MessageEvent<{ type: string; payload: object }>) => {
+  const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object }>) => {
     if (event.source != window) {
       return;
     }
     const { type, payload } = event.data;
     if (type === constants.EVENTS.REQUEST_CONSOLE_STATE) {
-      this.sendConsoleStateToInjected();
+      const result = await chrome.storage.local.get(constants.CONSOLE_TOGGLE);
+      const checked = result[constants.CONSOLE_TOGGLE];
+      document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: !!checked }));
     }
     if (type === constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
-      this.pbjsNamespace = (payload as IPrebidDetails).namespace;
+      pbjsNamespace = (payload as IPrebidDetails).namespace;
     }
-    this.updateBackgroundPage(type, payload);
-    this.updateOverlays();
+    updateBackgroundPage(type, payload);
+    updateOverlays();
   };
 
-  sendConsoleStateToInjected = async () => {
-    const result = await chrome.storage.local.get(constants.CONSOLE_TOGGLE);
-    const checked = result[constants.CONSOLE_TOGGLE];
-    document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: !!checked }));
-  };
-
-  updateBackgroundPage = (type: string, payload: object) => {
+  const updateBackgroundPage = (type: string, payload: object) => {
     if (!type || !payload || !chrome.runtime?.id) return;
     chrome.runtime.sendMessage({ type, payload });
   };
 
-  updateOverlays = () => {
-    if (this.pbjsNamespace) {
-      document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: this.pbjsNamespace }));
+  const updateOverlays = () => {
+    if (pbjsNamespace) {
+      document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: pbjsNamespace }));
     }
   };
-}
 
-new Content();
-const inject = () => {
-  const script = document.createElement('script');
-  script.src = chrome.runtime.getURL('/injected.bundle.js');
-  script.id = 'professor prebid injected bundle';
-  if (document.head || document.documentElement) {
-    (document.head || document.documentElement).appendChild(script);
-    script.onload = () => {
-      script.remove();
-    };
-  } else {
-    requestIdleCallback(inject);
-  }
+  const init = () => {
+    listenToWindowMessages();
+    listenToChromeRuntimeMessages();
+    injectScript();
+  };
+  init();
 };
-inject();
+
+ContentScript();
