@@ -7,7 +7,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import constants from '../../../../constants.json';
+import { CONSOLE_TOGGLE } from '../../../Shared/constants';
 import { getTabId } from '../../utils';
 import Grid from '@mui/material/Grid';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -47,8 +47,8 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
 
   useEffect(() => {
-    chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {
-      const checked = result ? result[constants.CONSOLE_TOGGLE] : false;
+    chrome.storage.local.get(CONSOLE_TOGGLE, (result) => {
+      const checked = result ? result[CONSOLE_TOGGLE] : false;
       setConsoleState(checked);
     });
   }, [consoleState]);

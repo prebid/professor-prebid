@@ -9,7 +9,7 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
 import ToolsComponent from './components/tools/ToolsComponent';
-import constants from '../../constants.json';
+import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
@@ -33,7 +33,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
-import { popupTheme } from '../theme';
+import { popupTheme } from '../Shared/theme';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
@@ -43,7 +43,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   const tabId = await getTabId();
-  chrome.tabs.sendMessage(tabId, { type: constants.PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+  chrome.tabs.sendMessage(tabId, { type: PBJS_NAMESPACE_CHANGE, pbjsNamespace });
 };
 
 const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {

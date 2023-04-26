@@ -7,7 +7,7 @@ import {
   IPrebidBidderRequest,
 } from '../../../Content/scripts/prebid';
 import React, { useEffect, useRef } from 'react';
-import { createRangeArray } from '../../../../utils';
+import { createRangeArray } from '../../../Shared/utils';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';

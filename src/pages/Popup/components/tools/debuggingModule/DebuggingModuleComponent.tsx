@@ -1,6 +1,6 @@
 import { IPrebidDetails, IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../Content/scripts/prebid';
 import { getTabId } from '../../../utils';
-import constants from '../../../../../constants.json';
+import { STORE_RULES_TOGGLE } from '../../../../Shared/constants';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
@@ -19,8 +19,8 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
   const [storeRules, setStoreRules] = useState<boolean>(false);
 
   useEffect(() => {
-    chrome.storage.local.get(constants.STORE_RULES_TOGGLE, (result) => {
-      const checked = result ? result[constants.STORE_RULES_TOGGLE] : false;
+    chrome.storage.local.get(STORE_RULES_TOGGLE, (result) => {
+      const checked = result ? result[STORE_RULES_TOGGLE] : false;
       setStoreRules(checked);
     });
   }, [storeRules]);
@@ -72,10 +72,10 @@ const DebuggingModuleComponent = ({ prebid }: DebuggingModuleComponentProps): JS
   const handleStoreRulesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setStoreRules(event.target.checked);
     const { checked } = event.target;
-    chrome.storage.local.set({ [constants.STORE_RULES_TOGGLE]: checked }, () => {
+    chrome.storage.local.set({ [STORE_RULES_TOGGLE]: checked }, () => {
       chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
         const tab = tabs[0];
-        chrome.tabs.sendMessage(tab.id as number, { type: constants.STORE_RULES_TOGGLE, consoleState: checked });
+        chrome.tabs.sendMessage(tab.id as number, { type: STORE_RULES_TOGGLE, consoleState: checked });
       });
     });
   };

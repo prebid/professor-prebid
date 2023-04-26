@@ -1,5 +1,5 @@
-import { sendToContentScript } from '../../../utils';
-import constants from '../../../constants.json';
+import { sendToContentScript } from '../../Shared/utils';
+import { EVENTS } from '../../Shared/constants';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -122,7 +122,7 @@ class Prebid {
       bidderSettings: this.globalPbjs.bidderSettings,
     };
 
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+    sendToContentScript(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     this.sendToContentScriptPending = false;
   };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { overlayTheme } from '../../theme';
+import { overlayTheme } from '../../Shared/theme';
 import { ThemeProvider } from '@mui/material/styles';
 import GamDetailsComponent from './GamDetailsComponent';
 import { Paper } from '@mui/material';

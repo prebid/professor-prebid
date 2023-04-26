@@ -3,7 +3,7 @@ import Switch from '@mui/material/Switch';
 import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { Typography } from '@mui/material';
-import constants from '../../../../constants.json';
+import { CONSOLE_TOGGLE } from '../../../Shared/constants';
 import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
@@ -13,8 +13,8 @@ const OverlayControlComponent = (): JSX.Element => {
   const [showOverlay, setShowOverlay] = useState<boolean>(null);
 
   useEffect(() => {
-    chrome.storage.local.get(constants.CONSOLE_TOGGLE, (result) => {
-      const checked = result ? result[constants.CONSOLE_TOGGLE] : false;
+    chrome.storage.local.get(CONSOLE_TOGGLE, (result) => {
+      const checked = result ? result[CONSOLE_TOGGLE] : false;
       setShowOverlay(checked);
     });
   }, [showOverlay]);
@@ -22,10 +22,10 @@ const OverlayControlComponent = (): JSX.Element => {
   const handleShowOverlayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowOverlay(event.target.checked);
     const { checked } = event.target;
-    chrome.storage.local.set({ [constants.CONSOLE_TOGGLE]: checked }, () => {
+    chrome.storage.local.set({ [CONSOLE_TOGGLE]: checked }, () => {
       chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
         const tab = tabs[0];
-        chrome.tabs.sendMessage(tab.id as number, { type: constants.CONSOLE_TOGGLE, consoleState: checked });
+        chrome.tabs.sendMessage(tab.id as number, { type: CONSOLE_TOGGLE, consoleState: checked });
       });
     });
   };

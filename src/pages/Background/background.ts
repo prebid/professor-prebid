@@ -1,4 +1,4 @@
-import constants from '../../constants.json';
+import {EVENTS} from '../Shared/constants';
 import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
 import { IPrebidDetails } from '../Content/scripts/prebid';
 import { ITcfDetails } from '../Content/scripts/tcf';
@@ -33,17 +33,17 @@ class Background {
     if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     switch (type) {
-      case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
+      case EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
         sendResponse();
         this.tabInfos[tabId]['googleAdManager'] = payload as IGoogleAdManagerDetails;
         break;
-      case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
+      case EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
         sendResponse();
         const typedPayload = payload as IPrebidDetails;
         this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
         this.tabInfos[tabId]['prebids']![typedPayload.namespace] = typedPayload;
         break;
-      case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
+      case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
         sendResponse();
         this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
         break;

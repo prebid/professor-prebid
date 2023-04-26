@@ -13,7 +13,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
 import { ThemeProvider } from '@mui/material/styles';
-import { popupTheme } from '../../theme';
+import { popupTheme } from '../../Shared/theme';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
