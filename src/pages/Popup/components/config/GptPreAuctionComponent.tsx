@@ -8,7 +8,7 @@ import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import BorderBottomIcon from '@mui/icons-material/BorderBottom';
 
 const GptPreAuctionComponent = ({ gptPreAuction }: IGptPreAuctionComponentProps): JSX.Element => {

@@ -1,7 +1,7 @@
 import { IPrebidDetails } from '../../../Content/scripts/prebid';
 import React from 'react';
 import Box from '@mui/material/Box';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';

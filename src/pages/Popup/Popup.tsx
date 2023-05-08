@@ -33,7 +33,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Badge from '@mui/material/Badge';
-import { popupTheme } from '../Shared/theme';
+import { popupTheme } from '../../theme/theme';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AutorenewIcon from '@mui/icons-material/Autorenew';

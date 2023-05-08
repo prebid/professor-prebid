@@ -2,7 +2,7 @@ import React from 'react';
 import { IPrebidBidWonEventData, IPrebidBid } from '../../../Content/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';

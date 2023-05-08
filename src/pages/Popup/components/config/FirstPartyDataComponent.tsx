@@ -7,7 +7,7 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 
 const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX.Element => {

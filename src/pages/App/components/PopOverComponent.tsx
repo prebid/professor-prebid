@@ -12,7 +12,7 @@ import Close from '@mui/icons-material/Close';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import JSONViewerComponent from '../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GavelIcon from '@mui/icons-material/Gavel';

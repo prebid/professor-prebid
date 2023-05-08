@@ -1,7 +1,7 @@
 import React from 'react';
 import { IPrebidAdUnitMediaTypes } from '../../../Content/scripts/prebid';
 import Chip from '@mui/material/Chip';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import Popover from '@mui/material/Popover';
 
 const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipComponentProps): JSX.Element => {

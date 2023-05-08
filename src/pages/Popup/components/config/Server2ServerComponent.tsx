@@ -7,7 +7,7 @@ import CardContent from '@mui/material/CardContent';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DnsIcon from '@mui/icons-material/Dns';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from './ConfigComponent';
 

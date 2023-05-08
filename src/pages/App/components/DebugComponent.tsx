@@ -6,14 +6,14 @@ import { ITabInfos, ITabInfo } from '../../Background/background';
 import BidsComponent from '../../Popup/components/bids/BidsComponent';
 import ConfigComponent from '../../Popup/components/config/ConfigComponent';
 import ToolsComponent from '../../Popup/components/tools/ToolsComponent';
-import JSONViewerComponent from '../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
 import { ThemeProvider } from '@mui/material/styles';
-import { popupTheme } from '../../Shared/theme';
+import { popupTheme } from '../../../theme/theme';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
