@@ -1,5 +1,5 @@
-import { sendToContentScript } from '../../../utils';
-import constants from '../../../constants.json';
+import { sendToContentScript } from '../../Shared/utils';
+import { EVENTS } from '../../Shared/constants';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -94,10 +94,10 @@ class Prebid {
     const objectURL = URL.createObjectURL(blob);
     // memory management
     this.lastEventsObjectUrl.push({ url: objectURL, size: blob.size });
-    const numberOfCachedUrls = 5;
+    const numberOfCachedUrls = 5 * 10;
     const totalWeight = this.lastEventsObjectUrl.reduce((acc, cur) => acc + cur.size, 0);
-    if ((this.lastEventsObjectUrl.length > numberOfCachedUrls && totalWeight > 5e6) || totalWeight > 25e6) {
-      // 5MB / 25MB
+    if ((this.lastEventsObjectUrl.length > numberOfCachedUrls && totalWeight > 5e6 * 10) || totalWeight > 25e6 * 10) {
+      // revoke oldest urls
       const count = this.lastEventsObjectUrl.length - numberOfCachedUrls;
       const toRevoke = this.lastEventsObjectUrl.splice(0, count);
       for (const url of toRevoke) {
@@ -115,6 +115,7 @@ class Prebid {
       config,
       debug: this.getDebugConfig(),
       eids,
+      events: [],
       eventsUrl: this.getEventsObjUrl(),
       namespace: this.namespace,
       timeout,
@@ -122,7 +123,7 @@ class Prebid {
       bidderSettings: this.globalPbjs.bidderSettings,
     };
 
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+    sendToContentScript(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     this.sendToContentScriptPending = false;
   };
 
@@ -384,6 +385,13 @@ export interface IPrebidConfigS2SConfig {
   timeout: number;
 }
 
+export interface IPrebidConfigConsentManagementRule {
+  purpose: string;
+  enforcePurpose: boolean;
+  enforceVendor: boolean;
+  vendorExceptions: string[];
+}
+
 export interface IPrebidConfigConsentManagement {
   allowAuctionWithoutConsent: boolean;
   defaultGdprScope: string;
@@ -400,12 +408,7 @@ export interface IPrebidConfigConsentManagement {
       addtlConsent: string;
       gdprApplies: boolean;
     };
-    rules: {
-      purpose: string;
-      enforcePurpose: boolean;
-      enforceVendor: boolean;
-      vendorExceptions: string[];
-    }[];
+    rules: IPrebidConfigConsentManagementRule[];
   };
   usp: {
     cmpApi: string;
@@ -433,7 +436,7 @@ export interface IPrebidConfig {
     priceGranularity: string;
     publisherDomain: string;
   };
-  s2sConfig: IPrebidConfigS2SConfig;
+  s2sConfig: IPrebidConfigS2SConfig | IPrebidConfigS2SConfig[];
   targetingControls: {
     allowTargetingKeys: string[];
     alwaysIncludeDeals: boolean;
@@ -525,7 +528,7 @@ export interface IPrebidDetails {
   version: string;
   timeout: number;
   eventsUrl: string;
-  events?: (
+  events: (
     | IPrebidAuctionInitEventData
     | IPrebidAuctionEndEventData
     | IPrebidBidRequestedEventData

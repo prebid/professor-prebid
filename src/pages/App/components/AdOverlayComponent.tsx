@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { overlayTheme } from '../../theme';
+import { theme } from '../../../theme/theme';
 import { ThemeProvider } from '@mui/material/styles';
 import GamDetailsComponent from './GamDetailsComponent';
 import { Paper } from '@mui/material';
@@ -52,7 +52,7 @@ const AdOverlayComponent = ({
     }
   }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight, truncate]);
   return (
-    <ThemeProvider theme={overlayTheme}>
+    <ThemeProvider theme={theme}>
       <PopOverComponent
         elementId={elementId}
         winningCPM={winningCPM}

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import { IPrebidAuctionEndEventData, IPrebidBidderRequest } from '../../../Content/scripts/prebid';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
@@ -12,6 +12,44 @@ const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject
     (a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input)
   )[0] as HTMLElement;
   return nearestGridBar;
+};
+
+const getListItemStyle = (isTimeOut: boolean, width: number, left: number) => ({
+  whiteSpace: 'nowrap',
+  m: 1,
+  position: 'relative',
+  color: isTimeOut ? 'warning.main' : 'primary.main',
+  border: '1px solid',
+  backgroundColor: 'background.paper',
+  borderRadius: '4px',
+  width: `${width}px`,
+  left: `${left}px`,
+});
+
+const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpenClose }: IPopoverWithJSONViewerProps) => {
+  return (
+    <Popover
+      open={open}
+      anchorEl={anchorEl}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+      onClose={handlePopoverOpenClose}
+      disableRestoreFocus
+    >
+      <JSONViewerComponent
+        src={bidderRequest}
+        name={false}
+        collapsed={3}
+        displayObjectSize={false}
+        displayDataTypes={false}
+        sortKeys={false}
+        quotesOnKeys={false}
+        indentWidth={2}
+        collapseStringsAfterLength={100}
+        style={{ fontSize: 12, fontFamily: 'roboto', padding: '5px' }}
+      />
+    </Popover>
+  );
 };
 
 const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent, gridRef }: IBidderBarComponentProps): JSX.Element => {
@@ -32,45 +70,12 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent, gridRef }: 
 
   return (
     <React.Fragment>
-      <ListItem
-        onClick={handlePopoverOpenClose}
-        sx={{
-          whiteSpace: 'nowrap',
-          m: 1,
-          position: 'relative',
-          color: isTimeOut ? 'warning.main' : 'primary.main',
-          border: '1px solid',
-          backgroundColor: 'background.paper',
-          borderRadius: '4px',
-          width: `${width}px`,
-          left: `${left}px`,
-        }}
-      >
+      <ListItem onClick={handlePopoverOpenClose} sx={getListItemStyle(isTimeOut, width, left)}>
         <Typography variant="body1" sx={{ color: isTimeOut ? 'warning.main' : 'primary.main' }}>
-          {item.bidderCode}: {item.end - item.start}ms {isTimeOut ? '(timeout)' : null}
+          {item.bidderCode}: {Math.round((item.end - item.start) * 100) / 100}ms {isTimeOut ? '(timeout)' : null}
         </Typography>
+        <PopoverWithJSONViewer anchorEl={anchorEl} bidderRequest={bidderRequest} open={open} handlePopoverOpenClose={handlePopoverOpenClose} />
       </ListItem>
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        onClose={handlePopoverOpenClose}
-        disableRestoreFocus
-      >
-        <JSONViewerComponent
-          src={bidderRequest}
-          name={false}
-          collapsed={3}
-          displayObjectSize={false}
-          displayDataTypes={false}
-          sortKeys={false}
-          quotesOnKeys={false}
-          indentWidth={2}
-          collapseStringsAfterLength={100}
-          style={{ fontSize: 12, fontFamily: 'roboto', padding: '5px' }}
-        />
-      </Popover>
     </React.Fragment>
   );
 };
@@ -87,6 +92,13 @@ interface ITableRow {
   start: number;
   end: number;
   bidderRequestId: string;
+}
+
+interface IPopoverWithJSONViewerProps {
+  anchorEl: HTMLElement | null;
+  bidderRequest: IPrebidBidderRequest | null;
+  open: boolean;
+  handlePopoverOpenClose: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 export default BidderBarComponent;

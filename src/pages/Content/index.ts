@@ -1,4 +1,4 @@
-import constants from '../../constants.json';
+import {CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS} from '../Shared/constants';
 import { IPrebidDetails } from './scripts/prebid';
 
 const ContentScript = () => {
@@ -25,12 +25,12 @@ const ContentScript = () => {
 
   const listenToChromeRuntimeMessages = () => {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-      if (request.type === constants.CONSOLE_TOGGLE) {
-        document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: request.consoleState }));
+      if (request.type === CONSOLE_TOGGLE) {
+        document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: request.consoleState }));
       }
-      if (request.type === constants.PBJS_NAMESPACE_CHANGE) {
+      if (request.type === PBJS_NAMESPACE_CHANGE) {
         pbjsNamespace = request.pbjsNamespace;
-        document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: request.pbjsNamespace }));
+        document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: request.pbjsNamespace }));
       }
       sendResponse();
     });
@@ -41,12 +41,12 @@ const ContentScript = () => {
       return;
     }
     const { type, payload } = event.data;
-    if (type === constants.EVENTS.REQUEST_CONSOLE_STATE) {
-      const result = await chrome.storage.local.get(constants.CONSOLE_TOGGLE);
-      const checked = result[constants.CONSOLE_TOGGLE];
-      document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: !!checked }));
+    if (type === EVENTS.REQUEST_CONSOLE_STATE) {
+      const result = await chrome.storage.local.get(CONSOLE_TOGGLE);
+      const checked = result[CONSOLE_TOGGLE];
+      document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: !!checked }));
     }
-    if (type === constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
+    if (type === EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
       pbjsNamespace = (payload as IPrebidDetails).namespace;
     }
     updateBackgroundPage(type, payload);
@@ -60,7 +60,7 @@ const ContentScript = () => {
 
   const updateOverlays = () => {
     if (pbjsNamespace) {
-      document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: pbjsNamespace }));
+      document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: pbjsNamespace }));
     }
   };
 

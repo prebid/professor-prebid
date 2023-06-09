@@ -1,8 +1,12 @@
 export const getTabId = (): Promise<number> => {
   return new Promise((resolve) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      resolve(tabs[0]?.id);
-    });
+    if (chrome?.devtools?.inspectedWindow?.tabId) {
+      resolve(chrome.devtools.inspectedWindow.tabId);
+    } else if (chrome?.tabs?.query) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        resolve(tabs[0]?.id);
+      });
+    }
   });
 };
 

@@ -1,5 +1,5 @@
-import { sendToContentScript } from '../../../utils';
-import constants from '../../../constants.json';
+import { sendToContentScript } from '../../Shared/utils';
+import { EVENTS } from '../../Shared/constants';
 
 declare global {
   interface Window {
@@ -216,7 +216,7 @@ class GoogleAdManager {
       postAuctionEndTimestamp: this.postAuctionEndTimestamp,
     };
     if (this.lastMessage !== JSON.stringify(detail)) {
-      sendToContentScript(constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, detail);
+      sendToContentScript(EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, detail);
       this.lastMessage = JSON.stringify(detail);
     }
   }

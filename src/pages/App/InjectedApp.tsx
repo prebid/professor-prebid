@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import constants from '../../constants.json';
-import { sendToContentScript } from '../../utils';
+import { EVENTS, CONSOLE_TOGGLE, SAVE_MASKS } from '../Shared/constants';
+import { sendToContentScript } from '../Shared/utils';
 import AdOverlayPortal from './components/AdOverlayPortal';
 import { AdOverlayComponentProps } from './components/AdOverlayComponent';
 
@@ -58,12 +58,12 @@ const InjectedApp = (): JSX.Element => {
   };
 
   useEffect(() => {
-    sendToContentScript(constants.EVENTS.REQUEST_CONSOLE_STATE, null);
-    document.addEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
-    document.addEventListener(constants.SAVE_MASKS, handleNewMasks);
+    sendToContentScript(EVENTS.REQUEST_CONSOLE_STATE, null);
+    document.addEventListener(CONSOLE_TOGGLE, handleConsoleStateChange);
+    document.addEventListener(SAVE_MASKS, handleNewMasks);
     return () => {
-      document.removeEventListener(constants.CONSOLE_TOGGLE, handleConsoleStateChange);
-      document.removeEventListener(constants.SAVE_MASKS, handleNewMasks);
+      document.removeEventListener(CONSOLE_TOGGLE, handleConsoleStateChange);
+      document.removeEventListener(SAVE_MASKS, handleNewMasks);
     };
   }, []);
 
