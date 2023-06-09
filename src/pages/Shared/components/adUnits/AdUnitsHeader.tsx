@@ -1,10 +1,15 @@
 import React, { useContext, useState } from 'react';
 import Typography from '@mui/material/Typography';
-import Popover from '@mui/material/Popover';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import StateContext from '../../contexts/appStateContext';
-import EventsComponent from '../auctionDebugEvents/EventsComponent';
+import AppStateContext from '../../contexts/appStateContext';
+import EventsPopOver from '../auctionDebugEvents/EventsPopOver';
+import { conditionalPluralization } from '../../utils';
+
+interface HeaderGridItemProps {
+  children: JSX.Element | string;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+}
 
 const HeaderGridItem = ({ children, onClick }: HeaderGridItemProps): JSX.Element => (
   <Grid item onClick={onClick}>
@@ -14,68 +19,28 @@ const HeaderGridItem = ({ children, onClick }: HeaderGridItemProps): JSX.Element
   </Grid>
 );
 
-interface HeaderGridItemProps {
-  children: JSX.Element;
-  onClick?: React.MouseEventHandler<HTMLDivElement>;
-}
-
-const conditionalPluralization = (input: Array<any>): string => (input?.length > 1 ? 's' : '');
-
 const AdUnitsHeaderComponent = (): JSX.Element => {
-  const { allBidResponseEvents, prebid, allNoBidEvents, allBidderEvents, allAdUnitCodes } = useContext(StateContext);
   const [eventsPopUpOpen, setEventsPopUpOpen] = useState<boolean>(false);
+  const { allBidResponseEvents, prebid, allNoBidEvents, allBidderEvents, allAdUnitCodes } = useContext(AppStateContext);
   if (!prebid) return null;
   return (
     <>
-      <HeaderGridItem>
-        <>Version: {prebid.version}</>
-      </HeaderGridItem>
+      <HeaderGridItem>{`Version: ${prebid.version}`}</HeaderGridItem>
 
-      <HeaderGridItem>
-        <>Timeout: {prebid.config?.bidderTimeout}</>
-      </HeaderGridItem>
+      <HeaderGridItem>{`Timeout: ${prebid.config?.bidderTimeout}`}</HeaderGridItem>
 
-      <HeaderGridItem>
-        <>
-          AdUnit{conditionalPluralization(allAdUnitCodes)}: : {allAdUnitCodes.length}
-        </>
-      </HeaderGridItem>
+      <HeaderGridItem>{`AdUnit${conditionalPluralization(allAdUnitCodes)}: ${allAdUnitCodes.length}`}</HeaderGridItem>
 
-      <HeaderGridItem>
-        <>
-          Bidder{conditionalPluralization(allBidderEvents)}: : {allBidderEvents.length}
-        </>
-      </HeaderGridItem>
+      <HeaderGridItem>{`Bidder${conditionalPluralization(allBidderEvents)}: ${allBidderEvents.length}`}</HeaderGridItem>
 
-      <HeaderGridItem>
-        <>
-          Bid{conditionalPluralization(allBidResponseEvents)}: {allBidResponseEvents.length}
-        </>
-      </HeaderGridItem>
+      <HeaderGridItem>{`Bid${conditionalPluralization(allBidResponseEvents)}: ${allBidResponseEvents.length}`}</HeaderGridItem>
 
-      <HeaderGridItem>
-        <>
-          noBid{conditionalPluralization(allNoBidEvents)} : {allNoBidEvents.length}
-        </>
-      </HeaderGridItem>
+      <HeaderGridItem>{`NoBid${conditionalPluralization(allNoBidEvents)}: ${allNoBidEvents.length}`}</HeaderGridItem>
 
       <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>
-        <>
-          Event{conditionalPluralization(prebid.events)} : {prebid.events.length}
-        </>
+        {`Event${conditionalPluralization(prebid.events)}: ${prebid.events.length}`}
       </HeaderGridItem>
-
-      <Popover
-        open={eventsPopUpOpen}
-        anchorReference="anchorPosition"
-        anchorPosition={{ top: 1, left: 1 }}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        onClose={() => setEventsPopUpOpen(false)}
-        PaperProps={{ style: { width: '100%', padding: 1 } }}
-      >
-        <EventsComponent close={() => setEventsPopUpOpen(false)} />
-      </Popover>
+      <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />
     </>
   );
 };
