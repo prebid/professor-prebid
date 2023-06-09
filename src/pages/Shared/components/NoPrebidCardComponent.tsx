@@ -1,33 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useContext } from 'react';
+import React from 'react';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import InspectedPageContext from '../contexts/inspectedPageContext';
-import JSONViewerComponent from './JSONViewerComponent';
-
+import Box from '@mui/material/Box';
+import CardHeader from '@mui/material/CardHeader';
+import IconButton from '@mui/material/IconButton';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { reloadPage } from '../utils';
 const NoPrebidCardComponent = (): JSX.Element => {
-  const context = useContext(InspectedPageContext);
-  const { syncState } = context;
   return (
-    <Card onClick={() => chrome.tabs.reload(chrome.devtools.inspectedWindow.tabId)}>
-      <CardContent sx={{ backgroundColor: 'primary.light' }}>
-        <Grid container justifyContent="center">
-          <Grid item>
-            <Paper elevation={4} sx={{ p: 2 }}>
-              {syncState === '' ? (
-                <Typography variant="h2">No Prebid.js detected on this page. Try to scroll down or click here to refresh the page.</Typography>
-              ) : (
-                <Typography variant="h2">syncState: {syncState}</Typography>
-              )}
-              {false && <JSONViewerComponent src={context || { context: JSON.stringify(context) }} collapsed={5} />}
-            </Paper>
-          </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+    <Box sx={{ backgroundColor: 'primary.light' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ABDDF' }}>
+        <Card sx={{ maxWidth: 0.75, minWidth: 0.75 }}>
+          <CardHeader
+            action={
+              <IconButton aria-label="share" onClick={reloadPage}>
+                <RestartAltIcon />
+              </IconButton>
+            }
+            title="No Prebid.js detected on this page."
+            subheader="Try to scroll down or click here to refresh the page."
+          />
+        </Card>
+      </Box>
+    </Box>
   );
 };
 

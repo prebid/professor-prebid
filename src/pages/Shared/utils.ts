@@ -1,3 +1,4 @@
+import { getTabId } from "../Popup/utils";
 
 export const sendToContentScript = (type: string, payload: object): void => {
   // work-around for
@@ -48,3 +49,10 @@ export const getMinAndMaxNumber = (timestampArray: number[]): { min: number; max
   });
   return { min, max };
 };
+
+export const conditionalPluralization = (input: Array<any>): string => (input?.length > 1 ? 's' : '');
+
+export const reloadPage = async () => {
+  const tabId = await getTabId();
+  chrome.tabs.reload(tabId)
+}

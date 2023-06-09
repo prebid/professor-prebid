@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
@@ -12,6 +12,10 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InspectedPageContext from '../contexts/inspectedPageContext';
 import JSONViewerComponent from './JSONViewerComponent';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import LogoSvg from '../../../assets/Logo';
+import { reloadPage } from '../utils';
+import { Avatar } from '@mui/material';
 
 interface ExpandMoreProps extends IconButtonProps {
   expand: boolean;
@@ -32,32 +36,50 @@ const ErrorCardComponent = ({ error }: any) => {
   const context = useContext(InspectedPageContext);
   const { syncState } = context;
   const [expanded, setExpanded] = React.useState(false);
-
+  const cardRef = useRef(null);
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
 
+  console.log({ cardRef });
+
   return (
-    // center card in screen
     <Box sx={{ backgroundColor: 'primary.light' }}>
-      <Box id="florian" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ABDDF' }}>
-        <Card sx={{ maxWidth: 0.75, minWidth: 0.75 }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10000,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          backgroundColor: '#ABDDF',
+        }}
+      ></Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ABDDF' }}>
+        <Card sx={{ maxWidth: 0.75, minWidth: 0.75 }} ref={cardRef}>
           <CardHeader
-            // avatar={
-            //   <Typography variant="h1" aria-label="Error">
-            //     This is an Error
-            //   </Typography>
-            // }
+            avatar={
+              <Avatar sx={{ backgroundColor: 'primary.light', width: 70, height: 70 }}>
+                <LogoSvg width={50} height={50} />
+              </Avatar>
+            }
             action={
-              <IconButton aria-label="report bug">
-                <BugReportIcon />
+              <IconButton aria-label="share" onClick={reloadPage}>
+                <RestartAltIcon />
               </IconButton>
             }
-            title="Oops! An Error Occurred"
-            subheader={error?.message || syncState ? 'SyncState: ' + syncState : ''}
-            // subheader={syncState ? 'SyncState: ' + syncState : ''}
+            title={<Typography variant="h1">Oops! An Error Occurred</Typography>}
+            subheader={
+              error?.message
+                ? `Error Message: ${error.message}`
+                : syncState && syncState !== '' && syncState !== 'null'
+                ? 'SyncState: ' + syncState
+                : ''
+            }
           />
-          {/* <CardMedia component="img" height="194" image="/static/images/cards/paella.jpg" alt="Paella dish" /> */}
           <CardContent>
             <Typography variant="body1" paragraph>
               We apologize for the inconvenience, but it seems that an error has occurred.We highly value your privacy and therefore do not track any
@@ -78,9 +100,9 @@ const ErrorCardComponent = ({ error }: any) => {
             </Typography>
           </CardContent>
           <CardActions disableSpacing>
-            {/* <IconButton aria-label="share">
-              <ShareIcon />
-            </IconButton> */}
+            <IconButton aria-label="report bug">
+              <BugReportIcon />
+            </IconButton>
             <ExpandMore expand={expanded} onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
               <ExpandMoreIcon />
             </ExpandMore>
