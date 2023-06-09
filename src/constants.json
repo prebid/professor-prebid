@@ -20,6 +20,8 @@
     "EVENT_SEND_AUCTION_DATA_TO_DEBUG_TAB": "sendAuctionDataToDebugTab"
   },
   "CONSOLE_TOGGLE": "PP_CONSOLE_STATE",
+  "INITIATOR_TOGGLE": "initiator_state",
+  "INITIATOR_ROOT_URL": "initiator_root_url",
   "STORE_RULES_TOGGLE": "persistDebuggingRules",
   "PBJS_NAMESPACE_CHANGE": "PBJS_NAMESPACE_CHANGE",
   "SAVE_MASK": "PP_SAVE_MASK",

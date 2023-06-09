@@ -5,12 +5,14 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import GoogleIcon from '@mui/icons-material/Google';
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import constants from '../../../../constants.json';
 import { getTabId } from '../../utils';
 import Grid from '@mui/material/Grid';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import LinkIcon from '@mui/icons-material/Link';
 import { Paper } from '@mui/material';
 import OverlayControlComponent from './OverlayControlComponent';
 import { gte } from 'semver';
@@ -43,7 +45,7 @@ const openDebugTab = async () => {
   chrome.tabs.create({ url });
 };
 
-const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
+const ToolsComponent = ({ prebid, handleRouteChange }: ToolsComponentProps): JSX.Element => {
   const [consoleState, setConsoleState] = useState<boolean>(null);
 
   useEffect(() => {
@@ -77,6 +79,19 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
             </Button>
           </Paper>
         </Grid>
+        <Grid item sx={{ height: 36 }}>
+          <Paper elevation={1}>
+            <Link to="initiator">
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => handleRouteChange('/initiator')}
+                startIcon={<LinkIcon />}>
+                <Typography variant="h3"> initiator</Typography>
+              </Button>
+            </Link>
+          </Paper>
+        </Grid>
 
         <OverlayControlComponent />
         {prebid && !isNewDebugVersion(prebid.version) && <ModifyBidResponsesComponent prebid={prebid} />}
@@ -88,6 +103,7 @@ const ToolsComponent = ({ prebid }: ToolsComponentProps): JSX.Element => {
 
 interface ToolsComponentProps {
   prebid: IPrebidDetails;
+  handleRouteChange?: (route: string) => void;
 }
 
 export default ToolsComponent;

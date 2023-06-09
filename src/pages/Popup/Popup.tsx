@@ -9,6 +9,7 @@ import ConfigComponent from './components/config/ConfigComponent';
 import TimelineComponent from './components/timeline/TimeLineComponent';
 import BidsComponent from './components/bids/BidsComponent';
 import ToolsComponent from './components/tools/ToolsComponent';
+import InitiatorComponent from './components/initiator/InitiatorComponent';
 import constants from '../../constants.json';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -245,7 +246,7 @@ export const Popup = (): JSX.Element => {
             <Link to="tools">
               <Button
                 size="small"
-                variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
+                variant={activeRoute === '/tools' || activeRoute === '/initiator' ? 'contained' : 'outlined'}
                 onClick={() => handleRouteChange('/tools')}
                 startIcon={<DnsOutlinedIcon />}
               >
@@ -347,10 +348,23 @@ export const Popup = (): JSX.Element => {
               path="tools"
               element={
                 <React.Fragment>
-                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] && <ToolsComponent prebid={tabInfo?.prebids[pbjsNameSpace]} />}
+                  {tabInfo?.prebids && tabInfo.prebids[pbjsNameSpace] &&
+                    <ToolsComponent
+                      prebid={tabInfo?.prebids[pbjsNameSpace]}
+                      handleRouteChange={handleRouteChange}
+                    />
+                  }
                 </React.Fragment>
               }
             ></Route>
+            {/* <Route
+              path="tools/initiator"
+              element={
+                <React.Fragment>
+                  <InitiatorComponent />
+                </React.Fragment>
+              }
+            ></Route> */}
           </Routes>
         </Box>
       </ThemeProvider>
