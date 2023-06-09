@@ -22,4 +22,4 @@ render(
   window.document.querySelector('#app-container')
 );
 
-(module as any)?.hot?.accept();
+// (module as any)?.hot?.accept();
