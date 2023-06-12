@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react';
 import { ITabInfo, ITabInfos } from '../../Background/background';
 import { getTabId } from '../../Popup/utils';
+import { DOWNLOAD_FAILED } from '../constants';
 
 const InspectedPageContext = createContext<ITabInfo | undefined>(undefined);
 
@@ -11,32 +12,29 @@ interface ChromeStorageProviderProps {
 export const InspectedPageContextProvider = ({ children }: ChromeStorageProviderProps) => {
   const [pageContext, setPageContext] = useState<ITabInfo>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
-  const [syncState, setSyncState] = useState<string>('');
+  const [syncInfo, setSyncInfo] = useState<string>('');
 
   const fetchEvents = useCallback(async (tabInfos: ITabInfos) => {
     const tabId = await getTabId();
     const prebids = tabInfos[tabId]?.prebids;
     if (prebids) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      for (const [_namespace, prebid] of Object.entries(prebids)) {
-        setSyncState(`try to download Events from ${prebid.eventsUrl}`);
+      for (const [namespace, prebid] of Object.entries(prebids)) {
+        setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
         try {
           setDownloading('true');
 
-          setSyncState(`downloading ${prebid.eventsUrl}`);
+          setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);
           const response = await fetch(prebid.eventsUrl);
 
-          setSyncState(`get JSON from response stream`);
+          setSyncInfo(`${namespace}: get JSON from response stream`);
           prebid.events = await response.json();
 
           setDownloading('false');
-          setSyncState(null);
+          setSyncInfo(null);
         } catch (error) {
-          setSyncState(`error during download of ${prebid.eventsUrl}`);
+          setSyncInfo(`${namespace}: error during download of ${prebid.eventsUrl}`);
           setDownloading('error');
-          // write error to chrome.storage.local in order to trigger a rerun of the fetch
-          chrome.storage.local.set({ error: prebid.eventsUrl });
-          prebid.events = [];
+          chrome.tabs.sendMessage(chrome.devtools.inspectedWindow.tabId, { type: DOWNLOAD_FAILED, payload: prebids.eventsUrl });
         }
       }
     }
@@ -59,14 +57,6 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
         const tabInfoWithEvents = await fetchEvents({ ...changes.tabInfos.newValue });
         setPageContext(tabInfoWithEvents);
       }
-      if (areaName === 'local' && changes.newValue?.error !== undefined) {
-        const url = changes.newValue.error;
-        console.log('error', url);
-        console.log('delete error', changes.newValue);
-        delete changes.newValue.error;
-        console.log('new value', changes.newValue);
-        chrome.storage.local.set(changes.newValue);
-      }
     };
     chrome.storage.onChanged.addListener(handler);
 
@@ -76,7 +66,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     };
   }, [fetchEvents]);
 
-  const contextValue: ITabInfo = { ...pageContext, downloading, syncState };
+  const contextValue: ITabInfo = { ...pageContext, downloading, syncState: syncInfo };
 
   return <InspectedPageContext.Provider value={contextValue}>{children}</InspectedPageContext.Provider>;
 };

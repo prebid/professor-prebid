@@ -1,4 +1,4 @@
-import {CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS} from '../Shared/constants';
+import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, DOWNLOAD_FAILED } from '../Shared/constants';
 import { IPrebidDetails } from './scripts/prebid';
 
 const ContentScript = () => {
@@ -31,6 +31,9 @@ const ContentScript = () => {
       if (request.type === PBJS_NAMESPACE_CHANGE) {
         pbjsNamespace = request.pbjsNamespace;
         document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: request.pbjsNamespace }));
+      }
+      if (request.type === DOWNLOAD_FAILED) {
+        document.dispatchEvent(new CustomEvent(DOWNLOAD_FAILED, { detail: request.url }));
       }
       sendResponse();
     });

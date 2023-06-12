@@ -1,5 +1,5 @@
 import { sendToContentScript } from '../../Shared/utils';
-import { EVENTS } from '../../Shared/constants';
+import { DOWNLOAD_FAILED, EVENTS } from '../../Shared/constants';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -61,6 +61,18 @@ class Prebid {
       }
       this.throttle(this.sendDetailsToContentScript);
     });
+
+    window.addEventListener('message', (event) => {
+      if (event.source != window) {
+        return;
+      }
+      const { type, payload } = event.data;
+      if (type === DOWNLOAD_FAILED) {
+        alert('download failed ' + payload);
+        this.lastEventsObjectUrl = this.lastEventsObjectUrl.filter(({ url }) => url !== payload);
+        this.sendDetailsToContentScript();
+      }
+    }, false);
   };
 
   getDebugConfig = () => {
