@@ -18,6 +18,7 @@ export const CONSOLE_TOGGLE = "PP_CONSOLE_STATE";
 export const STORE_RULES_TOGGLE = "persistDebuggingRules";
 export const PBJS_NAMESPACE_CHANGE = "PBJS_NAMESPACE_CHANGE";
 export const SAVE_MASKS = "PP_SAVE_MASKS";
+export const DOWNLOAD_FAILED = "PP_DOWNLOAD_FAILED";
 export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   // all mediaTypes
   { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '', type: 'string' },
