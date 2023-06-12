@@ -7,6 +7,7 @@ export const sendToContentScript = (type: string, payload: object): void => {
   payload = JSON.parse(JSON.stringify(payload));
   window.top.postMessage(
     {
+      profPrebid: true,
       type,
       payload,
     },

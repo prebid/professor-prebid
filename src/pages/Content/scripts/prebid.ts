@@ -12,6 +12,7 @@ class Prebid {
   lastEventsObjectUrl: { url: string; size: number }[] = [];
   events: any[] = [];
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
+
   constructor(namespace: string) {
     this.namespace = namespace;
     this.globalPbjs = window[namespace as keyof Window];
@@ -156,15 +157,36 @@ class Prebid {
   };
 }
 
+const detectIframe = () => {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+};
+
+const getIFrameNestedDepth = (input: Window): number => {
+  if (input === window.top) {
+    return 0;
+  }
+  else if (input.parent === window.top) {
+    return 1;
+  }
+
+  return 1 + getIFrameNestedDepth(input.parent);
+}
+
 export const addEventListenersForPrebid = () => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(() => {
     stopLoop = true;
-  }, 60000);
+  }, detectIframe() ? 8000 : 60000);
   const isPrebidInPage = () => {
+
     const pbjsGlobals = window._pbjsGlobals || [];
-    if (pbjsGlobals.length > 0) {
+
+    if (window.innerWidth > 0 && window.innerHeight > 0 && pbjsGlobals.length > 0 && getIFrameNestedDepth(window) < 2) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);

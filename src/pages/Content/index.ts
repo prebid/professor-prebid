@@ -39,10 +39,8 @@ const ContentScript = () => {
     });
   };
 
-  const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object }>) => {
-    if (event.source != window) {
-      return;
-    }
+  const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object; profPrebid: boolean }>) => {
+    if (!event.data.profPrebid || !event?.data || !event?.data?.type) return;
     const { type, payload } = event.data;
     if (type === EVENTS.REQUEST_CONSOLE_STATE) {
       const result = await chrome.storage.local.get(CONSOLE_TOGGLE);
