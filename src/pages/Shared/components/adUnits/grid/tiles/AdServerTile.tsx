@@ -1,17 +1,38 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import InspectedPageContext from '../../../../contexts/inspectedPageContext';
 import { IPrebidAdUnit } from '../../../../../Content/scripts/prebid';
 import Box from '@mui/material/Box';
+import { IGoogleAdManagerSlot } from '../../../../../Content/scripts/googleAdManager';
+import JSONViewerComponent from '../../../JSONViewerComponent';
 
 const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
   const [targetingExpanded, setTargetingExpanded] = React.useState<boolean>(false);
   const { googleAdManager } = useContext(InspectedPageContext);
-  const { targeting, sizes, elementId, name } =
-    googleAdManager?.slots?.find(({ name, elementId }) => name === adUnit.code || elementId === adUnit.code) || {};
+  const [slot, setSlot] = useState<IGoogleAdManagerSlot | undefined>(undefined);
+  useEffect(() => {
+    const slot = googleAdManager?.slots?.find(
+      ({ name, elementId }) =>
+        name === adUnit.code ||
+        elementId === adUnit.code ||
+        name.toLowerCase() === adUnit.code.toLowerCase() ||
+        elementId.toLowerCase() === adUnit.code.toLowerCase()
+    );
+    setSlot(slot);
+  }, [adUnit.code, googleAdManager?.slots]);
 
+  if (!slot) {
+    return (
+      <Box sx={{ p: 0.5 }}>
+        <Typography variant="caption">Unable to match Prebid AdUnit with Adserver Slot. All detected slots:</Typography>
+        <JSONViewerComponent src={googleAdManager.slots || []} collapsed={2} />
+      </Box>
+    );
+  }
+
+  const { targeting, sizes, elementId, name } = slot as IGoogleAdManagerSlot;
   return (
     <React.Fragment>
       {elementId && (
@@ -41,7 +62,7 @@ const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
         </Box>
       )}
       {targeting?.length > 0 && (
-        <Box sx={{ p: 0.5, overflow: 'hidden'}} onClick={() => setTargetingExpanded(!targetingExpanded)}>
+        <Box sx={{ p: 0.5, overflow: 'hidden' }} onClick={() => setTargetingExpanded(!targetingExpanded)}>
           <Typography variant="caption">Targeting:</Typography>
           <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, maxHeight: !targetingExpanded ? 100 : 'unset' }}>
             {targeting
