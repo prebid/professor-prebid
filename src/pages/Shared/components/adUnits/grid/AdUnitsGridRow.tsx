@@ -9,36 +9,47 @@ import MediaTypes from './tiles/MediaTypesTile';
 import BiddersTile from './tiles/BiddersTile';
 import AdServerTile from './tiles/AdServerTile';
 
+const GridItem = ({ mdWidth, children, expanded, setExpanded, isPanel }: IGridItemProps): JSX.Element => {
+  return (
+    <Grid
+      item
+      xs={4}
+      md={mdWidth}
+      sx={{ minHeight: isPanel ? '250px' : 'unset', overflow: 'hidden', maxHeight: isPanel ? (!expanded ? 100 : 'unset') : 'unset' }}
+      onClick={() => setExpanded(!expanded)}
+    >
+      <Paper sx={{ height: '100%' }}>
+        <span onClick={(e) => e.stopPropagation()}>{children}</span>
+      </Paper>
+    </Grid>
+  );
+};
+
 const AdUnitGridRow = ({ adUnit }: IAdUnitGridRowProps): JSX.Element => {
+  const [expanded, setExpanded] = React.useState<boolean>(false);
   const { isPanel } = useContext(StateContext);
   const { googleAdManager } = useContext(InspectedPageContext);
   const showAdServerComlumn = isPanel && googleAdManager?.slots?.length > 0;
+  const mdWidth = showAdServerComlumn ? 3 : 4;
+
   return (
     <React.Fragment>
-      <Grid item xs={4} md={showAdServerComlumn ? 3 : 4}>
-        <Paper sx={{ height: '100%' }}>
-          <AdUnitChipComponent adUnit={adUnit} />
-        </Paper>
-      </Grid>
+      <GridItem mdWidth={mdWidth} expanded={expanded} setExpanded={setExpanded} isPanel={isPanel}>
+        <AdUnitChipComponent adUnit={adUnit} />
+      </GridItem>
 
-      <Grid item xs={4} md={showAdServerComlumn ? 3 : 4}>
-        <Paper sx={{ height: '100%' }}>
-          <MediaTypes adUnit={adUnit} />
-        </Paper>
-      </Grid>
+      <GridItem mdWidth={mdWidth} expanded={expanded} setExpanded={setExpanded} isPanel={isPanel}>
+        <MediaTypes adUnit={adUnit} />
+      </GridItem>
 
-      <Grid item xs={4} md={showAdServerComlumn ? 3 : 4}>
-        <Paper sx={{ height: '100%' }}>
-          <BiddersTile adUnit={adUnit} />
-        </Paper>
-      </Grid>
+      <GridItem mdWidth={mdWidth} expanded={expanded} setExpanded={setExpanded} isPanel={isPanel}>
+        <BiddersTile adUnit={adUnit} />
+      </GridItem>
 
-      {isPanel && googleAdManager?.slots?.length > 0 && (
-        <Grid item xs={4} md={3}>
-          <Paper sx={{ height: '100%' }}>
-            <AdServerTile adUnit={adUnit} />
-          </Paper>
-        </Grid>
+      {showAdServerComlumn && (
+        <GridItem mdWidth={mdWidth} expanded={expanded} setExpanded={setExpanded} isPanel={isPanel}>
+          <AdServerTile adUnit={adUnit} />
+        </GridItem>
       )}
     </React.Fragment>
   );
@@ -47,4 +58,12 @@ const AdUnitGridRow = ({ adUnit }: IAdUnitGridRowProps): JSX.Element => {
 export default AdUnitGridRow;
 interface IAdUnitGridRowProps {
   adUnit: IPrebidAdUnit;
+}
+
+interface IGridItemProps {
+  mdWidth: number;
+  children: React.ReactNode;
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+  isPanel: boolean;
 }

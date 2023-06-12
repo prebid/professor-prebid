@@ -9,7 +9,6 @@ import { IGoogleAdManagerSlot } from '../../../../../Content/scripts/googleAdMan
 import JSONViewerComponent from '../../../JSONViewerComponent';
 
 const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
-  const [targetingExpanded, setTargetingExpanded] = React.useState<boolean>(false);
   const { googleAdManager } = useContext(InspectedPageContext);
   const [slot, setSlot] = useState<IGoogleAdManagerSlot | undefined>(undefined);
   useEffect(() => {
@@ -26,8 +25,13 @@ const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
   if (!slot) {
     return (
       <Box sx={{ p: 0.5 }}>
-        <Typography variant="caption">Unable to match Prebid AdUnit with Adserver Slot. All detected slots:</Typography>
-        <JSONViewerComponent src={googleAdManager.slots || []} collapsed={2} />
+        <Typography variant="caption">Unable to match Prebid AdUnit with ad-server slot. </Typography>
+        {googleAdManager.slots.length > 0 && (
+          <>
+            <Typography variant="caption">All detected ad-server slots:</Typography>
+            <JSONViewerComponent src={googleAdManager.slots} collapsed={2} />
+          </>
+        )}
       </Box>
     );
   }
@@ -62,9 +66,9 @@ const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
         </Box>
       )}
       {targeting?.length > 0 && (
-        <Box sx={{ p: 0.5, overflow: 'hidden' }} onClick={() => setTargetingExpanded(!targetingExpanded)}>
+        <Box sx={{ p: 0.5 }}>
           <Typography variant="caption">Targeting:</Typography>
-          <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, maxHeight: !targetingExpanded ? 100 : 'unset' }}>
+          <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
             {targeting
               .filter(({ value }) => value)
               .sort((a, b) => (a.key > b.key ? 1 : -1))
