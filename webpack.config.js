@@ -43,7 +43,6 @@ var options = {
       'contentScript',
       'contentScript.bundle.js',
       'devtools',
-      // 'inject',
       'injected',
       'openDfpConsole',
     ],
