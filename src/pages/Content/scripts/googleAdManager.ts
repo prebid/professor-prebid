@@ -224,7 +224,7 @@ class GoogleAdManager {
 
 export const googleAdManager = new GoogleAdManager();
 
-interface IGoogleAdManagerSlot {
+export interface IGoogleAdManagerSlot {
   elementId: string;
   name: string;
   sizes: string[];
