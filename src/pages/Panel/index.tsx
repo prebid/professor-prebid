@@ -12,11 +12,11 @@ import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
 render(
   <ThemeProvider theme={theme}>
     <InspectedPageContextProvider>
-      <ErrorBoundary FallbackComponent={ErrorCardComponent}>
-        <StateContextProvider>
+      <StateContextProvider>
+        <ErrorBoundary FallbackComponent={ErrorCardComponent}>
           <Panel />
-        </StateContextProvider>
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </StateContextProvider>
     </InspectedPageContextProvider>
   </ThemeProvider>,
   window.document.querySelector('#app-container')

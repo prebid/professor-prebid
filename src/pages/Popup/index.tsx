@@ -6,17 +6,17 @@ import { InspectedPageContextProvider } from '../Shared/contexts/inspectedPageCo
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '../../theme/theme';
 import { ErrorBoundary } from 'react-error-boundary';
-
+import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
 render(
-  <ErrorBoundary fallback={<div>Something went wrong</div>}>
-    <ThemeProvider theme={theme}>
-      <InspectedPageContextProvider>
-        <StateContextProvider>
+  <ThemeProvider theme={theme}>
+    <InspectedPageContextProvider>
+      <StateContextProvider>
+        <ErrorBoundary FallbackComponent={ErrorCardComponent}>
           <Popup />
-        </StateContextProvider>
-      </InspectedPageContextProvider>
-    </ThemeProvider>
-  </ErrorBoundary>,
+        </ErrorBoundary>
+      </StateContextProvider>
+    </InspectedPageContextProvider>
+  </ThemeProvider>,
   document.getElementById('root')
 );
 const handleResize = () => {
