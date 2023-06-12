@@ -161,7 +161,7 @@ export const addEventListenersForPrebid = () => {
   let stopLoop = false;
   setTimeout(() => {
     stopLoop = true;
-  }, 8000);
+  }, 60000);
   const isPrebidInPage = () => {
     const pbjsGlobals = window._pbjsGlobals || [];
     if (pbjsGlobals.length > 0) {
