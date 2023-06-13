@@ -7,12 +7,14 @@ import { BrowserRouter } from 'react-router-dom';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
 import StateContext from '../Shared/contexts/appStateContext';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
+import { sendChromeTabsMessage } from '../Shared/utils';
 
 const Panel = (): JSX.Element => {
   const { pbjsNamespace } = useContext(StateContext);
   const { prebids } = useContext(InspectedPageContext);
+
   useEffect(() => {
-    chrome.tabs.sendMessage(chrome.devtools.inspectedWindow.tabId, { type: PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+    sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, pbjsNamespace);
   }, [pbjsNamespace]);
 
   return (

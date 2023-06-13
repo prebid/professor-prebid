@@ -1,5 +1,6 @@
 import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, DOWNLOAD_FAILED } from '../Shared/constants';
 import { IPrebidDetails } from './scripts/prebid';
+import { sendWindowPostMessage } from '../Shared/utils';
 
 const ContentScript = () => {
   let pbjsNamespace: string = null;
@@ -26,14 +27,14 @@ const ContentScript = () => {
   const listenToChromeRuntimeMessages = () => {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
       if (request.type === CONSOLE_TOGGLE) {
-        document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: request.consoleState }));
+        sendWindowPostMessage(request.type, { detail: request.consoleState });
       }
       if (request.type === PBJS_NAMESPACE_CHANGE) {
         pbjsNamespace = request.pbjsNamespace;
-        document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: request.pbjsNamespace }));
+        sendWindowPostMessage(request.type, { detail: request.pbjsNamespace });
       }
       if (request.type === DOWNLOAD_FAILED) {
-        document.dispatchEvent(new CustomEvent(DOWNLOAD_FAILED, { detail: request.url }));
+        sendWindowPostMessage(request.type, request.payload);
       }
       sendResponse();
     });
@@ -48,7 +49,7 @@ const ContentScript = () => {
       document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: !!checked }));
     }
     if (type === EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
-      pbjsNamespace = (payload as IPrebidDetails).namespace;
+      pbjsNamespace = (payload as IPrebidDetails)?.namespace;
     }
     updateBackgroundPage(type, payload);
     updateOverlays();

@@ -23,8 +23,7 @@ import ChromeStorageContext from '../../Shared/contexts/inspectedPageContext';
 import { PBJS_NAMESPACE_CHANGE } from '../../Shared/constants';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import StateContext from '../../Shared/contexts/appStateContext';
-
-const tabId = chrome.devtools.inspectedWindow.tabId;
+import { sendChromeTabsMessage } from '../../Shared/utils';
 
 const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLinkComponentProps): JSX.Element => (
   <Link to={target}>
@@ -46,7 +45,7 @@ const NavBarComponent = () => {
 
   const updatePbjsNamespace = (newValue: string) => {
     setPbjsNamespace(newValue);
-    chrome.tabs.sendMessage(tabId, { type: PBJS_NAMESPACE_CHANGE, newValue });
+    sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, newValue);
   };
 
   return (

@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react';
 import { ITabInfo, ITabInfos } from '../../Background/background';
-import { getTabId } from '../../Popup/utils';
+import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
 
 const InspectedPageContext = createContext<ITabInfo | undefined>(undefined);
@@ -32,9 +32,9 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
           setDownloading('false');
           setSyncInfo(null);
         } catch (error) {
+          sendChromeTabsMessage(DOWNLOAD_FAILED, { eventsUrl: prebid.eventsUrl });
           setSyncInfo(`${namespace}: error during download of ${prebid.eventsUrl}`);
           setDownloading('error');
-          chrome.tabs.sendMessage(chrome.devtools.inspectedWindow.tabId, { type: DOWNLOAD_FAILED, payload: prebids.eventsUrl });
         }
       }
     }

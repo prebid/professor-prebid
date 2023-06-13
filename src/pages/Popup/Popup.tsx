@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from 'react';
-import { getTabId } from './utils';
+import { sendChromeTabsMessage } from '../Shared/utils';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
 import Box from '@mui/material/Box';
 import { BrowserRouter } from 'react-router-dom';
@@ -14,10 +14,7 @@ export const Popup = (): JSX.Element => {
   const { prebids } = useContext(InspectedPageContext);
 
   useEffect(() => {
-    (async () => {
-      const tabId = await getTabId();
-      chrome.tabs.sendMessage(tabId, { type: PBJS_NAMESPACE_CHANGE, pbjsNamespace });
-    })();
+    sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, pbjsNamespace);
   }, [pbjsNamespace]);
 
   return (

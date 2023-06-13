@@ -10,7 +10,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { gte } from 'semver';
 import OverlayControlComponent from './OverlayControlComponent';
 import AppStateContext from '../../contexts/appStateContext';
-import { getTabId } from '../../../Popup/utils';
+import { getTabId } from '../../../Shared/utils';
 import DebuggingModuleComponent from './debugging/DebuggingModuleComponent';
 import ModifyBidResponsesComponent from './legacyDebugging/ModifyBidResponsesComponent';
 

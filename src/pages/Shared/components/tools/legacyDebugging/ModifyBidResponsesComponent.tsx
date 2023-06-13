@@ -5,7 +5,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
-import { getTabId } from '../../../../Popup/utils';
+import { getTabId } from '../../../../Shared/utils';
 import BidderFilter from './BidderFilter';
 import BidOverWriteComponent from './BidOverWriteComponent';
 import { IPrebidDebugConfig } from '../../../../Content/scripts/prebid';

@@ -9,11 +9,12 @@ import FormGroup from '@mui/material/FormGroup';
 import AddIcon from '@mui/icons-material/Add';
 import set from 'lodash/set';
 import get from 'lodash/get';
-import { getTabId } from '../../../../Popup/utils';
+import { getTabId } from '../../../../Shared/utils';
 import { IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../Content/scripts/prebid';
 import { STORE_RULES_TOGGLE } from '../../../constants';
 import RuleComponent from './RuleComponent';
 import AppStateContext from '../../../contexts/appStateContext';
+import { sendChromeTabsMessage } from '../../../../Shared/utils';
 
 const DebuggingModuleComponent = (): JSX.Element => {
   const { prebid } = useContext(AppStateContext);
@@ -76,10 +77,12 @@ const DebuggingModuleComponent = (): JSX.Element => {
     setStoreRules(event.target.checked);
     const { checked } = event.target;
     chrome.storage.local.set({ [STORE_RULES_TOGGLE]: checked }, () => {
-      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-        const tab = tabs[0];
-        chrome.tabs.sendMessage(tab.id as number, { type: STORE_RULES_TOGGLE, consoleState: checked });
-      });
+      sendChromeTabsMessage(STORE_RULES_TOGGLE, { consoleState: checked });
+
+      // chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+      //   const tab = tabs[0];
+      //   chrome.tabs.sendMessage(tab.id as number, { type: STORE_RULES_TOGGLE, consoleState: checked });
+      // });
     });
   };
 

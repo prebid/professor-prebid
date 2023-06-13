@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { getTabId } from './utils';
+import { getTabId, sendChromeTabsMessage } from '../Shared/utils';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -28,8 +28,7 @@ import StateContext from '../Shared/contexts/appStateContext';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
-  const tabId = await getTabId();
-  chrome.tabs.sendMessage(tabId, { type: PBJS_NAMESPACE_CHANGE, pbjsNamespace });
+  sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, pbjsNamespace);
 };
 
 export const NavBar = (): JSX.Element => {

@@ -2,7 +2,7 @@ import { EVENTS } from '../Shared/constants';
 import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
 import { IPrebidDetails } from '../Content/scripts/prebid';
 import { ITcfDetails } from '../Content/scripts/tcf';
-import { getTabId } from '../Popup/utils';
+import { getTabId } from '../Shared/utils';
 class Background {
   tabInfos: ITabInfos = {};
   constructor() {
@@ -41,7 +41,7 @@ class Background {
         sendResponse();
         const typedPayload = payload as IPrebidDetails;
         this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-        this.tabInfos[tabId]['prebids']![typedPayload.namespace] = typedPayload;
+        this.tabInfos[tabId]['prebids']![typedPayload?.namespace] = typedPayload;
         break;
       case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
         sendResponse();
@@ -60,8 +60,8 @@ class Background {
     const { frameId, tabId, url } = web_navigation;
     if (frameId == 0) {
       this.tabInfos[tabId] = { url };
-      await this.persistInStorage();
       this.updateBadge(tabId);
+      await this.persistInStorage();
     }
   };
 

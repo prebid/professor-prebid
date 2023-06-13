@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { EVENTS, CONSOLE_TOGGLE, SAVE_MASKS } from '../Shared/constants';
-import { sendToContentScript } from '../Shared/utils';
+import { sendWindowPostMessage } from '../Shared/utils';
 import AdOverlayPortal from './components/AdOverlayPortal';
 import { AdOverlayComponentProps } from './components/AdOverlayComponent';
 
@@ -58,7 +58,7 @@ const InjectedApp = (): JSX.Element => {
   };
 
   useEffect(() => {
-    sendToContentScript(EVENTS.REQUEST_CONSOLE_STATE, null);
+    sendWindowPostMessage(EVENTS.REQUEST_CONSOLE_STATE, null);
     document.addEventListener(CONSOLE_TOGGLE, handleConsoleStateChange);
     document.addEventListener(SAVE_MASKS, handleNewMasks);
     return () => {

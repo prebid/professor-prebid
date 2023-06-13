@@ -1,6 +1,16 @@
-import { getTabId } from "../Popup/utils";
+export const getTabId = (): Promise<number> => {
+  return new Promise((resolve) => {
+    if (chrome?.devtools?.inspectedWindow?.tabId) {
+      resolve(chrome.devtools.inspectedWindow.tabId);
+    } else if (chrome?.tabs?.query) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        resolve(tabs[0]?.id);
+      });
+    }
+  });
+};
 
-export const sendToContentScript = (type: string, payload: object): void => {
+export const sendWindowPostMessage = (type: string, payload: object): void => {
   // work-around for
   // DOMException:xyz could not be cloned.
   // in window.postMessage
@@ -56,4 +66,9 @@ export const conditionalPluralization = (input: Array<any>): string => (input?.l
 export const reloadPage = async () => {
   const tabId = await getTabId();
   chrome.tabs.reload(tabId)
+}
+
+export const sendChromeTabsMessage = async (type: string, payload: object | string): Promise<void> => {
+  const tabId = await getTabId();
+  chrome.tabs.sendMessage(tabId, { type, payload });
 }

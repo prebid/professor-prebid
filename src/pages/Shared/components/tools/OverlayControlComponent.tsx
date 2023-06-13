@@ -7,6 +7,7 @@ import { CONSOLE_TOGGLE } from '../../constants';
 import { useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
+import { sendChromeTabsMessage } from '../../utils';
 
 const OverlayControlComponent = (): JSX.Element => {
   const theme = useTheme();
@@ -23,10 +24,12 @@ const OverlayControlComponent = (): JSX.Element => {
     setShowOverlay(event.target.checked);
     const { checked } = event.target;
     chrome.storage.local.set({ [CONSOLE_TOGGLE]: checked }, () => {
-      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-        const tab = tabs[0];
-        chrome.tabs.sendMessage(tab.id as number, { type: CONSOLE_TOGGLE, consoleState: checked });
-      });
+      
+      sendChromeTabsMessage(CONSOLE_TOGGLE, { consoleState: checked });
+      // chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+      //   const tab = tabs[0];
+      //   chrome.tabs.sendMessage(tab.id as number, { type: CONSOLE_TOGGLE, consoleState: checked });
+      // });
     });
   };
 
