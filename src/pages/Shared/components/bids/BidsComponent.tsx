@@ -45,7 +45,7 @@ const BidsComponent = (): JSX.Element => {
   }, [auctionEndEvents]);
 
   return (
-    <Grid container direction="row" justifyContent="start" spacing={1} sx={gridStyle}>
+    <Grid container direction="row" justifyContent="start" spacing={.25} sx={gridStyle}>
       <Grid item xs={12} sx={{ paddingBottom: 0.5 }}>
         <Tabs
           value={tab}
