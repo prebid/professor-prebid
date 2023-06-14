@@ -19,19 +19,15 @@ const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
         name.toLowerCase() === adUnit.code.toLowerCase() ||
         elementId.toLowerCase() === adUnit.code.toLowerCase()
     );
-    setSlot(slot);
+    const fallbackSlot = googleAdManager?.slots?.length === 1 ? googleAdManager?.slots[0] : undefined;
+    setSlot(slot || fallbackSlot);
   }, [adUnit.code, googleAdManager?.slots]);
 
   if (!slot) {
     return (
       <Box sx={{ p: 0.5 }}>
         <Typography variant="caption">Unable to match Prebid AdUnit with ad-server slot. </Typography>
-        {googleAdManager.slots.length > 0 && (
-          <>
-            <Typography variant="caption">All detected ad-server slots:</Typography>
-            <JSONViewerComponent src={googleAdManager.slots} collapsed={2} />
-          </>
-        )}
+        {googleAdManager.slots.length > 0 && <JSONViewerComponent name="All detected ad-server slots:" src={googleAdManager.slots} collapsed={2} />}
       </Box>
     );
   }

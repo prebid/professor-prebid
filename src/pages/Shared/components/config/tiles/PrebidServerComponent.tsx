@@ -10,7 +10,6 @@ import DnsIcon from '@mui/icons-material/Dns';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from '../ConfigComponent';
 import RenderKeyValueComponent from '../../RenderKeyValueComponent';
-import InspectedPageContext from '../../../contexts/inspectedPageContext';
 import AppStateContext from '../../../contexts/appStateContext';
 
 const RenderPrebidServerComponent = ({
@@ -53,7 +52,7 @@ const RenderPrebidServerComponent = ({
           <Grid container spacing={2}>
             <RenderKeyValueComponent columns={[12, 12]} label="Account Id" value={accountId} expanded={expanded} />
             <RenderKeyValueComponent columns={[4, 6]} label="Adapter" value={adapter} expanded={expanded} />
-            <RenderKeyValueComponent columns={[12, 6]} label="Bidders" value={bidders} expanded={expanded} />
+            <RenderKeyValueComponent columns={[12, 12]} label="Bidders" value={bidders} expanded={expanded} />
             <RenderKeyValueComponent columns={[4, 6]} label="Default TTL" value={defaultTtl} expanded={expanded} />
             <RenderKeyValueComponent columns={[4, 6]} label="Enabled" value={enabled} expanded={expanded} />
             <RenderKeyValueComponent columns={[4, 6]} label="Max Bids" value={maxBids} expanded={expanded} />

@@ -12,7 +12,7 @@ import NoBidRowComponent from './NoBidRowComponent';
 import AppStateContext from '../../contexts/appStateContext';
 
 const gridStyle = {
-  p: 1,
+  p: .5,
   '& .MuiGrid-item > .MuiPaper-root': {
     display: 'flex',
     alignItems: 'center',
@@ -45,7 +45,7 @@ const BidsComponent = (): JSX.Element => {
   }, [auctionEndEvents]);
 
   return (
-    <Grid container direction="row" justifyContent="start" spacing={0.25} sx={gridStyle}>
+    <Grid container direction="row" justifyContent="start" spacing={1} sx={gridStyle}>
       <Grid item xs={12} sx={{ paddingBottom: 0.5 }}>
         <Tabs
           value={tab}

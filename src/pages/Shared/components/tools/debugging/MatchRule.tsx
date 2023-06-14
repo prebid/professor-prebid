@@ -29,7 +29,7 @@ const MatchRule = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, p
   };
 
   useEffect(() => {
-    // extract the matchRuleTargetOptions from  prebid.events
+    // extract the matchRuleTargetOptions from  events
     const adUnitCodes = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
       if (!args || !args.adUnitCodes) return prevValue;
 

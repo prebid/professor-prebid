@@ -12,7 +12,7 @@ import { IPrebidDebugConfig } from '../../../../Content/scripts/prebid';
 import AppStateContext from '../../../contexts/appStateContext';
 
 const ModifyBidResponsesComponent = (): JSX.Element => {
-  const { prebid, isSmallScreen } = useContext(AppStateContext);
+  const { isSmallScreen, pbjsNamespace } = useContext(AppStateContext);
   const [debugConfgigState, setDebugConfigState] = useState<IPrebidDebugConfig>(null);
 
   const handleChange = async (input: IPrebidDebugConfig) => {
@@ -24,7 +24,7 @@ const ModifyBidResponsesComponent = (): JSX.Element => {
       func: (namespace: string, input: object) => {
         sessionStorage.setItem(`${namespace}:debugging`, `${JSON.stringify(input)}`);
       },
-      args: [prebid.namespace, input],
+      args: [pbjsNamespace, input],
     });
   };
 
@@ -41,14 +41,14 @@ const ModifyBidResponsesComponent = (): JSX.Element => {
         func: (namespace: string) => {
           return sessionStorage.getItem(`${namespace}:debugging`);
         },
-        args: [prebid.namespace],
+        args: [pbjsNamespace],
       });
 
       const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
       setDebugConfigState(savedConfig);
     };
     getInitialState();
-  }, [prebid.namespace]);
+  }, [pbjsNamespace]);
 
   return (
     <Grid item xs={12}>

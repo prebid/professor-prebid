@@ -1,10 +1,9 @@
 import { sendWindowPostMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED, EVENTS } from '../../Shared/constants';
-
+import { decylce } from '../../Shared/utils';
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
-  debug: IPrebidDebugConfig;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 3000;
@@ -69,14 +68,14 @@ class Prebid {
       }
       const { type, payload } = event.data;
       if (type === DOWNLOAD_FAILED) {
+        this.reset();
         this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
         this.sendDetailsToContentScript();
       }
     }, false);
 
     window.addEventListener('beforeunload', () => {
-      this.events.length = 0;
-      this.lastEventsObjectUrls.length = 0;
+      this.reset();
       this.sendDetailsToContentScript();
     });
   };
@@ -90,24 +89,9 @@ class Prebid {
     }
   };
 
-  decylce = (obj: any) => {
-    const cache = new WeakSet();
-    return JSON.stringify(obj, (key, value) => {
-      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-        if (value['location']) {
-          // document object found, discard key  
-          return; 
-        }
-        // Store value in our set
-        cache.add(value);
-      }
-      return value;
-    });
-  };
-
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    const string = this.decylce(events);
+    const string = decylce(events);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
@@ -123,6 +107,12 @@ class Prebid {
       }
     }
     return objectURL;
+  };
+
+  reset = () => {
+    this.events = [];
+    this.lastEventsObjectUrls = [];
+    this.sendToContentScriptPending = false;
   };
 
   sendDetailsToContentScript = (): void => {
@@ -170,17 +160,6 @@ const detectIframe = () => {
   }
 };
 
-const getIFrameNestedDepth = (input: Window): number => {
-  if (input === window.top) {
-    return 0;
-  }
-  else if (input.parent === window.top) {
-    return 1;
-  }
-
-  return 1 + getIFrameNestedDepth(input.parent);
-}
-
 export const addEventListenersForPrebid = () => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
@@ -191,7 +170,7 @@ export const addEventListenersForPrebid = () => {
 
     const pbjsGlobals = window._pbjsGlobals || [];
 
-    if (window.innerWidth > 0 && window.innerHeight > 0 && pbjsGlobals.length > 0 && getIFrameNestedDepth(window) < 2) {
+    if (pbjsGlobals.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);

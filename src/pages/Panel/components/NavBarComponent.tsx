@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -62,20 +62,19 @@ const NavBarComponent = () => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}>
-        {inspectedPageState?.prebids && (
-          <Box component="form">
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 180 }} disabled={Object.keys(inspectedPageState?.prebids || {}).length < 2}>
-              <InputLabel>Prebid Global</InputLabel>
-              <Select value={pbjsNamespace || 'undefined'} onChange={(e) => updatePbjsNamespace(e.target.value)} autoWidth>
-                {Object.keys(inspectedPageState?.prebids).map((global, index) => (
+        <Box component="form">
+          <FormControl variant="standard" sx={{ m: 1, minWidth: 180 }} disabled={Object.keys(inspectedPageState?.prebids || {}).length < 2}>
+            <InputLabel>Prebid Global</InputLabel>
+            <Select value={pbjsNamespace || 'undefined'} onChange={(e) => updatePbjsNamespace(e.target.value)} autoWidth>
+              {inspectedPageState?.prebids &&
+                Object.keys(inspectedPageState?.prebids).map((global, index) => (
                   <MenuItem key={index} value={global}>
                     {global}
                   </MenuItem>
                 ))}
-              </Select>
-            </FormControl>
-          </Box>
-        )}
+            </Select>
+          </FormControl>
+        </Box>
 
         <RouterLink target="/" activeRoute={activeRoute} clickHandler={() => handleRouteChange('/')} icon={<AdUnitsOutlinedIcon />} label="AdUnits" />
 

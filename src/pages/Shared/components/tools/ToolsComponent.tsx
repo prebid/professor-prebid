@@ -55,17 +55,15 @@ const GridItemButton = ({ clickHandler, label, icon }: IGridItemButtonProps): JS
 const ToolsComponent = (): JSX.Element => {
   const { prebid } = useContext(AppStateContext);
   return (
-    <Box sx={{ m: 1 }}>
-      <Grid container direction="row" rowSpacing={0.25} columnSpacing={0.5} justifyContent="stretch" alignItems="center">
-        <GridItemButton label="open google AdManager console" clickHandler={dfp_open_console} icon={<GoogleIcon />} />
-        <GridItemButton label="open debug tab" clickHandler={openDebugTab} icon={<BugReportIcon />} />
-        <GridItemButton label="delete tabInfos" clickHandler={() => chrome.storage?.local.set({ tabInfos: null })} icon={<DeleteOutlineIcon />} />
+    <Grid container direction="row" rowSpacing={0.25} columnSpacing={0.5} justifyContent="stretch" alignItems="center" sx={{ p: 0.5 }}>
+      <GridItemButton label="open google AdManager console" clickHandler={dfp_open_console} icon={<GoogleIcon />} />
+      <GridItemButton label="open debug tab" clickHandler={openDebugTab} icon={<BugReportIcon />} />
+      <GridItemButton label="delete tabInfos" clickHandler={() => chrome.storage?.local.set({ tabInfos: null })} icon={<DeleteOutlineIcon />} />
 
-        <OverlayControlComponent />
+      <OverlayControlComponent />
 
-        {isNewDebugVersion(prebid?.version) ? <DebuggingModuleComponent /> : <ModifyBidResponsesComponent />}
-      </Grid>
-    </Box>
+      {isNewDebugVersion(prebid.version) ? <DebuggingModuleComponent /> : <ModifyBidResponsesComponent />}
+    </Grid>
   );
 };
 

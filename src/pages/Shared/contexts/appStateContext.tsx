@@ -25,12 +25,12 @@ const AppStateContext = React.createContext<AppState>({
   auctionInitEvents: [],
   auctionEndEvents: [],
   adsRendered: [],
-  prebid: undefined,
+  prebid: {} as IPrebidDetails,
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
   const [pbjsNamespace, setPbjsNamespace] = useState<string | undefined>();
-  const [prebid, setPrebid] = useState<IPrebidDetails>();
+  const [prebid, setPrebid] = useState<IPrebidDetails>({} as IPrebidDetails);
   const [events, setEvents] = useState<IPrebidDetails['events']>([]);
   const [allBidResponseEvents, setAllBidResponseEvents] = useState<IPrebidBidResponseEventData[]>([]);
   const [allNoBidEvents, setAllNoBidEvents] = useState<IPrebidNoBidEventData[]>([]);
@@ -54,8 +54,8 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   }, [pbjsNamespace, prebids, setPbjsNamespace]);
 
   useEffect(() => {
-    const prebid = prebids?.[pbjsNamespace];
-    const events = prebids?.[pbjsNamespace]?.events;
+    const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
+    const events = prebids?.[pbjsNamespace]?.events || [];
     const allBidResponseEvents = (events?.filter(({ eventType }) => eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
     const allNoBidEvents = (events?.filter(({ eventType }) => eventType === 'noBid') || []) as IPrebidNoBidEventData[];
     const allAdUnitCodes = Array.from(
@@ -64,7 +64,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
           if (event.eventType === 'auctionInit') {
             const adUnitCodes = (event as IPrebidAuctionInitEventData).args.adUnitCodes;
             acc = [...acc, ...adUnitCodes];
-          }  
+          }
           return acc;
         }, [] as string[])
       )

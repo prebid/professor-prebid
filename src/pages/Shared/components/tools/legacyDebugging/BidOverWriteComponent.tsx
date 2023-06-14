@@ -23,7 +23,7 @@ const getStyles = (name: string, selectedBidders: string[], theme: Theme) => ({
 });
 
 const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOverWriteComponentProps): JSX.Element => {
-  const { prebid } = useContext(AppStateContext);
+  const { events } = useContext(AppStateContext);
   const theme = useTheme();
 
   const [detectedBidderNames, setDetectedBidderNames] = useState<string[]>([]);
@@ -102,29 +102,25 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
     setCpm(debugConfigState?.bids?.length > 0 ? Number(debugConfigState?.bids[0].cpm) : 20.0);
     setCurrency(debugConfigState?.bids?.length > 0 ? debugConfigState?.bids[0].currency : 'USD');
     setSelectedBidders(debugConfigState?.bids?.map((item) => item.bidder).filter((v, i, a) => a.indexOf(v) === i) || []);
-    setSelectedAdUnitCodes(
-      debugConfigState?.bids
-        ?.map((item) => item.adUnitCode)
-        .filter((v, i, a) => v && a.indexOf(v) === i) || []
-    );
+    setSelectedAdUnitCodes(debugConfigState?.bids?.map((item) => item.adUnitCode).filter((v, i, a) => v && a.indexOf(v) === i) || []);
   }, [bidsOverwriteEnabled, debugConfigState?.bids]);
 
   useEffect(() => {
-    const events = prebid?.events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
-    const bidderNamesSet = events.reduce((previousValue, currentValue) => {
+    const auctionInitEndEvent = events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
+    const bidderNamesSet = auctionInitEndEvent.reduce((previousValue, currentValue) => {
       const adUnitsArray = (currentValue as IPrebidAuctionEndEventData).args.adUnits || [];
       adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
       return previousValue;
     }, new Set<string>());
     setDetectedBidderNames(Array.from(bidderNamesSet));
 
-    const adUnitCodesSet = events.reduce((previousValue, currentValue) => {
+    const adUnitCodesSet = auctionInitEndEvent.reduce((previousValue, currentValue) => {
       const adUnitsCodesArray = (currentValue as IPrebidAuctionEndEventData).args.adUnitCodes || [];
       adUnitsCodesArray.forEach((adUnitCode) => previousValue.add(adUnitCode));
       return previousValue;
     }, new Set<string>());
     setDetectedAdUnitCodes(Array.from(adUnitCodesSet));
-  }, [prebid?.events]);
+  }, [events]);
 
   return (
     <React.Fragment>

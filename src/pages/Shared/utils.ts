@@ -1,3 +1,18 @@
+export const decylce = (obj: any) => {
+  const cache = new WeakSet();
+  return JSON.stringify(obj, (key, value) => {
+    if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+      if (value['location']) {
+        // document object found, discard key  
+        return;
+      }
+      // Store value in our set
+      cache.add(value);
+    }
+    return value;
+  });
+};
+
 export const getTabId = (): Promise<number> => {
   return new Promise((resolve) => {
     if (chrome?.devtools?.inspectedWindow?.tabId) {
@@ -14,7 +29,8 @@ export const sendWindowPostMessage = (type: string, payload: object): void => {
   // work-around for
   // DOMException:xyz could not be cloned.
   // in window.postMessage
-  payload = JSON.parse(JSON.stringify(payload));
+  // payload = JSON.parse(JSON.stringify(payload));
+  payload = JSON.parse(decylce(payload));
   window.top.postMessage(
     {
       profPrebid: true,
@@ -23,19 +39,6 @@ export const sendWindowPostMessage = (type: string, payload: object): void => {
     },
     '*'
   );
-};
-
-export const safelyParseJSON = (data: object | string): object => {
-  if (typeof data === 'object') {
-    return data;
-  }
-
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    console.error(`safelyParseJSON failed with data `, data);
-    return {};
-  }
 };
 
 export const createRangeArray = (start: number, end: number, step: number, offsetRight: number): number[] => {

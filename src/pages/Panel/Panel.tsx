@@ -19,7 +19,7 @@ const Panel = (): JSX.Element => {
 
   return (
     <BrowserRouter>
-      <Box sx={{ backgroundColor: 'primary.light' }}>
+      <Box sx={{ backgroundColor: 'primary.light', minHeight: '100vH', height: '100%' }}>
         {/* <JSONViewerComponent src={inspectedPageState} collapsed={2} /> */}
         <NavBarComponent />
         {(!prebids || !prebids[pbjsNamespace]) && <NoPrebidCardComponent />}

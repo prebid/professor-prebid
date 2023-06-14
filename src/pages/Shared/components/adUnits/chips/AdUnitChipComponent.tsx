@@ -6,7 +6,7 @@ import { getTabId } from '../../../../Shared/utils';
 const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element => {
   const [labelText, setLabelText] = useState<string | null>(adUnit.code);
   const timeoutRef = useRef<NodeJS.Timeout | null>();
-  
+
   const scroll2element = async (elementId: string): Promise<void> => {
     const tabId = await getTabId();
     const func = (elementId: string): boolean => {
@@ -54,6 +54,7 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
         scroll2element(adUnit.code);
       }}
       label={labelText}
+      color={'primary'}
       sx={{
         m: 0.5,
         height: 'unset',

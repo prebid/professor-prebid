@@ -21,7 +21,7 @@ const HeaderGridItem = ({ children, onClick }: HeaderGridItemProps): JSX.Element
 
 const AdUnitsHeaderComponent = (): JSX.Element => {
   const [eventsPopUpOpen, setEventsPopUpOpen] = useState<boolean>(false);
-  const { allBidResponseEvents, prebid, allNoBidEvents, allBidderEvents, allAdUnitCodes } = useContext(AppStateContext);
+  const { allBidResponseEvents, prebid, allNoBidEvents, allBidderEvents, allAdUnitCodes, events } = useContext(AppStateContext);
   if (!prebid) return null;
   return (
     <>
@@ -37,9 +37,7 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
 
       <HeaderGridItem>{`NoBid${conditionalPluralization(allNoBidEvents)}: ${allNoBidEvents.length}`}</HeaderGridItem>
 
-      <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>
-        {`Event${conditionalPluralization(prebid.events)}: ${prebid.events.length}`}
-      </HeaderGridItem>
+      <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>{`Event${conditionalPluralization(events)}: ${events.length}`}</HeaderGridItem>
       <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />
     </>
   );

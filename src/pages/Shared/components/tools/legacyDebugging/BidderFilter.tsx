@@ -14,7 +14,7 @@ import AppStateContext from '../../../contexts/appStateContext';
 import { IPrebidAuctionEndEventData, IPrebidDebugConfig } from '../../../../Content/scripts/prebid';
 
 const BidderFilter = ({ debugConfigState, setDebugConfigState }: IBidderFilterProps): JSX.Element => {
-  const { prebid } = useContext(AppStateContext);
+  const { events } = useContext(AppStateContext);
   const theme = useTheme();
 
   const [detectedBidderNames, setDetectedBidderNames] = useState<string[]>([]);
@@ -56,14 +56,14 @@ const BidderFilter = ({ debugConfigState, setDebugConfigState }: IBidderFilterPr
   }, [debugConfigState?.bidders]);
 
   useEffect(() => {
-    const events = prebid?.events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
-    const bidderNamesSet = events.reduce((previousValue, currentValue) => {
+    const auctionInitEndEvents = events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
+    const bidderNamesSet = auctionInitEndEvents.reduce((previousValue, currentValue) => {
       const adUnitsArray = (currentValue as IPrebidAuctionEndEventData).args.adUnits || [];
       adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
       return previousValue;
     }, new Set<string>());
     setDetectedBidderNames(Array.from(bidderNamesSet));
-  }, [prebid?.events]);
+  }, [events]);
 
   return (
     <React.Fragment>

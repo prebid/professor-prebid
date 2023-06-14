@@ -17,8 +17,7 @@ import AppStateContext from '../../../contexts/appStateContext';
 import { sendChromeTabsMessage } from '../../../../Shared/utils';
 
 const DebuggingModuleComponent = (): JSX.Element => {
-  const { prebid } = useContext(AppStateContext);
-
+  const { prebid, pbjsNamespace } = useContext(AppStateContext);
   const [debuggingModuleConfig, setDebuggingModuleConfig] = useState<IPrebidDebugModuleConfig>({ enabled: false, intercept: [] });
   const [storeRules, setStoreRules] = useState<boolean>(false);
 
@@ -37,7 +36,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
       func: (namespace: string, input: object) => {
         sessionStorage.setItem(`__${namespace}_debugging__`, `${JSON.stringify(input)}`);
       },
-      args: [prebid.namespace, input],
+      args: [pbjsNamespace, input],
     });
     if (!storeRules) return;
     await chrome.scripting.executeScript({
@@ -45,7 +44,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
       func: (namespace: string, input: object) => {
         localStorage.setItem(`__${namespace}_debugging__`, `${JSON.stringify(input)}`);
       },
-      args: [prebid.namespace, input],
+      args: [pbjsNamespace, input],
     });
   };
 
@@ -93,13 +92,13 @@ const DebuggingModuleComponent = (): JSX.Element => {
       let [first] = await chrome.scripting.executeScript({
         target: { tabId },
         func: (namespace: string) => sessionStorage.getItem(`__${namespace}_debugging__`),
-        args: [prebid.namespace],
+        args: [pbjsNamespace],
       });
       if (!first || !first.result) {
         [first] = await chrome.scripting.executeScript({
           target: { tabId },
           func: (namespace: string) => localStorage.getItem(`__${namespace}_debugging__`),
-          args: [prebid.namespace],
+          args: [pbjsNamespace],
         });
       }
       if (!first || !first.result) return;
@@ -109,7 +108,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
     };
     getInitialState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prebid.namespace]);
+  }, [pbjsNamespace]);
 
   return (
     <Grid item xs={12}>
