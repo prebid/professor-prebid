@@ -306,9 +306,11 @@ chrome.storage.local.get('initiator_state', (result) => {
     chrome.storage.local.get('initiator_root_url', (res) => {
       if (res) {
         getInitReqChainByUrl(res.initiator_root_url, 'document', 'GET');
+        // getInitReqChainByUrl(res.initiator_root_url);
       }
     });
   }
 });
 
 // https://ads.pubmatic.com/AdServer/js/user_sync.html
+// https://hbopenbid.pubmatic.com/translator

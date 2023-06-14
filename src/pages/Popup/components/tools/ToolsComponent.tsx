@@ -87,12 +87,12 @@ const ToolsComponent = ({ prebid, handleRouteChange }: ToolsComponentProps): JSX
                 variant="outlined"
                 onClick={() => handleRouteChange('/initiator')}
                 startIcon={<LinkIcon />}>
-                <Typography variant="h3"> initiator</Typography>
+                <Typography variant="h3"> network inspector</Typography>
+                &nbsp;(alpha)
               </Button>
             </Link>
           </Paper>
         </Grid>
-
         <OverlayControlComponent />
         {prebid && !isNewDebugVersion(prebid.version) && <ModifyBidResponsesComponent prebid={prebid} />}
         {prebid && isNewDebugVersion(prebid.version) && <DebuggingModuleComponent prebid={prebid} />}

@@ -57,6 +57,9 @@ const getNameSpace = (previous: null | string, tabInfo: ITabInfo): string => {
   }
 };
 
+let initChain = {};
+let disableRefresh = true;
+
 export const Popup = (): JSX.Element => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
@@ -64,6 +67,31 @@ export const Popup = (): JSX.Element => {
   const [tabInfo, setTabInfo] = useState<ITabInfo>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
   const timer = React.useRef<ReturnType<typeof setTimeout>>(null);
+  const [initChainObj, setInitChainObj] = React.useState<any>({});
+  const [initiatorOutput, setInitiatorOutput] = useState<any>({});
+  const [disableRefreshButton, setdisableRefreshButton] = useState<boolean>(true);
+
+  chrome.runtime.onMessage.addListener(function(request) {
+    if (request.command === 'sendToConsole' && request.tabId) {
+      const result = JSON.parse(unescape(request.args));
+
+      if (JSON.stringify(initChain) !== JSON.stringify(result[1])) {
+        initChain = result[1];
+
+        if (disableRefresh) {
+          disableRefresh = false;
+          setdisableRefreshButton(false);
+          return;
+        }
+      }
+    }
+  });
+
+  const handleRefreshButtonClick = () => {
+    setInitiatorOutput(initChain);
+    disableRefresh = true;
+    setdisableRefreshButton(true);
+  };
 
   const fetchEvents = async (url: string) => {
     try {
@@ -357,14 +385,14 @@ export const Popup = (): JSX.Element => {
                 </React.Fragment>
               }
             ></Route>
-            {/* <Route
+            <Route
               path="tools/initiator"
               element={
                 <React.Fragment>
-                  <InitiatorComponent />
+                  <InitiatorComponent initChain={initChain} handleRefreshButtonClick={handleRefreshButtonClick} initiatorOutput={initiatorOutput} disableRefreshButton={disableRefreshButton} />
                 </React.Fragment>
               }
-            ></Route> */}
+            ></Route>
           </Routes>
         </Box>
       </ThemeProvider>

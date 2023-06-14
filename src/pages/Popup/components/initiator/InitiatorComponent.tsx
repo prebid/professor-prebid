@@ -11,30 +11,13 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
-import { useDebounce } from './hooks/useDebounce';
 
-const InitiatorComponent = (): JSX.Element => {
+const InitiatorComponent = ({ initChain, handleRefreshButtonClick, initiatorOutput, disableRefreshButton }: InitiatorComponentProps): JSX.Element => {
   const [initChainFeatureStatus, setInitChainFeatureStatus] = useState<boolean>(null);
   const [rootUrl, setRootUrl] = useState<string>('');
-  const [initiatorOutput, setInitiatorOutput] = useState<any>({});
 
-  const initOutput = useDebounce(initiatorOutput, 2000);
-
-  useEffect(() => {
-    // setListing('')
-    // if (searchQuery || query.length < 0) searchCharacter();
-    // async function searchCharacter() {
-    //   setListing('')
-    //   setLoading(true)
-    //   const data = await getCharacter(searchQuery)
-    //   setListing(data.results)
-    //   setLoading(false)
-    // }
-    if (initOutput) {
-      // setInitiatorOutput(initOutput);
-      console.log('initOutput: ', initOutput);
-    }
-  }, [initOutput]);
+  console.log('rootUrl', rootUrl);
+  console.log('initChainFeatureStatus', initChainFeatureStatus);
 
   useEffect(() => {
     chrome.storage.local.get(constants.INITIATOR_TOGGLE, (result) => {
@@ -48,6 +31,10 @@ const InitiatorComponent = (): JSX.Element => {
       const value = result ? result[constants.INITIATOR_ROOT_URL] : rootUrl;
       setRootUrl(value);
     });
+    
+    if (!disableRefreshButton) {
+      handleRefreshButtonClick();
+    }
   }, []);
 
   const handleInitChainFeatureStatusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,16 +61,6 @@ const InitiatorComponent = (): JSX.Element => {
     setRootUrl(e.target.value);
   };
 
-  chrome.runtime.onMessage.addListener(function(request) {
-    if (request.command === 'sendToConsole' && request.tabId) {
-      const result = JSON.parse(unescape(request.args));
-      console.log(result[1]);
-      // if (result[1][rootUrl]) {
-      //   // setInitiatorOutput(result[1]);
-      // }
-    }
-  });
-
   return (
     <React.Fragment>
       <div className="initiator-instructions">
@@ -93,34 +70,40 @@ const InitiatorComponent = (): JSX.Element => {
             '& > div > div > button': { minHeight: 0 },
             '& > div  > span': { display: 'none' },
           }}
+          value={0}
         >
           <Tab
             sx={{ p: 0, justifyContent: 'flex-start' }}
             label={
               <Typography variant="h2" component={Paper} sx={{ p: 1, border: 1, borderColor: 'primary.main' }}>
-                Initiator Request Chain
+                Network Inspector
               </Typography>
             }
           />
         </Tabs>
       </div>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }} className="box-wrapper">
-        <p>The initiator tool can be used to visualize initiator request chains originating from a specific root URL/resource.</p>
+        <p>The Network Inspector tool can be utilized to visualize initiator request chains originating from a specific root URL/resource in order to identify whether or not specific privacy related params are being passed along where they should be.</p>
+        <p>Under the hood this tool uses the Chrome Devtools Network API which requires that a new instance of the Chrome devtools be opened each time a modification is made to this Network Inspector tool (Modifying the root URL, toggling the feature on/off, etc.). For more details see the instructions below.</p>
         <p><b>Instructions on How to Use:</b></p>
-        <ul>
+        <ol>
           <li>
             Enable the feature by sliding the toggle below.
           </li>
           <li>
-            Enter and submit a URL that you know will be loaded onto this page.
+            Enter a root URL to listen for to generate a request chain from and then click the "Set URL" button.
           </li>
           <li>
-            Open the developer tools on this webpage. This can be done by right-clicking anywhere on the page and selecting "Inspect". <b>Note:</b> Each time you toggle on/off the initiator tool or modify the root URL, you will need to refresh the page and re-open the developer tools (closing any prior open developer tool windows).
+            Close Professor Prebid and open a new instance of the developer tools on the current webpage (right-click "Inspect").
           </li>
           <li>
-            Refresh the page, re-open Professor Prebid and navigate to the Initiator tool once again.  You will see data in object form outlining the initiator request chain for the provided root URL.
+            Re-open Professor Prebid, navigate back to the Network Inspector tool and click the <svg className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root refresh-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="RefreshIcon"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path></svg> icon (top-right).
           </li>
-        </ul>
+          <li>
+            The "Refresh" button below will be enabled whenever the initiator request chain has been generated or updated.
+          </li>
+        </ol>
+        <br /><br />
         <div className="initiator-form">
           <FormControl>
             <FormControlLabel
@@ -133,11 +116,12 @@ const InitiatorComponent = (): JSX.Element => {
             label="Enter Root URL"
             variant="outlined"
             size="small"
-            className="child"
+            className="child margin-right"
             value={rootUrl}
             onChange={handleChangeOfRootUrlField}
           />
-          <Button variant="outlined" className="submit-button" onClick={handleSettingRootUrl}>Submit</Button>
+          <Button variant="outlined" className="submit-button margin-right" onClick={handleSettingRootUrl}>Set URL</Button>
+          <Button variant="outlined" className="submit-button pbjs-orange" onClick={handleRefreshButtonClick} disabled={disableRefreshButton}>Refresh</Button>
         </div>
         <div className="initiator-output">
           <JSONViewerComponent
@@ -158,9 +142,11 @@ const InitiatorComponent = (): JSX.Element => {
   );
 };
 
-// interface InitiatorComponentProps {
-//   prebid: IPrebidDetails;
-//   handleRouteChange: (route: string) => void;
-// }
+export interface InitiatorComponentProps {
+  initChain: any;
+  handleRefreshButtonClick: () => void;
+  initiatorOutput: any;
+  disableRefreshButton: boolean;
+}
 
 export default InitiatorComponent;

@@ -127,21 +127,21 @@ export interface ITabInfos {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-// const tab_log = function(json_args: any) {
-//   const args = JSON.parse(unescape(json_args));
-//   console['log'].apply(console, Array.prototype.slice.call(args, 1));
-// }
+const tab_log = function(json_args: any) {
+  const args = JSON.parse(unescape(json_args));
+  console['log'].apply(console, Array.prototype.slice.call(args, 1));
+}
 
-// chrome.runtime.onMessage.addListener(function(request) {
-//   if (request.command === 'sendToConsole' && request.tabId) {
-//     // for debugging on clientside webpage chrome inspector devtools console
-//     chrome.scripting.executeScript({
-//       target: { tabId: request.tabId },
-//       func: tab_log,
-//       args: [request.args]
-//     });
+chrome.runtime.onMessage.addListener(function(request) {
+  if (request.command === 'sendToConsole' && request.tabId) {
+    // for debugging on clientside webpage chrome inspector devtools console
+    // chrome.scripting.executeScript({
+    //   target: { tabId: request.tabId },
+    //   func: tab_log,
+    //   args: [request.args]
+    // });
 
-//     // for service worker debugging
-//     // console.log(JSON.parse(unescape(request.args)));
-//   }
-// });
+    // for service worker debugging
+    console.log(JSON.parse(unescape(request.args))[1]);
+  }
+});
