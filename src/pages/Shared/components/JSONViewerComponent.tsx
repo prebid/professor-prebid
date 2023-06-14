@@ -11,6 +11,7 @@ const JSONViewerComponent = ({
   quotesOnKeys = false,
   indentWidth = 2,
   collapseStringsAfterLength = 100,
+  style,
 }: IJSONViewerComponentProps): JSX.Element => {
   const handleCopy = (copy: OnCopyProps) => {
     navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
@@ -27,7 +28,7 @@ const JSONViewerComponent = ({
       quotesOnKeys={quotesOnKeys}
       indentWidth={indentWidth}
       collapseStringsAfterLength={collapseStringsAfterLength}
-      style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px' }}
+      style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px', ...style }}
     />
   );
 };
