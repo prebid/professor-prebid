@@ -3,20 +3,20 @@ import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import StateContext from '../../../../contexts/appStateContext';
-
+import JSONViewerComponent from '../../../JSONViewerComponent';
 import MediaTypeChipComponent from '../../chips/MediaTypeChipComponent';
 import { IPrebidAdUnit } from '../../../../../Content/scripts/prebid';
 import Box from '@mui/material/Box';
 
-const MediaTypes = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTileComponentProps): JSX.Element => {
-  const { allWinningBids } = useContext(StateContext);
+const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTileComponentProps): JSX.Element => {
+  const { allWinningBids, isPanel } = useContext(StateContext);
 
   return (
-    <>
+    <Box sx={{ p: 0.5 }}>
       {Object.keys(mediaTypes).map((mediaType, index) => (
         <React.Fragment key={index}>
           {mediaType === 'banner' && mediaTypes['banner'].sizes && (
-            <Box sx={{ p: 0.5 }}>
+            <Box>
               <Typography variant="caption">Banner Sizes:</Typography>
               <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                 {mediaTypes['banner'].sizes?.map(([width, height], index) => (
@@ -32,7 +32,7 @@ const MediaTypes = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTil
           )}
           {mediaType === 'banner' &&
             mediaTypes['banner'].sizeConfig?.map(({ minViewPort, sizes }, index) => (
-              <Box sx={{ p: 0.5 }} key={index}>
+              <Box key={index}>
                 <Typography variant="caption">
                   minViewPort {minViewPort[0]}x{minViewPort[1]}:
                 </Typography>
@@ -44,7 +44,7 @@ const MediaTypes = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTil
               </Box>
             ))}
           {mediaType === 'video' && (
-            <Box sx={{ p: 0.5 }} key={index}>
+            <Box key={index}>
               <Typography variant="caption">Video:</Typography>
               <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                 {Object.keys(mediaTypes['video']).map((key, index) => (
@@ -58,7 +58,7 @@ const MediaTypes = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTil
             </Box>
           )}
           {mediaType === 'native' && (
-            <Box sx={{ p: 0.5 }} key={index}>
+            <Box key={index}>
               <Typography variant="caption">Native:</Typography>
               <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
                 {Object.keys(mediaTypes['native']).map((key, index) => (
@@ -73,11 +73,17 @@ const MediaTypes = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTil
           )}
         </React.Fragment>
       ))}
-    </>
+      {isPanel && (
+        <Box sx={{ padding: 0.5 }}>
+          <Typography variant="caption">AdUnit JSON:</Typography>
+          <JSONViewerComponent style={{ padding: 0 }} src={mediaTypes} collapsed={4} />
+        </Box>
+      )}
+    </Box>
   );
 };
 
-export default MediaTypes;
+export default MediaTypesTile;
 interface IMediaTypesTileComponentProps {
   adUnit: IPrebidAdUnit;
 }
