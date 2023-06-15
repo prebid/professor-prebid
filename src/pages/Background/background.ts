@@ -1,8 +1,8 @@
-import constants from '../../constants.json';
+import { EVENTS } from '../Shared/constants';
 import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
 import { IPrebidDetails } from '../Content/scripts/prebid';
 import { ITcfDetails } from '../Content/scripts/tcf';
-import { getTabId } from '../Popup/utils';
+import { getTabId } from '../Shared/utils';
 class Background {
   tabInfos: ITabInfos = {};
   constructor() {
@@ -33,17 +33,17 @@ class Background {
     if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     switch (type) {
-      case constants.EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
+      case EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
         sendResponse();
         this.tabInfos[tabId]['googleAdManager'] = payload as IGoogleAdManagerDetails;
         break;
-      case constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
+      case EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
         sendResponse();
         const typedPayload = payload as IPrebidDetails;
         this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-        this.tabInfos[tabId]['prebids']![typedPayload.namespace] = typedPayload;
+        this.tabInfos[tabId]['prebids']![typedPayload?.namespace] = typedPayload;
         break;
-      case constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
+      case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
         sendResponse();
         this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
         break;
@@ -60,8 +60,8 @@ class Background {
     const { frameId, tabId, url } = web_navigation;
     if (frameId == 0) {
       this.tabInfos[tabId] = { url };
-      await this.persistInStorage();
       this.updateBadge(tabId);
+      await this.persistInStorage();
     }
   };
 
@@ -115,6 +115,10 @@ export interface ITabInfo {
   prebids?: IPrebids;
   tcf?: ITcfDetails;
   url?: string;
+  downloading?: 'true' | 'false' | 'error';
+  namespace?: string;
+  updateNamespace?: (namespace: string) => void;
+  syncState?: string;
 }
 
 export interface ITabInfos {

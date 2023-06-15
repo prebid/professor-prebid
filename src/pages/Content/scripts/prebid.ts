@@ -1,17 +1,17 @@
-import { sendToContentScript } from '../../../utils';
-import constants from '../../../constants.json';
-
+import { sendWindowPostMessage } from '../../Shared/utils';
+import { DOWNLOAD_FAILED, EVENTS } from '../../Shared/constants';
+import { decylce } from '../../Shared/utils';
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
-  debug: IPrebidDebugConfig;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 3000;
   sendToContentScriptPending: boolean = false;
-  lastEventsObjectUrl: { url: string; size: number }[] = [];
+  lastEventsObjectUrls: { url: string; size: number }[] = [];
   events: any[] = [];
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
+
   constructor(namespace: string) {
     this.namespace = namespace;
     this.globalPbjs = window[namespace as keyof Window];
@@ -61,6 +61,23 @@ class Prebid {
       }
       this.throttle(this.sendDetailsToContentScript);
     });
+
+    window.addEventListener('message', (event) => {
+      if (!event.data.profPrebid) {
+        return;
+      }
+      const { type, payload } = event.data;
+      if (type === DOWNLOAD_FAILED) {
+        this.reset();
+        this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
+        this.sendDetailsToContentScript();
+      }
+    }, false);
+
+    window.addEventListener('beforeunload', () => {
+      this.reset();
+      this.sendDetailsToContentScript();
+    });
   };
 
   getDebugConfig = () => {
@@ -72,39 +89,30 @@ class Prebid {
     }
   };
 
-  decylce = (obj: any) => {
-    const cache = new WeakSet();
-    return JSON.stringify(obj, (key, value) => {
-      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-        if (value['location']) {
-          // document object found, discard key  
-          return;
-        }
-        // Store value in our set
-        cache.add(value);
-      }
-      return value;
-    });
-  };
-
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    const string = this.decylce(events);
+    const string = decylce(events);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
-    this.lastEventsObjectUrl.push({ url: objectURL, size: blob.size });
-    const numberOfCachedUrls = 5;
-    const totalWeight = this.lastEventsObjectUrl.reduce((acc, cur) => acc + cur.size, 0);
-    if ((this.lastEventsObjectUrl.length > numberOfCachedUrls && totalWeight > 5e6) || totalWeight > 25e6) {
-      // 5MB / 25MB
-      const count = this.lastEventsObjectUrl.length - numberOfCachedUrls;
-      const toRevoke = this.lastEventsObjectUrl.splice(0, count);
+    this.lastEventsObjectUrls.push({ url: objectURL, size: blob.size });
+    const numberOfCachedUrls = 5 * 10;
+    const totalWeight = this.lastEventsObjectUrls.reduce((acc, cur) => acc + cur.size, 0);
+    if ((this.lastEventsObjectUrls.length > numberOfCachedUrls && totalWeight > 5e6 * 10) || totalWeight > 25e6 * 10) {
+      // revoke oldest urls
+      const count = this.lastEventsObjectUrls.length - numberOfCachedUrls;
+      const toRevoke = this.lastEventsObjectUrls.splice(0, count);
       for (const url of toRevoke) {
         URL.revokeObjectURL(url.url);
       }
     }
     return objectURL;
+  };
+
+  reset = () => {
+    this.events = [];
+    this.lastEventsObjectUrls = [];
+    this.sendToContentScriptPending = false;
   };
 
   sendDetailsToContentScript = (): void => {
@@ -115,6 +123,7 @@ class Prebid {
       config,
       debug: this.getDebugConfig(),
       eids,
+      events: [],
       eventsUrl: this.getEventsObjUrl(),
       namespace: this.namespace,
       timeout,
@@ -122,7 +131,7 @@ class Prebid {
       bidderSettings: this.globalPbjs.bidderSettings,
     };
 
-    sendToContentScript(constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+    sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
     this.sendToContentScriptPending = false;
   };
 
@@ -143,14 +152,24 @@ class Prebid {
   };
 }
 
+const detectIframe = () => {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+};
+
 export const addEventListenersForPrebid = () => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(() => {
     stopLoop = true;
-  }, 8000);
+  }, detectIframe() ? 8000 : 60000);
   const isPrebidInPage = () => {
+
     const pbjsGlobals = window._pbjsGlobals || [];
+
     if (pbjsGlobals.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
@@ -165,6 +184,7 @@ export const addEventListenersForPrebid = () => {
   };
   isPrebidInPage();
 };
+
 
 export interface IPrebidBidParams {
   publisherId: string;
@@ -384,6 +404,13 @@ export interface IPrebidConfigS2SConfig {
   timeout: number;
 }
 
+export interface IPrebidConfigConsentManagementRule {
+  purpose: string;
+  enforcePurpose: boolean;
+  enforceVendor: boolean;
+  vendorExceptions: string[];
+}
+
 export interface IPrebidConfigConsentManagement {
   allowAuctionWithoutConsent: boolean;
   defaultGdprScope: string;
@@ -400,12 +427,7 @@ export interface IPrebidConfigConsentManagement {
       addtlConsent: string;
       gdprApplies: boolean;
     };
-    rules: {
-      purpose: string;
-      enforcePurpose: boolean;
-      enforceVendor: boolean;
-      vendorExceptions: string[];
-    }[];
+    rules: IPrebidConfigConsentManagementRule[];
   };
   usp: {
     cmpApi: string;
@@ -433,7 +455,7 @@ export interface IPrebidConfig {
     priceGranularity: string;
     publisherDomain: string;
   };
-  s2sConfig: IPrebidConfigS2SConfig;
+  s2sConfig: IPrebidConfigS2SConfig | IPrebidConfigS2SConfig[];
   targetingControls: {
     allowTargetingKeys: string[];
     alwaysIncludeDeals: boolean;
@@ -525,7 +547,7 @@ export interface IPrebidDetails {
   version: string;
   timeout: number;
   eventsUrl: string;
-  events?: (
+  events: (
     | IPrebidAuctionInitEventData
     | IPrebidAuctionEndEventData
     | IPrebidBidRequestedEventData

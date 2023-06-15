@@ -1,5 +1,6 @@
-import constants from '../../constants.json';
+import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, DOWNLOAD_FAILED } from '../Shared/constants';
 import { IPrebidDetails } from './scripts/prebid';
+import { sendWindowPostMessage } from '../Shared/utils';
 
 const ContentScript = () => {
   let pbjsNamespace: string = null;
@@ -25,29 +26,30 @@ const ContentScript = () => {
 
   const listenToChromeRuntimeMessages = () => {
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-      if (request.type === constants.CONSOLE_TOGGLE) {
-        document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: request.consoleState }));
+      if (request.type === CONSOLE_TOGGLE) {
+        sendWindowPostMessage(request.type, { detail: request.consoleState });
       }
-      if (request.type === constants.PBJS_NAMESPACE_CHANGE) {
+      if (request.type === PBJS_NAMESPACE_CHANGE) {
         pbjsNamespace = request.pbjsNamespace;
-        document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: request.pbjsNamespace }));
+        sendWindowPostMessage(request.type, { detail: request.pbjsNamespace });
+      }
+      if (request.type === DOWNLOAD_FAILED) {
+        sendWindowPostMessage(request.type, request.payload);
       }
       sendResponse();
     });
   };
 
-  const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object }>) => {
-    if (event.source != window) {
-      return;
-    }
+  const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object; profPrebid: boolean }>) => {
+    if (!event.data.profPrebid || !event?.data || !event?.data?.type) return;
     const { type, payload } = event.data;
-    if (type === constants.EVENTS.REQUEST_CONSOLE_STATE) {
-      const result = await chrome.storage.local.get(constants.CONSOLE_TOGGLE);
-      const checked = result[constants.CONSOLE_TOGGLE];
-      document.dispatchEvent(new CustomEvent(constants.CONSOLE_TOGGLE, { detail: !!checked }));
+    if (type === EVENTS.REQUEST_CONSOLE_STATE) {
+      const result = await chrome.storage.local.get(CONSOLE_TOGGLE);
+      const checked = result[CONSOLE_TOGGLE];
+      document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: !!checked }));
     }
-    if (type === constants.EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
-      pbjsNamespace = (payload as IPrebidDetails).namespace;
+    if (type === EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND) {
+      pbjsNamespace = (payload as IPrebidDetails)?.namespace;
     }
     updateBackgroundPage(type, payload);
     updateOverlays();
@@ -60,7 +62,7 @@ const ContentScript = () => {
 
   const updateOverlays = () => {
     if (pbjsNamespace) {
-      document.dispatchEvent(new CustomEvent(constants.SAVE_MASKS, { detail: pbjsNamespace }));
+      document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: pbjsNamespace }));
     }
   };
 

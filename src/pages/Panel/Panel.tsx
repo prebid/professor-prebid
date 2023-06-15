@@ -1,10 +1,31 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import Box from '@mui/material/Box';
+import NavBarComponent from './components/NavBarComponent';
+import RoutesComponent from '../Shared/components/RoutesComponent';
+import NoPrebidCardComponent from '../Shared/components/NoPrebidCardComponent';
+import { BrowserRouter } from 'react-router-dom';
+import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
+import StateContext from '../Shared/contexts/appStateContext';
+import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
+import { sendChromeTabsMessage } from '../Shared/utils';
 
-const Panel: React.FC = () => {
+const Panel = (): JSX.Element => {
+  const { pbjsNamespace } = useContext(StateContext);
+  const { prebids } = useContext(InspectedPageContext);
+
+  useEffect(() => {
+    sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, pbjsNamespace);
+  }, [pbjsNamespace]);
+
   return (
-    <div className="container">
-      <h1>Dev Tools Panel</h1>
-    </div>
+    <BrowserRouter>
+      <Box sx={{ backgroundColor: 'primary.light', minHeight: '100vH', height: '100%' }}>
+        {/* <JSONViewerComponent src={inspectedPageState} collapsed={2} /> */}
+        <NavBarComponent />
+        {(!prebids || !prebids[pbjsNamespace]) && <NoPrebidCardComponent />}
+        {prebids && prebids[pbjsNamespace] && <RoutesComponent />}
+      </Box>
+    </BrowserRouter>
   );
 };
 

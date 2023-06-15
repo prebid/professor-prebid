@@ -1,5 +1,4 @@
-import React from 'react';
-import { IPrebidConfig } from '../../../Content/scripts/prebid';
+import React, { useContext } from 'react';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -8,9 +7,14 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
-import { tileHeight } from './ConfigComponent';
+import { tileHeight } from '../../../Shared/components/config/ConfigComponent';
+import InspectedPageContext from '../../../Shared/contexts/inspectedPageContext';
+import AppStateContext from '../../../Shared/contexts/appStateContext';
 
-const PrebidConfigComponent = ({ config }: IPrebidConfigComponentProps): JSX.Element => {
+const PrebidConfigComponent = (): JSX.Element => {
+  const inspectedPageState = useContext(InspectedPageContext);
+  const { pbjsNamespace } = useContext(AppStateContext);
+  const { config } = inspectedPageState?.prebids?.[pbjsNamespace];
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
   const ref = React.useRef<HTMLInputElement>(null);
@@ -20,8 +24,9 @@ const PrebidConfigComponent = ({ config }: IPrebidConfigComponentProps): JSX.Ele
     setMaxWidth(expanded ? 4 : 8);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
+
   return (
-    <Grid item md={maxWidth} xs={12} ref={ref}>
+    <Grid item sm={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
@@ -93,9 +98,5 @@ const PrebidConfigComponent = ({ config }: IPrebidConfigComponentProps): JSX.Ele
     </Grid>
   );
 };
-
-interface IPrebidConfigComponentProps {
-  config: IPrebidConfig;
-}
 
 export default PrebidConfigComponent;

@@ -6,8 +6,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
-import { tileHeight } from './ConfigComponent';
-import JSONViewerComponent from '../../../Shared/JSONViewerComponent';
+import { tileHeight } from '../../../Shared/components/config/ConfigComponent';
+import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 
 const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX.Element => {
@@ -21,7 +21,7 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   return (
-    <Grid item md={maxWidth} xs={12} ref={ref}>
+    <Grid item sm={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={

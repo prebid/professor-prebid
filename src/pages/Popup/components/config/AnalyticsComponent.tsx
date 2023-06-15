@@ -8,7 +8,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
-import { tileHeight } from './ConfigComponent';
+import { tileHeight } from '../../../Shared/components/config/ConfigComponent';
 
 const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -21,7 +21,7 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   return (
-    <Grid item md={maxWidth} xs={12} ref={ref}>
+    <Grid item sm={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={

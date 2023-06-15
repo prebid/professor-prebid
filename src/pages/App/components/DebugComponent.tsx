@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import UserIdsComponent from '../../Popup/components/userIds/UserIdsComponent';
-import PrebidAdUnitsComponent from '../../Popup/components/adUnits/AdUnitsComponent';
-import TimeLineComponent from '../../Popup/components/timeline/TimeLineComponent';
+import UserIdsComponent from '../../Shared/components/userIds/UserIdsComponent';
+import PrebidAdUnitsComponent from '../../Shared/components/adUnits/AdUnitsComponent';
+import TimeLineComponent from '../../Shared/components/timeline/TimeLineComponent';
 import { ITabInfos, ITabInfo } from '../../Background/background';
-import BidsComponent from '../../Popup/components/bids/BidsComponent';
-import ConfigComponent from '../../Popup/components/config/ConfigComponent';
-import ToolsComponent from '../../Popup/components/tools/ToolsComponent';
-import JSONViewerComponent from '../../Shared/JSONViewerComponent';
+import BidsComponent from '../../Shared/components/bids/BidsComponent';
+import ConfigComponent from '../../Shared/components/config/ConfigComponent';
+import ToolsComponent from '../../Shared/components/tools/ToolsComponent';
+import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
 import { ThemeProvider } from '@mui/material/styles';
-import { popupTheme } from '../../theme';
+import { theme } from '../../../theme/theme';
 
 const a11yProps = (index: number) => ({
   id: `simple-tab-${index}`,
@@ -46,7 +46,7 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: NamespaceTabsProps) => {
     setMuiTabId(newValue);
   };
   return (
-    <ThemeProvider theme={popupTheme}>
+    <ThemeProvider theme={theme}>
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={muiTabId} onChange={handleMuiTabIdChange} aria-label="basic tabs example">
@@ -56,19 +56,18 @@ const NamespaceTabs = ({ prebids, megaBytes, tcf }: NamespaceTabsProps) => {
           </Tabs>
         </Box>
         {Object.keys(prebids).map((prebidKey: string, index) => {
-          const prebid = prebids[prebidKey];
           return (
             <TabPanel value={muiTabId} index={index} key={index}>
               <Box key={prebidKey}>
                 <Typography>
                   Prebid ({prebidKey}) {megaBytes}MB
                 </Typography>
-                <ToolsComponent prebid={prebid}></ToolsComponent>
-                <PrebidAdUnitsComponent prebid={prebid}></PrebidAdUnitsComponent>
-                <BidsComponent prebid={prebid}></BidsComponent>
-                <TimeLineComponent prebid={prebid}></TimeLineComponent>
-                <ConfigComponent prebid={prebid} tcf={tcf}></ConfigComponent>
-                <UserIdsComponent prebid={prebid}></UserIdsComponent>
+                <ToolsComponent />
+                <PrebidAdUnitsComponent></PrebidAdUnitsComponent>
+                <BidsComponent></BidsComponent>
+                <TimeLineComponent></TimeLineComponent>
+                <ConfigComponent />
+                <UserIdsComponent />
                 <Typography component="div" variant="body1">
                   <Box sx={{ color: 'primary.main' }}>primary.main</Box>
                   <Box sx={{ color: 'secondary.main' }}>secondary.main</Box>
@@ -233,7 +232,7 @@ const DebugComponent = () => {
     };
   }, []);
 
-  return <ThemeProvider theme={popupTheme}>{tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>}</ThemeProvider>;
+  return <ThemeProvider theme={theme}>{tabInfos && <ChromeTabs tabInfos={tabInfos}></ChromeTabs>}</ThemeProvider>;
 };
 
 export default DebugComponent;

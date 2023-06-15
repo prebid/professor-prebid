@@ -1,5 +1,5 @@
-import { sendToContentScript } from '../../../utils';
-import constants from '../../../constants.json';
+import { sendWindowPostMessage } from '../../Shared/utils';
+import { EVENTS } from '../../Shared/constants';
 
 declare global {
   interface Window {
@@ -114,12 +114,12 @@ class IabTcf {
               },
             };
             if (this.lastMessage !== JSON.stringify(detail)) {
-              sendToContentScript(constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
+              sendWindowPostMessage(EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
               this.lastMessage = JSON.stringify(detail);
             }
           });
         });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     if (typeof window.__tcfapi === 'function') {
@@ -134,12 +134,12 @@ class IabTcf {
               },
             };
             if (this.lastMessage !== JSON.stringify(detail)) {
-              sendToContentScript(constants.EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
+              sendWindowPostMessage(EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
               this.lastMessage = JSON.stringify(detail);
             }
           });
         });
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 }
