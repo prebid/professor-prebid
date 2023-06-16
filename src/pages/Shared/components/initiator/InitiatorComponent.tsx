@@ -13,6 +13,8 @@ import Box from '@mui/material/Box';
 import JSONViewerComponent from '../JSONViewerComponent';
 import AppStateContext from '../../contexts/appStateContext';
 import Grid from '@mui/material/Grid';
+import { IconButton } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const gridStyle = {
   p: 0.5,
@@ -105,23 +107,29 @@ const InitiatorComponent = (): JSX.Element => {
             <b>Instructions on How to Use:</b>
           </Typography>
           <ol>
-            <li>Enable the feature by sliding the toggle below.</li>
-            <li>Enter a root URL to listen for to generate a request chain from and then click the "Set URL" button.</li>
-            <li>Close Professor Prebid and open a new instance of the developer tools on the current webpage (right-click "Inspect").</li>
             <li>
-              Re-open Professor Prebid, navigate back to the Network Inspector tool and click the{' '}
-              <svg
-                className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root refresh-icon"
-                focusable="false"
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                data-testid="RefreshIcon"
-              >
-                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
-              </svg>{' '}
-              icon (top-right).
+              <Typography>Enable the feature by sliding the toggle below.</Typography>
             </li>
-            <li>The "Refresh" button below will be enabled whenever the initiator request chain has been generated or updated.</li>
+            <li>
+              <Typography>Enter a root URL to listen for to generate a request chain from and then click the "Set URL" button.</Typography>
+            </li>
+            <li>
+              <Typography>
+                Close Professor Prebid and open a new instance of the developer tools on the current webpage (right-click "Inspect").
+              </Typography>
+            </li>
+            <li>
+              <Typography component={'span'}>
+                Re-open Professor Prebid, navigate back to the Network Inspector tool and click the{' '}
+                <IconButton size="small">
+                  <RefreshIcon />
+                </IconButton>{' '}
+                icon (top-right).
+              </Typography>
+            </li>
+            <li>
+              <Typography>The "Refresh" button below will be enabled whenever the initiator request chain has been generated or updated.</Typography>
+            </li>
           </ol>
           <br />
           <br />
