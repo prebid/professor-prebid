@@ -39,7 +39,7 @@ const BidReceivedRowComponent = ({ bid, globalOpen }: IBidReceivedRowComponentPr
       </Grid>
       <Grid item xs={3}>
         <Paper sx={{ height: 1 }}>
-          <Typography variant="body1">{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</Typography>
+          <Typography variant="body1">{bid.adUnitCode?.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</Typography>
         </Paper>
       </Grid>
       <Grid item xs={1}>

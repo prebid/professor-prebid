@@ -170,7 +170,7 @@ export const addEventListenersForPrebid = () => {
 
     const pbjsGlobals = window._pbjsGlobals || [];
 
-    if (pbjsGlobals.length > 0) {
+    if (pbjsGlobals?.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);

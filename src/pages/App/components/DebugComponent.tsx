@@ -194,7 +194,7 @@ const loadInitialData = async (setTabInfos: Function) => {
       for (const [_, prebid] of Object.entries(prebids)) {
         try {
           const events = await fetchEvents(prebid.eventsUrl);
-          if (events.length > 0) {
+          if (events?.length > 0) {
             prebid.events = events;
           }
         } catch (error) {

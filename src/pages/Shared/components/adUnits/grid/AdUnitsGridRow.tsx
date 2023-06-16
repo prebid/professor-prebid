@@ -27,7 +27,7 @@ const GridItem = ({ mdWidth, children, isPanel }: IGridItemProps): JSX.Element =
     const contentRefCurrent = contentRef.current;
     const handleResize = () => {
       setContentHeight(contentRefCurrent?.clientHeight);
-      setGridItemHeight(gridItemRef.current.clientHeight);
+      setGridItemHeight(gridItemRef.current?.clientHeight);
     };
     const resizeObserver = new ResizeObserver(handleResize);
     if (contentRefCurrent) {
