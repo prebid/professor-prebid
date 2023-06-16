@@ -24,10 +24,16 @@ import { PBJS_NAMESPACE_CHANGE } from '../../Shared/constants';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import StateContext from '../../Shared/contexts/appStateContext';
 import { sendChromeTabsMessage } from '../../Shared/utils';
+import LinkIcon from '@mui/icons-material/Link';
 
 const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLinkComponentProps): JSX.Element => (
   <Link to={target}>
-    <Button variant={activeRoute === target ? 'contained' : 'outlined'} onClick={clickHandler} startIcon={icon}>
+    <Button
+      variant={activeRoute === target ? 'contained' : 'outlined'}
+      onClick={clickHandler}
+      startIcon={icon}
+      sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+    >
       {label}
     </Button>
   </Link>
@@ -124,6 +130,14 @@ const NavBarComponent = () => {
           clickHandler={() => handleRouteChange('/events')}
           icon={<WarningAmberOutlinedIcon />}
           label="Events"
+        />
+
+        <RouterLink
+          target="initiator"
+          activeRoute={activeRoute}
+          clickHandler={() => handleRouteChange('/initiator')}
+          icon={<LinkIcon />}
+          label="Netwok Inspector (alpha))"
         />
       </Box>
 
