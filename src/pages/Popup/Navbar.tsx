@@ -75,7 +75,7 @@ export const NavBar = (): JSX.Element => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         onClick={handleClickOpen}
       >
-        <img src="https://prebid.org/wp-content/uploads/2021/02/Prebid-Logo-RGB-Full-Color-Medium.svg" width={'100%'} alt="prebid logo" />
+        <img src="../../assets/img/prebid-web1.webp" width={'100%'} alt="prebid logo" />
       </Badge>
 
       {prebids && (
