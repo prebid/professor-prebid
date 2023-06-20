@@ -8,6 +8,11 @@ declare module "*.svg" {
     export default ReactComponent;
 }
 
+declare module "*.png" {
+    const value: any;
+    export = value;
+}
+
 interface RouterLinkComponentProps {
     target: string;
     activeRoute: string;

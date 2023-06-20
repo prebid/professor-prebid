@@ -26,6 +26,7 @@ import { IconButton } from '@mui/material';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import StateContext from '../Shared/contexts/appStateContext';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
+import logo from '../../assets/img/logo.png';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, pbjsNamespace);
@@ -75,7 +76,7 @@ export const NavBar = (): JSX.Element => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         onClick={handleClickOpen}
       >
-        <img src="../../assets/img/prebid-web1.webp" width={'100%'} alt="prebid logo" />
+        <img src={logo} width={'100%'} alt="prebid logo" />
       </Badge>
 
       {prebids && (
