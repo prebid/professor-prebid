@@ -137,14 +137,15 @@ const NavBarComponent = () => {
           activeRoute={activeRoute}
           clickHandler={() => handleRouteChange('/initiator')}
           icon={<LinkIcon />}
-          label="Netwok Inspector (alpha))"
+          label="Netwok Inspector (alpha)"
         />
+
+        <Typography variant="caption" sx={{ mr: 1, color: 'black', overflow: 'clip', textAlign: 'left' }}>
+          {inspectedPageState?.syncState}
+        </Typography>
       </Box>
 
       <Box>
-        <Typography variant="caption" sx={{ mr: 1, color: 'black' }}>
-          {inspectedPageState?.syncState}
-        </Typography>
         <IconButton
           aria-label="refresh"
           color="default"
@@ -153,6 +154,7 @@ const NavBarComponent = () => {
         >
           <HelpOutlineOutlinedIcon />
         </IconButton>
+
         <IconButton
           sx={{ p: 0 }}
           aria-label="refresh"
