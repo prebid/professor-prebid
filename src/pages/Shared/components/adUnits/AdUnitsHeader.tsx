@@ -37,7 +37,7 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
 
       <HeaderGridItem>{`NoBid${conditionalPluralization(allNoBidEvents)}: ${allNoBidEvents.length}`}</HeaderGridItem>
 
-      <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>{`Event${conditionalPluralization(events)}: ${events.length}`}</HeaderGridItem>
+      <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</HeaderGridItem>
       <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />
     </>
   );
