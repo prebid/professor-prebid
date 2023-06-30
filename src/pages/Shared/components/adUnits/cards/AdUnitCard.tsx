@@ -135,13 +135,13 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
               (bidReceived) =>
                 bidReceived.args?.adUnitCode === adUnit.code &&
                 bidReceived.args.bidder === bidder &&
-                adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args?.size)
+                adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`)?.includes(bidReceived?.args?.size)
             );
             const isWinner = winningBids.some(
               (winningBid) =>
                 winningBid.args.adUnitCode === adUnit.code &&
                 winningBid.args.bidder === bidder &&
-                adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`).includes(bidReceived?.args.size)
+                adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`)?.includes(bidReceived?.args.size)
             );
             const isRendered = auctionsAdsRendered.some(
               (renderedAd) =>

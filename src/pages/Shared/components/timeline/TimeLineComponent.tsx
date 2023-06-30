@@ -8,8 +8,8 @@ import Typography from '@mui/material/Typography';
 const TimeLineComponent = (): JSX.Element => {
   const { prebid, auctionEndEvents } = useContext(AppStateContext);
   const { events } = prebid;
-  if (events.length === 0) return <div>no events</div>;
-  if (auctionEndEvents.length === 0) return <div>no auctionEndEvents</div>;
+  if (events?.length === 0) return <div>no events</div>;
+  if (auctionEndEvents?.length === 0) return <div>no auctionEndEvents</div>;
   return (
     <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: .5 }}>
       {auctionEndEvents.map((auctionEndEvent, index) => {
