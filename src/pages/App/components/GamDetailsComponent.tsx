@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/system/Box';
 import Paper from '@mui/material/Paper';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
@@ -209,17 +208,30 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                   <Paper elevation={1} sx={{ p: 1 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Targeting:</Typography>
                     <Box sx={{ display: 'flex', flexGrow: 1 }}>
-                      <DataGrid
-                        density="compact"
-                        rows={slotTargeting}
-                        columns={[
-                          { field: 'key', headerName: 'Key', align: 'left', width: 200 },
-                          { field: 'value', headerName: 'Value', align: 'left', width: 200 },
-                        ]}
-                        disableSelectionOnClick
-                        autoHeight
-                        hideFooter
-                      />
+                      <Grid container>
+                        <Grid item xs={6}>
+                          <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
+                            Key
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
+                            Value
+                          </Typography>
+                        </Grid>
+                        {slotTargeting.map((st, i) => (
+                          <React.Fragment key={i}>
+                            <Grid item xs={6}>
+                              <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
+                              {st.key}
+                            </Grid>
+                            <Grid item xs={6}>
+                              <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
+                              {st.value}
+                            </Grid>
+                          </React.Fragment>
+                        ))}
+                      </Grid>
                     </Box>
                   </Paper>
                 </Grid>
