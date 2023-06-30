@@ -35,6 +35,7 @@ const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpe
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       onClose={handlePopoverOpenClose}
       disableRestoreFocus
+      onClick={(e) => e.stopPropagation()}
     >
       <JSONViewerComponent
         src={bidderRequest}
