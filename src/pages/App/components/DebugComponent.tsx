@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Grid from '@mui/material/Grid';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material';
 import { theme } from '../../../theme/theme';
 
 const a11yProps = (index: number) => ({
@@ -194,7 +194,7 @@ const loadInitialData = async (setTabInfos: Function) => {
       for (const [_, prebid] of Object.entries(prebids)) {
         try {
           const events = await fetchEvents(prebid.eventsUrl);
-          if (events.length > 0) {
+          if (events?.length > 0) {
             prebid.events = events;
           }
         } catch (error) {

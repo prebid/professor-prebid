@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box } from '@mui/system';
-import { Paper } from '@mui/material';
+import Box from '@mui/system/Box';
+import Paper from '@mui/material/Paper';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {

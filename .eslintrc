@@ -15,6 +15,14 @@
   "rules": {
     "no-extra-semi": "off",
     "no-inner-declarations": "off",
-    "eqeqeq": "off"
+    "eqeqeq": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          "@mui/*/*/*"
+        ]
+      }
+    ]
   }
 }
