@@ -43,7 +43,7 @@ const NavBarComponent = () => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
   const inspectedPageState = useContext(ChromeStorageContext);
   const downloading = inspectedPageState?.downloading;
-  const { pbjsNamespace, setPbjsNamespace } = useContext(StateContext);
+  const { pbjsNamespace, setPbjsNamespace, setInitiatorOutput, setIsRefresh, setInitDataLoaded } = useContext(StateContext);
 
   const handleRouteChange = (input: any) => {
     setActiveRoute(input);
@@ -158,7 +158,13 @@ const NavBarComponent = () => {
         <IconButton
           sx={{ p: 0 }}
           aria-label="refresh"
-          onClick={() => chrome.devtools.inspectedWindow.reload({ ignoreCache: true })}
+          onClick={() => {
+            setInitiatorOutput({});
+            setInitDataLoaded(false);
+            setIsRefresh(true);
+            chrome.storage.local.set({ initReqChain: JSON.stringify(null) });
+            chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
+          }}
           color={downloading === 'true' ? 'primary' : downloading === 'error' ? 'error' : 'default'}
         >
           {downloading === 'true' ? (
