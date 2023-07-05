@@ -130,7 +130,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
       chrome.storage.local.get('initReqChain', (result) => {
         const data = JSON.parse(result.initReqChain);
         if (data === null) {
-          console.log('STOPPING');
+          // console.log('STOPPING');
           initReqChainObj = {};
           chrome.devtools.network.onRequestFinished.removeListener(processHarRequests);
         }
@@ -174,22 +174,6 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
       if (har_entry.response.redirectURL) {
         redirectArray.push(har_entry.response.redirectURL);
       }
-
-      // if (origin) {
-      //   data.origin = origin.value;
-      // }
-
-      // if (referer) {
-      //   data.referer = referer.value;
-      // }
-
-      // if (host) {
-      //   data.host = host.value;
-      // }
-
-      // if (har_entry.request.postData) {
-      //   data.postData = har_entry.request.postData;
-      // }
 
       switch (true) {
         case Boolean(
@@ -248,11 +232,8 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
 
     chrome.tabs.onUpdated.addListener(function (tabId, info) {
       if (info.status === 'loading') {
-        console.log("info.status === 'loading': ", info.status === 'loading');
-        console.log('tabId: ', tabId);
-        console.log('info: ', info);
         chrome.storage.local.set({ initReqChain: JSON.stringify({}) });
-        console.log('STARTING');
+        // console.log('STARTING');
         start(processHarRequests);
       }
     });
