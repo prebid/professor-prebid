@@ -119,27 +119,13 @@ export interface ITabInfo {
   namespace?: string;
   updateNamespace?: (namespace: string) => void;
   syncState?: string;
+  initReqChainData?: InitReqChainData;
 }
 
 export interface ITabInfos {
   [key: number]: ITabInfo;
 }
 
-const tab_log = (json_args: any) => {
-  const args = JSON.parse(unescape(json_args));
-  console['log'].apply(console, Array.prototype.slice.call(args, 1));
+export interface InitReqChainData {
+  [key: string]: any;
 }
-
-chrome.runtime.onMessage.addListener(function (request) {
-  if (request.command === 'sendToConsole' && request.tabId) {
-    // for debugging on clientside webpage chrome inspector devtools console
-    chrome.scripting.executeScript({
-      target: { tabId: request.tabId },
-      func: tab_log,
-      args: [request.args]
-    });
-
-    // for service worker debugging
-    console.log(JSON.parse(unescape(request.args))[1]);
-  }
-});

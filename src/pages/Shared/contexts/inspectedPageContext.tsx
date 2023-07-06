@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react';
-import { ITabInfo, ITabInfos } from '../../Background/background';
+import { ITabInfo, ITabInfos, InitReqChainData } from '../../Background/background';
 import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
 
@@ -13,6 +13,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const [pageContext, setPageContext] = useState<ITabInfo>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
   const [syncInfo, setSyncInfo] = useState<string>('');
+  const [initReqChainData, setInitReqChainData] = useState<InitReqChainData>({});
 
   const fetchEvents = useCallback(async (tabInfos: ITabInfos) => {
     const tabId = await getTabId();
@@ -57,6 +58,10 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
         const tabInfoWithEvents = await fetchEvents({ ...changes.tabInfos.newValue });
         setPageContext(tabInfoWithEvents);
       }
+
+      if (areaName === 'local' && changes.initReqChain && changes) {
+        setInitReqChainData({ initReqChain: changes.initReqChain.newValue });
+      }
     };
     chrome.storage.onChanged.addListener(handler);
 
@@ -66,7 +71,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     };
   }, [fetchEvents]);
 
-  const contextValue: ITabInfo = { ...pageContext, downloading, syncState: syncInfo };
+  const contextValue: ITabInfo = { ...pageContext, downloading, syncState: syncInfo, initReqChainData };
 
   return <InspectedPageContext.Provider value={contextValue}>{children}</InspectedPageContext.Provider>;
 };
