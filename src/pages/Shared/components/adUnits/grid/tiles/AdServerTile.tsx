@@ -27,7 +27,7 @@ const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
     return (
       <Box sx={{ p: 0.5 }}>
         <Typography variant="caption">Unable to match Prebid AdUnit with ad-server slot. </Typography>
-        {googleAdManager.slots.length > 0 && (
+        {googleAdManager?.slots?.length > 0 && (
           <JSONViewerComponent style={{ padding: 0 }} name="All detected ad-server slots:" src={googleAdManager.slots} collapsed={2} />
         )}
       </Box>

@@ -67,7 +67,8 @@ class Prebid {
         return;
       }
       const { type, payload } = event.data;
-      if (type === DOWNLOAD_FAILED) {
+      if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
+        console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
         this.reset();
         this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
         this.sendDetailsToContentScript();
@@ -78,6 +79,15 @@ class Prebid {
       this.reset();
       this.sendDetailsToContentScript();
     });
+  };
+
+  extractDomain = (url: string) => {
+    const domain = url
+      .replace('blob:', '')
+      .replace('http://', '')
+      .replace('https://', '')
+      .split(/[/?#]/)[0];
+    return domain;
   };
 
   getDebugConfig = () => {
@@ -170,7 +180,7 @@ export const addEventListenersForPrebid = () => {
 
     const pbjsGlobals = window._pbjsGlobals || [];
 
-    if (pbjsGlobals.length > 0) {
+    if (pbjsGlobals?.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);

@@ -46,7 +46,7 @@ const UserIdModuleComponent = (): JSX.Element => {
           subheader={
             <Typography variant="subtitle1">
               {userSync.userIds?.length > 0
-                ? `${userSync.userIds.length} UserId${userSync.userIds.length > 1 ? 's' : ''} detected:`
+                ? `${userSync.userIds?.length} UserId${userSync.userIds?.length > 1 ? 's' : ''} detected:`
                 : 'No UserIds detected!'}
             </Typography>
           }
@@ -73,7 +73,7 @@ const UserIdModuleComponent = (): JSX.Element => {
               ))}
             {!expanded && userSync.userIds?.length > 5 && (
               <Grid item xs={12}>
-                <Typography variant="body2">+ {userSync.userIds.length - 5} more user ids...</Typography>
+                <Typography variant="body2">+ {userSync.userIds?.length - 5} more user ids...</Typography>
               </Grid>
             )}
             {expanded && (

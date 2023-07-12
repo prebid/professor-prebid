@@ -38,7 +38,8 @@
     "storage",
     "unlimitedStorage",
     "tabs",
-    "scripting"
+    "scripting",
+    "webRequest"
   ],
   "version": "0.2.66",
   "web_accessible_resources": [

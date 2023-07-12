@@ -8,7 +8,7 @@ import BidsComponent from './bids/BidsComponent';
 import ToolsComponent from './tools/ToolsComponent';
 import EventsComponent from './auctionDebugEvents/EventsComponent';
 import { Routes, Route } from 'react-router-dom';
-
+import InitiatorComponent from './initiator/InitiatorComponent';
 const RoutesComponent = (): JSX.Element => {
   return (
     <Routes>
@@ -21,6 +21,8 @@ const RoutesComponent = (): JSX.Element => {
       <Route path="userId" element={<UserIdsComponent />} />
       <Route path="tools" element={<ToolsComponent />} />
       <Route path="events" element={<EventsComponent />} />
+      <Route path="events" element={<EventsComponent />} />
+      <Route path="initiator" element={<InitiatorComponent />} />
     </Routes>
   );
 };

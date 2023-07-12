@@ -29,7 +29,7 @@ const NoBidRowComponent = ({ bid, globalOpen }: INoBidRowComponentProps) => {
       </Grid>
       <Grid item xs={9}>
         <Paper sx={{ height: 1 }}>
-          <Typography variant="body1">{bid.adUnitCode.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</Typography>
+          <Typography variant="body1">{bid.adUnitCode?.length > 15 ? bid.adUnitCode.substring(0, 15) + '...' : bid.adUnitCode}</Typography>
         </Paper>
       </Grid>
       {open && <ExpandedRowComponent bid={bid} />}
