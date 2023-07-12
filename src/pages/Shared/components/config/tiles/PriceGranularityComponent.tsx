@@ -56,7 +56,7 @@ const PriceGranularityComponent = () => {
           title={<Typography variant="h3">Price Granularity</Typography>}
           subheader={
             <Typography variant="subtitle1">
-              {priceGranularity} ({Object.keys(defaultBuckets).includes(priceGranularity) ? 'default' : 'custom'})
+              {priceGranularity} ({Object.keys(defaultBuckets)?.includes(priceGranularity) ? 'default' : 'custom'})
             </Typography>
           }
           action={

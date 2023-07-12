@@ -10,9 +10,9 @@ import JSONViewerComponent from '../../../JSONViewerComponent';
 const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): boolean => {
   const adUnitSizes =
     adUnit.sizes?.map(([width, height]) => `${width}x${height}`) || adUnit.mediaTypes?.banner?.sizes?.map(([width, height]) => `${width}x${height}`);
-  const isSizeMatch = adUnitSizes.includes(bidEvent?.args?.size);
-  const isNativeMatch = Object.keys(adUnit.mediaTypes).includes('native') && bidEvent.args.mediaType === 'native';
-  const isVideoMatch = Object.keys(adUnit.mediaTypes).includes('video') && bidEvent.args.mediaType === 'video';
+  const isSizeMatch = adUnitSizes?.includes(bidEvent?.args?.size);
+  const isNativeMatch = Object.keys(adUnit.mediaTypes)?.includes('native') && bidEvent.args.mediaType === 'native';
+  const isVideoMatch = Object.keys(adUnit.mediaTypes)?.includes('video') && bidEvent.args.mediaType === 'video';
 
   return isSizeMatch || isNativeMatch || isVideoMatch;
 };

@@ -75,7 +75,7 @@ const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaType
       ))}
       {isPanel && (
         <Box sx={{ padding: 0.5 }}>
-          <Typography variant="caption">AdUnit JSON:</Typography>
+          <Typography variant="caption">MediaType JSON:</Typography>
           <JSONViewerComponent style={{ padding: 0 }} src={mediaTypes} collapsed={4} />
         </Box>
       )}

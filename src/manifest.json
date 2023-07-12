@@ -41,7 +41,7 @@
     "scripting",
     "webRequest"
   ],
-  "version": "0.2.63",
+  "version": "0.2.66",
   "web_accessible_resources": [
     {
       "resources": [

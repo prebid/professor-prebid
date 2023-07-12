@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography';
 import createCache from '@emotion/cache';
 import Box from '@mui/material/Card';
 import Close from '@mui/icons-material/Close';
-import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
@@ -21,6 +20,7 @@ import PreviewIcon from '@mui/icons-material/Preview';
 import HelpIcon from '@mui/icons-material/Help';
 import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import { Paper } from '@mui/material';
 
 const ExpandableItem = ({
   avatar,
@@ -382,18 +382,41 @@ const PopOverComponent = ({
                   title="Adserver Targeting"
                   avatar={<CrisisAlertIcon />}
                   children={
-                    <Box elevation={0} sx={{ display: 'flex', flexGrow: 1 }}>
-                      <DataGrid
-                        density="compact"
-                        rows={slotTargeting}
-                        columns={[
-                          { field: 'key', headerName: 'Key', align: 'left', flex: 1 },
-                          { field: 'value', headerName: 'Value', align: 'left', flex: 1 },
-                        ]}
-                        disableSelectionOnClick
-                        autoHeight
-                        hideFooter
-                      />
+                    <Box elevation={0} sx={{ display: 'flex', flexGrow: 1, backgroundColor: 'primary.light' }}>
+                      <Grid container spacing={0.25}>
+                        <Grid item xs={6}>
+                          <Paper sx={{ p: 0.5 }}>
+                            <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
+                              Key
+                            </Typography>
+                          </Paper>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Paper sx={{ p: 0.5 }}>
+                            <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
+                              Value
+                            </Typography>
+                          </Paper>
+                        </Grid>
+                        {slotTargeting.map((st, i) => (
+                          <React.Fragment key={i}>
+                            <Grid item xs={6} sx={{}}>
+                              <Paper sx={{ p: 0.5, h: 1, minHeight: 1 }}>
+                                <Typography variant={'body1'} sx={{ textAlign: 'left' }}>
+                                  {st.key}
+                                </Typography>
+                              </Paper>
+                            </Grid>
+                            <Grid item xs={6} sx={{}}>
+                              <Paper sx={{ p: 0.5, h: 1, minHeight: 1 }}>
+                                <Typography variant={'body1'} sx={{ textAlign: 'left' }}>
+                                  {st.value}
+                                </Typography>
+                              </Paper>
+                            </Grid>
+                          </React.Fragment>
+                        ))}
+                      </Grid>
                     </Box>
                   }
                 />

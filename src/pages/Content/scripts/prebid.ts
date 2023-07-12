@@ -106,9 +106,9 @@ class Prebid {
     const objectURL = URL.createObjectURL(blob);
     // memory management
     this.lastEventsObjectUrls.push({ url: objectURL, size: blob.size });
-    const numberOfCachedUrls = 5 * 10;
+    const numberOfCachedUrls = 5;
     const totalWeight = this.lastEventsObjectUrls.reduce((acc, cur) => acc + cur.size, 0);
-    if ((this.lastEventsObjectUrls.length > numberOfCachedUrls && totalWeight > 5e6 * 10) || totalWeight > 25e6 * 10) {
+    if ((this.lastEventsObjectUrls.length > numberOfCachedUrls && totalWeight > 5e6) || totalWeight > 25e6) {
       // revoke oldest urls
       const count = this.lastEventsObjectUrls.length - numberOfCachedUrls;
       const toRevoke = this.lastEventsObjectUrls.splice(0, count);

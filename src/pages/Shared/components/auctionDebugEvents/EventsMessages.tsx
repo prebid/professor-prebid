@@ -33,12 +33,12 @@ const Args2Typo = ({ input }: any): JSX.Element => {
 };
 
 const filterEventsBySearch = (events: { args: any; elapsedTime: number }[], search: string) => {
-  return events.filter((event) => args2string(event.args.arguments).toLowerCase().includes(search.toLowerCase()));
+  return events.filter((event) => args2string(event.args.arguments).toLowerCase()?.includes(search.toLowerCase()));
 };
 
 const filterEventsByState = (events: { args: any; elapsedTime: number }[], state: { error: boolean; warning: boolean }) => {
   const selectedKeys = Object.keys(state).filter((key) => state[key as keyof { error: boolean; warning: boolean }]);
-  return events.filter((event) => selectedKeys.includes(event.args.type.toLowerCase()));
+  return events.filter((event) => selectedKeys?.includes(event.args.type.toLowerCase()));
 };
 
 const sortEventsByElapsedTime = (events: { args: any; elapsedTime: number }[]) => {
