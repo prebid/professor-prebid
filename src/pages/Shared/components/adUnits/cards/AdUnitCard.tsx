@@ -145,7 +145,7 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
             );
             const isRendered = auctionsAdsRendered.some(
               (renderedAd) =>
-                renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bidder && renderedAd.args.bid.auctionId === auctionId
+                renderedAd.args.bid.adUnitCode === adUnit.code && renderedAd.args.bid.bidder === bidder && renderedAd?.args?.bid?.auctionId === auctionId
             );
             const label = bidReceived?.args.cpm
               ? `${bidder} (${Number(bidReceived?.args.cpm).toFixed(2)} ${bidReceived?.args.currency})`

@@ -18,7 +18,7 @@ const TimeLineComponent = (): JSX.Element => {
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
                 <Typography variant="h2" component="span">
-                  Auction ID: {auctionEndEvent.args.auctionId}
+                  Auction ID: {auctionEndEvent.args?.auctionId}
                 </Typography>
               </Paper>
             </Grid>
