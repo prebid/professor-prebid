@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 import InspectedPageContext from './inspectedPageContext';
+import { useDebounce } from '../hooks/useDebounce';
 import {
   IPrebidDetails,
   IPrebidAuctionInitEventData,
@@ -32,6 +33,7 @@ const AppStateContext = React.createContext<AppState>({
   setIsRefresh: () => {},
   initDataLoaded: false,
   setInitDataLoaded: () => {},
+  initReqChainResult: {},
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
@@ -52,6 +54,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [initiatorOutput, setInitiatorOutput] = useState<any>({});
   const [isRefresh, setIsRefresh] = useState<boolean>(false);
   const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
+  const initReqChainResult = useDebounce(initiatorOutput, 2000);
   
   useEffect(() => {
     if (pbjsNamespace === undefined && prebids && Object.keys(prebids).length > 0) {
@@ -123,6 +126,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     setIsRefresh,
     initDataLoaded,
     setInitDataLoaded,
+    initReqChainResult,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
@@ -153,6 +157,9 @@ interface AppState {
   setIsRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   initDataLoaded: boolean;
   setInitDataLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  initReqChainResult: {
+    [key: string]: any;
+  };
 }
 
 interface StateContextProviderProps {

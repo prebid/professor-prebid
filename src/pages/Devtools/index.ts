@@ -121,6 +121,31 @@ const setRootUrlToInitReqChainObj = (reqChainObj: resultObj, currentResourceData
   });
 };
 
+const buildObjectFromHarEntry = (har_entry: any) => {
+  const origin = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'origin');
+  const referer = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'referer');
+  const host = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'host');
+  const data = {
+    fullUrl: har_entry.request.url,
+    queryParameters: har_entry.request.queryString || {},
+    redirectsTo: har_entry.response.redirectURL ? { [har_entry.response.redirectURL]: {} } : {},
+    initiated: [] as any[],
+    startedDateTime: new Date(har_entry.startedDateTime).getTime(),
+    time: har_entry.time,
+    timings: har_entry.timings,
+    timeSincePageLoad: performance.now(),
+    requestCookies: har_entry.request.cookies,
+    requestHeaders: har_entry.request.headers,
+    responseCookies: har_entry.response.cookies,
+    responseHeaders: har_entry.response.headers,
+    origin: origin ? origin.value : '',
+    referer: referer ? referer.value : '',
+    host: host ? host.value : '',
+    postData: har_entry.request.postData ? har_entry.request.postData : '',
+  };
+  return data;
+};
+
 const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootRequestMethod: string) => {
   let initReqChainObj: resultObj = {};
 
@@ -128,8 +153,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
     const processHarRequests = async (har_entry: any) => {
       currentRootUrl = rootUrl;
       chrome.storage.local.get('initReqChain', (result) => {
-        const data = JSON.parse(result.initReqChain);
-        if (data === null) {
+        if (result.initReqChain === 'null') {
           // console.log('STOPPING');
           initReqChainObj = {};
           chrome.devtools.network.onRequestFinished.removeListener(processHarRequests);
@@ -148,28 +172,6 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
       const harEntryRequestUrl = har_entry.request.url;
       const resourceType = rootResourceType ? rootResourceType : har_entry._resourceType;
       const reqMethod = rootRequestMethod ? rootRequestMethod : har_entry.request.method;
-      const origin = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'origin');
-      const referer = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'referer');
-      const host = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'host');
-
-      const data = {
-        fullUrl: harEntryRequestUrl,
-        queryParameters: har_entry.request.queryString || {},
-        redirectsTo: har_entry.response.redirectURL ? { [har_entry.response.redirectURL]: {} } : {},
-        initiated: [] as any[],
-        startedDateTime: new Date(har_entry.startedDateTime).getTime(),
-        time: har_entry.time,
-        timings: har_entry.timings,
-        timeSincePageLoad: performance.now(),
-        requestCookies: har_entry.request.cookies,
-        requestHeaders: har_entry.request.headers,
-        responseCookies: har_entry.response.cookies,
-        responseHeaders: har_entry.response.headers,
-        origin: origin ? origin.value : '',
-        referer: referer ? referer.value : '',
-        host: host ? host.value : '',
-        postData: har_entry.request.postData ? har_entry.request.postData : '',
-      };
 
       if (har_entry.response.redirectURL) {
         redirectArray.push(har_entry.response.redirectURL);
@@ -183,7 +185,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
           !initReqChainObj[harEntryRequestUrl]
         ): // root resource logic
           try {
-            await setRootUrlToInitReqChainObj(initReqChainObj, data);
+            await setRootUrlToInitReqChainObj(initReqChainObj, buildObjectFromHarEntry(har_entry));
           } catch (error) {
             console.error('Something went wrong: ', error);
           }
@@ -194,7 +196,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
             // remove harEntryRequestUrl from redirectArray
             const pathsToRedirectUrl: any = await findPathsToKey({ obj: initReqChainObj, key: harEntryRequestUrl });
             pathsToRedirectUrl.forEach((pathArray: any) => {
-              setToRedirectValue(initReqChainObj, data, pathArray);
+              setToRedirectValue(initReqChainObj, buildObjectFromHarEntry(har_entry), pathArray);
             });
             const index = redirectArray.indexOf(harEntryRequestUrl);
             redirectArray.splice(index, 1);
@@ -209,12 +211,13 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
   
               // const initiatorSequence = [...new Set(initSeqArray)];
               const initiatorSequence = initSeqArray.filter((value: any, index: any, array: any) => array.indexOf(value) === index);
-              setToInitReqChainObj(initReqChainObj, initiatorSequence, data);
+              setToInitReqChainObj(initReqChainObj, initiatorSequence, buildObjectFromHarEntry(har_entry));
             }
   
             if (har_entry._initiator.url) {
-              initReqChainObj[harEntryRequestUrl] = data;
+              initReqChainObj[harEntryRequestUrl] = buildObjectFromHarEntry(har_entry);
               initReqChainObj[currentRootUrl].initiated.push({
+                message: `${harEntryRequestUrl} was initiated by the root URL, however the root URL will no longer be visible in the initiator stack for any subsequent resources initiated/redirected to from ${harEntryRequestUrl} because this resource was parsed by the root URL.  Instead all subsequent resources of this type will appear under a new object key under ${harEntryRequestUrl} (Scroll below to view).`,
                 url: harEntryRequestUrl,
                 initiatorDetails: har_entry._initiator
               });
@@ -265,6 +268,7 @@ interface findPathsToKeyOptions {
 };
 
 interface resourceObj {
+  message?: string;
   fullUrl: string;
   queryParameters?: {
     name: string;
