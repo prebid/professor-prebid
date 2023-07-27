@@ -129,7 +129,6 @@ const InitiatorComponent = (): JSX.Element => {
             {(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0
               ? (
                   <JSONViewerComponent
-                    // src={initReqChainResult}
                     src={initReqChainResult}
                     name={false}
                     collapsed={2}
