@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../JSONViewerComponent';
 import AppStateContext from '../../contexts/appStateContext';
+import InspectedPageContext from '../../contexts/inspectedPageContext';
 import Grid from '@mui/material/Grid';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import './InitiatorComponent.css';
@@ -24,7 +25,8 @@ const gridStyle = {
 };
 
 const InitiatorComponent = (): JSX.Element => {
-  const { initReqChainResult, isRefresh, initDataLoaded, setInitDataLoaded } = useContext(AppStateContext);
+  const { isRefresh, initDataLoaded, setInitDataLoaded } = useContext(AppStateContext);
+  const { initReqChainResult } = useContext(InspectedPageContext);
   const [initChainFeatureStatus, setInitChainFeatureStatus] = useState<boolean>(null);
   const [rootUrl, setRootUrl] = useState<string>('');
   const [showReqChain, setShowReqChain] = useState<boolean>(false);
@@ -123,10 +125,11 @@ const InitiatorComponent = (): JSX.Element => {
               Set URL
             </Button>
           </div>
-          <div className={`initiator__output ${(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? 'initiator__output-left-align' : ''}`}>
+            <div className={`initiator__output ${(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? 'initiator__output-left-align' : ''}`}>
             {(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0
               ? (
                   <JSONViewerComponent
+                    // src={initReqChainResult}
                     src={initReqChainResult}
                     name={false}
                     collapsed={2}
