@@ -25,9 +25,7 @@ const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode }, mdWidth }: I
       xs={4}
       md={mdWidth}
       sx={{
-        minHeight: isPanel ? '250px' : 'unset',
         overflow: 'hidden',
-        maxHeight: isPanel ? (!expanded ? 100 : 'unset') : 'unset',
         position: 'relative', // Ensure relative positioning for the overlay
         '&:after': {
           content: '""',
