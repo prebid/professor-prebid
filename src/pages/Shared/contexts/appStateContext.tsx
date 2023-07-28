@@ -53,7 +53,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [initiatorOutput, setInitiatorOutput] = useState<any>({});
   const [isRefresh, setIsRefresh] = useState<boolean>(false);
   const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
-  
+
   useEffect(() => {
     if (pbjsNamespace === undefined && prebids && Object.keys(prebids).length > 0) {
       const defaultNameSpaceIndex = Object.keys(prebids).findIndex((el) => el === 'pbjs');

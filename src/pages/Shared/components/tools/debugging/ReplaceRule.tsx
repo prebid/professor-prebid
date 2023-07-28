@@ -129,8 +129,6 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
   );
 };
 
-
-
 interface IReplaceRuleProps {
   groupIndex: number;
   rule: IPrebidDebugModuleConfigRule;

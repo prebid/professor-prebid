@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import InjectedApp from '../../App/InjectedApp'; 
+import InjectedApp from '../../App/InjectedApp';
 import { googleAdManager } from './googleAdManager';
 import { addEventListenersForPrebid } from './prebid';
 import { iabTcf } from './tcf';

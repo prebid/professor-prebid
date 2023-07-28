@@ -24,7 +24,6 @@ const OverlayControlComponent = (): JSX.Element => {
     setShowOverlay(event.target.checked);
     const { checked } = event.target;
     chrome.storage.local.set({ [CONSOLE_TOGGLE]: checked }, () => {
-      
       sendChromeTabsMessage(CONSOLE_TOGGLE, { consoleState: checked });
       // chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
       //   const tab = tabs[0];

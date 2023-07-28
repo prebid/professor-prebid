@@ -6,7 +6,6 @@ import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import AppStateContext from '../../contexts/appStateContext';
 
-
 const GridPaperItem = ({ cols, value }: { cols: number; value: string | number | object }): JSX.Element => {
   if (typeof value === 'object' && Object.keys(value).length > 0) {
     return (

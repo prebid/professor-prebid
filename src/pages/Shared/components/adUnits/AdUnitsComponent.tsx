@@ -9,7 +9,7 @@ const AdUnitsComponent = (): JSX.Element => {
   const { isSmallScreen } = useContext(StateContext);
 
   return (
-    <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: .5 }}>
+    <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 0.5 }}>
       <AdUnitsHeaderComponent />
 
       {!isSmallScreen && (

@@ -37,15 +37,7 @@ var options = {
     openDfpConsole: path.join(__dirname, 'src', 'pages', 'Content', 'scripts', 'openDfpConsole.ts'),
   },
   chromeExtensionBoilerplate: {
-    notHotReload: [
-      'background',
-      'background.bundle.js',
-      'contentScript',
-      'contentScript.bundle.js',
-      'devtools',
-      'injected',
-      'openDfpConsole',
-    ],
+    notHotReload: ['background', 'background.bundle.js', 'contentScript', 'contentScript.bundle.js', 'devtools', 'injected', 'openDfpConsole'],
   },
   output: {
     path: path.resolve(__dirname, 'build'),

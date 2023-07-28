@@ -119,7 +119,7 @@ class IabTcf {
             }
           });
         });
-      } catch (e) { }
+      } catch (e) {}
     }
 
     if (typeof window.__tcfapi === 'function') {
@@ -139,7 +139,7 @@ class IabTcf {
             }
           });
         });
-      } catch (e) { }
+      } catch (e) {}
     }
   }
 }
