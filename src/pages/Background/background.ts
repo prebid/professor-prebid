@@ -119,13 +119,13 @@ export interface ITabInfo {
   namespace?: string;
   updateNamespace?: (namespace: string) => void;
   syncState?: string;
-  initReqChainData?: InitReqChainData;
+  initReqChainResult?: initReqChainResult;
 }
 
 export interface ITabInfos {
   [key: number]: ITabInfo;
 }
 
-export interface InitReqChainData {
+export interface initReqChainResult {
   [key: string]: any;
 }

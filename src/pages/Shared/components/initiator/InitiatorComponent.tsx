@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../JSONViewerComponent';
 import AppStateContext from '../../contexts/appStateContext';
+import InspectedPageContext from '../../contexts/inspectedPageContext';
 import Grid from '@mui/material/Grid';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import './InitiatorComponent.css';
@@ -24,7 +25,8 @@ const gridStyle = {
 };
 
 const InitiatorComponent = (): JSX.Element => {
-  const { initiatorOutput, isRefresh, initDataLoaded, setInitDataLoaded } = useContext(AppStateContext);
+  const { isRefresh, initDataLoaded, setInitDataLoaded } = useContext(AppStateContext);
+  const { initReqChainResult } = useContext(InspectedPageContext);
   const [initChainFeatureStatus, setInitChainFeatureStatus] = useState<boolean>(null);
   const [rootUrl, setRootUrl] = useState<string>('');
   const [showReqChain, setShowReqChain] = useState<boolean>(false);
@@ -98,26 +100,9 @@ const InitiatorComponent = (): JSX.Element => {
           <Typography paragraph>
             Note: It is advised when testing User Sync URL's that you clear cookies relative to the domain you are testing. This will ensure that results are in-line with an initial visit to the current page. Additionally, the first resource matching the root URL will be used to generate the initiator request chain.
           </Typography>
-          <ol>
-            <li>
-              <Typography>Enable the feature by sliding the toggle below.</Typography>
-            </li>
-            <li>
-              <Typography>Enter a root URL to listen for as the page loads to generate a request chain from, then click the "Set URL" button. For example, <em>https://ads.pubmatic.com/AdServer/js/user_sync.html?kdntuid=1&p=159096&us_privacy=1YNY</em></Typography>
-            </li>
-            <li>
-              <Typography>
-                Close this window, re-open the Chrome Dev Tools again and navigate back to Professor Prebid --&gt; Network Inspector
-              </Typography>
-            </li>
-            <li className="refresh-icon__list-item">
-              <Typography component={'span'} className="initiator__flex-parent">
-                Lastly, click the{' '}
-                <RefreshIcon />
-                icon (top-right). This will refresh the page and generate a new initiator request chain below (If one is present for the provided Root URL).
-              </Typography>
-            </li>
-          </ol>
+          <Typography paragraph>
+            View instructions on the Prebid documentation site <a href="https://docs.prebid.org/tools/professor-prebid.html" target="_blank" rel="noreferrer">here</a>.
+          </Typography>
           <br />
           <br />
           <div className="initiator-form">
@@ -140,11 +125,11 @@ const InitiatorComponent = (): JSX.Element => {
               Set URL
             </Button>
           </div>
-          <div className={`initiator__output ${(showReqChain || initDataLoaded) && initiatorOutput && Object.keys(initiatorOutput).length > 0 ? 'initiator__output-left-align' : ''}`}>
-            {(showReqChain || initDataLoaded) && initiatorOutput && Object.keys(initiatorOutput).length > 0
+            <div className={`initiator__output ${(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? 'initiator__output-left-align' : ''}`}>
+            {(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0
               ? (
                   <JSONViewerComponent
-                    src={initiatorOutput}
+                    src={initReqChainResult}
                     name={false}
                     collapsed={2}
                     displayObjectSize={true}

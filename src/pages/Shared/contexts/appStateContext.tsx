@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 import InspectedPageContext from './inspectedPageContext';
+
 import {
   IPrebidDetails,
   IPrebidAuctionInitEventData,
@@ -46,7 +47,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [auctionEndEvents, setAuctionEndEvents] = useState<IPrebidAuctionEndEventData[]>([]);
   const [allWinningBids, setAllWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [adsRendered, setAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
-  const { prebids, initReqChainData } = useContext(InspectedPageContext);
+  const { prebids } = useContext(InspectedPageContext);
   const isSmallScreen = useMediaQuery(useTheme().breakpoints.down('sm'));
   const isPanel = useMediaQuery(useTheme().breakpoints.up('md'));
   const [initiatorOutput, setInitiatorOutput] = useState<any>({});
@@ -60,11 +61,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
       setPbjsNamespace(newValue);
     }
   }, [pbjsNamespace, prebids, setPbjsNamespace]);
-
-  useEffect(() => {
-    const reqChainData = JSON.parse(initReqChainData?.initReqChain || '{}');
-    setInitiatorOutput(reqChainData);
-  }, [initReqChainData]);
 
   useEffect(() => {
     const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
