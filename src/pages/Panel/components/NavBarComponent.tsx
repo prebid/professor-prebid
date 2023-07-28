@@ -16,10 +16,10 @@ import { Link } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { IconButton, Typography } from '@mui/material';
+import { IconButton } from '@mui/material';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import InputLabel from '@mui/material/InputLabel';
-import ChromeStorageContext from '../../Shared/contexts/inspectedPageContext';
+import InspectedPageState from '../../Shared/contexts/inspectedPageContext';
 import { PBJS_NAMESPACE_CHANGE } from '../../Shared/constants';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import StateContext from '../../Shared/contexts/appStateContext';
@@ -41,7 +41,7 @@ const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLi
 
 const NavBarComponent = () => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
-  const inspectedPageState = useContext(ChromeStorageContext);
+  const inspectedPageState = useContext(InspectedPageState);
   const downloading = inspectedPageState?.downloading;
   const { pbjsNamespace, setPbjsNamespace, setInitiatorOutput, setIsRefresh, setInitDataLoaded } = useContext(StateContext);
 
@@ -140,9 +140,6 @@ const NavBarComponent = () => {
           label="Netwok Inspector (alpha)"
         />
 
-        <Typography variant="caption" sx={{ mr: 1, color: 'black', overflow: 'clip', textAlign: 'left' }}>
-          {inspectedPageState?.syncState}
-        </Typography>
       </Box>
 
       <Box>

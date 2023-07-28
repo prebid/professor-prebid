@@ -23,8 +23,8 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     if (prebids) {
       for (const [namespace, prebid] of Object.entries(prebids)) {
         setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
+        setDownloading('true');
         try {
-          setDownloading('true');
 
           setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);
           const response = await fetch(prebid.eventsUrl);
