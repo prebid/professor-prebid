@@ -73,7 +73,9 @@ class Prebid {
         this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
         this.sendDetailsToContentScript();
       }
-    }, false);
+    },
+      false
+    );
 
     window.addEventListener('beforeunload', () => {
       this.reset();
@@ -82,11 +84,7 @@ class Prebid {
   };
 
   extractDomain = (url: string) => {
-    const domain = url
-      .replace('blob:', '')
-      .replace('http://', '')
-      .replace('https://', '')
-      .split(/[/?#]/)[0];
+    const domain = url.replace('blob:', '').replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
     return domain;
   };
 
@@ -106,7 +104,7 @@ class Prebid {
     const objectURL = URL.createObjectURL(blob);
     // memory management
     this.lastEventsObjectUrls.push({ url: objectURL, size: blob.size });
-    const numberOfCachedUrls = 5;
+    const numberOfCachedUrls = 1;
     const totalWeight = this.lastEventsObjectUrls.reduce((acc, cur) => acc + cur.size, 0);
     if ((this.lastEventsObjectUrls.length > numberOfCachedUrls && totalWeight > 5e6) || totalWeight > 25e6) {
       // revoke oldest urls
@@ -145,7 +143,7 @@ class Prebid {
     this.sendToContentScriptPending = false;
   };
 
-  throttle = async (fn: Function) => {
+  throttle = (fn: Function) => {
     if (
       !this.sendToContentScriptPending &&
       (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)
@@ -173,11 +171,13 @@ const detectIframe = () => {
 export const addEventListenersForPrebid = () => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
-  setTimeout(() => {
-    stopLoop = true;
-  }, detectIframe() ? 8000 : 60000);
+  setTimeout(
+    () => {
+      stopLoop = true;
+    },
+    detectIframe() ? 8000 : 60000
+  );
   const isPrebidInPage = () => {
-
     const pbjsGlobals = window._pbjsGlobals || [];
 
     if (pbjsGlobals?.length > 0) {
@@ -194,7 +194,6 @@ export const addEventListenersForPrebid = () => {
   };
   isPrebidInPage();
 };
-
 
 export interface IPrebidBidParams {
   publisherId: string;

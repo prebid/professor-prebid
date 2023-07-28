@@ -48,12 +48,12 @@ const findPathsToKey = (options: findPathsToKeyOptions) => {
       })(options);
       resolve(results);
     } catch (error) {
-      reject({error: error});
+      reject({ error: error });
     }
   });
-}
+};
 
-const setToRedirectValue = (obj: { [key: string]: any; }, value: resourceObj, pathArray: string | any[]) => {
+const setToRedirectValue = (obj: { [key: string]: any }, value: resourceObj, pathArray: string | any[]) => {
   let i;
 
   for (i = 0; i < pathArray.length - 1; i++) {
@@ -61,9 +61,9 @@ const setToRedirectValue = (obj: { [key: string]: any; }, value: resourceObj, pa
   }
 
   obj[pathArray[i]] = value;
-}
+};
 
-const populateInitSeqArray = (obj: { [key: string]: any; }, pathArray: string[], array: string[]) => {
+const populateInitSeqArray = (obj: { [key: string]: any }, pathArray: string[], array: string[]) => {
   let i;
 
   for (i = 0; i < pathArray.length - 1; i++) {
@@ -71,28 +71,30 @@ const populateInitSeqArray = (obj: { [key: string]: any; }, pathArray: string[],
   }
 
   array.push(obj[pathArray[i]]);
-}
+};
 
 const setToInitReqChainObj = (obj: { [key: string]: any }, pathArray: string[], value: resourceObj) => {
   let i: number;
   let next;
 
   for (i = 0; i < pathArray.length; i++) {
-    if (i % 2 === 0) { // even index
+    if (i % 2 === 0) {
+      // even index
       next = obj[pathArray[i]]['initiated'];
-      
+
       if (next) {
         obj = next;
       }
-    } else { // odd index
-      next = obj.find((item: { fullUrl: any; }) => item.fullUrl === pathArray[i]);
+    } else {
+      // odd index
+      next = obj.find((item: { fullUrl: any }) => item.fullUrl === pathArray[i]);
 
       if (next) {
         obj = next;
       } else {
         value = {
           fullUrl: pathArray[i],
-          initiated: [value]
+          initiated: [value],
         };
       }
     }
@@ -103,7 +105,7 @@ const setToInitReqChainObj = (obj: { [key: string]: any }, pathArray: string[], 
   } else {
     obj['initiated'].push(value);
   }
-}
+};
 
 const setToStorage = (key: string, value: string) => {
   chrome.storage.local.set({ [key]: value });
@@ -116,7 +118,7 @@ const setRootUrlToInitReqChainObj = (reqChainObj: resultObj, currentResourceData
       setToStorage('initReqChain', JSON.stringify(reqChainObj));
       resolve(true);
     } catch (error) {
-      reject({error: error});
+      reject({ error: error });
     }
   });
 };
@@ -204,16 +206,16 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
             if (har_entry._initiator.stack) {
               const pathOuterArray: any = await findPathsToKey({ obj: har_entry._initiator.stack, key: 'url' });
               const initSeqArray: any = [];
-  
+
               pathOuterArray.forEach((pathInnerArray: any) => {
                 populateInitSeqArray(har_entry._initiator.stack, pathInnerArray, initSeqArray);
               });
-  
+
               // const initiatorSequence = [...new Set(initSeqArray)];
               const initiatorSequence = initSeqArray.filter((value: any, index: any, array: any) => array.indexOf(value) === index);
               setToInitReqChainObj(initReqChainObj, initiatorSequence, buildObjectFromHarEntry(har_entry));
             }
-  
+
             if (har_entry._initiator.url) {
               initReqChainObj[harEntryRequestUrl] = buildObjectFromHarEntry(har_entry);
               initReqChainObj[currentRootUrl].initiated.push({
@@ -227,7 +229,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
           setToStorage('initReqChain', JSON.stringify(initReqChainObj));
           break;
         default: // logic for resources redirected to from other resources (and everything else)
-          // 
+        //
       }
     };
 
@@ -245,13 +247,13 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
   return initReqChainObj;
 };
 
-const start = (func: { (request: chrome.devtools.network.Request): void; }) => {
+const start = (func: { (request: chrome.devtools.network.Request): void }) => {
   chrome.devtools.network.onRequestFinished.addListener(func);
 };
 
-chrome.storage.local.get('initiator_state', (result: { [key: string]: any; }) => {
+chrome.storage.local.get('initiator_state', (result: { [key: string]: any }) => {
   if (result.initiator_state) {
-    chrome.storage.local.get('initiator_root_url', (res: { [key: string]: any; }) => {
+    chrome.storage.local.get('initiator_root_url', (res: { [key: string]: any }) => {
       if (res.initiator_root_url) {
         getInitReqChainByUrl(res.initiator_root_url, 'document', 'GET');
       }
@@ -262,10 +264,10 @@ chrome.storage.local.get('initiator_state', (result: { [key: string]: any; }) =>
 interface findPathsToKeyOptions {
   obj: {
     [key: string]: any;
-  }
+  };
   key: string;
   pathToKey?: string;
-};
+}
 
 interface resourceObj {
   message?: string;
@@ -328,4 +330,4 @@ interface resourceObj {
 
 interface resultObj {
   [key: string]: resourceObj;
-};
+}
