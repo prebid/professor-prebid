@@ -33,6 +33,8 @@ const AppStateContext = React.createContext<AppState>({
   setIsRefresh: () => {},
   initDataLoaded: false,
   setInitDataLoaded: () => {},
+  prebidReleaseInfo: {},
+  setPrebidReleaseInfo: () => {},
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
@@ -53,11 +55,13 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [initiatorOutput, setInitiatorOutput] = useState<any>({});
   const [isRefresh, setIsRefresh] = useState<boolean>(false);
   const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
+  const [prebidReleaseInfo, setPrebidReleaseInfo] = useState<any>({});
 
   useEffect(() => {
     if (pbjsNamespace === undefined && prebids && Object.keys(prebids).length > 0) {
       const defaultNameSpaceIndex = Object.keys(prebids).findIndex((el) => el === 'pbjs');
       const newValue = defaultNameSpaceIndex > -1 ? Object.keys(prebids)[defaultNameSpaceIndex] : Object.keys(prebids)[0];
+
       setPbjsNamespace(newValue);
     }
   }, [pbjsNamespace, prebids, setPbjsNamespace]);
@@ -119,6 +123,8 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     setIsRefresh,
     initDataLoaded,
     setInitDataLoaded,
+    prebidReleaseInfo,
+    setPrebidReleaseInfo,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
@@ -149,6 +155,16 @@ interface AppState {
   setIsRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   initDataLoaded: boolean;
   setInitDataLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  prebidReleaseInfo: {
+    latestVersion?: string;
+    installedVersion?: string;
+    installedVersionPublishedAt?: string;
+    featureCountSinceInstalledVersion?: number;
+    maintenanceCountSinceInstalledVersion?: number;
+    bugfixCountSinceInstalledVersion?: number;
+    releasesSinceInstalledVersion?: any[];
+  };
+  setPrebidReleaseInfo: React.Dispatch<React.SetStateAction<any>>;
 }
 
 interface StateContextProviderProps {

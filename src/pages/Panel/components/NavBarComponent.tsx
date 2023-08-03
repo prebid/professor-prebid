@@ -25,6 +25,7 @@ import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import StateContext from '../../Shared/contexts/appStateContext';
 import { sendChromeTabsMessage } from '../../Shared/utils';
 import LinkIcon from '@mui/icons-material/Link';
+import DifferenceIcon from '@mui/icons-material/Difference';
 
 const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLinkComponentProps): JSX.Element => (
   <Link to={target}>
@@ -137,7 +138,15 @@ const NavBarComponent = () => {
           activeRoute={activeRoute}
           clickHandler={() => handleRouteChange('/initiator')}
           icon={<LinkIcon />}
-          label="Netwok Inspector (alpha)"
+          label="Network Inspector"
+        />
+
+        <RouterLink
+          target="version"
+          activeRoute={activeRoute}
+          clickHandler={() => handleRouteChange('/version')}
+          icon={<DifferenceIcon />}
+          label="Version"
         />
 
       </Box>
