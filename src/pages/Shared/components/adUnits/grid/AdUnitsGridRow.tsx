@@ -31,4 +31,3 @@ export default AdUnitGridRow;
 interface IAdUnitGridRowProps {
   adUnit: IPrebidAdUnit;
 }
-

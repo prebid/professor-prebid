@@ -12,7 +12,6 @@ import InspectedPageContext from '../contexts/inspectedPageContext';
 const DownloadingCardComponent = (): JSX.Element => {
   const inspectedPageState = useContext(InspectedPageContext);
 
-
   return (
     <Box sx={{ backgroundColor: 'primary.light' }}>
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ABDDF' }}>

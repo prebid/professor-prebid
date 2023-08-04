@@ -1,4 +1,4 @@
-chrome.devtools?.panels?.create('Professor Prebid', 'icon-34.png', 'panel.html', async (panel) => { });
+chrome.devtools?.panels?.create('Professor Prebid', 'icon-34.png', 'panel.html', async (panel) => {});
 
 let redirectArray: string[] = [];
 let currentRootUrl: string;
@@ -124,9 +124,9 @@ const setRootUrlToInitReqChainObj = (reqChainObj: resultObj, currentResourceData
 };
 
 const buildObjectFromHarEntry = (har_entry: any) => {
-  const origin = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'origin');
-  const referer = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'referer');
-  const host = har_entry.request.headers.find((header: { name: string; }) => header.name.toLowerCase() === 'host');
+  const origin = har_entry.request.headers.find((header: { name: string }) => header.name.toLowerCase() === 'origin');
+  const referer = har_entry.request.headers.find((header: { name: string }) => header.name.toLowerCase() === 'referer');
+  const host = har_entry.request.headers.find((header: { name: string }) => header.name.toLowerCase() === 'host');
   const data = {
     fullUrl: har_entry.request.url,
     queryParameters: har_entry.request.queryString || {},
@@ -182,9 +182,9 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
       switch (true) {
         case Boolean(
           harEntryRequestUrl.includes(currentRootUrl) &&
-          har_entry._resourceType === resourceType &&
-          reqMethod === har_entry.request.method &&
-          !initReqChainObj[harEntryRequestUrl]
+            har_entry._resourceType === resourceType &&
+            reqMethod === har_entry.request.method &&
+            !initReqChainObj[harEntryRequestUrl]
         ): // root resource logic
           try {
             await setRootUrlToInitReqChainObj(initReqChainObj, buildObjectFromHarEntry(har_entry));
@@ -221,7 +221,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
               initReqChainObj[currentRootUrl].initiated.push({
                 message: `${harEntryRequestUrl} was initiated by the root URL, however the root URL will no longer be visible in the initiator stack for any subsequent resources initiated/redirected to from ${harEntryRequestUrl} because this resource was parsed by the root URL.  Instead all subsequent resources of this type will appear under a new object key under ${harEntryRequestUrl} (Scroll below to view).`,
                 url: harEntryRequestUrl,
-                initiatorDetails: har_entry._initiator
+                initiatorDetails: har_entry._initiator,
               });
             }
           }
@@ -326,7 +326,7 @@ interface resourceObj {
   timeSincePageLoad?: number;
   postData?: any;
   initiated: any[];
-};
+}
 
 interface resultObj {
   [key: string]: resourceObj;

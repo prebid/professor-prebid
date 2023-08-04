@@ -139,7 +139,6 @@ const NavBarComponent = () => {
           icon={<LinkIcon />}
           label="Netwok Inspector (alpha)"
         />
-
       </Box>
 
       <Box>

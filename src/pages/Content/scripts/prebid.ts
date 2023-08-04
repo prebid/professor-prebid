@@ -62,18 +62,20 @@ class Prebid {
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    window.addEventListener('message', (event) => {
-      if (!event.data.profPrebid) {
-        return;
-      }
-      const { type, payload } = event.data;
-      if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
-        console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
-        this.reset();
-        this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
-        this.sendDetailsToContentScript();
-      }
-    },
+    window.addEventListener(
+      'message',
+      (event) => {
+        if (!event.data.profPrebid) {
+          return;
+        }
+        const { type, payload } = event.data;
+        if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
+          console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
+          this.reset();
+          this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
+          this.sendDetailsToContentScript();
+        }
+      },
       false
     );
 
@@ -399,16 +401,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }

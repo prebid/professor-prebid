@@ -108,7 +108,11 @@ const InitiatorComponent = (): JSX.Element => {
             generate the initiator request chain.
           </Typography>
           <Typography paragraph>
-            View instructions on the Prebid documentation site <a href="https://docs.prebid.org/tools/professor-prebid.html" target="_blank" rel="noreferrer">here</a>.
+            View instructions on the Prebid documentation site{' '}
+            <a href="https://docs.prebid.org/tools/professor-prebid.html" target="_blank" rel="noreferrer">
+              here
+            </a>
+            .
           </Typography>
           <br />
           <br />
@@ -132,42 +136,40 @@ const InitiatorComponent = (): JSX.Element => {
               Set URL
             </Button>
           </div>
-            <div className={`initiator__output ${(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? 'initiator__output-left-align' : ''}`}>
-            {(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0
-              ? (
-                  <JSONViewerComponent
-                    src={initReqChainResult}
-                    name={false}
-                    collapsed={2}
-                    displayObjectSize={true}
-                    displayDataTypes={false}
-                    sortKeys={false}
-                    quotesOnKeys={false}
-                    indentWidth={2}
-                    collapseStringsAfterLength={100}
-                    style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-                  />
-                )
-              : isRefresh
-                ? (
-                    <div className="initiator__loader-wrapper">
-                      <p>Generating initiator request chain...</p>
-                      <div className="loader">
-                        <Bars
-                          height="80"
-                          width="50"
-                          color="#ff6f00"
-                          ariaLabel="bars-loading"
-                          wrapperStyle={{}}
-                          wrapperClass=""
-                          visible={true}
-                        />
-                      </div>
-                    </div>
-                  )
-                : (
-                    <p className="initiator__short-instructions">The initiator request chain will go here.<br />Follow the instructions above then click the <RefreshIcon className="initiator__refresh-icon" /> icon.</p>
-                  )}
+          <div
+            className={`initiator__output ${
+              (showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0
+                ? 'initiator__output-left-align'
+                : ''
+            }`}
+          >
+            {(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? (
+              <JSONViewerComponent
+                src={initReqChainResult}
+                name={false}
+                collapsed={2}
+                displayObjectSize={true}
+                displayDataTypes={false}
+                sortKeys={false}
+                quotesOnKeys={false}
+                indentWidth={2}
+                collapseStringsAfterLength={100}
+                style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
+              />
+            ) : isRefresh ? (
+              <div className="initiator__loader-wrapper">
+                <p>Generating initiator request chain...</p>
+                <div className="loader">
+                  <Bars height="80" width="50" color="#ff6f00" ariaLabel="bars-loading" wrapperStyle={{}} wrapperClass="" visible={true} />
+                </div>
+              </div>
+            ) : (
+              <p className="initiator__short-instructions">
+                The initiator request chain will go here.
+                <br />
+                Follow the instructions above then click the <RefreshIcon className="initiator__refresh-icon" /> icon.
+              </p>
+            )}
           </div>
         </Box>
       </Grid>
