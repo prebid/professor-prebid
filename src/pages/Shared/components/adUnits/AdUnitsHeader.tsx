@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import AppStateContext from '../../contexts/appStateContext';
+import PbjsVersionInfoPopOver from '../pbjsVersionInfo/PbjsVersionInfoPopOver';
 import EventsPopOver from '../auctionDebugEvents/EventsPopOver';
 import { conditionalPluralization } from '../../utils';
 
@@ -21,11 +22,13 @@ const HeaderGridItem = ({ children, onClick }: HeaderGridItemProps): JSX.Element
 
 const AdUnitsHeaderComponent = (): JSX.Element => {
   const [eventsPopUpOpen, setEventsPopUpOpen] = useState<boolean>(false);
+  const [pbjsVersionPopUpOpen, setPbjsVersionPopUpOpen] = useState<boolean>(false);
   const { allBidResponseEvents, prebid, allNoBidEvents, allBidderEvents, allAdUnitCodes, events } = useContext(AppStateContext);
   if (!prebid) return null;
   return (
     <>
-      <HeaderGridItem>{`Version: ${prebid.version}`}</HeaderGridItem>
+      <HeaderGridItem onClick={() => setPbjsVersionPopUpOpen(true)}><div style={{cursor: "pointer"}}>{`Version: ${prebid.version}`}</div></HeaderGridItem>
+      <PbjsVersionInfoPopOver pbjsVersionPopUpOpen={pbjsVersionPopUpOpen} setPbjsVersionPopUpOpen={setPbjsVersionPopUpOpen} />
 
       <HeaderGridItem>{`Timeout: ${prebid.config?.bidderTimeout}`}</HeaderGridItem>
 
@@ -37,7 +40,8 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
 
       <HeaderGridItem>{`NoBid${conditionalPluralization(allNoBidEvents)}: ${allNoBidEvents.length}`}</HeaderGridItem>
 
-      <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</HeaderGridItem>
+      <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>
+        <div style={{cursor: "pointer"}}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</div></HeaderGridItem>
       <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />
     </>
   );

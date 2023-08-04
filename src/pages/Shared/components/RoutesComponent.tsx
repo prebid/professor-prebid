@@ -9,6 +9,7 @@ import ToolsComponent from './tools/ToolsComponent';
 import EventsComponent from './auctionDebugEvents/EventsComponent';
 import { Routes, Route } from 'react-router-dom';
 import InitiatorComponent from './initiator/InitiatorComponent';
+import PbjsVersionInfoComponent from './pbjsVersionInfo/PbjsVersionInfoComponent';
 const RoutesComponent = (): JSX.Element => {
   return (
     <Routes>
@@ -23,6 +24,7 @@ const RoutesComponent = (): JSX.Element => {
       <Route path="events" element={<EventsComponent />} />
       <Route path="events" element={<EventsComponent />} />
       <Route path="initiator" element={<InitiatorComponent />} />
+      <Route path="version" element={<PbjsVersionInfoComponent />} />
     </Routes>
   );
 };
