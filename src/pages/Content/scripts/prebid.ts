@@ -62,22 +62,32 @@ class Prebid {
       this.throttle(this.sendDetailsToContentScript);
     });
 
-    window.addEventListener('message', (event) => {
-      if (!event.data.profPrebid) {
-        return;
-      }
-      const { type, payload } = event.data;
-      if (type === DOWNLOAD_FAILED) {
-        this.reset();
-        this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
-        this.sendDetailsToContentScript();
-      }
-    }, false);
+    window.addEventListener(
+      'message',
+      (event) => {
+        if (!event.data.profPrebid) {
+          return;
+        }
+        const { type, payload } = event.data;
+        if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
+          console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
+          this.reset();
+          this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
+          this.sendDetailsToContentScript();
+        }
+      },
+      false
+    );
 
     window.addEventListener('beforeunload', () => {
       this.reset();
       this.sendDetailsToContentScript();
     });
+  };
+
+  extractDomain = (url: string) => {
+    const domain = url.replace('blob:', '').replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
+    return domain;
   };
 
   getDebugConfig = () => {
@@ -135,7 +145,7 @@ class Prebid {
     this.sendToContentScriptPending = false;
   };
 
-  throttle = async (fn: Function) => {
+  throttle = (fn: Function) => {
     if (
       !this.sendToContentScriptPending &&
       (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)
@@ -163,14 +173,16 @@ const detectIframe = () => {
 export const addEventListenersForPrebid = () => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
-  setTimeout(() => {
-    stopLoop = true;
-  }, detectIframe() ? 8000 : 60000);
+  setTimeout(
+    () => {
+      stopLoop = true;
+    },
+    detectIframe() ? 8000 : 60000
+  );
   const isPrebidInPage = () => {
-
     const pbjsGlobals = window._pbjsGlobals || [];
 
-    if (pbjsGlobals.length > 0) {
+    if (pbjsGlobals?.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
           new Prebid(global);
@@ -184,7 +196,6 @@ export const addEventListenersForPrebid = () => {
   };
   isPrebidInPage();
 };
-
 
 export interface IPrebidBidParams {
   publisherId: string;
@@ -390,16 +401,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }

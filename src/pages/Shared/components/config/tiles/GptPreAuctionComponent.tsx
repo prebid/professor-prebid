@@ -15,7 +15,7 @@ const GptPreAuctionComponent = (): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
   const ref = React.useRef<HTMLInputElement>(null);
-  
+
   const { prebid } = useContext(AppStateContext);
   const {
     config: { gptPreAuction },

@@ -3,7 +3,7 @@ export const decylce = (obj: any) => {
   return JSON.stringify(obj, (key, value) => {
     if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
       if (value['location']) {
-        // document object found, discard key  
+        // document object found, discard key
         return;
       }
       // Store value in our set
@@ -68,10 +68,10 @@ export const conditionalPluralization = (input: Array<any>): string => (input?.l
 
 export const reloadPage = async () => {
   const tabId = await getTabId();
-  chrome.tabs.reload(tabId)
-}
+  chrome.tabs.reload(tabId);
+};
 
 export const sendChromeTabsMessage = async (type: string, payload: object | string): Promise<void> => {
   const tabId = await getTabId();
   chrome.tabs.sendMessage(tabId, { type, payload });
-}
+};

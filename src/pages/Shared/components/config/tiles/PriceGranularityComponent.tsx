@@ -97,10 +97,10 @@ const PriceGranularityComponent = () => {
                           <strong>Increment: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)[0].increment}
                         </Typography>
                       </Grid>
-                      {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length > 1 && (
+                      {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)?.length > 1 && (
                         <Grid item xs={12} sm={expanded ? 4 : 12}>
                           <Typography variant="body2">
-                            + {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets).length - 1} more price buckets...
+                            + {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)?.length - 1} more price buckets...
                           </Typography>
                         </Grid>
                       )}

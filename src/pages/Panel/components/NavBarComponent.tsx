@@ -16,18 +16,24 @@ import { Link } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import { IconButton, Typography } from '@mui/material';
+import { IconButton } from '@mui/material';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import InputLabel from '@mui/material/InputLabel';
-import ChromeStorageContext from '../../Shared/contexts/inspectedPageContext';
+import InspectedPageState from '../../Shared/contexts/inspectedPageContext';
 import { PBJS_NAMESPACE_CHANGE } from '../../Shared/constants';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import StateContext from '../../Shared/contexts/appStateContext';
 import { sendChromeTabsMessage } from '../../Shared/utils';
+import LinkIcon from '@mui/icons-material/Link';
 
 const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLinkComponentProps): JSX.Element => (
   <Link to={target}>
-    <Button variant={activeRoute === target ? 'contained' : 'outlined'} onClick={clickHandler} startIcon={icon}>
+    <Button
+      variant={activeRoute === target ? 'contained' : 'outlined'}
+      onClick={clickHandler}
+      startIcon={icon}
+      sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+    >
       {label}
     </Button>
   </Link>
@@ -35,9 +41,9 @@ const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLi
 
 const NavBarComponent = () => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
-  const inspectedPageState = useContext(ChromeStorageContext);
+  const inspectedPageState = useContext(InspectedPageState);
   const downloading = inspectedPageState?.downloading;
-  const { pbjsNamespace, setPbjsNamespace } = useContext(StateContext);
+  const { pbjsNamespace, setPbjsNamespace, setInitiatorOutput, setIsRefresh, setInitDataLoaded } = useContext(StateContext);
 
   const handleRouteChange = (input: any) => {
     setActiveRoute(input);
@@ -125,12 +131,17 @@ const NavBarComponent = () => {
           icon={<WarningAmberOutlinedIcon />}
           label="Events"
         />
+
+        <RouterLink
+          target="initiator"
+          activeRoute={activeRoute}
+          clickHandler={() => handleRouteChange('/initiator')}
+          icon={<LinkIcon />}
+          label="Netwok Inspector (alpha)"
+        />
       </Box>
 
       <Box>
-        <Typography variant="caption" sx={{ mr: 1, color: 'black' }}>
-          {inspectedPageState?.syncState}
-        </Typography>
         <IconButton
           aria-label="refresh"
           color="default"
@@ -139,10 +150,17 @@ const NavBarComponent = () => {
         >
           <HelpOutlineOutlinedIcon />
         </IconButton>
+
         <IconButton
           sx={{ p: 0 }}
           aria-label="refresh"
-          onClick={() => chrome.devtools.inspectedWindow.reload({ ignoreCache: true })}
+          onClick={() => {
+            setInitiatorOutput({});
+            setInitDataLoaded(false);
+            setIsRefresh(true);
+            chrome.storage.local.set({ initReqChain: JSON.stringify(null) });
+            chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
+          }}
           color={downloading === 'true' ? 'primary' : downloading === 'error' ? 'error' : 'default'}
         >
           {downloading === 'true' ? (

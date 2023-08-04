@@ -11,14 +11,14 @@ const TimeLineComponent = (): JSX.Element => {
   if (events?.length === 0) return <div>no events</div>;
   if (auctionEndEvents?.length === 0) return <div>no auctionEndEvents</div>;
   return (
-    <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: .5 }}>
+    <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 0.5 }}>
       {auctionEndEvents.map((auctionEndEvent, index) => {
         return (
           <React.Fragment key={index}>
             <Grid item>
               <Paper sx={{ p: 1 }} elevation={1}>
                 <Typography variant="h2" component="span">
-                  Auction ID: {auctionEndEvent.args.auctionId}
+                  Auction ID: {auctionEndEvent.args?.auctionId}
                 </Typography>
               </Paper>
             </Grid>

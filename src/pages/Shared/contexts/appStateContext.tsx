@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 import InspectedPageContext from './inspectedPageContext';
+
 import {
   IPrebidDetails,
   IPrebidAuctionInitEventData,
@@ -26,6 +27,12 @@ const AppStateContext = React.createContext<AppState>({
   auctionEndEvents: [],
   adsRendered: [],
   prebid: {} as IPrebidDetails,
+  initiatorOutput: {},
+  setInitiatorOutput: () => {},
+  isRefresh: false,
+  setIsRefresh: () => {},
+  initDataLoaded: false,
+  setInitDataLoaded: () => {},
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
@@ -40,10 +47,12 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [auctionEndEvents, setAuctionEndEvents] = useState<IPrebidAuctionEndEventData[]>([]);
   const [allWinningBids, setAllWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [adsRendered, setAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
-
   const { prebids } = useContext(InspectedPageContext);
   const isSmallScreen = useMediaQuery(useTheme().breakpoints.down('sm'));
   const isPanel = useMediaQuery(useTheme().breakpoints.up('md'));
+  const [initiatorOutput, setInitiatorOutput] = useState<any>({});
+  const [isRefresh, setIsRefresh] = useState<boolean>(false);
+  const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     if (pbjsNamespace === undefined && prebids && Object.keys(prebids).length > 0) {
@@ -104,6 +113,12 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     auctionInitEvents,
     auctionEndEvents,
     adsRendered,
+    initiatorOutput,
+    setInitiatorOutput,
+    isRefresh,
+    setIsRefresh,
+    initDataLoaded,
+    setInitDataLoaded,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
@@ -126,6 +141,14 @@ interface AppState {
   auctionInitEvents: IPrebidAuctionEndEventData[];
   auctionEndEvents: IPrebidAuctionEndEventData[];
   adsRendered: IPrebidAdRenderSucceededEventData[];
+  initiatorOutput: {
+    [key: string]: any;
+  };
+  setInitiatorOutput: React.Dispatch<React.SetStateAction<any>>;
+  isRefresh: boolean;
+  setIsRefresh: React.Dispatch<React.SetStateAction<boolean>>;
+  initDataLoaded: boolean;
+  setInitDataLoaded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface StateContextProviderProps {

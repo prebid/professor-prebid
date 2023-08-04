@@ -1,7 +1,8 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react';
-import { ITabInfo, ITabInfos } from '../../Background/background';
+import { ITabInfo, ITabInfos, initReqChainResult } from '../../Background/background';
 import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
+import { useDebounce } from '../hooks/useDebounce';
 
 const InspectedPageContext = createContext<ITabInfo | undefined>(undefined);
 
@@ -13,6 +14,8 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const [pageContext, setPageContext] = useState<ITabInfo>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
   const [syncInfo, setSyncInfo] = useState<string>('');
+  const [initReqChainData, setInitReqChainData] = useState<initReqChainResult>({});
+  const initReqChainResult = useDebounce(initReqChainData, 2000);
 
   const fetchEvents = useCallback(async (tabInfos: ITabInfos) => {
     const tabId = await getTabId();
@@ -20,9 +23,8 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     if (prebids) {
       for (const [namespace, prebid] of Object.entries(prebids)) {
         setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
+        setDownloading('true');
         try {
-          setDownloading('true');
-
           setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);
           const response = await fetch(prebid.eventsUrl);
 
@@ -66,7 +68,22 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     };
   }, [fetchEvents]);
 
-  const contextValue: ITabInfo = { ...pageContext, downloading, syncState: syncInfo };
+  useEffect(() => {
+    // Subscribe to changes in local storage
+    const handler = async (changes: any, areaName: 'sync' | 'local' | 'managed') => {
+      if (areaName === 'local' && changes.initReqChain && changes) {
+        setInitReqChainData(JSON.parse(changes.initReqChain.newValue));
+      }
+    };
+    chrome.storage.onChanged.addListener(handler);
+
+    // Unsubscribe when component unmounts
+    return () => {
+      chrome.storage.onChanged.removeListener(handler);
+    };
+  }, []);
+
+  const contextValue: ITabInfo = { ...pageContext, downloading, syncState: syncInfo, initReqChainResult };
 
   return <InspectedPageContext.Provider value={contextValue}>{children}</InspectedPageContext.Provider>;
 };
