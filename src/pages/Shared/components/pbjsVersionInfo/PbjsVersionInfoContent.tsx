@@ -129,7 +129,17 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
       if (page && releaseData.length === 100) {
         fetchReleaseInfo(page + 1, trackingData);
       } else {
-        console.log('oops, the current version of PBJS is not in the release data');
+        if (!page) {
+          fetchReleaseInfo(1, {
+            totalNewFeaturesCount: 0,
+            totalMaintenanceCount: 0,
+            totalBugfixesCount: 0,
+            timeElapsed: { text: '', years: '', months: '', days: '', hours: '', minutes: '' },
+            releasesSinceInstalledVersion: []
+          });
+        } else {
+          console.log('Oops, something went wrong. No release data for the currently installed PBJS version was able to be found.');
+        }
       }
     }
   };
@@ -308,6 +318,7 @@ interface ReleaseProps {
   name: string;
   tag_name: string;
   cached_at: number;
+  hostname: string;
 }
 
 interface VersionProps {
