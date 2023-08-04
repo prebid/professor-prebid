@@ -25,7 +25,7 @@ const PrivacyComponent = (): JSX.Element => {
   const {
     config: { consentManagement },
   } = prebid;
-  const { allowAuctionWithoutConsent, cmpApi, defaultGdprScope, gdpr, timeout, usp } = consentManagement;
+  const { allowAuctionWithoutConsent, cmpApi, defaultGdprScope, gdpr, timeout, usp } = consentManagement || {};
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
