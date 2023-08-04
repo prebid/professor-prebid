@@ -318,7 +318,6 @@ interface ReleaseProps {
   name: string;
   tag_name: string;
   cached_at: number;
-  hostname: string;
 }
 
 interface VersionProps {
