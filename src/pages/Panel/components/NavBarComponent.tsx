@@ -27,18 +27,24 @@ import { sendChromeTabsMessage } from '../../Shared/utils';
 import LinkIcon from '@mui/icons-material/Link';
 import DifferenceIcon from '@mui/icons-material/Difference';
 
-const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLinkComponentProps): JSX.Element => (
-  <Link to={target}>
-    <Button
-      variant={activeRoute === target ? 'contained' : 'outlined'}
-      onClick={clickHandler}
-      startIcon={icon}
-      sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
-    >
-      {label}
-    </Button>
-  </Link>
-);
+const RouterLink = ({ target, activeRoute, clickHandler, icon, label }: RouterLinkComponentProps): JSX.Element => {
+  if (target !== '/') {
+    target = `/${target}`;
+  }
+
+  return (
+    <Link to={target}>
+      <Button
+        variant={activeRoute === target ? 'contained' : 'outlined'}
+        onClick={clickHandler}
+        startIcon={icon}
+        sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+      >
+        {label}
+      </Button>
+    </Link>
+  );
+};
 
 const NavBarComponent = () => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');

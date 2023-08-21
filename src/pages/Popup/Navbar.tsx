@@ -27,7 +27,6 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { IconButton } from '@mui/material';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
-import LinkIcon from '@mui/icons-material/Link';
 import DifferenceIcon from '@mui/icons-material/Difference';
 import StateContext from '../Shared/contexts/appStateContext';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
@@ -43,10 +42,10 @@ export const NavBar = (): JSX.Element => {
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
   const { pbjsNamespace, setPbjsNamespace } = useContext(StateContext);
   const { prebids, downloading } = useContext(InspectedPageContext);
-  const [value, setValue] = React.useState(0);
+  const [selectedTab, setSelectedTab] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+    setSelectedTab(newValue);
   };
 
   const refresh = async () => {
@@ -116,7 +115,7 @@ export const NavBar = (): JSX.Element => {
 
       <Box sx={{ maxWidth: { xs: 320, sm: 625 }, bgcolor: 'background.paper' }}>
         <Tabs
-          value={value}
+          value={selectedTab}
           onChange={handleChange}
           variant="scrollable"
           scrollButtons="auto"
