@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
+import Tooltip from '@mui/material/Tooltip';
 import AppStateContext from '../../contexts/appStateContext';
 import PbjsVersionInfoPopOver from '../pbjsVersionInfo/PbjsVersionInfoPopOver';
 import EventsPopOver from '../auctionDebugEvents/EventsPopOver';
@@ -27,7 +28,13 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
   if (!prebid) return null;
   return (
     <>
-      <HeaderGridItem onClick={() => setPbjsVersionPopUpOpen(true)}><div style={{cursor: "pointer"}}>{`Version: ${prebid.version}`}</div></HeaderGridItem>
+      <HeaderGridItem onClick={() => setPbjsVersionPopUpOpen(true)}>
+        <Tooltip title="Click for more info" arrow>
+          <div style={{cursor: "pointer"}}>
+            {`Version: ${prebid.version}`}
+          </div>
+        </Tooltip>
+      </HeaderGridItem>
       <PbjsVersionInfoPopOver pbjsVersionPopUpOpen={pbjsVersionPopUpOpen} setPbjsVersionPopUpOpen={setPbjsVersionPopUpOpen} />
 
       <HeaderGridItem>{`Timeout: ${prebid.config?.bidderTimeout}`}</HeaderGridItem>
@@ -41,7 +48,12 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
       <HeaderGridItem>{`NoBid${conditionalPluralization(allNoBidEvents)}: ${allNoBidEvents.length}`}</HeaderGridItem>
 
       <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>
-        <div style={{cursor: "pointer"}}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</div></HeaderGridItem>
+        <Tooltip title="Click for more info" arrow>
+          <div style={{cursor: "pointer"}}>
+            {`Event${conditionalPluralization(events)}: ${events?.length}`}
+          </div>
+        </Tooltip>
+      </HeaderGridItem>
       <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />
     </>
   );

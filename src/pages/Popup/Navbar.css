@@ -1,0 +1,21 @@
+.navbar__container {
+  padding: 0 8px !important;
+}
+
+svg[data-testid="KeyboardArrowRightIcon"],
+svg[data-testid="KeyboardArrowLeftIcon"] {
+  fill: rgba(0, 0, 0, 0.5);
+}
+
+.navbar__tabs .MuiTabs-indicator {
+  display: none;
+}
+
+.navbar__tabs .navbar__tab {
+  padding: 0px 3px;
+  min-width: initial;
+}
+
+.navbar__tabs .css-145v6pe-MuiButtonBase-root-MuiTabScrollButton-root {
+  width: 19px;
+}
