@@ -27,7 +27,9 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
   if (!prebid) return null;
   return (
     <>
-      <HeaderGridItem onClick={() => setPbjsVersionPopUpOpen(true)}><div style={{cursor: "pointer"}}>{`Version: ${prebid.version}`}</div></HeaderGridItem>
+      <HeaderGridItem onClick={() => setPbjsVersionPopUpOpen(true)}>
+        <div style={{ cursor: 'pointer' }}>{`Version: ${prebid.version}`}</div>
+      </HeaderGridItem>
       <PbjsVersionInfoPopOver pbjsVersionPopUpOpen={pbjsVersionPopUpOpen} setPbjsVersionPopUpOpen={setPbjsVersionPopUpOpen} />
 
       <HeaderGridItem>{`Timeout: ${prebid.config?.bidderTimeout}`}</HeaderGridItem>
@@ -41,7 +43,8 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
       <HeaderGridItem>{`NoBid${conditionalPluralization(allNoBidEvents)}: ${allNoBidEvents.length}`}</HeaderGridItem>
 
       <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>
-        <div style={{cursor: "pointer"}}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</div></HeaderGridItem>
+        <div style={{ cursor: 'pointer' }}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</div>
+      </HeaderGridItem>
       <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />
     </>
   );
