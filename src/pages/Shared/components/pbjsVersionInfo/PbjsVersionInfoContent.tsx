@@ -47,7 +47,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
       const currentTime = Date.now();
       const differenceInMilliseconds = Math.round(currentTime - cachedTime);
       const timeElapsed = msToTime(differenceInMilliseconds);
-      
+
       if (Number(timeElapsed.days) >= 1) {
         result = true;
         console.log('cached data is expired, refreshing data from github');
@@ -60,7 +60,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
   };
 
   const toggleChangeLog = () => {
-    setShowChangeLog(!showChangeLog)
+    setShowChangeLog(!showChangeLog);
   };
 
   const formatDate = (date: string) => {
@@ -116,15 +116,15 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
         featureCountSinceInstalledVersion: trackingData.totalNewFeaturesCount,
         maintenanceCountSinceInstalledVersion: trackingData.totalMaintenanceCount,
         bugfixCountSinceInstalledVersion: trackingData.totalBugfixesCount,
-        releasesSinceInstalledVersion: trackingData.releasesSinceInstalledVersion
+        releasesSinceInstalledVersion: trackingData.releasesSinceInstalledVersion,
       };
 
       setPrebidReleaseInfo(processedReleaseInfoObj);
-      
+
       if (page) {
         console.log('setting pbjsReleasesData in storage: ', trackingData.releasesSinceInstalledVersion);
         trackingData.releasesSinceInstalledVersion[0].cached_at = Date.now();
-        chrome.storage.local.set({ 'pbjsReleasesData': JSON.stringify(trackingData.releasesSinceInstalledVersion) });
+        chrome.storage.local.set({ pbjsReleasesData: JSON.stringify(trackingData.releasesSinceInstalledVersion) });
       }
     } else {
       if (page && releaseData.length === 100) {
@@ -136,7 +136,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
             totalMaintenanceCount: 0,
             totalBugfixesCount: 0,
             timeElapsed: { text: '', years: '', months: '', days: '', hours: '', minutes: '' },
-            releasesSinceInstalledVersion: []
+            releasesSinceInstalledVersion: [],
           });
         } else {
           console.log('Oops, something went wrong. No release data for the currently installed PBJS version was able to be found.');
@@ -159,18 +159,14 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
     processReleaseData(releaseData, trackingData, page);
   };
 
-  if (
-    prebid &&
-    prebid.version &&
-    Object.keys(prebidReleaseInfo).length === 0
-  ) {
+  if (prebid && prebid.version && Object.keys(prebidReleaseInfo).length === 0) {
     try {
       let dataToTrackOverIterations: TrackingDataProps = {
         totalNewFeaturesCount: 0,
         totalMaintenanceCount: 0,
         totalBugfixesCount: 0,
         timeElapsed: { text: '', years: '', months: '', days: '', hours: '', minutes: '' },
-        releasesSinceInstalledVersion: []
+        releasesSinceInstalledVersion: [],
       };
 
       chrome.storage.local.get('pbjsReleasesData', (result) => {
@@ -233,73 +229,69 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
               </div>
             </div>
             <div className="content__wrapper">
-              {`v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion
-                ? (
-                      <>
-                        <p>
-                          <strong>Details:</strong> For more information about Prebid.js releases, please visit the following link: <a style={{color: "#ff6f00"}} href="https://github.com/prebid/Prebid.js/releases" target="_blank" rel="noreferrer">https://github.com/prebid/Prebid.js/releases</a>
-                        </p>
-                      </>
-                  )
-                : (
-                    <>
-                      <p>
-                        <strong>Details:</strong> {prebidReleaseInfo.installedVersion} was released {moment(prebidReleaseInfo.installedVersionPublishedAt).fromNow()}. Approximately, the following number of updates have been pushed since it's release:
-                      </p>
-                      <ul className="updates__wrapper">
-                        <li>
-                          <strong>New Features:</strong> {prebidReleaseInfo.featureCountSinceInstalledVersion}
-                        </li>
-                        <li>
-                          <strong>Maintenance Updates:</strong> {prebidReleaseInfo.maintenanceCountSinceInstalledVersion}
-                        </li>
-                        <li>
-                          <strong>Bug Fixes:</strong> {prebidReleaseInfo.bugfixCountSinceInstalledVersion}
-                        </li>
-                      </ul>
-                      <p className="changelog__link" onClick={toggleChangeLog}>
-                        View Full Release Changelog Since {prebidReleaseInfo.installedVersion}
-                      </p>
-                    </>
-                  )
-              }
+              {`v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion ? (
+                <>
+                  <p>
+                    <strong>Details:</strong> For more information about Prebid.js releases, please visit the following link:{' '}
+                    <a style={{ color: '#ff6f00' }} href="https://github.com/prebid/Prebid.js/releases" target="_blank" rel="noreferrer">
+                      https://github.com/prebid/Prebid.js/releases
+                    </a>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    <strong>Details:</strong> {prebidReleaseInfo.installedVersion} was released{' '}
+                    {moment(prebidReleaseInfo.installedVersionPublishedAt).fromNow()}. Approximately, the following number of updates have been pushed
+                    since it's release:
+                  </p>
+                  <ul className="updates__wrapper">
+                    <li>
+                      <strong>New Features:</strong> {prebidReleaseInfo.featureCountSinceInstalledVersion}
+                    </li>
+                    <li>
+                      <strong>Maintenance Updates:</strong> {prebidReleaseInfo.maintenanceCountSinceInstalledVersion}
+                    </li>
+                    <li>
+                      <strong>Bug Fixes:</strong> {prebidReleaseInfo.bugfixCountSinceInstalledVersion}
+                    </li>
+                  </ul>
+                  <p className="changelog__link" onClick={toggleChangeLog}>
+                    View Full Release Changelog Since {prebidReleaseInfo.installedVersion}
+                  </p>
+                </>
+              )}
             </div>
-            {showChangeLog && prebidReleaseInfo.releasesSinceInstalledVersion.map((version: VersionProps) => (
-              <>
-                <hr />
-                <p>
-                  <strong>Name:</strong> {version.name}
-                </p>
-                <p>
-                  <strong>Published:</strong> {formatDate(version.published_at)}
-                </p>
-                <p>
-                  <strong>URL:</strong> <a style={{color: "#ff6f00"}} href={version.html_url} target='_blank' rel="noreferrer">{version.html_url}</a>
-                </p>
-                <p>
-                  <strong>Description:</strong> {parse(version.doc.body.innerHTML)}
-                </p>
-              </>
-            ))}
+            {showChangeLog &&
+              prebidReleaseInfo.releasesSinceInstalledVersion.map((version: VersionProps) => (
+                <>
+                  <hr />
+                  <p>
+                    <strong>Name:</strong> {version.name}
+                  </p>
+                  <p>
+                    <strong>Published:</strong> {formatDate(version.published_at)}
+                  </p>
+                  <p>
+                    <strong>URL:</strong>{' '}
+                    <a style={{ color: '#ff6f00' }} href={version.html_url} target="_blank" rel="noreferrer">
+                      {version.html_url}
+                    </a>
+                  </p>
+                  <p>
+                    <strong>Description:</strong> {parse(version.doc.body.innerHTML)}
+                  </p>
+                </>
+              ))}
           </>
-        )
-        : (
-            <div className="pbjs-version-info__loader-wrapper">
-              <p>Attempting to fetch data about PBJS releases..</p>
-              <div className="loader">
-                <Bars
-                  height="80"
-                  width="50"
-                  color="#ff6f00"
-                  ariaLabel="bars-loading"
-                  wrapperStyle={{}}
-                  wrapperClass=""
-                  visible={true}
-                />
-              </div>
+        ) : (
+          <div className="pbjs-version-info__loader-wrapper">
+            <p>Attempting to fetch data about PBJS releases..</p>
+            <div className="loader">
+              <Bars height="80" width="50" color="#ff6f00" ariaLabel="bars-loading" wrapperStyle={{}} wrapperClass="" visible={true} />
             </div>
-          )
-        }
+          </div>
+        )}
       </Grid>
     </React.Fragment>
   );
