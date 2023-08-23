@@ -24,8 +24,8 @@
   "manifest_version": 3,
   "name": "Professor Prebid",
   "options_page": "options.html",
-  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting", "webRequest"],
-  "version": "0.2.67",
+  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
+  "version": "0.2.68",
   "web_accessible_resources": [
     {
       "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],

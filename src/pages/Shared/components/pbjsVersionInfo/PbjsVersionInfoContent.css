@@ -1,0 +1,26 @@
+.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-7.version-info__body.css-1ys5d6u-MuiGrid-root {
+  margin: auto;
+}
+
+.title__wrapper {
+  text-align: center;
+}
+
+.title__wrapper .sub-title__wrapper {
+  text-align: left;
+}
+
+.changelog__link {
+  text-align: center;
+  margin-top: 30px;
+  color: #ff6f00;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pbjs-version-info__loader-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
