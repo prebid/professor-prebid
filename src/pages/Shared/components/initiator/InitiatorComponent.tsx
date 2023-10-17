@@ -47,7 +47,7 @@ const InitiatorComponent = (): JSX.Element => {
     undefined,
   );
 
-  chrome.tabs.onUpdated.addListener(function (tabId, info) {
+  chrome.tabs?.onUpdated.addListener(function (tabId, info) {
     if (info.status === 'complete') {
       setShowReqChain(true);
       setInitDataLoaded(true);

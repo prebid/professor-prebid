@@ -31,9 +31,9 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
 
     const { auctionId: latestAuctionId } = auctionEndEvents[0]?.args;
 
-    const auctionsWinningBids = (events as IPrebidBidWonEventData[]).filter(
-      ({ eventType, args: { auctionId } }) => eventType === 'bidWon' && auctionId === latestAuctionId
-    );
+    const auctionsWinningBids = (events as IPrebidBidWonEventData[])
+      .filter(({ eventType, args: { auctionId } }) => eventType === 'bidWon' && auctionId === latestAuctionId)
+      .sort((a, b) => b.args.requestTimestamp - a.args.requestTimestamp);
 
     const auctionsBidsReceived = (events as IPrebidBidWonEventData[]).filter(
       ({ eventType, args: { auctionId } }) => eventType === 'bidResponse' && auctionId === latestAuctionId
