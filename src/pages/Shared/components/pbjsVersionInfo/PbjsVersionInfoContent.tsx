@@ -109,6 +109,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
 
       const processedReleaseInfoObj = {
         latestVersion: trackingData.releasesSinceInstalledVersion[0].tag_name,
+        latestVersionPublishedAt: trackingData.releasesSinceInstalledVersion[0].published_at,
         installedVersion: prebid.version,
         installedVersionPublishedAt: oldVersionPublishedAtDate,
         timeElapsedSinceLatestVersion: trackingData.timeElapsed,
@@ -171,7 +172,6 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
       chrome.storage.local.get('pbjsReleasesData', (result) => {
         if (result.pbjsReleasesData && !isCachedReleaseDataExpired(result.pbjsReleasesData)) {
           console.log('using pbjsReleasesData from storage: ', result);
-          // setPrebidReleaseInfo(JSON.parse(result.pbjsReleasesData));
           processReleaseData(JSON.parse(result.pbjsReleasesData), dataToTrackOverIterations, 0);
         } else {
           console.log('calling the github api for pbjsReleasesData ');
@@ -207,24 +207,24 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
           <>
             <div className="title__wrapper">
               <div className="sub-title-main__wrapper">
-                {`v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion ? (
-                  <>
-                    <CheckCircleOutlineIcon color="primary" />
-                    <h4>You are using the latest version of Prebid.js!</h4>
-                  </>
-                ) : (
-                  <>
-                    <WarningAmberOutlinedIcon color="secondary" />
-                    <h4>Warning: Old version of Prebid.js detected..</h4>
-                  </>
-                )}
+                {`v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion
+                  ? (
+                      <>
+                        <CheckCircleOutlineIcon color="primary" />
+                        <h4>You are using the latest version of Prebid.js!</h4>
+                      </>
+                    )
+                  : (
+                      <WarningAmberOutlinedIcon color="secondary" />
+                    )
+                }
               </div>
               <div className="sub-title__wrapper">
                 <p>
-                  <strong>Latest PBJS Version:</strong> v{prebidReleaseInfo.latestVersion}
+                  <strong>Latest PBJS Version:</strong> v{prebidReleaseInfo.latestVersion} - <em>({formatDate(prebidReleaseInfo.latestVersionPublishedAt)})</em>
                 </p>
                 <p>
-                  <strong>Installed PBJS Version:</strong> {prebidReleaseInfo.installedVersion}
+                  <strong>Installed PBJS Version:</strong> {prebidReleaseInfo.installedVersion} - <em>({formatDate(prebidReleaseInfo.installedVersionPublishedAt)})</em>
                 </p>
               </div>
             </div>
@@ -302,6 +302,7 @@ interface PbjsVersionInfoContentProps {
 }
 
 interface ReleaseProps {
+  published_at: any;
   doc: Document;
   body: string;
   name: string;
