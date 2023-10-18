@@ -156,6 +156,7 @@ interface AppState {
   initDataLoaded: boolean;
   setInitDataLoaded: React.Dispatch<React.SetStateAction<boolean>>;
   prebidReleaseInfo: {
+    latestVersionPublishedAt?: string;
     latestVersion?: string;
     installedVersion?: string;
     installedVersionPublishedAt?: string;

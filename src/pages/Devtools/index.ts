@@ -235,7 +235,7 @@ const getInitReqChainByUrl = (rootUrl: string, rootResourceType: string, rootReq
 
     start(processHarRequests);
 
-    chrome.tabs.onUpdated.addListener(function (tabId, info) {
+    chrome.tabs?.onUpdated.addListener(function (tabId, info) {
       if (info.status === 'loading') {
         chrome.storage.local.set({ initReqChain: JSON.stringify({}) });
         // console.log('STARTING');

@@ -3,6 +3,8 @@ import { getTabId, sendChromeTabsMessage } from '../Shared/utils';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import AdUnitsOutlinedIcon from '@mui/icons-material/AdUnitsOutlined';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
@@ -24,9 +26,12 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { IconButton } from '@mui/material';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import DifferenceIcon from '@mui/icons-material/Difference';
 import StateContext from '../Shared/contexts/appStateContext';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
 import logo from '../../assets/img/logo.png';
+import './Navbar.css';
 
 const onPbjsNamespaceChange = async (pbjsNamespace: string) => {
   sendChromeTabsMessage(PBJS_NAMESPACE_CHANGE, pbjsNamespace);
@@ -37,6 +42,11 @@ export const NavBar = (): JSX.Element => {
   const [pbjsNamespaceDialogOpen, setPbjsNamespaceDialogOpen] = React.useState(false);
   const { pbjsNamespace, setPbjsNamespace } = useContext(StateContext);
   const { prebids, downloading } = useContext(InspectedPageContext);
+  const [selectedTab, setSelectedTab] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
 
   const refresh = async () => {
     const tabId = await getTabId();
@@ -67,6 +77,7 @@ export const NavBar = (): JSX.Element => {
         alignItems: 'center',
         '&> a  ': { textDecoration: 'none' },
       }}
+      className="navbar__container"
     >
       <Badge
         invisible={prebids && Object.keys(prebids).length < 2}
@@ -101,66 +112,138 @@ export const NavBar = (): JSX.Element => {
           </DialogActions>
         </Dialog>
       )}
-      <Link to="/">
-        <Button
-          size="small"
-          variant={activeRoute === '/' ? 'contained' : 'outlined'}
-          onClick={() => handleRouteChange('/')}
-          startIcon={<AdUnitsOutlinedIcon />}
+
+      <Box sx={{ maxWidth: { xs: 320, sm: 625 }, bgcolor: 'background.paper' }}>
+        <Tabs
+          value={selectedTab}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          className="navbar__tabs"
         >
-          AdUnits
-        </Button>
-      </Link>
-      <Link to="bids">
-        <Button
-          size="small"
-          variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
-          onClick={() => handleRouteChange('/bids')}
-          startIcon={<AccountBalanceOutlinedIcon />}
-        >
-          Bids
-        </Button>
-      </Link>
-      <Link to="timeline">
-        <Button
-          size="small"
-          variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
-          onClick={() => handleRouteChange('/timeline')}
-          startIcon={<TimelineOutlinedIcon />}
-        >
-          Timeline
-        </Button>
-      </Link>
-      <Link to="config">
-        <Button
-          size="small"
-          variant={activeRoute === '/config' ? 'contained' : 'outlined'}
-          onClick={() => handleRouteChange('/config')}
-          startIcon={<SettingsOutlinedIcon />}
-        >
-          Config
-        </Button>
-      </Link>
-      <Link to="userId">
-        <Button
-          size="small"
-          variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
-          onClick={() => handleRouteChange('/userId')}
-          startIcon={<ContactPageOutlinedIcon />}
-        >
-          UserID
-        </Button>
-      </Link>
-      <Link to="tools">
-        <Button
-          size="small"
-          variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
-          onClick={() => handleRouteChange('/tools')}
-          startIcon={<DnsOutlinedIcon />}
-        >
-          Tools
-        </Button>
-      </Link>
+          <Tab
+            label={
+              <Link to="/">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/')}
+                  startIcon={<AdUnitsOutlinedIcon />}
+                >
+                  AdUnits
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="bids">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/bids')}
+                  startIcon={<AccountBalanceOutlinedIcon />}
+                >
+                  Bids
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="timeline">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/timeline')}
+                  startIcon={<TimelineOutlinedIcon />}
+                >
+                  Timeline
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="config">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/config' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/config')}
+                  startIcon={<SettingsOutlinedIcon />}
+                >
+                  Config
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="userId">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/userId')}
+                  startIcon={<ContactPageOutlinedIcon />}
+                >
+                  UserID
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="tools">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/tools')}
+                  startIcon={<DnsOutlinedIcon />}
+                >
+                  Tools
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="events">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/events' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/events')}
+                  startIcon={<WarningAmberOutlinedIcon />}
+                >
+                  Events
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+          <Tab
+            label={
+              <Link to="version">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/version' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/version')}
+                  startIcon={<DifferenceIcon />}
+                >
+                  Version
+                </Button>
+              </Link>
+            }
+            className="navbar__tab"
+          />
+        </Tabs>
+      </Box>
+
       <IconButton
         aria-label="refresh"
         color="default"

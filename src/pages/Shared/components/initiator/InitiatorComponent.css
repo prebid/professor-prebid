@@ -29,6 +29,7 @@
 
 .box-wrapper {
   margin: 8px;
+  position: relative;
 }
 
 .box-wrapper .refresh-icon {
@@ -79,8 +80,37 @@ svg.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.initiator__refresh-icon.css-i4bv87
   height: auto;
   position: relative;
   top: 3px;
+  cursor: pointer;
 }
 
 .initiator__strong {
   color: #ff6f00;
+}
+
+.network-inspector-error-modal {
+  margin: 0 auto;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.network-inspector-error-modal-alert {
+  align-items: center;
+}
+
+.toaster-modal .css-1t3kceu-MuiPaper-root-MuiSnackbarContent-root {
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  border: 2px solid #ff6f00;
+  font-size: 12px;
+}
+
+.toaster-content-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+svg.MuiSvgIcon-root.MuiSvgIcon-colorSecondary.MuiSvgIcon-fontSizeMedium.toaster-warning-icon.css-3cp8hf-MuiSvgIcon-root {
+  margin-right: 15px;
 }
