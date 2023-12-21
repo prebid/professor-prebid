@@ -339,6 +339,7 @@ export interface IPrebidAdUnit {
   mediaTypes: IPrebidAdUnitMediaTypes;
   sizes: number[][];
   transactionId: string;
+  ortb2Imp: {};
 }
 
 export interface IPrebidConfigPriceBucket {
@@ -484,6 +485,11 @@ export interface IPrebidConfig {
     url: string;
   };
   gptPreAuction: { mcmEnabled: boolean };
+  fledgeForGpt: {
+    enabled: boolean;
+    bidders: string[];
+    defaultForSlots: number;
+  };
   floors: {
     auctionDelay: number;
     data: {

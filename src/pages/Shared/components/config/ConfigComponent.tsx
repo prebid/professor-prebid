@@ -7,6 +7,7 @@ import BidderSettingsComponent from './tiles/BidderSettingsComponent';
 import PrebidConfigComponent from '../../../Popup/components/config/PrebidConfigComponent';
 import FloorsModuleComponent from './tiles/FloorsModuleComponent';
 import GptPreAuctionComponent from './tiles/GptPreAuctionComponent';
+import FledgeForGPTComponent from './tiles/FledgeForGPTComponent';
 import Grid from '@mui/material/Grid';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -44,6 +45,10 @@ const ConfigComponent = (): JSX.Element => (
 
     <ErrorBoundary FallbackComponent={Fallback}>
       <GptPreAuctionComponent />
+    </ErrorBoundary>
+
+    <ErrorBoundary FallbackComponent={Fallback}>
+      <FledgeForGPTComponent />
     </ErrorBoundary>
   </Grid>
 );
