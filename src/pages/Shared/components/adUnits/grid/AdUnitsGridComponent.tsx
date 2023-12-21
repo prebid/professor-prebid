@@ -16,17 +16,20 @@ const AdUnitsGridComponent = (): JSX.Element => {
   const { isPanel } = useContext(AppStateContext);
   const { googleAdManager } = useContext(InspectedPageContext);
   const showAdServerComlumn = isPanel && googleAdManager?.slots?.length > 0;
-
+  const showOrtb2ImpColumn = isPanel && adUnits.find(({ ortb2Imp }) => ortb2Imp);
+  let columns = 12;
+  if (showAdServerComlumn) columns += 4;
+  if (showOrtb2ImpColumn) columns += 4;
   return (
-    <Grid spacing={0.25} container direction="row">
-      <Grid item xs={4} md={showAdServerComlumn ? 3 : 4}>
+    <Grid spacing={0.25} container direction="row" columns={columns}>
+      <Grid item xs={4} md={4}>
         <Paper>
           <Typography variant="h3" sx={{ p: 0.5 }}>
             Code
           </Typography>
         </Paper>
       </Grid>
-      <Grid item xs={4} md={showAdServerComlumn ? 3 : 4}>
+      <Grid item xs={4} md={4}>
         <Paper>
           <Typography variant="h3" sx={{ p: 0.5 }}>
             Media Types
@@ -34,7 +37,7 @@ const AdUnitsGridComponent = (): JSX.Element => {
         </Paper>
       </Grid>
 
-      <Grid item xs={4} md={showAdServerComlumn ? 3 : 4}>
+      <Grid item xs={4} md={4}>
         <Paper>
           <Typography variant="h3" sx={{ p: 0.5 }}>
             Bidders
@@ -42,7 +45,7 @@ const AdUnitsGridComponent = (): JSX.Element => {
         </Paper>
       </Grid>
       {isPanel && googleAdManager?.slots?.length > 0 && (
-        <Grid item md={3}>
+        <Grid item md={4}>
           <Paper sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <Typography variant="h3" sx={{ p: 0.5 }}>
               Ad Server
@@ -65,7 +68,15 @@ const AdUnitsGridComponent = (): JSX.Element => {
           </Paper>
         </Grid>
       )}
-
+      {isPanel && (
+        <Grid item md={4}>
+          <Paper sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+            <Typography variant="h3" sx={{ p: 0.5 }}>
+              OpenRtb2 Imp
+            </Typography>
+          </Paper>
+        </Grid>
+      )}
       {adUnits?.map((adUnit, index) => (
         <AdUnitGridRow adUnit={adUnit} key={index} />
       ))}

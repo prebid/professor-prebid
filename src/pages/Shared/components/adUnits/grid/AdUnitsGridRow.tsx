@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-
 import AdUnitsTile from './tiles/AdUnitTile';
 import StateContext from '../../../contexts/appStateContext';
 import InspectedPageContext from '../../../contexts/inspectedPageContext';
@@ -7,22 +6,23 @@ import { IPrebidAdUnit } from '../../../../Content/scripts/prebid';
 import MediaTypesTile from './tiles/MediaTypesTile';
 import BiddersTile from './tiles/BiddersTile';
 import AdServerTile from './tiles/AdServerTile';
+import Ortb2ImpTile from './tiles/Ortb2ImpTile';
 
-const AdUnitGridRow = ({ adUnit }: IAdUnitGridRowProps): JSX.Element => {
+const AdUnitGridRow = ({ adUnit, adUnit: { ortb2Imp } }: IAdUnitGridRowProps): JSX.Element => {
   const { isPanel } = useContext(StateContext);
   const { googleAdManager } = useContext(InspectedPageContext);
   const showAdServerComlumn = isPanel && googleAdManager?.slots?.length > 0;
-  const mdWidth = showAdServerComlumn ? 3 : 4;
-
+  const showOrtb2Imp = isPanel && ortb2Imp;
   return (
     <React.Fragment>
-      <AdUnitsTile adUnit={adUnit} mdWidth={mdWidth} />
+      <AdUnitsTile adUnit={adUnit} />
 
-      <MediaTypesTile adUnit={adUnit} mdWidth={mdWidth} />
+      <MediaTypesTile adUnit={adUnit} />
 
-      <BiddersTile adUnit={adUnit} mdWidth={mdWidth} />
+      <BiddersTile adUnit={adUnit} />
 
-      {showAdServerComlumn && <AdServerTile adUnit={adUnit} mdWidth={mdWidth} />}
+      {showAdServerComlumn && <AdServerTile adUnit={adUnit} />}
+      {showOrtb2Imp && <Ortb2ImpTile adUnit={adUnit} />}
     </React.Fragment>
   );
 };

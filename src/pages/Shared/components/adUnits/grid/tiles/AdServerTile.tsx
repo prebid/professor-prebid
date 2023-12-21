@@ -13,7 +13,7 @@ import Paper from '@mui/material/Paper';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
-const AdServerTile = ({ adUnit, mdWidth }: IAdServerTileProps): JSX.Element => {
+const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
   const { googleAdManager } = useContext(InspectedPageContext);
   const [slot, setSlot] = useState<IGoogleAdManagerSlot | undefined>(undefined);
   const [expanded, setExpanded] = React.useState(false);
@@ -40,11 +40,9 @@ const AdServerTile = ({ adUnit, mdWidth }: IAdServerTileProps): JSX.Element => {
     <Grid
       item
       xs={4}
-      md={mdWidth}
+      md={4}
       sx={{
         overflow: 'hidden',
-        maxHeight: isPanel ? (!expanded ? 200 : 'unset') : 'unset',
-        // height: '100%',
         position: 'relative', // Ensure relative positioning for the overlay
         '&:after': {
           content: '""',
@@ -83,7 +81,7 @@ const AdServerTile = ({ adUnit, mdWidth }: IAdServerTileProps): JSX.Element => {
           </Box>
         )}
         {slot && (
-          <Box onClick={(e) => e.stopPropagation()}>
+          <Box onClick={(e) => e.stopPropagation()} sx={{ maxHeight: isPanel ? (!expanded ? 200 : 'unset') : 'unset' }}>
             <React.Fragment>
               {elementId && (
                 <Box sx={{ p: 0.5 }}>
@@ -141,5 +139,4 @@ const AdServerTile = ({ adUnit, mdWidth }: IAdServerTileProps): JSX.Element => {
 export default AdServerTile;
 interface IAdServerTileProps {
   adUnit: IPrebidAdUnit;
-  mdWidth: number;
 }

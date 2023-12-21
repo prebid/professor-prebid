@@ -12,7 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import Paper from '@mui/material/Paper';
 
-const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode }, mdWidth }: IMediaTypesTileComponentProps): JSX.Element => {
+const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaTypesTileComponentProps): JSX.Element => {
   const { allWinningBids, isPanel } = useContext(StateContext);
   const [expanded, setExpanded] = React.useState(false);
   const handleExpandClick = () => {
@@ -23,7 +23,7 @@ const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode }, mdWidth }: I
     <Grid
       item
       xs={4}
-      md={mdWidth}
+      md={4}
       sx={{
         overflow: 'hidden',
         position: 'relative', // Ensure relative positioning for the overlay
@@ -133,5 +133,4 @@ const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode }, mdWidth }: I
 export default MediaTypesTile;
 interface IMediaTypesTileComponentProps {
   adUnit: IPrebidAdUnit;
-  mdWidth: number;
 }
