@@ -38,7 +38,7 @@ const FledgeForGPTComponent = (): JSX.Element => {
               <BorderBottomIcon />
             </Avatar>
           }
-          title={<Typography variant="h3">Fledge For GPT Component</Typography>}
+          title={<Typography variant="h3">Fledge For GPT Module</Typography>}
           subheader={<Typography variant="subtitle1"></Typography>}
           action={
             <ExpandMoreIcon
@@ -53,14 +53,14 @@ const FledgeForGPTComponent = (): JSX.Element => {
         <CardContent>
           <Grid container spacing={2}>
             {!expanded && <RenderKeyValueComponent label="Enabled" value={fledgeForGpt.enabled} columns={[12, 12]} expanded={expanded} />}
-            {/* {!expanded && (
+            {!expanded && (
               <RenderKeyValueComponent
                 label="Prebid Version"
-                value={`${prebid.version} ${gte(prebid.version, '8.22.0') ? '✅' : '❗(not supported))'}`}
+                value={`${prebid.version} ${gte(prebid.version, '8.0.0') ? '✅' : '❗(not supported))'}`}
                 columns={[12, 12]}
                 expanded={expanded}
               />
-            )} */}
+            )}
             {!expanded && (
               <RenderKeyValueComponent label="Bidders" value={fledgeForGpt.bidders || 'all bidders'} columns={[12, 12]} expanded={expanded} />
             )}
