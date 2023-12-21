@@ -6,7 +6,7 @@ class Prebid {
   namespace: string;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
-  updateRateInterval: number = 3000;
+  updateRateInterval: number = 5000;
   sendToContentScriptPending: boolean = false;
   lastEventsObjectUrls: { url: string; size: number }[] = [];
   events: any[] = [];
@@ -99,9 +99,29 @@ class Prebid {
     }
   };
 
+  removeDocumentFields = (obj: { [key: string]: any }): void => {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        if (obj[key] instanceof Document || obj[key] instanceof Window || obj[key] instanceof Node) {
+          // If the property is a Document instance, delete it
+          delete obj[key];
+        } else if (typeof obj[key] === 'object') {
+          // If the property is an object, recursively check its fields
+          this.removeDocumentFields(obj[key]);
+        }
+      }
+    }
+  };
+
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    const string = decylce(events);
+    // events.forEach((event) => this.removeDocumentFields(event));
+    // no foreach loop
+    for (let i = 0; i < events.length; i++) {
+      this.removeDocumentFields(events[i]);
+    }
+
+    const string = JSON.stringify(events);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
@@ -339,7 +359,9 @@ export interface IPrebidAdUnit {
   mediaTypes: IPrebidAdUnitMediaTypes;
   sizes: number[][];
   transactionId: string;
-  ortb2Imp: {};
+  ortb2Imp: {
+    [key: string]: any;
+  };
 }
 
 export interface IPrebidConfigPriceBucket {
