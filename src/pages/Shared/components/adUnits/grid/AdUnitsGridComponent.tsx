@@ -68,7 +68,7 @@ const AdUnitsGridComponent = (): JSX.Element => {
           </Paper>
         </Grid>
       )}
-      {isPanel && (
+      {isPanel && !!adUnits.find(({ ortb2Imp }) => ortb2Imp) && (
         <Grid item md={4}>
           <Paper sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
             <Typography variant="h3" sx={{ p: 0.5 }}>

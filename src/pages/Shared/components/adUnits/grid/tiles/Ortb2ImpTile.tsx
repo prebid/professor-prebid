@@ -15,7 +15,7 @@ const Ortb2ImpTile = ({ adUnit }: IOrtb2ImpTileProps): JSX.Element => {
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
-  if (adUnit?.bids?.length === 0) return null;
+  if (!adUnit?.ortb2Imp) return null;
   return (
     <Grid
       item
