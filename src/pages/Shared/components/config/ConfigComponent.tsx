@@ -14,46 +14,41 @@ import { ErrorBoundary } from 'react-error-boundary';
 export const tileHeight = 255;
 
 const ConfigComponent = (): JSX.Element => {
-  const handleReset = () => {
-    // Implement any logic you need when resetting the error boundary
-    console.log('Error boundary reset');
-  };
-
   return (
     <Grid container spacing={0.25} padding={0.5}>
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PriceGranularityComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PrebidConfigComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <BidderSettingsComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PrebidServerComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PrivacyComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <UserIdModule />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <FloorsModuleComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <GptPreAuctionComponent />
       </ErrorBoundary>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleReset}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
         <FledgeForGPTComponent />
       </ErrorBoundary>
     </Grid>
@@ -74,7 +69,6 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
   return (
     <div>
       <p>An error occurred: {error.message}</p>
-      {!delayElapsed && <p>Trying to reset in 5 seconds...</p>}
       {delayElapsed && <p>Resetting...</p>}
     </div>
   );

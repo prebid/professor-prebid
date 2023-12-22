@@ -70,7 +70,7 @@ class Prebid {
         }
         const { type, payload } = event.data;
         if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
-          console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
+          // console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
           this.reset();
           this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
           this.sendDetailsToContentScript();
@@ -115,13 +115,10 @@ class Prebid {
 
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    // events.forEach((event) => this.removeDocumentFields(event));
-    // no foreach loop
     for (let i = 0; i < events.length; i++) {
       this.removeDocumentFields(events[i]);
     }
-
-    const string = JSON.stringify(events);
+    const string = decylce(events);
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
