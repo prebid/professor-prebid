@@ -21,7 +21,7 @@ const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): 
   return isSizeMatch || isNativeMatch || isVideoMatch;
 };
 
-const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode }, mdWidth }: IBiddersTileProps): JSX.Element => {
+const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps): JSX.Element => {
   const { allWinningBids, allBidResponseEvents, adsRendered, isPanel } = useContext(StateContext);
   const [expanded, setExpanded] = React.useState(false);
 
@@ -33,7 +33,7 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode }, mdWidth }: IBidders
     <Grid
       item
       xs={4}
-      md={mdWidth}
+      md={4}
       sx={{
         overflow: 'hidden',
         position: 'relative', // Ensure relative positioning for the overlay
@@ -120,5 +120,4 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode }, mdWidth }: IBidders
 export default BiddersTile;
 interface IBiddersTileProps {
   adUnit: IPrebidAdUnit;
-  mdWidth: number;
 }

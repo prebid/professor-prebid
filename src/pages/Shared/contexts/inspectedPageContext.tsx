@@ -56,6 +56,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     // Subscribe to changes in local storage
     const handler = async (changes: any, areaName: 'sync' | 'local' | 'managed') => {
       if (areaName === 'local' && changes.tabInfos && changes) {
+        const tabId = await getTabId();
         const tabInfoWithEvents = await fetchEvents({ ...changes.tabInfos.newValue });
         setPageContext(tabInfoWithEvents);
       }

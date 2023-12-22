@@ -50,10 +50,10 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
 
       if (Number(timeElapsed.days) >= 1) {
         result = true;
-        console.log('cached data is expired, refreshing data from github');
+        // console.log('cached data is expired, refreshing data from github');
       }
 
-      console.log(timeElapsed);
+      // console.log(timeElapsed);
     }
 
     return result;
@@ -122,7 +122,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
       setPrebidReleaseInfo(processedReleaseInfoObj);
 
       if (page) {
-        console.log('setting pbjsReleasesData in storage: ', trackingData.releasesSinceInstalledVersion);
+        // console.log('setting pbjsReleasesData in storage: ', trackingData.releasesSinceInstalledVersion);
         trackingData.releasesSinceInstalledVersion[0].cached_at = Date.now();
         chrome.storage.local.set({ pbjsReleasesData: JSON.stringify(trackingData.releasesSinceInstalledVersion) });
       }
@@ -139,14 +139,14 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
             releasesSinceInstalledVersion: [],
           });
         } else {
-          console.log('Oops, something went wrong. No release data for the currently installed PBJS version was able to be found.');
+          // console.log('Oops, something went wrong. No release data for the currently installed PBJS version was able to be found.');
         }
       }
     }
   };
 
   const fetchReleaseInfo = async (page: number, trackingData: any) => {
-    console.log('calling github: ', `https://api.github.com/repos/prebid/Prebid.js/releases?per_page=100&page=${page}&owner=prebid&repo=Prebid.js`);
+    // console.log('calling github: ', `https://api.github.com/repos/prebid/Prebid.js/releases?per_page=100&page=${page}&owner=prebid&repo=Prebid.js`);
     const response = await fetch(`https://api.github.com/repos/prebid/Prebid.js/releases?per_page=100&page=${page}&owner=prebid&repo=Prebid.js`);
 
     if (!response.ok) {
@@ -171,10 +171,10 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
 
       chrome.storage.local.get('pbjsReleasesData', (result) => {
         if (result.pbjsReleasesData && !isCachedReleaseDataExpired(result.pbjsReleasesData)) {
-          console.log('using pbjsReleasesData from storage: ', result);
+          // console.log('using pbjsReleasesData from storage: ', result);
           processReleaseData(JSON.parse(result.pbjsReleasesData), dataToTrackOverIterations, 0);
         } else {
-          console.log('calling the github api for pbjsReleasesData ');
+          // console.log('calling the github api for pbjsReleasesData ');
           fetchReleaseInfo(1, dataToTrackOverIterations);
         }
       });

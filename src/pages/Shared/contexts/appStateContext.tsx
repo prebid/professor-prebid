@@ -68,7 +68,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 
   useEffect(() => {
     const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
-    const events = prebids?.[pbjsNamespace]?.events || [];
+    const events = Array.isArray(prebids?.[pbjsNamespace]?.events) ? prebids?.[pbjsNamespace]?.events : [];
     const allBidResponseEvents = (events?.filter(({ eventType }) => eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
     const allNoBidEvents = (events?.filter(({ eventType }) => eventType === 'noBid') || []) as IPrebidNoBidEventData[];
     const allAdUnitCodes = Array.from(

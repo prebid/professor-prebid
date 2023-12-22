@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PriceGranularityComponent from './tiles/PriceGranularityComponent';
 import UserIdModule from './tiles/UserIdModule';
 import PrebidServerComponent from './tiles/PrebidServerComponent';
@@ -7,55 +7,69 @@ import BidderSettingsComponent from './tiles/BidderSettingsComponent';
 import PrebidConfigComponent from '../../../Popup/components/config/PrebidConfigComponent';
 import FloorsModuleComponent from './tiles/FloorsModuleComponent';
 import GptPreAuctionComponent from './tiles/GptPreAuctionComponent';
+import FledgeForGPTComponent from './tiles/FledgeForGPTComponent';
 import Grid from '@mui/material/Grid';
 import { ErrorBoundary } from 'react-error-boundary';
 
 export const tileHeight = 255;
 
-const ConfigComponent = (): JSX.Element => (
-  <Grid container spacing={0.25} padding={0.5}>
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <PriceGranularityComponent />
-    </ErrorBoundary>
+const ConfigComponent = (): JSX.Element => {
+  return (
+    <Grid container spacing={0.25} padding={0.5}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <PriceGranularityComponent />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <PrebidConfigComponent />
-    </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <PrebidConfigComponent />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <BidderSettingsComponent />
-    </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <BidderSettingsComponent />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <PrebidServerComponent />
-    </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <PrebidServerComponent />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <PrivacyComponent />
-    </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <PrivacyComponent />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <UserIdModule />
-    </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <UserIdModule />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <FloorsModuleComponent />
-    </ErrorBoundary>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <FloorsModuleComponent />
+      </ErrorBoundary>
 
-    <ErrorBoundary FallbackComponent={Fallback}>
-      <GptPreAuctionComponent />
-    </ErrorBoundary>
-  </Grid>
-);
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <GptPreAuctionComponent />
+      </ErrorBoundary>
+
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <FledgeForGPTComponent />
+      </ErrorBoundary>
+    </Grid>
+  );
+};
 export default ConfigComponent;
 
-const Fallback = ({ error }: { error: any }) => {
+const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> = ({ error, resetErrorBoundary }) => {
+  // Use state to track whether the delay has elapsed
+  const [delayElapsed, setDelayElapsed] = useState(false);
+
+  // Reset the error boundary after the delay
+  setTimeout(() => {
+    resetErrorBoundary();
+    setDelayElapsed(true);
+  }, 1000);
+
   return (
-    <Grid item sm={4} xs={12}>
-      <div role="alert">
-        <p>Something went wrong:</p>
-        <pre style={{ color: 'red' }}>{error.message}</pre>
-      </div>
-    </Grid>
+    <div>
+      <p>An error occurred: {error.message}</p>
+      {delayElapsed && <p>Resetting...</p>}
+    </div>
   );
 };
