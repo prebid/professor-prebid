@@ -207,24 +207,23 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
           <>
             <div className="title__wrapper">
               <div className="sub-title-main__wrapper">
-                {`v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion
-                  ? (
-                      <>
-                        <CheckCircleOutlineIcon color="primary" />
-                        <h4>You are using the latest version of Prebid.js!</h4>
-                      </>
-                    )
-                  : (
-                      <WarningAmberOutlinedIcon color="secondary" />
-                    )
-                }
+                {`v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion ? (
+                  <>
+                    <CheckCircleOutlineIcon color="primary" />
+                    <h4>You are using the latest version of Prebid.js!</h4>
+                  </>
+                ) : (
+                  <WarningAmberOutlinedIcon color="secondary" />
+                )}
               </div>
               <div className="sub-title__wrapper">
                 <p>
-                  <strong>Latest PBJS Version:</strong> v{prebidReleaseInfo.latestVersion} - <em>({formatDate(prebidReleaseInfo.latestVersionPublishedAt)})</em>
+                  <strong>Latest PBJS Version:</strong> v{prebidReleaseInfo.latestVersion} -{' '}
+                  <em>({formatDate(prebidReleaseInfo.latestVersionPublishedAt)})</em>
                 </p>
                 <p>
-                  <strong>Installed PBJS Version:</strong> {prebidReleaseInfo.installedVersion} - <em>({formatDate(prebidReleaseInfo.installedVersionPublishedAt)})</em>
+                  <strong>Installed PBJS Version:</strong> {prebidReleaseInfo.installedVersion} -{' '}
+                  <em>({formatDate(prebidReleaseInfo.installedVersionPublishedAt)})</em>
                 </p>
               </div>
             </div>

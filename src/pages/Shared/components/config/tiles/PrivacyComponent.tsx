@@ -75,6 +75,7 @@ const PrivacyComponent = (): JSX.Element => {
             <Grid item xs={12} />
             {gdpr?.rules?.map((rule, index) => (
               <RenderKeyValueComponent
+                key={index}
                 columns={[4, 4]}
                 label={`Rule #${index + 1}`}
                 value={
