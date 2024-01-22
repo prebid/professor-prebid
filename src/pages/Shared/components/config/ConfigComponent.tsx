@@ -10,12 +10,17 @@ import GptPreAuctionComponent from './tiles/GptPreAuctionComponent';
 import FledgeForGPTComponent from './tiles/FledgeForGPTComponent';
 import Grid from '@mui/material/Grid';
 import { ErrorBoundary } from 'react-error-boundary';
+import InstalledModulesComponent from './tiles/InstalledModules';
 
 export const tileHeight = 255;
 
 const ConfigComponent = (): JSX.Element => {
   return (
     <Grid container spacing={0.25} padding={0.5}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <InstalledModulesComponent />
+      </ErrorBoundary>
+
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PriceGranularityComponent />
       </ErrorBoundary>
