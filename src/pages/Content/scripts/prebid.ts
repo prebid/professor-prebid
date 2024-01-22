@@ -4,6 +4,7 @@ import { decylce } from '../../Shared/utils';
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
+  ifFrameId: string | null;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 5000;
@@ -12,8 +13,9 @@ class Prebid {
   events: any[] = [];
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
 
-  constructor(namespace: string) {
+  constructor(namespace: string, iframeId: string | null) {
     this.namespace = namespace;
+    this.ifFrameId = iframeId;
     this.globalPbjs = window[namespace as keyof Window];
     this.globalPbjs.que.push(() => this.addEventListeners());
     this.globalPbjs.que.push(() => this.throttle(this.sendDetailsToContentScript));
@@ -153,6 +155,8 @@ class Prebid {
       events: [],
       eventsUrl: this.getEventsObjUrl(),
       namespace: this.namespace,
+      iframeId: this.ifFrameId,
+      installedModules: this.globalPbjs.installedModules,
       timeout,
       version: this.globalPbjs.version,
       bidderSettings: this.globalPbjs.bidderSettings,
@@ -188,6 +192,7 @@ const detectIframe = () => {
 };
 
 export const addEventListenersForPrebid = () => {
+  const iFrameId = detectIframe() ? window.frameElement?.id : null;
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(
@@ -202,7 +207,7 @@ export const addEventListenersForPrebid = () => {
     if (pbjsGlobals?.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
-          new Prebid(global);
+          new Prebid(global, iFrameId);
           allreadyInjectedPrebid.push(global);
         }
       });
@@ -233,6 +238,7 @@ export interface IGlobalPbjs {
   adUnits: IPrebidAdUnit[];
   getBidResponsesForAdUnitCode: (elementId: string) => { bids: IPrebidBid[] };
   getAllWinningBids: () => IPrebidBid[];
+  installedModules: string[];
 }
 
 export interface IPrebidBid {
@@ -597,6 +603,8 @@ export interface IPrebidDetails {
   eids: IPrebidEids[];
   debug: IPrebidDebugConfig;
   namespace: string;
+  iframeId: string | null;
+  installedModules: string[];
   bidderSettings: IPrebidBidderSettings;
 }
 
