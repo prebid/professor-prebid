@@ -39,7 +39,11 @@ const FledgeForGPTComponent = (): JSX.Element => {
             </Avatar>
           }
           title={<Typography variant="h3">Fledge For GPT Module</Typography>}
-          subheader={<Typography variant="subtitle1"></Typography>}
+          subheader={
+            <Typography variant="subtitle1">
+              {!expanded && <RenderKeyValueComponent label="Enabled" value={fledgeForGpt.enabled} columns={[12, 12]} expanded={expanded} />}
+            </Typography>
+          }
           action={
             <ExpandMoreIcon
               sx={{
@@ -52,7 +56,6 @@ const FledgeForGPTComponent = (): JSX.Element => {
         />
         <CardContent>
           <Grid container spacing={2}>
-            {!expanded && <RenderKeyValueComponent label="Enabled" value={fledgeForGpt.enabled} columns={[12, 12]} expanded={expanded} />}
             {!expanded && (
               <RenderKeyValueComponent
                 label="Prebid Version"
@@ -62,15 +65,15 @@ const FledgeForGPTComponent = (): JSX.Element => {
               />
             )}
             {!expanded && (
-              <RenderKeyValueComponent label="Bidders" value={fledgeForGpt.bidders || 'all bidders'} columns={[12, 12]} expanded={expanded} />
-            )}
-            {!expanded && (
               <RenderKeyValueComponent
                 label="Default For Slots"
                 value={fledgeForGpt.defaultForSlots || 'undefined'}
                 columns={[12, 12]}
                 expanded={expanded}
               />
+            )}
+            {!expanded && (
+              <RenderKeyValueComponent label="Bidders" value={fledgeForGpt.bidders || 'all bidders'} columns={[12, 12]} expanded={expanded} />
             )}
             {expanded && <RenderKeyValueComponent label="Module Configuration" value={fledgeForGpt} columns={[12, 12]} expanded={expanded} />}
           </Grid>
