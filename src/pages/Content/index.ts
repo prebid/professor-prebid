@@ -25,7 +25,7 @@ const ContentScript = () => {
   };
 
   const listenToChromeRuntimeMessages = () => {
-    chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+    chrome.runtime?.onMessage.addListener((request, _, sendResponse) => {
       if (request.type === CONSOLE_TOGGLE) {
         sendWindowPostMessage(request.type, { detail: request.consoleState });
       }
@@ -44,7 +44,7 @@ const ContentScript = () => {
     if (!event.data.profPrebid || !event?.data || !event?.data?.type) return;
     const { type, payload } = event.data;
     if (type === EVENTS.REQUEST_CONSOLE_STATE) {
-      const result = await chrome.storage.local.get(CONSOLE_TOGGLE);
+      const result = await chrome.storage?.local.get(CONSOLE_TOGGLE);
       const checked = result[CONSOLE_TOGGLE];
       document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: !!checked }));
     }
