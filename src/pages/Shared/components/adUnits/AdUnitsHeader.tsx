@@ -30,9 +30,7 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
     <>
       <HeaderGridItem onClick={() => setPbjsVersionPopUpOpen(true)}>
         <Tooltip title="Click for more info" arrow>
-          <div style={{cursor: "pointer"}}>
-            {`Version: ${prebid.version}`}
-          </div>
+          <div style={{ cursor: 'pointer' }}>{`Version: ${prebid.version}`}</div>
         </Tooltip>
       </HeaderGridItem>
       <PbjsVersionInfoPopOver pbjsVersionPopUpOpen={pbjsVersionPopUpOpen} setPbjsVersionPopUpOpen={setPbjsVersionPopUpOpen} />
@@ -49,9 +47,7 @@ const AdUnitsHeaderComponent = (): JSX.Element => {
 
       <HeaderGridItem onClick={() => setEventsPopUpOpen(true)}>
         <Tooltip title="Click for more info" arrow>
-          <div style={{cursor: "pointer"}}>
-            {`Event${conditionalPluralization(events)}: ${events?.length}`}
-          </div>
+          <div style={{ cursor: 'pointer' }}>{`Event${conditionalPluralization(events)}: ${events?.length}`}</div>
         </Tooltip>
       </HeaderGridItem>
       <EventsPopOver eventsPopUpOpen={eventsPopUpOpen} setEventsPopUpOpen={setEventsPopUpOpen} />

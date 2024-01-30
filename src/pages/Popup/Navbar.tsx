@@ -114,13 +114,7 @@ export const NavBar = (): JSX.Element => {
       )}
 
       <Box sx={{ maxWidth: { xs: 320, sm: 625 }, bgcolor: 'background.paper' }}>
-        <Tabs
-          value={selectedTab}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          className="navbar__tabs"
-        >
+        <Tabs value={selectedTab} onChange={handleChange} variant="scrollable" scrollButtons="auto" className="navbar__tabs">
           <Tab
             label={
               <Link to="/">
