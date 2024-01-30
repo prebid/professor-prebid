@@ -5,6 +5,8 @@ import { ITcfDetails } from '../Content/scripts/tcf';
 import { getTabId } from '../Shared/utils';
 class Background {
   tabInfos: ITabInfos = {};
+  timeoutId: NodeJS.Timeout | null = null;
+
   constructor() {
     chrome.runtime.onMessage.addListener(this.handleMessagesFromInjected);
     chrome.webNavigation?.onBeforeNavigate.addListener(this.handleWebNavigationOnBeforeNavigate);
@@ -25,8 +27,7 @@ class Background {
 
   handleMessagesFromInjected = async (
     message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails },
-    sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: undefined) => void
+    sender: chrome.runtime.MessageSender
   ) => {
     const { type, payload } = message;
     const tabId = sender.tab?.id;
@@ -34,17 +35,19 @@ class Background {
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     switch (type) {
       case EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
-        sendResponse();
         this.tabInfos[tabId]['googleAdManager'] = payload as IGoogleAdManagerDetails;
         break;
       case EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
-        sendResponse();
         const typedPayload = payload as IPrebidDetails;
         this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-        this.tabInfos[tabId]['prebids']![typedPayload?.namespace] = typedPayload;
+        if (typedPayload?.iframeId) {
+          this.tabInfos[tabId]['prebids']![typedPayload?.namespace].iframes = this.tabInfos[tabId]['prebids']![typedPayload?.namespace]?.iframes || {};
+          this.tabInfos[tabId]['prebids']![typedPayload?.namespace].iframes![String(typedPayload?.iframeId)] = typedPayload;
+        } else {
+          this.tabInfos[tabId]['prebids']![typedPayload?.namespace] = typedPayload;
+        }
         break;
       case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
-        sendResponse();
         this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
         break;
     }
@@ -101,8 +104,14 @@ class Background {
     }
   };
 
-  persistInStorage = async () => {
-    await chrome.storage?.local.set({ tabInfos: this.tabInfos });
+  persistInStorage = () => {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(async () => {
+      await chrome.storage?.local.set({ tabInfos: this.tabInfos });
+      this.timeoutId = null;
+    }, 1500);
   };
 }
 new Background();
