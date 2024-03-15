@@ -73,32 +73,36 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
 
   const processReleaseData = (releaseData: any[], trackingData: TrackingDataProps, page: number) => {
     const dataForCurrentUsedRelease = releaseData.find((release: ReleaseProps) => {
-      const text = release.body;
-      const html = converter.makeHtml(text);
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      release.doc = doc;
-      trackingData.releasesSinceInstalledVersion.push(release);
+      try {
+        const text = release.body;
+        const html = converter.makeHtml(text);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        release.doc = doc;
+        trackingData.releasesSinceInstalledVersion.push(release);
 
-      const newFeaturesEl = doc.getElementById('newfeatures');
-      const maintenanceEl = doc.getElementById('maintenance');
-      const bugfixesEl = doc.getElementById('bugfixes');
-      const newFeaturesCount = newFeaturesEl?.nextElementSibling?.children.length;
-      const maintenanceCount = maintenanceEl?.nextElementSibling?.children.length;
-      const bugfixesCount = bugfixesEl?.nextElementSibling?.children.length;
+        const newFeaturesEl = doc.getElementById('newfeatures');
+        const maintenanceEl = doc.getElementById('maintenance');
+        const bugfixesEl = doc.getElementById('bugfixes');
+        const newFeaturesCount = newFeaturesEl?.nextElementSibling?.children.length;
+        const maintenanceCount = maintenanceEl?.nextElementSibling?.children.length;
+        const bugfixesCount = bugfixesEl?.nextElementSibling?.children.length;
 
-      if (newFeaturesCount) {
-        trackingData.totalNewFeaturesCount = trackingData.totalNewFeaturesCount + newFeaturesCount;
+        if (newFeaturesCount) {
+          trackingData.totalNewFeaturesCount = trackingData.totalNewFeaturesCount + newFeaturesCount;
+        }
+
+        if (maintenanceCount) {
+          trackingData.totalMaintenanceCount = trackingData.totalMaintenanceCount + maintenanceCount;
+        }
+
+        if (bugfixesCount) {
+          trackingData.totalBugfixesCount = trackingData.totalBugfixesCount + bugfixesCount;
+        }
+
+        return `v${release.tag_name}` === prebid.version;
+      } catch (e: any) {
+        return `v${release.tag_name}` === e.message;
       }
-
-      if (maintenanceCount) {
-        trackingData.totalMaintenanceCount = trackingData.totalMaintenanceCount + maintenanceCount;
-      }
-
-      if (bugfixesCount) {
-        trackingData.totalBugfixesCount = trackingData.totalBugfixesCount + bugfixesCount;
-      }
-
-      return `v${release.tag_name}` === prebid.version;
     });
 
     if (dataForCurrentUsedRelease) {
