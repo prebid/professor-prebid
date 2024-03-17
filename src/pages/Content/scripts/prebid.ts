@@ -86,8 +86,6 @@ class Prebid {
               delete obj[key];
             } catch (error) {
               // some properties are not deletable
-              // what could be done is to set them to null?
-              obj[key] = null;
             }
           } else if (typeof propertyValue === 'object' && !visitedObjects.has(propertyValue)) {
             visitedObjects.add(propertyValue);
