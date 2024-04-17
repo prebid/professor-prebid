@@ -22,10 +22,10 @@ const InstalledModulesComponent = (): JSX.Element => {
 
   const bidAdapters = installedModules.filter((module) => module.includes('BidAdapter')).sort();
   const analyticsAdapters = installedModules.filter((module) => module.includes('AnalyticsAdapter')).sort();
-  const idSystems = installedModules.filter((module) => module.includes('IdSystem')|| module.includes('UserID')).sort();
-  const miscellaneous = installedModules.filter(
-    (module) => !module.includes('BidAdapter') && !module.includes('AnalyticsAdapter') && !module.includes('IdSystem')
-  ).sort();
+  const idSystems = installedModules.filter((module) => module.includes('IdSystem') || module.includes('UserID')).sort();
+  const miscellaneous = installedModules
+    .filter((module) => !module.includes('BidAdapter') && !module.includes('AnalyticsAdapter') && !module.includes('IdSystem'))
+    .sort();
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
