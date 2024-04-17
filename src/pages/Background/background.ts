@@ -3,6 +3,8 @@ import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
 import { IPrebidDetails } from '../Content/scripts/prebid';
 import { ITcfDetails } from '../Content/scripts/tcf';
 import { getTabId } from '../Shared/utils';
+import { Paapi } from './paapi';
+
 class Background {
   tabInfos: ITabInfos = {};
   timeoutId: NodeJS.Timeout | null = null;
@@ -41,10 +43,11 @@ class Background {
         const typedPayload = payload as IPrebidDetails;
         this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
         if (typedPayload?.iframeId) {
-          this.tabInfos[tabId]['prebids']![typedPayload?.namespace].iframes = this.tabInfos[tabId]['prebids']![typedPayload?.namespace]?.iframes || {};
-          this.tabInfos[tabId]['prebids']![typedPayload?.namespace].iframes![String(typedPayload?.iframeId)] = typedPayload;
+          this.tabInfos[tabId]['prebids'][typedPayload?.namespace]['iframes'] =
+            this.tabInfos[tabId]['prebids'][typedPayload?.namespace]['iframes'] || {};
+          this.tabInfos[tabId]['prebids'][typedPayload?.namespace]['iframes'][String(typedPayload?.iframeId)] = typedPayload;
         } else {
-          this.tabInfos[tabId]['prebids']![typedPayload?.namespace] = typedPayload;
+          this.tabInfos[tabId]['prebids'][typedPayload?.namespace] = typedPayload;
         }
         break;
       case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
@@ -115,6 +118,7 @@ class Background {
   };
 }
 new Background();
+new Paapi();
 export interface IPrebids {
   [key: string]: IPrebidDetails;
 }

@@ -503,6 +503,14 @@ export interface IPrebidConfig {
     bidders: string[];
     defaultForSlots: number;
   };
+  paapi: {
+    enabled: boolean;
+    bidders: string[];
+    defaultForSlots: number;
+    gpt: {
+      autoconfig: boolean;
+    };
+  };
   floors: {
     auctionDelay: number;
     data: {

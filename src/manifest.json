@@ -24,7 +24,7 @@
   "manifest_version": 3,
   "name": "Professor Prebid",
   "options_page": "options.html",
-  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
+  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting", "debugger"],
   "version": "0.2.72",
   "web_accessible_resources": [
     {
