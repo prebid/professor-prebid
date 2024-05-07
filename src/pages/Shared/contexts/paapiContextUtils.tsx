@@ -43,13 +43,15 @@ export const eventRowFromMessage = (message: IMessage, state: IAuctionInfo): IEv
 
 export interface IAuctionInfo {
   auctionId: string;
+  auctionType: 'Top' | 'Component' | 'Global';
+  auctionTime: string;
   childAuctionsBox?: IAuctionInfo[];
   config?: IAuctionConfig;
   eventTable?: IEventRow[];
-  header: string;
   startTime?: number;
   endTime?: number;
   parentAuctionId?: string;
+  expanded?: boolean;
 }
 
 export interface IEventRow {

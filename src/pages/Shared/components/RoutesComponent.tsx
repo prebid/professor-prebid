@@ -10,7 +10,7 @@ import EventsComponent from './auctionDebugEvents/EventsComponent';
 import { Routes, Route } from 'react-router-dom';
 import InitiatorComponent from './initiator/InitiatorComponent';
 import PbjsVersionInfoComponent from './pbjsVersionInfo/PbjsVersionInfoComponent';
-import PaapiComponent from '../../Panel/components/PaapiComponent';
+import PaapiComponent from '../../Panel/components/paapi/PaapiComponent';
 const RoutesComponent = (): JSX.Element => {
   return (
     <Routes>

@@ -11,72 +11,75 @@ export class Paapi {
 
   constructor() {
     chrome.runtime.onConnect.addListener(this.connectListener);
-    chrome.debugger.onEvent.addListener((source, method, params: any) => {
-      // This is useful for debugging things:
-      // console.log(method + '/' + JSON.stringify(params) + ' /' + JSON.stringify(source));
-      let port = null;
-      if (source.tabId) {
-        port = this.tabIdToPort.get(source.tabId);
-      } else if (source.targetId) {
-        port = this.targetIdToPort.get(source.targetId);
-      }
-
-      if (port) {
-        // Forward the messages extension cares about.
-        if (
-          method === 'Storage.interestGroupAccessed' ||
-          method === 'Storage.interestGroupAuctionEventOccurred' ||
-          method === 'Storage.interestGroupAuctionNetworkRequestCreated' ||
-          method === 'Network.requestWillBeSent' ||
-          method === 'Network.loadingFinished' ||
-          method === 'Network.loadingFailed'
-        ) {
-          port.postMessage({ method, params });
-        }
-
-        // Pay attention to frames.
-        if (method === 'Target.attachedToTarget') {
-          const targetId = params.targetInfo.targetId;
-          const childDebuggee = { targetId: targetId };
-          this.targetIdToPort.set(targetId, port);
-          this.portToTargets.get(port).push(childDebuggee);
-          chrome.debugger.attach(childDebuggee, '1.3', () => {
-            // Child frames don't need setInterestGroupTracking since
-            // interestGroupAccessed is global anyway.
-            this.enableInterestGroupAuctionTracking(childDebuggee);
-            this.enableNetworkEvents(childDebuggee);
-
-            // In non-flat mode, we must send runIfWaitingForDebugger via
-            // sendMessageToTarget for it to actually work.
-            const message = {
-              id: 0,
-              method: 'Runtime.runIfWaitingForDebugger',
-              params: {},
-            };
-            chrome.debugger.sendCommand(source, 'Target.sendMessageToTarget', {
-              message: JSON.stringify(message),
-              targetId: targetId,
-            });
-          });
-        }
-
-        if (method === 'Target.detachedFromTarget') {
-          const targetId = params.targetId;
-          const childDebuggee = { targetId: targetId };
-          // If seems like the extension API doesn't detach on some iframes, so
-          // try to be sure.
-          chrome.debugger.detach(childDebuggee);
-          this.targetIdToPort.delete(targetId);
-          // This is pretty awful complexity-wise; it would be better to use a set,
-          // but that would require encoding target down to a string key.
-          const remainingTargets = this.portToTargets.get(port).filter((t: { targetId: string; tabId: string }) => {
-            return t.tabId || t.targetId !== targetId;
-          });
-          this.portToTargets.set(port, remainingTargets);
-        }
-      }
-    });
+    chrome.debugger.onEvent.addListener(this.eventHandler);
   }
+
+  eventHandler = (source: any, method: string, params: any) => {
+    // This is useful for debugging things:
+    // console.log(method + '/' + JSON.stringify(params) + ' /' + JSON.stringify(source));
+    let port = null;
+    if (source.tabId) {
+      port = this.tabIdToPort.get(source.tabId);
+    } else if (source.targetId) {
+      port = this.targetIdToPort.get(source.targetId);
+    }
+
+    if (port) {
+      // Forward the messages extension cares about.
+      if (
+        method === 'Storage.interestGroupAccessed' ||
+        method === 'Storage.interestGroupAuctionEventOccurred' ||
+        method === 'Storage.interestGroupAuctionNetworkRequestCreated' ||
+        method === 'Network.requestWillBeSent' ||
+        method === 'Network.loadingFinished' ||
+        method === 'Network.loadingFailed' ||
+        (method === 'Page.frameNavigated' && !params.frame.parentId)
+      ) {
+        port.postMessage({ method, params });
+      }
+
+      // Pay attention to frames.
+      if (method === 'Target.attachedToTarget') {
+        const targetId = params.targetInfo.targetId;
+        const childDebuggee = { targetId: targetId };
+        this.targetIdToPort.set(targetId, port);
+        this.portToTargets.get(port).push(childDebuggee);
+        chrome.debugger.attach(childDebuggee, '1.3', () => {
+          // Child frames don't need setInterestGroupTracking since
+          // interestGroupAccessed is global anyway.
+          this.enableInterestGroupAuctionTracking(childDebuggee);
+          this.enableNetworkEvents(childDebuggee);
+
+          // In non-flat mode, we must send runIfWaitingForDebugger via
+          // sendMessageToTarget for it to actually work.
+          const message = {
+            id: 0,
+            method: 'Runtime.runIfWaitingForDebugger',
+            params: {},
+          };
+          chrome.debugger.sendCommand(source, 'Target.sendMessageToTarget', {
+            message: JSON.stringify(message),
+            targetId: targetId,
+          });
+        });
+      }
+
+      if (method === 'Target.detachedFromTarget') {
+        const targetId = params.targetId;
+        const childDebuggee = { targetId: targetId };
+        // If seems like the extension API doesn't detach on some iframes, so
+        // try to be sure.
+        chrome.debugger.detach(childDebuggee);
+        this.targetIdToPort.delete(targetId);
+        // This is pretty awful complexity-wise; it would be better to use a set,
+        // but that would require encoding target down to a string key.
+        const remainingTargets = this.portToTargets.get(port).filter((t: { targetId: string; tabId: string }) => {
+          return t.tabId || t.targetId !== targetId;
+        });
+        this.portToTargets.set(port, remainingTargets);
+      }
+    }
+  };
 
   enableInterestGroupTracking = (debuggee: any) => {
     // console.log({ debuggee });
@@ -93,6 +96,11 @@ export class Paapi {
   enableNetworkEvents = (debuggee: any) => {
     // console.log({ debuggee });
     chrome.debugger.sendCommand(debuggee, 'Network.enable', {});
+  };
+
+  enablePageEvents = (debuggee: any) => {
+    // console.log({ debuggee });
+    chrome.debugger.sendCommand(debuggee, 'Page.enable', {});
   };
 
   connectListener = (devtoolsPagePort: any) => {
@@ -127,8 +135,10 @@ export class Paapi {
       this.enableInterestGroupTracking(debuggee);
       this.enableInterestGroupAuctionTracking(debuggee);
       this.enableNetworkEvents(debuggee);
+      this.enablePageEvents(debuggee);
     });
   };
+
   disconnectFromTab = (devtoolsPagePort: any, onMessage: any) => {
     const debuggees = this.portToTargets.get(devtoolsPagePort);
     for (const debuggee of debuggees) {

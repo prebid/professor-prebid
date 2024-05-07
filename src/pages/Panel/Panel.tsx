@@ -2,7 +2,6 @@ import React, { useContext, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import NavBarComponent from './components/NavBarComponent';
 import RoutesComponent from '../Shared/components/RoutesComponent';
-import NoPrebidCardComponent from '../Shared/components/NoPrebidCardComponent';
 import { BrowserRouter } from 'react-router-dom';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
 import StateContext from '../Shared/contexts/appStateContext';
@@ -37,11 +36,12 @@ const Panel = (): JSX.Element => {
   return (
     <BrowserRouter>
       <Box sx={{ backgroundColor: 'primary.light', minHeight: '100vH', height: '100%' }}>
-        {/* <JSONViewerComponent src={inspectedPageState} collapsed={2} /> */}
+        {/* <JSONViewerComponent src={auctionState} collapsed={2} /> */}
         <NavBarComponent />
-        {(!prebids || !prebids[pbjsNamespace]) && downloading === 'false' && <NoPrebidCardComponent />}
+        {/* {(!prebids || !prebids[pbjsNamespace]) && downloading === 'false' && <NoPrebidCardComponent />} */}
         {showDownloadCard && <DownloadingCardComponent />}
         {prebids && prebids[pbjsNamespace] && !showDownloadCard && <RoutesComponent />}
+        <RoutesComponent />
       </Box>
     </BrowserRouter>
   );
