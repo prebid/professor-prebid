@@ -8,17 +8,14 @@ import { InspectedPageContextProvider } from '../Shared/contexts/inspectedPageCo
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '../../theme/theme';
 import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
-import { PaapiContextProvider } from '../Shared/contexts/paapiContext';
 
 render(
   <ThemeProvider theme={theme}>
     <InspectedPageContextProvider>
       <StateContextProvider>
-        <PaapiContextProvider>
           <ErrorBoundary FallbackComponent={ErrorCardComponent}>
             <Panel />
           </ErrorBoundary>
-        </PaapiContextProvider>
       </StateContextProvider>
     </InspectedPageContextProvider>
   </ThemeProvider>,

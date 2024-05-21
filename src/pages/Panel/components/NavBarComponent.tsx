@@ -155,13 +155,6 @@ const NavBarComponent = () => {
           label="Version"
         />
 
-        <RouterLink
-          target="paapi"
-          activeRoute={activeRoute}
-          clickHandler={() => handleRouteChange('/paapi')}
-          icon={<DifferenceIcon />}
-          label="PAAPI"
-        />
       </Box>
 
       <Box>

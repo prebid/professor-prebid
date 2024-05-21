@@ -3,7 +3,6 @@ import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
 import { IPrebidDetails } from '../Content/scripts/prebid';
 import { ITcfDetails } from '../Content/scripts/tcf';
 import { getTabId } from '../Shared/utils';
-import { Paapi } from './paapi';
 
 class Background {
   tabInfos: ITabInfos = {};
@@ -118,7 +117,7 @@ class Background {
   };
 }
 new Background();
-new Paapi();
+
 export interface IPrebids {
   [key: string]: IPrebidDetails;
 }

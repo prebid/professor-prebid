@@ -8,6 +8,7 @@ import StateContext from '../Shared/contexts/appStateContext';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
 import { sendChromeTabsMessage } from '../Shared/utils';
 import DownloadingCardComponent from '../Shared/components/DownloadingCardComponent';
+import NoPrebidCardComponent from '../Shared/components/NoPrebidCardComponent';
 
 const Panel = (): JSX.Element => {
   const { pbjsNamespace } = useContext(StateContext);
@@ -38,7 +39,7 @@ const Panel = (): JSX.Element => {
       <Box sx={{ backgroundColor: 'primary.light', minHeight: '100vH', height: '100%' }}>
         {/* <JSONViewerComponent src={auctionState} collapsed={2} /> */}
         <NavBarComponent />
-        {/* {(!prebids || !prebids[pbjsNamespace]) && downloading === 'false' && <NoPrebidCardComponent />} */}
+        {(!prebids || !prebids[pbjsNamespace]) && downloading === 'false' && <NoPrebidCardComponent />}
         {showDownloadCard && <DownloadingCardComponent />}
         {prebids && prebids[pbjsNamespace] && !showDownloadCard && <RoutesComponent />}
         <RoutesComponent />
