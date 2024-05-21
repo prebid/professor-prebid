@@ -28,7 +28,7 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
-  if (adUnit?.bids?.length === 0) return null;
+  // if (adUnit?.bids?.length === 0) return null;
   return (
     <Grid
       item
