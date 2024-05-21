@@ -1,8 +1,8 @@
-import React, { createContext, useEffect, useState, useCallback } from 'react';
-import { ITabInfo, ITabInfos, initReqChainResult } from '../../Background/background';
-import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
-import { DOWNLOAD_FAILED } from '../constants';
+import React, { createContext, useEffect, useState } from 'react';
+import { ITabInfo, initReqChainResult } from '../../Background/background';
+import { getTabId } from '../../Shared/utils';
 import { useDebounce } from '../hooks/useDebounce';
+import { fetchEvents } from './fetchEvents';
 
 const InspectedPageContext = createContext<ITabInfo | undefined>(undefined);
 
@@ -16,58 +16,46 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const [syncInfo, setSyncInfo] = useState<string>('');
   const [initReqChainData, setInitReqChainData] = useState<initReqChainResult>({});
   const initReqChainResult = useDebounce(initReqChainData, 2000);
-
-  const fetchEvents = useCallback(async (tabInfos: ITabInfos) => {
-    const tabId = await getTabId();
-    const prebids = tabInfos[tabId]?.prebids;
-    if (prebids) {
-      for (const [namespace, prebid] of Object.entries(prebids)) {
-        setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
-        setDownloading('true');
-        try {
-          setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);
-          const response = await fetch(prebid.eventsUrl);
-
-          setSyncInfo(`${namespace}: get JSON from response stream`);
-          prebid.events = await response.json();
-
-          setDownloading('false');
-          setSyncInfo(null);
-        } catch (error) {
-          sendChromeTabsMessage(DOWNLOAD_FAILED, { eventsUrl: prebid.eventsUrl });
-          setSyncInfo(`${namespace}: error during download of ${prebid.eventsUrl}`);
-          setDownloading('error');
-        }
-      }
-    }
-    return { ...tabInfos[tabId] };
-  }, []);
+  const [downloadingUrls, setDownloadingUrls] = useState<string[]>([]);
 
   useEffect(() => {
     // Read initial value from chrome.storage.local
-    chrome.storage.local.get(['tabInfos'], async ({ tabInfos }) => {
-      if (!tabInfos) return;
-      const tabInfoWithEvents = await fetchEvents(tabInfos);
-      setPageContext(tabInfoWithEvents);
+    chrome.storage.local.get(['tabInfos'], async ({ tabInfos, url }) => {
+      if (tabInfos && url) {
+        const tabInfoWithEvents = await fetchEvents(tabInfos, setDownloading, setSyncInfo, []);
+        setPageContext(tabInfoWithEvents);
+      }
     });
-  }, [fetchEvents]);
+  }, []);
 
   useEffect(() => {
     // Subscribe to changes in local storage
     const handler = async (changes: any, areaName: 'sync' | 'local' | 'managed') => {
-      if (areaName === 'local' && changes.tabInfos && changes) {
+      if (areaName === 'local' && changes?.tabInfos) {
         const tabId = await getTabId();
-        const tabInfoWithEvents = await fetchEvents({ ...changes.tabInfos.newValue });
-        setPageContext(tabInfoWithEvents);
+        if (JSON.stringify(changes.tabInfos.newValue[tabId]?.prebids) !== JSON.stringify(changes.tabInfos.oldValue[tabId]?.prebids)) {
+          const tabInfoWithEvents = await fetchEvents(
+            { ...changes.tabInfos.newValue, [tabId]: changes.tabInfos.newValue[tabId] },
+            setDownloading,
+            setSyncInfo,
+            downloadingUrls
+          );
+          setPageContext(tabInfoWithEvents);
+        }
       }
     };
     chrome.storage.onChanged.addListener(handler);
+
+    // keep only the last 100 urls
+    if (downloadingUrls.length > 100) {
+      setDownloadingUrls(downloadingUrls.slice(1));
+    }
 
     // Unsubscribe when component unmounts
     return () => {
       chrome.storage.onChanged.removeListener(handler);
     };
-  }, [fetchEvents]);
+  }, [downloadingUrls]);
 
   useEffect(() => {
     // Subscribe to changes in local storage

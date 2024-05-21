@@ -10,6 +10,7 @@ import GptPreAuctionComponent from './tiles/GptPreAuctionComponent';
 import FledgeForGPTComponent from './tiles/FledgeForGPTComponent';
 import Grid from '@mui/material/Grid';
 import { ErrorBoundary } from 'react-error-boundary';
+import PaapiComponent from './tiles/PaapiComponent';
 import InstalledModulesComponent from './tiles/InstalledModules';
 
 export const tileHeight = 255;
@@ -55,6 +56,10 @@ const ConfigComponent = (): JSX.Element => {
 
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <FledgeForGPTComponent />
+      </ErrorBoundary>
+
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <PaapiComponent />
       </ErrorBoundary>
     </Grid>
   );
