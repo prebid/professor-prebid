@@ -5,15 +5,7 @@ import { PaapiAuctionsGridComponent } from './PaapiAuctionGridComponent';
 
 const PaapiComponent = () => {
   return (
-    <Box
-      sx={{
-        // display: 'flex',
-        // flexDirection: 'column',
-        // justifyContent: 'space-between',
-        // rowGap: '10px',
-        p: 1
-      }}
-    >
+    <Box sx={{ p: 1 }}>
       <PaapiAuctionsGridComponent />
     </Box>
   );

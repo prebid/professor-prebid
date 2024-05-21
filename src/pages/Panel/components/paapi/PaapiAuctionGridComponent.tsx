@@ -98,23 +98,21 @@ export const PaapiGridContainer = ({
 export const PaapiAuctionsGridComponent = (): JSX.Element => {
   const { auctionState } = useContext(PaapiContext);
   const topAuctions = auctionState?.global?.childAuctionsBox;
-  const expandedAuction = topAuctions?.find((auction) => auction.expanded);
   const colCount = 1000;
   const step = 100;
   return (
-    <Box sx={{ overflowX: 'auto', p: 1 }}>
-      <PaapiGridContainer
-        label={true}
-        show={true}
-        colCount={colCount}
-        step={step}
-        children={
-          <>
-            {expandedAuction && <PaapiAuction auction={expandedAuction} colCount={colCount} step={step} />}
-            {!expandedAuction && topAuctions?.map((auction, index) => <PaapiAuction auction={auction} key={index} colCount={colCount} step={step} />)}
-          </>
-        }
-      />
-    </Box>
+    <PaapiGridContainer
+      label={true}
+      show={true}
+      colCount={colCount}
+      step={step}
+      children={
+        <>
+          {topAuctions?.map((auction, index) => (
+            <PaapiAuction auction={auction} key={index} colCount={colCount} step={step} />
+          ))}
+        </>
+      }
+    />
   );
 };
