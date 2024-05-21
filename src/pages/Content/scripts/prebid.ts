@@ -235,6 +235,7 @@ export interface IPrebidBid {
   adUnitCode: string;
   adUrl: string;
   adserverTargeting: any;
+  bidId: string;
   hb_adid: string;
   hb_adomain: string;
   hb_bidder: string;
