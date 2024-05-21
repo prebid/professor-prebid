@@ -4,6 +4,7 @@ import {
   IPrebidAdUnit,
   IPrebidBidWonEventData,
   IPrebidAdRenderSucceededEventData,
+  IPrebidBidRequestedEventData,
 } from '../../../../Content/scripts/prebid';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
@@ -22,6 +23,7 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
   const { mediaTypes } = adUnit;
   const [winningBids, setAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [auctionsBidsReceived, setAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
+  const [auctionsBidsRequested, setAuctionsBidsRequested] = React.useState<IPrebidBidRequestedEventData[]>([]);
   const [auctionsAdsRendered, setAuctionsAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
 
   useEffect(() => {
@@ -39,6 +41,10 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
       ({ eventType, args: { auctionId } }) => eventType === 'bidResponse' && auctionId === latestAuctionId
     );
 
+    const auctionsBidsRequested = (events as IPrebidBidRequestedEventData[]).filter(
+      ({ eventType, args: { auctionId } }) => eventType === 'bidRequested' && auctionId === latestAuctionId
+    );
+
     const auctionsAdsRendered = (events as IPrebidAdRenderSucceededEventData[]).filter(
       ({
         eventType,
@@ -50,6 +56,7 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
 
     setAuctionsWinningBids(auctionsWinningBids);
     setAuctionBidsReceived(auctionsBidsReceived);
+    setAuctionsBidsRequested(auctionsBidsRequested);
     setAuctionsAdsRendered(auctionsAdsRendered);
   }, [events]);
 
@@ -137,6 +144,11 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
                 bidReceived.args.bidder === bidder &&
                 adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`)?.includes(bidReceived?.args?.size)
             );
+            const bidRequested = auctionsBidsRequested.find(
+              (bidReq) =>
+                bidReq.args.bidderCode === bidder &&
+                bidReq.args.bids.find((bid) => bid.adUnitCode === adUnit.code)
+            );
             const isWinner = winningBids.some(
               (winningBid) =>
                 winningBid.args.adUnitCode === adUnit.code &&
@@ -153,7 +165,7 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
               ? `${bidder} (${Number(bidReceived?.args.cpm).toFixed(2)} ${bidReceived?.args.currency})`
               : `${bidder}`;
             return (
-              <BidChipComponent input={arr[index]} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} isRendered={isRendered} />
+              <BidChipComponent input={arr[index]} label={label} key={index} isWinner={isWinner} bidRequested={bidRequested} bidReceived={bidReceived} isRendered={isRendered} />
             );
           })}
         </Stack>

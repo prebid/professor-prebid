@@ -22,7 +22,7 @@ const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): 
 };
 
 const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps): JSX.Element => {
-  const { allWinningBids, allBidResponseEvents, adsRendered, isPanel } = useContext(StateContext);
+  const { allWinningBids, allBidResponseEvents, allBidRequestedEvents, adsRendered, isPanel } = useContext(StateContext);
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
@@ -77,6 +77,12 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps
                         bidReceived.args?.adUnitCode === adUnitCode && bidReceived.args.bidder === bidder && matchesSizes(bidReceived, adUnit)
                     );
 
+                    const bidRequested = allBidRequestedEvents.find(
+                      (bidReq) =>
+                        bidReq.args.bidderCode === bidder &&
+                        bidReq.args.bids.find((bid) => bid.adUnitCode === adUnitCode)
+                    );
+
                     const isWinner = allWinningBids.some(
                       (winningBid) =>
                         winningBid.args.adUnitCode === adUnitCode && winningBid.args.bidder === bidder && matchesSizes(winningBid, adUnit)
@@ -96,6 +102,7 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps
                         label={label}
                         key={index}
                         isWinner={isWinner}
+                        bidRequested={bidRequested}
                         bidReceived={bidReceived}
                         isRendered={isRendered}
                       />
