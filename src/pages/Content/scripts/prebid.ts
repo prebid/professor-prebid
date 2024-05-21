@@ -1,5 +1,5 @@
 import { sendWindowPostMessage } from '../../Shared/utils';
-import { EVENTS } from '../../Shared/constants';
+import { DOWNLOAD_FAILED, EVENTS } from '../../Shared/constants';
 import { decylce } from '../../Shared/utils';
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -18,8 +18,7 @@ class Prebid {
     this.ifFrameId = iframeId;
     this.globalPbjs = window[namespace as keyof Window];
     this.globalPbjs.que.push(() => this.addEventListeners());
-    this.globalPbjs.que.push(() => this.throttle(this.sendDetailsToBackground));
-    this.globalPbjs.que.push(() => this.sendDetailsEvery(3000));
+    this.globalPbjs.que.push(() => this.throttle(this.sendDetailsToContentScript));
   }
 
   addEventListeners = (): void => {
@@ -27,43 +26,70 @@ class Prebid {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionInit', args: auctionInitData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionEnd', args: auctionEndData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidRequested', args: bidRequestedData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidResponse', args: bidResponseData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'noBid', args: noBidData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidWon', args: bidWonData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
+
+    window.addEventListener(
+      'message',
+      (event) => {
+        if (!event.data.profPrebid) {
+          return;
+        }
+        const { type, payload } = event.data;
+        if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
+          // console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
+          this.reset();
+          this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
+          this.sendDetailsToContentScript();
+        }
+      },
+      false
+    );
+
+    window.addEventListener('beforeunload', () => {
+      this.reset();
+      this.sendDetailsToContentScript();
+    });
+  };
+
+  extractDomain = (url: string) => {
+    const domain = url.replace('blob:', '').replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
+    return domain;
   };
 
   getDebugConfig = () => {
@@ -75,35 +101,26 @@ class Prebid {
     }
   };
 
-  removeWindowFields = (obj: { [key: string]: any }): void => {
-    const visitedObjects: Set<Object> = new Set();
-    const traverseObject = (obj: { [key: string]: any }) => {
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          const propertyValue = obj[key];
-          if (propertyValue instanceof Window || propertyValue instanceof Node || propertyValue instanceof HTMLElement) {
-            try {
-              delete obj[key];
-            } catch (error) {
-              // some properties are not deletable
-            }
-          } else if (typeof propertyValue === 'object' && !visitedObjects.has(propertyValue)) {
-            visitedObjects.add(propertyValue);
-            traverseObject(propertyValue);
-          }
+  removeDocumentFields = (obj: { [key: string]: any }): void => {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        if (obj[key] instanceof Document || obj[key] instanceof Window || obj[key] instanceof Node) {
+          // If the property is a Document instance, delete it
+          delete obj[key];
+        } else if (typeof obj[key] === 'object') {
+          // If the property is an object, recursively check its fields
+          this.removeDocumentFields(obj[key]);
         }
       }
-    };
-    traverseObject(obj);
+    }
   };
 
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
     for (let i = 0; i < events.length; i++) {
-      this.removeWindowFields(events[i]);
+      this.removeDocumentFields(events[i]);
     }
     const string = decylce(events);
-    if (string === '[]') return null;
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
@@ -121,53 +138,48 @@ class Prebid {
     return objectURL;
   };
 
-  sendDetailsToBackground = (): void => {
-    this.globalPbjs.que.push(async () => {
-      const eventsUrl = this.getEventsObjUrl();
-      if (!eventsUrl) return;
-      const config = this.globalPbjs.getConfig();
-      const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
-      const timeout = window.PREBID_TIMEOUT || null;
-      const prebidDetail: IPrebidDetails = {
-        config,
-        debug: this.getDebugConfig(),
-        eids,
-        events: [],
-        eventsUrl,
-        namespace: this.namespace,
-        iframeId: this.ifFrameId,
-        installedModules: this.globalPbjs.installedModules,
-        timeout,
-        version: this.globalPbjs.version,
-        bidderSettings: this.globalPbjs.bidderSettings,
-      };
-      sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-      this.sendToContentScriptPending = false;
-    });
+  reset = () => {
+    this.events = [];
+    this.lastEventsObjectUrls = [];
+    this.sendToContentScriptPending = false;
+  };
+
+  sendDetailsToContentScript = (): void => {
+    const config = this.globalPbjs.getConfig();
+    const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
+    const timeout = window.PREBID_TIMEOUT || null;
+    const prebidDetail: IPrebidDetails = {
+      config,
+      debug: this.getDebugConfig(),
+      eids,
+      events: [],
+      eventsUrl: this.getEventsObjUrl(),
+      namespace: this.namespace,
+      iframeId: this.ifFrameId,
+      installedModules: this.globalPbjs.installedModules,
+      timeout,
+      version: this.globalPbjs.version,
+      bidderSettings: this.globalPbjs.bidderSettings,
+    };
+
+    sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+    this.sendToContentScriptPending = false;
   };
 
   throttle = (fn: Function) => {
-    const now = Date.now();
     if (
       !this.sendToContentScriptPending &&
-      (!this.lastTimeUpdateSentToContentScript || now - this.lastTimeUpdateSentToContentScript >= this.updateRateInterval)
+      (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)
     ) {
       this.sendToContentScriptPending = true;
-      this.lastTimeUpdateSentToContentScript = now;
-      fn();
-    } else if (this.updateTimeout) {
+      this.lastTimeUpdateSentToContentScript = Date.now();
+      this.globalPbjs.que.push(async () => {
+        this.sendDetailsToContentScript();
+      });
+    } else {
       clearTimeout(this.updateTimeout);
+      this.updateTimeout = setTimeout(() => this.throttle(fn), this.updateRateInterval);
     }
-    this.updateTimeout = setTimeout(() => this.throttle(fn), this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
-  };
-
-  sendDetailsEvery = (interval: number) => {
-    setInterval(() => {
-      // if hasn't been sent in the last interval milliseconds
-      if (Date.now() - this.lastTimeUpdateSentToContentScript > interval) {
-        this.sendDetailsToBackground();
-      }
-    }, interval);
   };
 }
 
@@ -180,7 +192,7 @@ const detectIframe = () => {
 };
 
 export const addEventListenersForPrebid = () => {
-  const iFrameId = detectIframe() ? window.name || window.id || window.location.href : null;
+  const iFrameId = detectIframe() ? window.frameElement?.id : null;
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(
@@ -235,7 +247,6 @@ export interface IPrebidBid {
   adUnitCode: string;
   adUrl: string;
   adserverTargeting: any;
-  bidId: string;
   hb_adid: string;
   hb_adomain: string;
   hb_bidder: string;
@@ -504,14 +515,6 @@ export interface IPrebidConfig {
     bidders: string[];
     defaultForSlots: number;
   };
-  paapi: {
-    enabled: boolean;
-    bidders: string[];
-    defaultForSlots: number;
-    gpt: {
-      autoconfig: boolean;
-    };
-  };
   floors: {
     auctionDelay: number;
     data: {
@@ -603,7 +606,6 @@ export interface IPrebidDetails {
   iframeId: string | null;
   installedModules: string[];
   bidderSettings: IPrebidBidderSettings;
-  iframes?: { [key: string]: IPrebidDetails };
 }
 
 export interface IPrebidBidderSettings {
