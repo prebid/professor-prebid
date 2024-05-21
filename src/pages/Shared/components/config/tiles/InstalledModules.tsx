@@ -18,14 +18,6 @@ const InstalledModulesComponent = (): JSX.Element => {
 
   const { prebid } = useContext(AppStateContext);
   const { installedModules } = prebid;
-  if (!installedModules || !Array.isArray(installedModules)) return null;
-
-  const bidAdapters = installedModules.filter((module) => module.includes('BidAdapter')).sort();
-  const analyticsAdapters = installedModules.filter((module) => module.includes('AnalyticsAdapter')).sort();
-  const idSystems = installedModules.filter((module) => module.includes('IdSystem') || module.includes('UserID')).sort();
-  const miscellaneous = installedModules
-    .filter((module) => !module.includes('BidAdapter') && !module.includes('AnalyticsAdapter') && !module.includes('IdSystem'))
-    .sort();
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -33,6 +25,7 @@ const InstalledModulesComponent = (): JSX.Element => {
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 
+  if (!installedModules) return null;
   return (
     <Grid item sm={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, maxHeight: expanded ? 'unset' : tileHeight }}>
@@ -62,22 +55,13 @@ const InstalledModulesComponent = (): JSX.Element => {
           <Grid container spacing={2}>
             {!expanded && (
               <RenderKeyValueComponent
-                label="Bid Adapters"
-                value={bidAdapters.length > 4 ? [...bidAdapters.slice(0, 4), '...'] : bidAdapters}
+                label="Installed Modules"
+                value={prebid.installedModules.length > 4 ? [...prebid.installedModules.slice(0, 4), '...'] : prebid.installedModules}
                 columns={[12, 12]}
                 expanded={expanded}
               />
             )}
-            {expanded && (
-              <>
-                {bidAdapters && <RenderKeyValueComponent label="Bid Adapters" value={bidAdapters} columns={[12, 12]} expanded={expanded} />}
-                {analyticsAdapters && (
-                  <RenderKeyValueComponent label="Analytics Adapters" value={analyticsAdapters} columns={[12, 12]} expanded={expanded} />
-                )}
-                {idSystems && <RenderKeyValueComponent label="Id Systems" value={idSystems} columns={[12, 12]} expanded={expanded} />}
-                {miscellaneous && <RenderKeyValueComponent label="Miscellaneous" value={miscellaneous} columns={[12, 12]} expanded={expanded} />}
-              </>
-            )}
+            {expanded && <RenderKeyValueComponent label="Installed Module" value={prebid.installedModules} columns={[12, 12]} expanded={expanded} />}
           </Grid>
         </CardContent>
       </Card>

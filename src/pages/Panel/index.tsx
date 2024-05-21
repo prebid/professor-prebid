@@ -13,9 +13,9 @@ render(
   <ThemeProvider theme={theme}>
     <InspectedPageContextProvider>
       <StateContextProvider>
-          <ErrorBoundary FallbackComponent={ErrorCardComponent}>
-            <Panel />
-          </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorCardComponent}>
+          <Panel />
+        </ErrorBoundary>
       </StateContextProvider>
     </InspectedPageContextProvider>
   </ThemeProvider>,

@@ -154,7 +154,6 @@ const NavBarComponent = () => {
           icon={<DifferenceIcon />}
           label="Version"
         />
-
       </Box>
 
       <Box>
