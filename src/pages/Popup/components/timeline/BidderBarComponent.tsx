@@ -40,7 +40,7 @@ const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpe
       onClick={(e) => e.stopPropagation()}
     >
       <JSONViewerComponent
-        src={{ ...bidderRequest, topics }}
+        src={{ bidderRequest, topics }}
         name={false}
         collapsed={3}
         displayObjectSize={false}
