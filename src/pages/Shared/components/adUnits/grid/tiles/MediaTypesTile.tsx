@@ -57,6 +57,11 @@ const MediaTypesTile = ({ adUnit: { mediaTypes, code: adUnitCode } }: IMediaType
         </Box>
         <Box onClick={(e) => e.stopPropagation()}>
           <Box sx={{ p: 0.5 }}>
+            {(JSON.stringify(mediaTypes) === '{}' || mediaTypes === undefined || !mediaTypes) && (
+              <Box>
+                <Typography variant="caption">Media Types Object: {JSON.stringify(mediaTypes)}</Typography>
+              </Box>
+            )}
             {Object.keys(mediaTypes).map((mediaType, index) => (
               <React.Fragment key={index}>
                 {mediaType === 'banner' && mediaTypes['banner'].sizes && (
