@@ -30,6 +30,7 @@ export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   { value: 'mediaType', label: 'mediaType', mediaType: 'allMediaTypes', default: 'banner', options: ['banner', 'native', 'video'], type: 'string' },
   { value: 'meta', label: 'meta', mediaType: 'allMediaTypes', default: '', type: 'string' },
   { value: 'netRevenue', label: 'netRevenue', mediaType: 'allMediaTypes', default: '', type: 'number' },
+  { value: 'requestBidder', label: 'requestBidder', mediaType: 'allMediaTypes', default: '', type: 'string' },
   { value: 'ttl', label: 'ttl', mediaType: 'allMediaTypes', default: '', type: 'number' },
   //mediaType banner
   { value: 'ad', label: 'ad', mediaType: 'banner', default: '', type: 'string' },
