@@ -7,7 +7,7 @@ class Prebid {
   ifFrameId: string | null;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
-  updateRateInterval: number = 5000;
+  updateRateInterval: number = 1000;
   sendToContentScriptPending: boolean = false;
   lastEventsObjectUrls: { url: string; size: number }[] = [];
   events: any[] = [];
@@ -155,10 +155,13 @@ class Prebid {
       this.sendToContentScriptPending = true;
       this.lastTimeUpdateSentToContentScript = now;
       fn();
-    } else if (this.updateTimeout) {
-      clearTimeout(this.updateTimeout);
     }
-    this.updateTimeout = setTimeout(() => this.throttle(fn), this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
+    if (!this.updateTimeout) {
+      this.updateTimeout = setTimeout(() => {
+        this.sendToContentScriptPending = false;
+        this.throttle(fn);
+      }, this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
+    }
   };
 
   sendDetailsEvery = (interval: number) => {
