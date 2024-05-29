@@ -75,3 +75,11 @@ export const sendChromeTabsMessage = async (type: string, payload: object | stri
   const tabId = await getTabId();
   chrome.tabs.sendMessage(tabId, { type, payload });
 };
+
+export const detectIframe = (): boolean => {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+};
