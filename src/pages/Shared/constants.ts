@@ -21,6 +21,10 @@ export const SAVE_MASKS = 'PP_SAVE_MASKS';
 export const DOWNLOAD_FAILED = 'PP_DOWNLOAD_FAILED';
 export const INITIATOR_TOGGLE = 'initiator_state';
 export const INITIATOR_ROOT_URL = 'initiator_root_url';
+export const POPUP_LOADED = 'PP_POPUP_LOADED';
+export const PREBID_DETECTION_TIMEOUT = 60000;
+export const PREBID_DETECTION_TIMEOUT_IFRAME = 3000;
+
 export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   // all mediaTypes
   { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '', type: 'string' },
