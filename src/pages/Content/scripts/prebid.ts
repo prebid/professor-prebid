@@ -1,13 +1,13 @@
-import { sendWindowPostMessage } from '../../Shared/utils';
-import { DOWNLOAD_FAILED, EVENTS } from '../../Shared/constants';
-import { decylce } from '../../Shared/utils';
+import { sendWindowPostMessage, detectIframe } from '../../Shared/utils';
+import { EVENTS, POPUP_LOADED, PREBID_DETECTION_TIMEOUT, PREBID_DETECTION_TIMEOUT_IFRAME } from '../../Shared/constants';
+
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
   ifFrameId: string | null;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
-  updateRateInterval: number = 5000;
+  updateRateInterval: number = 1000;
   sendToContentScriptPending: boolean = false;
   lastEventsObjectUrls: { url: string; size: number }[] = [];
   events: any[] = [];
@@ -18,7 +18,6 @@ class Prebid {
     this.ifFrameId = iframeId;
     this.globalPbjs = window[namespace as keyof Window];
     this.globalPbjs.que.push(() => this.addEventListeners());
-    this.globalPbjs.que.push(() => this.throttle(this.sendDetailsToContentScript));
   }
 
   addEventListeners = (): void => {
@@ -85,6 +84,17 @@ class Prebid {
       this.reset();
       this.sendDetailsToContentScript();
     });
+
+    window.addEventListener(
+      'message',
+      (event) => {
+        if (!event.data.profPrebid) return;
+        if (event.data.type === POPUP_LOADED) {
+          this.throttle(this.sendDetailsToBackground);
+        }
+      },
+      false
+    );
   };
 
   extractDomain = (url: string) => {
@@ -101,26 +111,51 @@ class Prebid {
     }
   };
 
-  removeDocumentFields = (obj: { [key: string]: any }): void => {
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        if (obj[key] instanceof Document || obj[key] instanceof Window || obj[key] instanceof Node) {
-          // If the property is a Document instance, delete it
-          delete obj[key];
-        } else if (typeof obj[key] === 'object') {
-          // If the property is an object, recursively check its fields
-          this.removeDocumentFields(obj[key]);
+  removeWindowFields = (obj: { [key: string]: any }): void => {
+    if (obj.eventType === 'adRenderSucceeded' && obj.args.doc) {
+      obj.args.doc = 'pruned by Prof. Prebid';
+    } else {
+      const visitedObjects: Set<Object> = new Set();
+      const traverseObject = (obj: { [key: string]: any }) => {
+        for (const key in obj) {
+          if (obj.hasOwnProperty(key)) {
+            const propertyValue = obj[key];
+            if (propertyValue instanceof Window || propertyValue instanceof Node || propertyValue instanceof HTMLElement) {
+              try {
+                delete obj[key];
+              } catch (error) {
+                // some properties are not deletable
+              }
+            } else if (typeof propertyValue === 'object' && !visitedObjects.has(propertyValue)) {
+              visitedObjects.add(propertyValue);
+              traverseObject(propertyValue);
+            }
+          }
         }
-      }
+      };
+      traverseObject(obj);
+
     }
   };
 
   getEventsObjUrl = () => {
     const events = this.globalPbjs?.getEvents ? this.globalPbjs.getEvents() : this.events;
-    for (let i = 0; i < events.length; i++) {
-      this.removeDocumentFields(events[i]);
-    }
-    const string = decylce(events);
+    const string = `[${events
+      .map((event) => {
+        this.removeWindowFields(event);
+        try {
+          return JSON.stringify(event);
+        } catch (error) {
+          return JSON.stringify({
+            eventType: event.eventType,
+            args: { error: 'Prof. Prebid could not stringify this event.' },
+            elapsedTime: event.elapsedTime,
+          });
+        }
+      })
+      .join()}]`;
+
+    if (string === '[]') return null;
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
     // memory management
@@ -172,24 +207,18 @@ class Prebid {
       (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)
     ) {
       this.sendToContentScriptPending = true;
-      this.lastTimeUpdateSentToContentScript = Date.now();
-      this.globalPbjs.que.push(async () => {
-        this.sendDetailsToContentScript();
-      });
-    } else {
-      clearTimeout(this.updateTimeout);
-      this.updateTimeout = setTimeout(() => this.throttle(fn), this.updateRateInterval);
+      this.lastTimeUpdateSentToContentScript = now;
+      fn();
     }
+    if (!this.updateTimeout) {
+      this.updateTimeout = setTimeout(() => {
+        this.sendToContentScriptPending = false;
+        this.throttle(fn);
+      }, this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
+    }
+
   };
 }
-
-const detectIframe = () => {
-  try {
-    return window.self !== window.top;
-  } catch (e) {
-    return true;
-  }
-};
 
 export const addEventListenersForPrebid = () => {
   const iFrameId = detectIframe() ? window.frameElement?.id : null;
@@ -199,7 +228,7 @@ export const addEventListenersForPrebid = () => {
     () => {
       stopLoop = true;
     },
-    detectIframe() ? 8000 : 60000
+    detectIframe() ? PREBID_DETECTION_TIMEOUT_IFRAME : PREBID_DETECTION_TIMEOUT
   );
   const isPrebidInPage = () => {
     const pbjsGlobals = window._pbjsGlobals || [];

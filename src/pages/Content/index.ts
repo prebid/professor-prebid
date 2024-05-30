@@ -1,6 +1,6 @@
-import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, DOWNLOAD_FAILED } from '../Shared/constants';
+import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, POPUP_LOADED, PREBID_DETECTION_TIMEOUT_IFRAME } from '../Shared/constants';
 import { IPrebidDetails } from './scripts/prebid';
-import { sendWindowPostMessage } from '../Shared/utils';
+import { detectIframe, sendWindowPostMessage } from '../Shared/utils';
 
 const ContentScript = () => {
   let pbjsNamespace: string = null;
@@ -25,19 +25,21 @@ const ContentScript = () => {
   };
 
   const listenToChromeRuntimeMessages = () => {
-    chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
-      if (request.type === CONSOLE_TOGGLE) {
-        sendWindowPostMessage(request.type, { detail: request.consoleState });
-      }
-      if (request.type === PBJS_NAMESPACE_CHANGE) {
-        pbjsNamespace = request.pbjsNamespace;
-        sendWindowPostMessage(request.type, { detail: request.pbjsNamespace });
-      }
-      if (request.type === DOWNLOAD_FAILED) {
-        sendWindowPostMessage(request.type, request.payload);
-      }
-      sendResponse();
-    });
+    chrome.runtime?.onMessage.addListener(processChromeRuntimeMessages);
+  };
+
+  const processChromeRuntimeMessages = (request: { type: string; payload?: object; [key: string]: any }) => {
+    if (request.type === CONSOLE_TOGGLE) {
+      sendWindowPostMessage(request.type, { detail: request.consoleState });
+    }
+    if (request.type === PBJS_NAMESPACE_CHANGE) {
+      pbjsNamespace = request.pbjsNamespace;
+      sendWindowPostMessage(request.type, { detail: request.pbjsNamespace });
+    }
+    if (request.type === POPUP_LOADED) {
+      sendWindowPostMessage(request.type, request.payload);
+    }
+
   };
 
   const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object; profPrebid: boolean }>) => {
@@ -71,7 +73,16 @@ const ContentScript = () => {
     listenToChromeRuntimeMessages();
     injectScript();
   };
-  init();
+
+  if (detectIframe() === true) {
+    setTimeout(() => {
+      if (window._pbjsGlobals !== undefined && Array.isArray(window._pbjsGlobals) && window._pbjsGlobals.length > 0) {
+        init();
+      }
+    }, PREBID_DETECTION_TIMEOUT_IFRAME);
+  } else {
+    init();
+  }
 };
 
 ContentScript();

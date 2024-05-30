@@ -21,6 +21,10 @@ export const SAVE_MASKS = 'PP_SAVE_MASKS';
 export const DOWNLOAD_FAILED = 'PP_DOWNLOAD_FAILED';
 export const INITIATOR_TOGGLE = 'initiator_state';
 export const INITIATOR_ROOT_URL = 'initiator_root_url';
+export const POPUP_LOADED = 'PP_POPUP_LOADED';
+export const PREBID_DETECTION_TIMEOUT = 60000;
+export const PREBID_DETECTION_TIMEOUT_IFRAME = 3000;
+
 export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   // all mediaTypes
   { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '', type: 'string' },
@@ -30,6 +34,7 @@ export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   { value: 'mediaType', label: 'mediaType', mediaType: 'allMediaTypes', default: 'banner', options: ['banner', 'native', 'video'], type: 'string' },
   { value: 'meta', label: 'meta', mediaType: 'allMediaTypes', default: '', type: 'string' },
   { value: 'netRevenue', label: 'netRevenue', mediaType: 'allMediaTypes', default: '', type: 'number' },
+  { value: 'requestBidder', label: 'requestBidder', mediaType: 'allMediaTypes', default: '', type: 'string' },
   { value: 'ttl', label: 'ttl', mediaType: 'allMediaTypes', default: '', type: 'number' },
   //mediaType banner
   { value: 'ad', label: 'ad', mediaType: 'banner', default: '', type: 'string' },
