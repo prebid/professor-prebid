@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
-import { IPrebidBidWonEventData, IPrebidBid, IPrebidBidRequestedEventData } from '../../../../Content/scripts/prebid';
-import StateContext from '../../../contexts/appStateContext';
+import React from 'react';
+import { IPrebidBidWonEventData, IPrebidBid } from '../../../../Content/scripts/prebid';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import JSONViewerComponent from '../../JSONViewerComponent';
@@ -8,8 +7,7 @@ import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
 
-const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, isRendered }: IBidChipComponentProps): JSX.Element => {
-  const { topics } = useContext(StateContext);
+const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: IBidChipComponentProps): JSX.Element => {
   const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
 
   return (
@@ -36,7 +34,7 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, i
         onClose={() => setPopUpOpen(false)}
       >
         <JSONViewerComponent
-          src={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid', topics }}
+          src={{ input: input, bidResponse: bidReceived || 'noBid' }}
           name={false}
           collapsed={3}
           displayObjectSize={false}
@@ -56,7 +54,6 @@ interface IBidChipComponentProps {
   input: IPrebidBid;
   label: string;
   isWinner: boolean;
-  bidRequested:IPrebidBidRequestedEventData | undefined; 
   bidReceived: IPrebidBidWonEventData | undefined;
   isRendered: boolean;
 }

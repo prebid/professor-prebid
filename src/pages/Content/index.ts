@@ -39,13 +39,14 @@ const ContentScript = () => {
     if (request.type === POPUP_LOADED) {
       sendWindowPostMessage(request.type, request.payload);
     }
+
   };
 
   const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object; profPrebid: boolean }>) => {
     if (!event.data.profPrebid || !event?.data || !event?.data?.type) return;
     const { type, payload } = event.data;
     if (type === EVENTS.REQUEST_CONSOLE_STATE) {
-      const result = await chrome.storage?.local.get(CONSOLE_TOGGLE);
+      const result = await chrome.storage.local.get(CONSOLE_TOGGLE);
       const checked = result[CONSOLE_TOGGLE];
       document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: !!checked }));
     }

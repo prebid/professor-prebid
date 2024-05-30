@@ -25,42 +25,64 @@ class Prebid {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionInit', args: auctionInitData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionEnd', args: auctionEndData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidRequested', args: bidRequestedData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidResponse', args: bidResponseData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'noBid', args: noBidData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
     });
 
     this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidWon', args: bidWonData });
       }
-      this.throttle(this.sendDetailsToBackground);
+      this.throttle(this.sendDetailsToContentScript);
+    });
+
+    window.addEventListener(
+      'message',
+      (event) => {
+        if (!event.data.profPrebid) {
+          return;
+        }
+        const { type, payload } = event.data;
+        if (type === DOWNLOAD_FAILED && this.extractDomain(payload?.eventsUrl) === this.extractDomain(this.lastEventsObjectUrls[0]?.url)) {
+          // console.log('Download failed, resetting', payload?.eventsUrl, this.lastEventsObjectUrls[0]?.url);
+          this.reset();
+          this.lastEventsObjectUrls = this.lastEventsObjectUrls.filter(({ url }) => url !== payload.eventsUrl);
+          this.sendDetailsToContentScript();
+        }
+      },
+      false
+    );
+
+    window.addEventListener('beforeunload', () => {
+      this.reset();
+      this.sendDetailsToContentScript();
     });
 
     window.addEventListener(
@@ -73,6 +95,11 @@ class Prebid {
       },
       false
     );
+  };
+
+  extractDomain = (url: string) => {
+    const domain = url.replace('blob:', '').replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
+    return domain;
   };
 
   getDebugConfig = () => {
@@ -107,6 +134,7 @@ class Prebid {
         }
       };
       traverseObject(obj);
+
     }
   };
 
@@ -145,36 +173,38 @@ class Prebid {
     return objectURL;
   };
 
-  sendDetailsToBackground = (): void => {
-    this.globalPbjs.que.push(async () => {
-      const eventsUrl = this.getEventsObjUrl();
-      if (!eventsUrl) return;
-      const config = this.globalPbjs.getConfig();
-      const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
-      const timeout = window.PREBID_TIMEOUT || null;
-      const prebidDetail: IPrebidDetails = {
-        config,
-        debug: this.getDebugConfig(),
-        eids,
-        events: [],
-        eventsUrl,
-        namespace: this.namespace,
-        iframeId: this.ifFrameId,
-        installedModules: this.globalPbjs.installedModules,
-        timeout,
-        version: this.globalPbjs.version,
-        bidderSettings: this.globalPbjs.bidderSettings,
-      };
-      sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-      this.sendToContentScriptPending = false;
-    });
+  reset = () => {
+    this.events = [];
+    this.lastEventsObjectUrls = [];
+    this.sendToContentScriptPending = false;
+  };
+
+  sendDetailsToContentScript = (): void => {
+    const config = this.globalPbjs.getConfig();
+    const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
+    const timeout = window.PREBID_TIMEOUT || null;
+    const prebidDetail: IPrebidDetails = {
+      config,
+      debug: this.getDebugConfig(),
+      eids,
+      events: [],
+      eventsUrl: this.getEventsObjUrl(),
+      namespace: this.namespace,
+      iframeId: this.ifFrameId,
+      installedModules: this.globalPbjs.installedModules,
+      timeout,
+      version: this.globalPbjs.version,
+      bidderSettings: this.globalPbjs.bidderSettings,
+    };
+
+    sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+    this.sendToContentScriptPending = false;
   };
 
   throttle = (fn: Function) => {
-    const now = Date.now();
     if (
       !this.sendToContentScriptPending &&
-      (!this.lastTimeUpdateSentToContentScript || now - this.lastTimeUpdateSentToContentScript >= this.updateRateInterval)
+      (!this.lastTimeUpdateSentToContentScript || this.lastTimeUpdateSentToContentScript < Date.now() - this.updateRateInterval)
     ) {
       this.sendToContentScriptPending = true;
       this.lastTimeUpdateSentToContentScript = now;
@@ -186,11 +216,12 @@ class Prebid {
         this.throttle(fn);
       }, this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
     }
+
   };
 }
 
 export const addEventListenersForPrebid = () => {
-  const iFrameId = detectIframe() ? window.name || window.id || window.location.href : null;
+  const iFrameId = detectIframe() ? window.frameElement?.id : null;
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(
@@ -245,7 +276,6 @@ export interface IPrebidBid {
   adUnitCode: string;
   adUrl: string;
   adserverTargeting: any;
-  bidId: string;
   hb_adid: string;
   hb_adomain: string;
   hb_bidder: string;
@@ -514,14 +544,6 @@ export interface IPrebidConfig {
     bidders: string[];
     defaultForSlots: number;
   };
-  paapi: {
-    enabled: boolean;
-    bidders: string[];
-    defaultForSlots: number;
-    gpt: {
-      autoconfig: boolean;
-    };
-  };
   floors: {
     auctionDelay: number;
     data: {
@@ -613,7 +635,6 @@ export interface IPrebidDetails {
   iframeId: string | null;
   installedModules: string[];
   bidderSettings: IPrebidBidderSettings;
-  iframes?: { [key: string]: IPrebidDetails };
 }
 
 export interface IPrebidBidderSettings {

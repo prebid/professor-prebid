@@ -117,121 +117,121 @@ export const NavBar = (): JSX.Element => {
         <Tabs value={selectedTab} onChange={handleChange} variant="scrollable" scrollButtons="auto" className="navbar__tabs">
           <Tab
             label={
-              <Button
-                component={Link}
-                to="/"
-                size="small"
-                variant={activeRoute === '/' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/')}
-                startIcon={<AdUnitsOutlinedIcon />}
-              >
-                AdUnits
-              </Button>
+              <Link to="/">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/')}
+                  startIcon={<AdUnitsOutlinedIcon />}
+                >
+                  AdUnits
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                to="bids"
-                component={Link}
-                size="small"
-                variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/bids')}
-                startIcon={<AccountBalanceOutlinedIcon />}
-              >
-                Bids
-              </Button>
+              <Link to="bids">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/bids' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/bids')}
+                  startIcon={<AccountBalanceOutlinedIcon />}
+                >
+                  Bids
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                to="timeline"
-                component={Link}
-                size="small"
-                variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/timeline')}
-                startIcon={<TimelineOutlinedIcon />}
-              >
-                Timeline
-              </Button>
+              <Link to="timeline">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/timeline' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/timeline')}
+                  startIcon={<TimelineOutlinedIcon />}
+                >
+                  Timeline
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                to="config"
-                size="small"
-                component={Link}
-                variant={activeRoute === '/config' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/config')}
-                startIcon={<SettingsOutlinedIcon />}
-              >
-                Config
-              </Button>
+              <Link to="config">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/config' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/config')}
+                  startIcon={<SettingsOutlinedIcon />}
+                >
+                  Config
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                to="userId"
-                component={Link}
-                size="small"
-                variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/userId')}
-                startIcon={<ContactPageOutlinedIcon />}
-              >
-                UserID
-              </Button>
+              <Link to="userId">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/userId' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/userId')}
+                  startIcon={<ContactPageOutlinedIcon />}
+                >
+                  UserID
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                component={Link}
-                to="tools"
-                size="small"
-                variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/tools')}
-                startIcon={<DnsOutlinedIcon />}
-              >
-                Tools
-              </Button>
+              <Link to="tools">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/tools' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/tools')}
+                  startIcon={<DnsOutlinedIcon />}
+                >
+                  Tools
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                to="events"
-                component={Link}
-                size="small"
-                variant={activeRoute === '/events' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/events')}
-                startIcon={<WarningAmberOutlinedIcon />}
-              >
-                Events
-              </Button>
+              <Link to="events">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/events' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/events')}
+                  startIcon={<WarningAmberOutlinedIcon />}
+                >
+                  Events
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />
           <Tab
             label={
-              <Button
-                to="version"
-                component={Link}
-                size="small"
-                variant={activeRoute === '/version' ? 'contained' : 'outlined'}
-                onClick={() => handleRouteChange('/version')}
-                startIcon={<DifferenceIcon />}
-              >
-                Version
-              </Button>
+              <Link to="version">
+                <Button
+                  size="small"
+                  variant={activeRoute === '/version' ? 'contained' : 'outlined'}
+                  onClick={() => handleRouteChange('/version')}
+                  startIcon={<DifferenceIcon />}
+                >
+                  Version
+                </Button>
+              </Link>
             }
             className="navbar__tab"
           />

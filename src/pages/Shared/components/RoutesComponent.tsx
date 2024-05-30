@@ -10,7 +10,6 @@ import EventsComponent from './auctionDebugEvents/EventsComponent';
 import { Routes, Route } from 'react-router-dom';
 import InitiatorComponent from './initiator/InitiatorComponent';
 import PbjsVersionInfoComponent from './pbjsVersionInfo/PbjsVersionInfoComponent';
-
 const RoutesComponent = (): JSX.Element => {
   return (
     <Routes>

@@ -6,19 +6,11 @@ import {
   IPrebidDetails,
   IPrebidAuctionInitEventData,
   IPrebidBidResponseEventData,
-  IPrebidBidRequestedEventData,
   IPrebidNoBidEventData,
   IPrebidAuctionEndEventData,
   IPrebidBidWonEventData,
   IPrebidAdRenderSucceededEventData,
 } from '../../Content/scripts/prebid';
-
-declare global {
-  interface Document {
-    featurePolicy: {[key: string]: any};
-    browsingTopics: () => Promise<string[]>;
-  }
-}
 
 const AppStateContext = React.createContext<AppState>({
   pbjsNamespace: undefined,
@@ -27,7 +19,6 @@ const AppStateContext = React.createContext<AppState>({
   isPanel: false,
   events: [],
   allBidResponseEvents: [],
-  allBidRequestedEvents: [],
   allNoBidEvents: [],
   allBidderEvents: [],
   allAdUnitCodes: [],
@@ -44,8 +35,6 @@ const AppStateContext = React.createContext<AppState>({
   setInitDataLoaded: () => {},
   prebidReleaseInfo: {},
   setPrebidReleaseInfo: () => {},
-  topics: [],
-  setTopics: () => {},
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
@@ -53,7 +42,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [prebid, setPrebid] = useState<IPrebidDetails>({} as IPrebidDetails);
   const [events, setEvents] = useState<IPrebidDetails['events']>([]);
   const [allBidResponseEvents, setAllBidResponseEvents] = useState<IPrebidBidResponseEventData[]>([]);
-  const [allBidRequestedEvents, setAllBidRequestedEvents] = useState<IPrebidBidRequestedEventData[]>([]);
   const [allNoBidEvents, setAllNoBidEvents] = useState<IPrebidNoBidEventData[]>([]);
   const [allBidderEvents, setAllBidderEvents] = useState<IPrebidDetails['events'][]>([]);
   const [allAdUnitCodes, setAllAdUnitCodes] = useState<string[]>([]);
@@ -68,25 +56,13 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [isRefresh, setIsRefresh] = useState<boolean>(false);
   const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
   const [prebidReleaseInfo, setPrebidReleaseInfo] = useState<any>({});
-  const [topics, setTopics] = useState<string[]>([]);
 
   useEffect(() => {
     if (pbjsNamespace === undefined && prebids && Object.keys(prebids).length > 0) {
       const defaultNameSpaceIndex = Object.keys(prebids).findIndex((el) => el === 'pbjs');
       const newValue = defaultNameSpaceIndex > -1 ? Object.keys(prebids)[defaultNameSpaceIndex] : Object.keys(prebids)[0];
-      const fetchTopics = async () => {  
-        if ('browsingTopics' in document && document.featurePolicy.allowsFeature('browsing-topics')) {
-          try {
-            const topics = await document.browsingTopics();
-            setTopics(topics);
-          } catch (error) {
-            console.error('Error fetching topics', error);
-          }
-        }
-      };
 
       setPbjsNamespace(newValue);
-      fetchTopics();
     }
   }, [pbjsNamespace, prebids, setPbjsNamespace]);
 
@@ -94,7 +70,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
     const events = Array.isArray(prebids?.[pbjsNamespace]?.events) ? prebids?.[pbjsNamespace]?.events : [];
     const allBidResponseEvents = (events?.filter(({ eventType }) => eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
-    const allBidRequestedEvents = (events?.filter(({ eventType }) => eventType === 'bidRequested') || []) as IPrebidBidRequestedEventData[];
     const allNoBidEvents = (events?.filter(({ eventType }) => eventType === 'noBid') || []) as IPrebidNoBidEventData[];
     const allAdUnitCodes = Array.from(
       new Set(
@@ -121,7 +96,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     setAuctionEndEvents(auctionEndEvents);
     setAllBidderEvents(allBidderEventsBidders);
     setAllBidResponseEvents(allBidResponseEvents);
-    setAllBidRequestedEvents(allBidRequestedEvents);
     setAllNoBidEvents(allNoBidEvents);
     setAllAdUnitCodes(allAdUnitCodes);
     setAllWinningBids(allWinningBids);
@@ -136,7 +110,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     prebid,
     events,
     allBidResponseEvents,
-    allBidRequestedEvents,
     allNoBidEvents,
     allBidderEvents,
     allAdUnitCodes,
@@ -152,8 +125,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     setInitDataLoaded,
     prebidReleaseInfo,
     setPrebidReleaseInfo,
-    topics,
-    setTopics,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
@@ -169,7 +140,6 @@ interface AppState {
   prebid: IPrebidDetails;
   events: IPrebidDetails['events'];
   allBidResponseEvents: IPrebidBidResponseEventData[];
-  allBidRequestedEvents: IPrebidBidRequestedEventData[];
   allNoBidEvents: IPrebidNoBidEventData[];
   allBidderEvents: IPrebidDetails['events'][];
   allAdUnitCodes: string[];
@@ -196,8 +166,6 @@ interface AppState {
     releasesSinceInstalledVersion?: any[];
   };
   setPrebidReleaseInfo: React.Dispatch<React.SetStateAction<any>>;
-  topics: string[];
-  setTopics: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 interface StateContextProviderProps {
