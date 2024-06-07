@@ -84,7 +84,7 @@ const PopOverComponent = ({
   pbjsNameSpace,
 }: PopOverComponentProps): JSX.Element => {
   const cacheTopPage = createCache({ key: 'css', container: window.top.document?.head, prepend: true });
-  const pbjs: IGlobalPbjs = window[pbjsNameSpace];
+  const pbjs: IGlobalPbjs = window[pbjsNameSpace as keyof Window];
   const open = Boolean(anchorEl);
 
   const [adUnit, setAdunit] = useState<IPrebidAdUnit>(null);
