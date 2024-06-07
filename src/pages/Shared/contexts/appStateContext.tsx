@@ -12,17 +12,24 @@ import {
   IPrebidBidWonEventData,
   IPrebidAdRenderSucceededEventData,
 } from '../../Content/scripts/prebid';
+import { IFrameInfo, IPrebids } from '../../Background/background';
+import { IGoogleAdManagerDetails } from '../../Content/scripts/googleAdManager';
+import { ITcfDetails } from '../../Content/scripts/tcf';
 
 declare global {
   interface Document {
-    featurePolicy: {[key: string]: any};
+    featurePolicy: { [key: string]: any };
     browsingTopics: () => Promise<string[]>;
   }
 }
 
 const AppStateContext = React.createContext<AppState>({
-  pbjsNamespace: undefined,
+  tcf: {} as ITcfDetails,
+  googleAdManager: {} as IGoogleAdManagerDetails,
+  pbjsNamespace: '',
   setPbjsNamespace: undefined,
+  frameId: '',
+  setIframeId: undefined,
   isSmallScreen: false,
   isPanel: false,
   events: [],
@@ -36,6 +43,7 @@ const AppStateContext = React.createContext<AppState>({
   auctionEndEvents: [],
   adsRendered: [],
   prebid: {} as IPrebidDetails,
+  prebids: {} as IPrebids,
   initiatorOutput: {},
   setInitiatorOutput: () => {},
   isRefresh: false,
@@ -49,7 +57,12 @@ const AppStateContext = React.createContext<AppState>({
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
-  const [pbjsNamespace, setPbjsNamespace] = useState<string | undefined>();
+  const [frameId, setIframeId] = useState<string>('');
+  const [pbjsNamespace, setPbjsNamespace] = useState<string>('');
+  const [pbjsNamespaces, setPbjsNamespaces] = useState<string[]>([]);
+  const [tcf, setTcf] = useState<ITcfDetails>({} as ITcfDetails);
+  const [googleAdManager, setGoogleAdManager] = useState<IGoogleAdManagerDetails>({} as IGoogleAdManagerDetails);
+  const [prebids, setPrebids] = useState<IPrebids>({} as IPrebids);
   const [prebid, setPrebid] = useState<IPrebidDetails>({} as IPrebidDetails);
   const [events, setEvents] = useState<IPrebidDetails['events']>([]);
   const [allBidResponseEvents, setAllBidResponseEvents] = useState<IPrebidBidResponseEventData[]>([]);
@@ -61,7 +74,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [auctionEndEvents, setAuctionEndEvents] = useState<IPrebidAuctionEndEventData[]>([]);
   const [allWinningBids, setAllWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [adsRendered, setAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
-  const { prebids } = useContext(InspectedPageContext);
+  const { frames } = useContext(InspectedPageContext);
   const isSmallScreen = useMediaQuery(useTheme().breakpoints.down('sm'));
   const isPanel = useMediaQuery(useTheme().breakpoints.up('md'));
   const [initiatorOutput, setInitiatorOutput] = useState<any>({});
@@ -71,28 +84,50 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [topics, setTopics] = useState<string[]>([]);
 
   useEffect(() => {
-    if (pbjsNamespace === undefined && prebids && Object.keys(prebids).length > 0) {
-      const defaultNameSpaceIndex = Object.keys(prebids).findIndex((el) => el === 'pbjs');
-      const newValue = defaultNameSpaceIndex > -1 ? Object.keys(prebids)[defaultNameSpaceIndex] : Object.keys(prebids)[0];
-      const fetchTopics = async () => {  
-        if ('browsingTopics' in document && document.featurePolicy.allowsFeature('browsing-topics')) {
-          try {
-            const topics = await document.browsingTopics();
-            setTopics(topics);
-          } catch (error) {
-            console.error('Error fetching topics', error);
-          }
-        }
-      };
+    setPbjsNamespaces(Object.keys(prebids).filter((key) => key !== 'tcf'));
+  }, [prebids]);
 
-      setPbjsNamespace(newValue);
-      fetchTopics();
+  useEffect(() => {
+    if (frameId === '' && frames && Object.keys(frames).length > 0) {
+      const defaultFrameIdIndex = Object.keys(frames).findIndex((el) => el === 'top-window');
+      const newValue = defaultFrameIdIndex > -1 ? Object.keys(frames)[defaultFrameIdIndex] : Object.keys(frames)[0];
+      setIframeId(newValue || '');
     }
-  }, [pbjsNamespace, prebids, setPbjsNamespace]);
+  }, [frameId, frames]);
+
+  useEffect(() => {
+    const currentFrameInfo = frames[frameId as keyof IFrameInfo] as IFrameInfo;
+    const newValue = currentFrameInfo?.prebids;
+    setPrebids({ ...newValue });
+    setGoogleAdManager({ ...currentFrameInfo?.googleAdManager });
+    setTcf({ ...currentFrameInfo?.tcf });
+  }, [frameId, frames]);
+
+  useEffect(() => {
+    if (pbjsNamespace === '' && pbjsNamespaces.length > 0) {
+      const defaultNameSpaceIndex = pbjsNamespaces.findIndex((el) => el === 'pbjs');
+      const newValue = defaultNameSpaceIndex > -1 ? pbjsNamespaces[defaultNameSpaceIndex] : pbjsNamespaces[0];
+      setPbjsNamespace(newValue || '');
+    }
+  }, [pbjsNamespace, pbjsNamespaces, setPbjsNamespace, frameId]);
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      if ('browsingTopics' in document && document.featurePolicy.allowsFeature('browsing-topics')) {
+        try {
+          const topics = await document.browsingTopics();
+          setTopics(topics);
+        } catch (error) {
+          console.error('Error fetching topics', error);
+        }
+      }
+    };
+    fetchTopics();
+  }, [prebids]);
 
   useEffect(() => {
     const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
-    const events = Array.isArray(prebids?.[pbjsNamespace]?.events) ? prebids?.[pbjsNamespace]?.events : [];
+    const events = Array.isArray(prebid.events) ? prebid.events : [];
     const allBidResponseEvents = (events?.filter(({ eventType }) => eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
     const allBidRequestedEvents = (events?.filter(({ eventType }) => eventType === 'bidRequested') || []) as IPrebidBidRequestedEventData[];
     const allNoBidEvents = (events?.filter(({ eventType }) => eventType === 'noBid') || []) as IPrebidNoBidEventData[];
@@ -129,11 +164,16 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   }, [pbjsNamespace, prebids]);
 
   const contextValue: AppState = {
+    tcf,
     pbjsNamespace,
     setPbjsNamespace,
+    frameId,
+    setIframeId,
     isSmallScreen,
     isPanel,
     prebid,
+    prebids,
+    googleAdManager,
     events,
     allBidResponseEvents,
     allBidRequestedEvents,
@@ -162,11 +202,16 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 export default AppStateContext;
 
 interface AppState {
+  tcf: ITcfDetails;
+  googleAdManager: IGoogleAdManagerDetails;
   pbjsNamespace?: string;
   setPbjsNamespace?: React.Dispatch<React.SetStateAction<string>>;
+  frameId: string;
+  setIframeId: React.Dispatch<React.SetStateAction<string>>;
   isSmallScreen: boolean;
   isPanel: boolean;
   prebid: IPrebidDetails;
+  prebids: IPrebids;
   events: IPrebidDetails['events'];
   allBidResponseEvents: IPrebidBidResponseEventData[];
   allBidRequestedEvents: IPrebidBidRequestedEventData[];

@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import NavBarComponent from './components/NavBarComponent';
 import RoutesComponent from '../Shared/components/RoutesComponent';
 import { BrowserRouter } from 'react-router-dom';
+import { NavBar } from '../Shared/components/navBar/Navbar';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
 import StateContext from '../Shared/contexts/appStateContext';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
@@ -11,8 +11,8 @@ import DownloadingCardComponent from '../Shared/components/DownloadingCardCompon
 import NoPrebidCardComponent from '../Shared/components/NoPrebidCardComponent';
 
 const Panel = (): JSX.Element => {
-  const { pbjsNamespace } = useContext(StateContext);
-  const { prebids, downloading } = useContext(InspectedPageContext);
+  const { pbjsNamespace, prebids } = useContext(StateContext);
+  const { downloading } = useContext(InspectedPageContext);
   const [showDownloadCard, setShowDownloadCard] = React.useState(false);
 
   useEffect(() => {
@@ -37,12 +37,10 @@ const Panel = (): JSX.Element => {
   return (
     <BrowserRouter>
       <Box sx={{ backgroundColor: 'primary.light', minHeight: '100vH', height: '100%' }}>
-        {/* <JSONViewerComponent src={auctionState} collapsed={2} /> */}
-        <NavBarComponent />
+        <NavBar />
         {(!prebids || !prebids[pbjsNamespace]) && downloading === 'false' && <NoPrebidCardComponent />}
         {showDownloadCard && <DownloadingCardComponent />}
         {prebids && prebids[pbjsNamespace] && !showDownloadCard && <RoutesComponent />}
-        <RoutesComponent />
       </Box>
     </BrowserRouter>
   );

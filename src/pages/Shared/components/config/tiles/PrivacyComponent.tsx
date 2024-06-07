@@ -12,16 +12,13 @@ import { tileHeight } from '../ConfigComponent';
 import ListItem from '@mui/material/ListItem';
 import CardContent from '@mui/material/CardContent';
 import RenderKeyValueComponent from '../../RenderKeyValueComponent';
-import InspectedPageContext from '../../../contexts/inspectedPageContext';
 import AppStateContext from '../../../contexts/appStateContext';
 
 const PrivacyComponent = (): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
   const ref = React.useRef<HTMLInputElement>(null);
-
-  const { tcf } = useContext(InspectedPageContext);
-  const { prebid } = useContext(AppStateContext);
+  const { prebid, tcf } = useContext(AppStateContext);
   const {
     config: { consentManagement },
   } = prebid;

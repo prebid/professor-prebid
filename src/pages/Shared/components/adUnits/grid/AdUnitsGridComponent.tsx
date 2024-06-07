@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid';
 import AdUnitsComponentState from '../AdUnitsComponentState';
 import AdUnitGridRow from './AdUnitsGridRow';
 import AppStateContext from '../../../contexts/appStateContext';
-import InspectedPageContext from '../../../contexts/inspectedPageContext';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import SyncProblemIcon from '@mui/icons-material/SyncProblem';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
@@ -13,8 +12,7 @@ import { Tooltip } from '@mui/material';
 
 const AdUnitsGridComponent = (): JSX.Element => {
   const { adUnits } = AdUnitsComponentState();
-  const { isPanel } = useContext(AppStateContext);
-  const { googleAdManager } = useContext(InspectedPageContext);
+  const { isPanel, googleAdManager } = useContext(AppStateContext);
   const showAdServerComlumn = isPanel && googleAdManager?.slots?.length > 0;
   const showOrtb2ImpColumn = isPanel && adUnits.find(({ ortb2Imp }) => ortb2Imp);
   let columns = 12;

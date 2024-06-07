@@ -8,13 +8,11 @@ import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
 import { tileHeight } from '../../../Shared/components/config/ConfigComponent';
-import InspectedPageContext from '../../../Shared/contexts/inspectedPageContext';
 import AppStateContext from '../../../Shared/contexts/appStateContext';
 
 const PrebidConfigComponent = (): JSX.Element => {
-  const inspectedPageState = useContext(InspectedPageContext);
-  const { pbjsNamespace } = useContext(AppStateContext);
-  const { config } = inspectedPageState?.prebids?.[pbjsNamespace];
+  const { prebid } = useContext(AppStateContext);
+  const { config } = prebid;
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
   const ref = React.useRef<HTMLInputElement>(null);

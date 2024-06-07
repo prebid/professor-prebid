@@ -36,18 +36,14 @@ class Background {
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     switch (type) {
       case EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
-        this.tabInfos[tabId]['googleAdManager'] = payload as IGoogleAdManagerDetails;
+        this.tabInfos[tabId]['top-window'] = this.tabInfos[tabId]['top-window'] || {};
+        this.tabInfos[tabId]['top-window']['googleAdManager'] = payload as IGoogleAdManagerDetails;
         break;
       case EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
-        const typedPayload = payload as IPrebidDetails;
-        this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-        if (typedPayload?.iframeId) {
-          this.tabInfos[tabId]['prebids'][typedPayload?.namespace]['iframes'] =
-            this.tabInfos[tabId]['prebids'][typedPayload?.namespace]['iframes'] || {};
-          this.tabInfos[tabId]['prebids'][typedPayload?.namespace]['iframes'][String(typedPayload?.iframeId)] = typedPayload;
-        } else {
-          this.tabInfos[tabId]['prebids'][typedPayload?.namespace] = typedPayload;
-        }
+        const { frameId, namespace } = payload as IPrebidDetails;
+        this.tabInfos[tabId][frameId] = this.tabInfos[tabId][frameId] || {};
+        this.tabInfos[tabId][frameId]['prebids'] = this.tabInfos[tabId][frameId]['prebids'] || {};
+        this.tabInfos[tabId][frameId]['prebids'][namespace as keyof IPrebids] = payload as IPrebidDetails;
         break;
       case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
         this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
@@ -64,7 +60,9 @@ class Background {
   handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
     if (frameId == 0) {
-      this.tabInfos[tabId] = { url };
+      this.tabInfos[tabId] = this.tabInfos[tabId] || {};
+      this.tabInfos[tabId]['top-window'] = this.tabInfos[tabId]['top-window'] || {};
+      this.tabInfos[tabId]['top-window'] = { url };
       this.updateBadge(tabId);
       await this.persistInStorage();
     }
@@ -97,7 +95,13 @@ class Background {
   updateBadge = async (tabId: number | undefined) => {
     const activeTabId = await getTabId();
     if (!tabId || tabId !== activeTabId) return;
-    if (tabId && this.tabInfos[tabId]?.prebids) {
+    let prebidCount = 0;
+    for (const [_frameId, frameInfo] of Object.entries(this.tabInfos[tabId])) {
+      if (frameInfo.prebids) {
+        prebidCount += Object.keys(frameInfo.prebids).length;
+      }
+    }
+    if (tabId && prebidCount > 0) {
       chrome.action.setBadgeBackgroundColor({ color: '#1ba9e1', tabId: activeTabId });
       chrome.action.setBadgeText({ text: `✓`, tabId: activeTabId });
     } else {
@@ -122,7 +126,7 @@ export interface IPrebids {
   [key: string]: IPrebidDetails;
 }
 
-export interface ITabInfo {
+export interface IFrameInfo {
   googleAdManager?: IGoogleAdManagerDetails;
   prebids?: IPrebids;
   tcf?: ITcfDetails;
@@ -134,8 +138,11 @@ export interface ITabInfo {
   initReqChainResult?: initReqChainResult;
 }
 
+interface IFrameInfos {
+  [key: string]: IFrameInfo;
+}
 export interface ITabInfos {
-  [key: number]: ITabInfo;
+  [key: number]: IFrameInfos;
 }
 
 export interface initReqChainResult {
