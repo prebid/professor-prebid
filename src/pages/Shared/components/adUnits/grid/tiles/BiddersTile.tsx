@@ -78,9 +78,7 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps
                     );
 
                     const bidRequested = allBidRequestedEvents.find(
-                      (bidReq) =>
-                        bidReq.args.bidderCode === bidder &&
-                        bidReq.args.bids.find((bid) => bid.adUnitCode === adUnitCode)
+                      (bidReq) => bidReq.args.bidderCode === bidder && bidReq.args.bids.find((bid) => bid.adUnitCode === adUnitCode)
                     );
 
                     const isWinner = allWinningBids.some(

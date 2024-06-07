@@ -56,7 +56,7 @@ interface IBidChipComponentProps {
   input: IPrebidBid;
   label: string;
   isWinner: boolean;
-  bidRequested:IPrebidBidRequestedEventData | undefined; 
+  bidRequested: IPrebidBidRequestedEventData | undefined;
   bidReceived: IPrebidBidWonEventData | undefined;
   isRendered: boolean;
 }
