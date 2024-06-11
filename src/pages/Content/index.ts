@@ -1,5 +1,5 @@
 import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, POPUP_LOADED } from '../Shared/constants';
-import { IPrebidDetails } from './scripts/prebid';
+import { IPrebidDetails } from '../Injected/prebid';
 import { detectIframe, sendWindowPostMessage } from '../Shared/utils';
 
 let pbjsNamespace: string = null;
@@ -36,6 +36,7 @@ const processChromeRuntimeMessages = (request: { type: string; payload?: object;
     sendWindowPostMessage(request.type, { detail: request.pbjsNamespace });
   }
   if (request.type === POPUP_LOADED) {
+    window.postMessage({ type: 'FROM_CONTENT_SCRIPT', text: 'Hello from the content script!' }, '*');
     sendWindowPostMessage(request.type, request.payload);
   }
 };

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Typography from '@mui/material/Typography';
-import { IPrebidConfigS2SConfig } from '../../../../Content/scripts/prebid';
+import { IPrebidConfigS2SConfig } from '../../../../Injected/prebid';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';

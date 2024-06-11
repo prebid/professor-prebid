@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import AdUnitsTile from './tiles/AdUnitTile';
 import StateContext from '../../../contexts/appStateContext';
-import { IPrebidAdUnit } from '../../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../../Injected/prebid';
 import MediaTypesTile from './tiles/MediaTypesTile';
 import BiddersTile from './tiles/BiddersTile';
 import AdServerTile from './tiles/AdServerTile';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../../Content/scripts/prebid';
+import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../../Injected/prebid';
 import { getMaxZIndex } from './AdOverlayPortal';
 import { CacheProvider } from '@emotion/react/';
 import { useState, useEffect } from 'react';

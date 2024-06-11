@@ -1,4 +1,3 @@
-import { IPrebidDebugModuleConfigRule, IPrebidDetails, IPrebidAuctionInitEventData } from '../../../../Content/scripts/prebid';
 import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -8,6 +7,7 @@ import DeleteForever from '@mui/icons-material/DeleteForever';
 import PauseSharpIcon from '@mui/icons-material/PauseSharp';
 import AddIcon from '@mui/icons-material/Add';
 import { firstDifferent } from '../../../../Popup/utils';
+import { IPrebidAuctionInitEventData, IPrebidDebugModuleConfigRule, IPrebidDetails } from '../../../../Injected/prebid';
 
 export const matchRuleTargets: { value: string; label: string }[] = [
   { value: 'adUnitCode', label: 'AdUnitCode' },

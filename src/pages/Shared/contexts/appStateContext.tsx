@@ -1,20 +1,19 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 import InspectedPageContext from './inspectedPageContext';
-
+import { IFrameInfo, IPrebids } from '../../Background';
+import { IGoogleAdManagerDetails } from '../../Injected/googleAdManager';
 import {
   IPrebidDetails,
-  IPrebidAuctionInitEventData,
   IPrebidBidResponseEventData,
   IPrebidBidRequestedEventData,
   IPrebidNoBidEventData,
   IPrebidAuctionEndEventData,
   IPrebidBidWonEventData,
   IPrebidAdRenderSucceededEventData,
-} from '../../Content/scripts/prebid';
-import { IFrameInfo, IPrebids } from '../../Background/background';
-import { IGoogleAdManagerDetails } from '../../Content/scripts/googleAdManager';
-import { ITcfDetails } from '../../Content/scripts/tcf';
+  IPrebidAuctionInitEventData,
+} from '../../Injected/prebid';
+import { ITcfDetails } from '../../Injected/tcf';
 
 declare global {
   interface Document {

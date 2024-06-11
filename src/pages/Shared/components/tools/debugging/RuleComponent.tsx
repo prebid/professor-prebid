@@ -1,5 +1,5 @@
-import { IPrebidDebugModuleConfigRule, IPrebidDetails } from '../../../../Content/scripts/prebid';
 import React from 'react';
+import { IPrebidDebugModuleConfigRule, IPrebidDetails } from '../../../../Injected/prebid';
 import IconButton from '@mui/material/IconButton';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';

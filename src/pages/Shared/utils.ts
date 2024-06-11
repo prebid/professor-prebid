@@ -31,6 +31,7 @@ export const sendWindowPostMessage = (type: string, payload: object): void => {
   // in window.postMessage
   // payload = JSON.parse(JSON.stringify(payload));
   payload = JSON.parse(decylce(payload));
+  // console.log('sendWindowPostMessage', type, payload);
   window.top.postMessage(
     {
       profPrebid: true,
@@ -83,3 +84,5 @@ export const detectIframe = (): boolean => {
     return true;
   }
 };
+
+export const generateUniqueId = () => new Date().getTime() + '-' + Math.random().toString(36).substr(2, 9);

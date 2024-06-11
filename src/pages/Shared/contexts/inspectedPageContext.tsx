@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { IFrameInfo, initReqChainResult } from '../../Background/background';
+import { IFrameInfo, initReqChainResult } from '../../Background';
 import { getTabId } from '../../Shared/utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';

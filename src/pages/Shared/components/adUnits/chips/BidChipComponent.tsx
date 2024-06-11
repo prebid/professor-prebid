@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { IPrebidBidWonEventData, IPrebidBid, IPrebidBidRequestedEventData } from '../../../../Content/scripts/prebid';
+import { IPrebidBidWonEventData, IPrebidBid, IPrebidBidRequestedEventData } from '../../../../Injected/prebid';
 import StateContext from '../../../contexts/appStateContext';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';

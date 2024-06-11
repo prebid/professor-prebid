@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import Stack from '@mui/material/Stack';
 import BidChipComponent from '../../chips/BidChipComponent';
 import StateContext from '../../../../contexts/appStateContext';
-import { IPrebidAdUnit, IPrebidBidWonEventData } from '../../../../../Content/scripts/prebid';
+import { IPrebidAdUnit, IPrebidBidWonEventData } from '../../../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../JSONViewerComponent';

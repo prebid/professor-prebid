@@ -1,7 +1,7 @@
+import { IGoogleAdManagerDetails } from '../Injected/googleAdManager';
+import { IPrebidDetails } from '../Injected/prebid';
+import { ITcfDetails } from '../Injected/tcf';
 import { EVENTS } from '../Shared/constants';
-import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
-import { IPrebidDetails } from '../Content/scripts/prebid';
-import { ITcfDetails } from '../Content/scripts/tcf';
 import { getTabId } from '../Shared/utils';
 
 class Background {

@@ -11,7 +11,7 @@ import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material';
 import AppStateContext from '../../../contexts/appStateContext';
-import { IPrebidAuctionEndEventData, IPrebidDebugConfig } from '../../../../Content/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidDebugConfig } from '../../../../Injected/prebid';
 
 const BidderFilter = ({ debugConfigState, setDebugConfigState }: IBidderFilterProps): JSX.Element => {
   const { events } = useContext(AppStateContext);

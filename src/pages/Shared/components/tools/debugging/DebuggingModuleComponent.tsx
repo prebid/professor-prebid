@@ -10,7 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import set from 'lodash/set';
 import get from 'lodash/get';
 import { getTabId } from '../../../../Shared/utils';
-import { IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../Content/scripts/prebid';
+import { IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../Injected/prebid';
 import { STORE_RULES_TOGGLE } from '../../../constants';
 import RuleComponent from './RuleComponent';
 import AppStateContext from '../../../contexts/appStateContext';

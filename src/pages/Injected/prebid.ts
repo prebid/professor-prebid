@@ -1,5 +1,5 @@
-import { sendWindowPostMessage, detectIframe } from '../../Shared/utils';
-import { EVENTS, POPUP_LOADED, PREBID_DETECTION_TIMEOUT, PREBID_DETECTION_TIMEOUT_IFRAME } from '../../Shared/constants';
+import { POPUP_LOADED, EVENTS, PREBID_DETECTION_TIMEOUT_IFRAME, PREBID_DETECTION_TIMEOUT } from '../Shared/constants';
+import { sendWindowPostMessage, detectIframe } from '../Shared/utils';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
@@ -13,10 +13,11 @@ class Prebid {
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
 
   constructor(namespace: string, iframeId: string | null) {
+    console.log('Prebid constructor', namespace, iframeId);
     this.namespace = namespace;
     this.frameId = iframeId;
     this.globalPbjs = window[namespace as keyof Window];
-    this.globalPbjs.que.push(() => this.addEventListeners());
+    this.addEventListeners();
   }
 
   addEventListeners = (): void => {
@@ -65,13 +66,24 @@ class Prebid {
     window.addEventListener(
       'message',
       (event) => {
-        if (!event.data.profPrebid) return;
+        // console.log('prebid.ts message event', event);
+        // if (!event.data.profPrebid) return;
         if (event.data.type === POPUP_LOADED) {
-          this.throttle(this.sendDetailsToBackground);
+          console.log('prebid.ts POPUP LOADED, send');
+          this.sendDetailsToBackground();
         }
       },
       false
     );
+
+    window.addEventListener('message', (event) => {
+      // We only accept messages from ourselves
+      // if (event.source != window) return;
+
+      if (event.data.type && event.data.type == 'FROM_CONTENT_SCRIPT') {
+        console.log('Content script has received a message: ' + event.data.text);
+      }
+    });
   };
 
   getDebugConfig = () => {
@@ -133,6 +145,7 @@ class Prebid {
   };
 
   sendDetailsToBackground = (): void => {
+    console.log('SEND_PREBID_DETAILS_TO_BACKGROUND');
     this.globalPbjs.que.push(async () => {
       const eventsUrl = this.getEventsObjUrl();
       if (!eventsUrl) return;
@@ -176,9 +189,7 @@ class Prebid {
   };
 }
 
-export const addEventListenersForPrebid = () => {
-  const uniqueId = new Date().getTime() + '-' + Math.random().toString(36).substr(2, 9);
-  const iFrameId = detectIframe() ? `${window.location.href}-${uniqueId}` : 'top-window';
+export const addEventListenersForPrebid = (frameId: string) => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(
@@ -193,7 +204,7 @@ export const addEventListenersForPrebid = () => {
     if (pbjsGlobals?.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
-          new Prebid(global, iFrameId);
+          new Prebid(global, frameId);
           allreadyInjectedPrebid.push(global);
         }
       });

@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import AdUnitChipComponent from '../../chips/AdUnitChipComponent';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import { IPrebidAdUnit } from '../../../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../../../Injected/prebid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidBid } from '../../../Content/scripts/prebid';
+import { IPrebidBid } from '../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';

@@ -5,7 +5,7 @@ import {
   IPrebidBidWonEventData,
   IPrebidAdRenderSucceededEventData,
   IPrebidBidRequestedEventData,
-} from '../../../../Content/scripts/prebid';
+} from '../../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';

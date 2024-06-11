@@ -1,6 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import Typography from '@mui/material/Typography';
-import { ITcfDetails } from '../../../../Content/scripts/tcf';
+import { ITcfDetails } from '../../../../Injected/tcf';
 import { TCString } from '@iabtcf/core';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';

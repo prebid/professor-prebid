@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { IPrebidAdUnit } from '../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../Injected/prebid';
 import merge from 'lodash/merge';
 import StateContext from '../../contexts/appStateContext';
 
