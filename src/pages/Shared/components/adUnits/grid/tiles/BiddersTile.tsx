@@ -22,13 +22,13 @@ const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): 
 };
 
 const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps): JSX.Element => {
-  const { allWinningBids, allBidResponseEvents, allBidRequestedEvents, adsRendered, isPanel } = useContext(StateContext);
+  const { allWinningBids, allBidResponseEvents, adsRendered, isPanel } = useContext(StateContext);
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
-  // if (adUnit?.bids?.length === 0) return null;
+  if (adUnit?.bids?.length === 0) return null;
   return (
     <Grid
       item
@@ -100,7 +100,6 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps
                         label={label}
                         key={index}
                         isWinner={isWinner}
-                        bidRequested={bidRequested}
                         bidReceived={bidReceived}
                         isRendered={isRendered}
                       />

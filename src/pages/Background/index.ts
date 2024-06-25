@@ -3,11 +3,8 @@ import { IPrebidDetails } from '../Injected/prebid';
 import { ITcfDetails } from '../Injected/tcf';
 import { EVENTS } from '../Shared/constants';
 import { getTabId } from '../Shared/utils';
-
 class Background {
   tabInfos: ITabInfos = {};
-  timeoutId: NodeJS.Timeout | null = null;
-
   constructor() {
     chrome.runtime.onMessage.addListener(this.handleMessagesFromInjected);
     chrome.webNavigation?.onBeforeNavigate.addListener(this.handleWebNavigationOnBeforeNavigate);
@@ -28,7 +25,8 @@ class Background {
 
   handleMessagesFromInjected = async (
     message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails },
-    sender: chrome.runtime.MessageSender
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: undefined) => void
   ) => {
     const { type, payload } = message;
     const tabId = sender.tab?.id;
@@ -46,6 +44,7 @@ class Background {
         this.tabInfos[tabId][frameId]['prebids'][namespace as keyof IPrebids] = payload as IPrebidDetails;
         break;
       case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
+        sendResponse();
         this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
         break;
     }
@@ -110,18 +109,11 @@ class Background {
     }
   };
 
-  persistInStorage = () => {
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
-    }
-    this.timeoutId = setTimeout(async () => {
-      await chrome.storage?.local.set({ tabInfos: this.tabInfos });
-      this.timeoutId = null;
-    }, 1500);
+  persistInStorage = async () => {
+    await chrome.storage?.local.set({ tabInfos: this.tabInfos });
   };
 }
 new Background();
-
 export interface IPrebids {
   [key: string]: IPrebidDetails;
 }

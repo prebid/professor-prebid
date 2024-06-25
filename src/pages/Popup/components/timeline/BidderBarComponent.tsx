@@ -1,10 +1,9 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
 import { IPrebidAuctionEndEventData, IPrebidBidderRequest } from '../../../Injected/prebid';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import Popover from '@mui/material/Popover';
-import StateContext from '../../../Shared/contexts/appStateContext';
 
 const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>) => {
   const allGridBarsCollection = gridRef?.current?.children;
@@ -28,7 +27,6 @@ const getListItemStyle = (isTimeOut: boolean, width: number, left: number) => ({
 });
 
 const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpenClose }: IPopoverWithJSONViewerProps) => {
-  const { topics } = useContext(StateContext);
   return (
     <Popover
       open={open}
@@ -41,6 +39,7 @@ const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpe
     >
       <JSONViewerComponent
         src={{ bidderRequest, topics }}
+
         name={false}
         collapsed={3}
         displayObjectSize={false}

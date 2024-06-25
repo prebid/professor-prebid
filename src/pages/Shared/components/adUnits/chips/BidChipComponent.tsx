@@ -8,8 +8,7 @@ import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
 
-const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, isRendered }: IBidChipComponentProps): JSX.Element => {
-  const { topics } = useContext(StateContext);
+const BidChipComponent = ({ input, label, isWinner, bidReceived, isRendered }: IBidChipComponentProps): JSX.Element => {
   const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
 
   return (
@@ -36,7 +35,7 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, i
         onClose={() => setPopUpOpen(false)}
       >
         <JSONViewerComponent
-          src={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid', topics }}
+          src={{ input: input, bidResponse: bidReceived || 'noBid' }}
           name={false}
           collapsed={3}
           displayObjectSize={false}

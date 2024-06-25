@@ -20,7 +20,6 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
   const { mediaTypes } = adUnit;
   const [winningBids, setAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [auctionsBidsReceived, setAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
-  const [auctionsBidsRequested, setAuctionsBidsRequested] = React.useState<IPrebidBidRequestedEventData[]>([]);
   const [auctionsAdsRendered, setAuctionsAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
 
   useEffect(() => {
@@ -38,10 +37,6 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
       ({ eventType, args: { auctionId } }) => eventType === 'bidResponse' && auctionId === latestAuctionId
     );
 
-    const auctionsBidsRequested = (events as IPrebidBidRequestedEventData[]).filter(
-      ({ eventType, args: { auctionId } }) => eventType === 'bidRequested' && auctionId === latestAuctionId
-    );
-
     const auctionsAdsRendered = (events as IPrebidAdRenderSucceededEventData[]).filter(
       ({
         eventType,
@@ -53,7 +48,6 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
 
     setAuctionsWinningBids(auctionsWinningBids);
     setAuctionBidsReceived(auctionsBidsReceived);
-    setAuctionsBidsRequested(auctionsBidsRequested);
     setAuctionsAdsRendered(auctionsAdsRendered);
   }, [events]);
 
