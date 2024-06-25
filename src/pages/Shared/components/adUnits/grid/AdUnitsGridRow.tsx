@@ -1,16 +1,14 @@
 import React, { useContext } from 'react';
 import AdUnitsTile from './tiles/AdUnitTile';
 import StateContext from '../../../contexts/appStateContext';
-import InspectedPageContext from '../../../contexts/inspectedPageContext';
-import { IPrebidAdUnit } from '../../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../../Injected/prebid';
 import MediaTypesTile from './tiles/MediaTypesTile';
 import BiddersTile from './tiles/BiddersTile';
 import AdServerTile from './tiles/AdServerTile';
 import Ortb2ImpTile from './tiles/Ortb2ImpTile';
 
 const AdUnitGridRow = ({ adUnit, adUnit: { ortb2Imp } }: IAdUnitGridRowProps): JSX.Element => {
-  const { isPanel } = useContext(StateContext);
-  const { googleAdManager } = useContext(InspectedPageContext);
+  const { isPanel, googleAdManager } = useContext(StateContext);
   const showAdServerComlumn = isPanel && googleAdManager?.slots?.length > 0;
   const showOrtb2Imp = isPanel && ortb2Imp;
   return (

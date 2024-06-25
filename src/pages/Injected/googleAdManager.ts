@@ -1,5 +1,5 @@
-import { sendWindowPostMessage } from '../../Shared/utils';
-import { EVENTS } from '../../Shared/constants';
+import { sendWindowPostMessage } from '../Shared/utils';
+import { EVENTS } from '../Shared/constants';
 
 declare global {
   interface Window {

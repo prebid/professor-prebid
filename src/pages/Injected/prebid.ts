@@ -1,23 +1,23 @@
-import { sendWindowPostMessage, detectIframe } from '../../Shared/utils';
-import { EVENTS, POPUP_LOADED, PREBID_DETECTION_TIMEOUT, PREBID_DETECTION_TIMEOUT_IFRAME } from '../../Shared/constants';
+import { POPUP_LOADED, EVENTS, PREBID_DETECTION_TIMEOUT_IFRAME, PREBID_DETECTION_TIMEOUT } from '../Shared/constants';
+import { sendWindowPostMessage, detectIframe } from '../Shared/utils';
 
 class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
-  ifFrameId: string | null;
+  frameId: string | null;
   lastTimeUpdateSentToContentScript: number;
   updateTimeout: ReturnType<typeof setTimeout>;
   updateRateInterval: number = 1000;
   sendToContentScriptPending: boolean = false;
-  lastEventsObjectUrls: { url: string; size: number }[] = [];
   events: any[] = [];
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
 
   constructor(namespace: string, iframeId: string | null) {
+    console.log('Prebid constructor', namespace, iframeId);
     this.namespace = namespace;
-    this.ifFrameId = iframeId;
+    this.frameId = iframeId;
     this.globalPbjs = window[namespace as keyof Window];
-    this.globalPbjs.que.push(() => this.addEventListeners());
+    this.addEventListeners();
   }
 
   addEventListeners = (): void => {
@@ -88,18 +88,24 @@ class Prebid {
     window.addEventListener(
       'message',
       (event) => {
-        if (!event.data.profPrebid) return;
+        // console.log('prebid.ts message event', event);
+        // if (!event.data.profPrebid) return;
         if (event.data.type === POPUP_LOADED) {
-          this.throttle(this.sendDetailsToBackground);
+          console.log('prebid.ts POPUP LOADED, send');
+          this.sendDetailsToBackground();
         }
       },
       false
     );
-  };
 
-  extractDomain = (url: string) => {
-    const domain = url.replace('blob:', '').replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
-    return domain;
+    window.addEventListener('message', (event) => {
+      // We only accept messages from ourselves
+      // if (event.source != window) return;
+
+      if (event.data.type && event.data.type == 'FROM_CONTENT_SCRIPT') {
+        console.log('Content script has received a message: ' + event.data.text);
+      }
+    });
   };
 
   getDebugConfig = () => {
@@ -118,7 +124,7 @@ class Prebid {
       const visitedObjects: Set<Object> = new Set();
       const traverseObject = (obj: { [key: string]: any }) => {
         for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
+          if (typeof obj.hasOwnProperty === 'function' && obj.hasOwnProperty(key)) {
             const propertyValue = obj[key];
             if (propertyValue instanceof Window || propertyValue instanceof Node || propertyValue instanceof HTMLElement) {
               try {
@@ -158,47 +164,33 @@ class Prebid {
     if (string === '[]') return null;
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
-    // memory management
-    this.lastEventsObjectUrls.push({ url: objectURL, size: blob.size });
-    const numberOfCachedUrls = 5;
-    const totalWeight = this.lastEventsObjectUrls.reduce((acc, cur) => acc + cur.size, 0);
-    if ((this.lastEventsObjectUrls.length > numberOfCachedUrls && totalWeight > 5e6) || totalWeight > 25e6) {
-      // revoke oldest urls
-      const count = this.lastEventsObjectUrls.length - numberOfCachedUrls;
-      const toRevoke = this.lastEventsObjectUrls.splice(0, count);
-      for (const url of toRevoke) {
-        URL.revokeObjectURL(url.url);
-      }
-    }
     return objectURL;
   };
 
-  reset = () => {
-    this.events = [];
-    this.lastEventsObjectUrls = [];
-    this.sendToContentScriptPending = false;
-  };
-
-  sendDetailsToContentScript = (): void => {
-    const config = this.globalPbjs.getConfig();
-    const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
-    const timeout = window.PREBID_TIMEOUT || null;
-    const prebidDetail: IPrebidDetails = {
-      config,
-      debug: this.getDebugConfig(),
-      eids,
-      events: [],
-      eventsUrl: this.getEventsObjUrl(),
-      namespace: this.namespace,
-      iframeId: this.ifFrameId,
-      installedModules: this.globalPbjs.installedModules,
-      timeout,
-      version: this.globalPbjs.version,
-      bidderSettings: this.globalPbjs.bidderSettings,
-    };
-
-    sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-    this.sendToContentScriptPending = false;
+  sendDetailsToBackground = (): void => {
+    console.log('SEND_PREBID_DETAILS_TO_BACKGROUND');
+    this.globalPbjs.que.push(async () => {
+      const eventsUrl = this.getEventsObjUrl();
+      if (!eventsUrl) return;
+      const config = this.globalPbjs.getConfig();
+      const eids = this.globalPbjs.getUserIdsAsEids ? this.globalPbjs.getUserIdsAsEids() : [];
+      const timeout = window.PREBID_TIMEOUT || null;
+      const prebidDetail: IPrebidDetails = {
+        config,
+        debug: this.getDebugConfig(),
+        eids,
+        events: [],
+        eventsUrl,
+        namespace: this.namespace,
+        frameId: this.frameId,
+        installedModules: this.globalPbjs.installedModules,
+        timeout,
+        version: this.globalPbjs.version,
+        bidderSettings: this.globalPbjs.bidderSettings,
+      };
+      sendWindowPostMessage(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
+      this.sendToContentScriptPending = false;
+    });
   };
 
   throttle = (fn: Function) => {
@@ -220,8 +212,7 @@ class Prebid {
   };
 }
 
-export const addEventListenersForPrebid = () => {
-  const iFrameId = detectIframe() ? window.frameElement?.id : null;
+export const addEventListenersForPrebid = (frameId: string) => {
   const allreadyInjectedPrebid: string[] = [];
   let stopLoop = false;
   setTimeout(
@@ -236,7 +227,7 @@ export const addEventListenersForPrebid = () => {
     if (pbjsGlobals?.length > 0) {
       pbjsGlobals.forEach((global: string) => {
         if (!allreadyInjectedPrebid.includes(global)) {
-          new Prebid(global, iFrameId);
+          new Prebid(global, frameId);
           allreadyInjectedPrebid.push(global);
         }
       });
@@ -251,7 +242,6 @@ export const addEventListenersForPrebid = () => {
 export interface IPrebidBidParams {
   publisherId: string;
   adSlot: string;
-
   [key: string]: string | number;
 }
 
@@ -632,7 +622,7 @@ export interface IPrebidDetails {
   eids: IPrebidEids[];
   debug: IPrebidDebugConfig;
   namespace: string;
-  iframeId: string | null;
+  frameId: string | null;
   installedModules: string[];
   bidderSettings: IPrebidBidderSettings;
 }

@@ -1,12 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import InjectedApp from '../../App/InjectedApp';
+import InjectedApp from '../App/InjectedApp';
 import { googleAdManager } from './googleAdManager';
 import { addEventListenersForPrebid } from './prebid';
 import { iabTcf } from './tcf';
+import { detectIframe, generateUniqueId } from '../Shared/utils';
 
+const frameId = detectIframe() ? `${window.location.href}-${generateUniqueId()}` : 'top-window';
+console.log('Frame ID: ', frameId, window);
 googleAdManager.init();
-addEventListenersForPrebid();
+addEventListenersForPrebid(frameId);
 iabTcf.init();
 
 const injectApp = () => {

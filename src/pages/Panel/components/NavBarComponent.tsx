@@ -204,3 +204,4 @@ const NavBarComponent = () => {
 };
 
 export default NavBarComponent;
+

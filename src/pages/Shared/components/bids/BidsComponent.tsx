@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { IPrebidBid } from '../../../Content/scripts/prebid';
+import { IPrebidBid } from '../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import AppsIcon from '@mui/icons-material/Apps';

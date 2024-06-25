@@ -275,3 +275,4 @@ export const NavBar = (): JSX.Element => {
     </AppBar>
   );
 };
+

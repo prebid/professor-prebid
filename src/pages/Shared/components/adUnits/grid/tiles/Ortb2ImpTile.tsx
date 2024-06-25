@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import StateContext from '../../../../contexts/appStateContext';
-import { IPrebidAdUnit } from '../../../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../JSONViewerComponent';

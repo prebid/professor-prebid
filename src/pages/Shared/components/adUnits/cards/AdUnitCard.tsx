@@ -4,21 +4,19 @@ import {
   IPrebidAdUnit,
   IPrebidBidWonEventData,
   IPrebidAdRenderSucceededEventData,
-} from '../../../../Content/scripts/prebid';
+  IPrebidBidRequestedEventData,
+} from '../../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import CardContent from '@mui/material/CardContent';
 import BidChipComponent from '../chips/BidChipComponent';
 import StateContext from '../../../contexts/appStateContext';
-import InspectedPageContext from '../../../contexts/inspectedPageContext';
 import Chip from '@mui/material/Chip';
 import MediaTypeChipComponent from '../chips/MediaTypeChipComponent';
 
 const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidAdUnit }): JSX.Element => {
-  const { pbjsNamespace } = useContext(StateContext);
-  const { prebids } = useContext(InspectedPageContext);
-  const { events } = prebids?.[pbjsNamespace];
+  const { events } = useContext(StateContext);
   const { mediaTypes } = adUnit;
   const [winningBids, setAuctionsWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
   const [auctionsBidsReceived, setAuctionBidsReceived] = React.useState<IPrebidBidWonEventData[]>([]);
@@ -137,6 +135,9 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
                 bidReceived.args.bidder === bidder &&
                 adUnit.sizes?.map((size) => `${size[0]}x${size[1]}`)?.includes(bidReceived?.args?.size)
             );
+            const bidRequested = auctionsBidsRequested.find(
+              (bidReq) => bidReq.args.bidderCode === bidder && bidReq.args.bids.find((bid) => bid.adUnitCode === adUnit.code)
+            );
             const isWinner = winningBids.some(
               (winningBid) =>
                 winningBid.args.adUnitCode === adUnit.code &&
@@ -153,7 +154,15 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
               ? `${bidder} (${Number(bidReceived?.args.cpm).toFixed(2)} ${bidReceived?.args.currency})`
               : `${bidder}`;
             return (
-              <BidChipComponent input={arr[index]} label={label} key={index} isWinner={isWinner} bidReceived={bidReceived} isRendered={isRendered} />
+              <BidChipComponent
+                input={arr[index]}
+                label={label}
+                key={index}
+                isWinner={isWinner}
+                bidRequested={bidRequested}
+                bidReceived={bidReceived}
+                isRendered={isRendered}
+              />
             );
           })}
         </Stack>

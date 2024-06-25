@@ -1,4 +1,3 @@
-import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../Content/scripts/prebid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -10,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Select from '@mui/material/Select';
 import { firstDifferent } from '../../../../Popup/utils';
 import { replaceRuleTargets } from '../../../constants';
+import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../Injected/prebid';
 
 const sanityCheck = (rule: IPrebidDebugModuleConfigRule, mediaType: string) => {
   if (mediaType === 'native') {

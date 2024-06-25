@@ -1,5 +1,5 @@
 import React from 'react';
-import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../../Content/scripts/prebid';
+import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../../Injected/prebid';
 import { getMaxZIndex } from './AdOverlayPortal';
 import { CacheProvider } from '@emotion/react/';
 import { useState, useEffect } from 'react';
@@ -84,7 +84,7 @@ const PopOverComponent = ({
   pbjsNameSpace,
 }: PopOverComponentProps): JSX.Element => {
   const cacheTopPage = createCache({ key: 'css', container: window.top.document?.head, prepend: true });
-  const pbjs: IGlobalPbjs = window[pbjsNameSpace];
+  const pbjs: IGlobalPbjs = window[pbjsNameSpace as keyof Window];
   const open = Boolean(anchorEl);
 
   const [adUnit, setAdunit] = useState<IPrebidAdUnit>(null);

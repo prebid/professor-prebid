@@ -11,7 +11,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { IPrebidAuctionEndEventData, IPrebidDebugConfig, IPrebidDebugConfigBid } from '../../../../Content/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidDebugConfig, IPrebidDebugConfigBid } from '../../../../Injected/prebid';
 import AppStateContext from '../../../contexts/appStateContext';
 
 const ITEM_HEIGHT = 48;

@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import StateContext from '../../../../contexts/appStateContext';
 import JSONViewerComponent from '../../../JSONViewerComponent';
 import MediaTypeChipComponent from '../../chips/MediaTypeChipComponent';
-import { IPrebidAdUnit } from '../../../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../../../Injected/prebid';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';

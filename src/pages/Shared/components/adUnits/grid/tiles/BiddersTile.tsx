@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import Stack from '@mui/material/Stack';
 import BidChipComponent from '../../chips/BidChipComponent';
 import StateContext from '../../../../contexts/appStateContext';
-import { IPrebidAdUnit, IPrebidBidWonEventData } from '../../../../../Content/scripts/prebid';
+import { IPrebidAdUnit, IPrebidBidWonEventData } from '../../../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../JSONViewerComponent';
@@ -75,6 +75,10 @@ const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode } }: IBiddersTileProps
                     const bidReceived = allBidResponseEvents.find(
                       (bidReceived) =>
                         bidReceived.args?.adUnitCode === adUnitCode && bidReceived.args.bidder === bidder && matchesSizes(bidReceived, adUnit)
+                    );
+
+                    const bidRequested = allBidRequestedEvents.find(
+                      (bidReq) => bidReq.args.bidderCode === bidder && bidReq.args.bids.find((bid) => bid.adUnitCode === adUnitCode)
                     );
 
                     const isWinner = allWinningBids.some(

@@ -3,8 +3,7 @@ import { EVENTS, CONSOLE_TOGGLE, SAVE_MASKS } from '../Shared/constants';
 import { sendWindowPostMessage } from '../Shared/utils';
 import AdOverlayPortal from './components/AdOverlayPortal';
 import { AdOverlayComponentProps } from './components/AdOverlayComponent';
-
-import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../Content/scripts/prebid';
+import { IPrebidAuctionEndEventData, IPrebidBidWonEventData } from '../Injected/prebid';
 
 declare global {
   interface Window {

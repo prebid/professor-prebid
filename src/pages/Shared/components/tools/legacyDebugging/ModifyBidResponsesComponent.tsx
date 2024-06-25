@@ -8,7 +8,7 @@ import FormControl from '@mui/material/FormControl';
 import { getTabId } from '../../../../Shared/utils';
 import BidderFilter from './BidderFilter';
 import BidOverWriteComponent from './BidOverWriteComponent';
-import { IPrebidDebugConfig } from '../../../../Content/scripts/prebid';
+import { IPrebidDebugConfig } from '../../../../Injected/prebid';
 import AppStateContext from '../../../contexts/appStateContext';
 
 const ModifyBidResponsesComponent = (): JSX.Element => {

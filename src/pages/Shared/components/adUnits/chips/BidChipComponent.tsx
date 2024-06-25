@@ -1,5 +1,6 @@
-import React from 'react';
-import { IPrebidBidWonEventData, IPrebidBid } from '../../../../Content/scripts/prebid';
+import React, { useContext } from 'react';
+import { IPrebidBidWonEventData, IPrebidBid, IPrebidBidRequestedEventData } from '../../../../Injected/prebid';
+import StateContext from '../../../contexts/appStateContext';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import JSONViewerComponent from '../../JSONViewerComponent';
@@ -54,6 +55,7 @@ interface IBidChipComponentProps {
   input: IPrebidBid;
   label: string;
   isWinner: boolean;
+  bidRequested: IPrebidBidRequestedEventData | undefined;
   bidReceived: IPrebidBidWonEventData | undefined;
   isRendered: boolean;
 }
