@@ -13,7 +13,6 @@ class Prebid {
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
 
   constructor(namespace: string, iframeId: string | null) {
-    console.log('Prebid constructor', namespace, iframeId);
     this.namespace = namespace;
     this.frameId = iframeId;
     this.globalPbjs = window[namespace as keyof Window];
@@ -66,10 +65,8 @@ class Prebid {
     window.addEventListener(
       'message',
       (event) => {
-        // console.log('prebid.ts message event', event);
         // if (!event.data.profPrebid) return;
         if (event.data.type === POPUP_LOADED) {
-          console.log('prebid.ts POPUP LOADED, send');
           this.sendDetailsToBackground();
         }
       },
@@ -145,7 +142,6 @@ class Prebid {
   };
 
   sendDetailsToBackground = (): void => {
-    console.log('SEND_PREBID_DETAILS_TO_BACKGROUND');
     this.globalPbjs.que.push(async () => {
       const eventsUrl = this.getEventsObjUrl();
       if (!eventsUrl) return;
@@ -424,16 +420,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }

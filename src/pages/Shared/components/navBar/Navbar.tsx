@@ -8,7 +8,6 @@ import { NavBarReload } from './NavbarReload';
 export const NavBar = (): JSX.Element => {
   return (
     <AppBar
-      id="floNavbar"
       sx={{
         position: 'relative',
         backgroundColor: 'background.paper',

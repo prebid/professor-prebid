@@ -7,7 +7,6 @@ import { iabTcf } from './tcf';
 import { detectIframe, generateUniqueId } from '../Shared/utils';
 
 const frameId = detectIframe() ? `${window.location.href}-${generateUniqueId()}` : 'top-window';
-console.log('Frame ID: ', frameId, window);
 googleAdManager.init();
 addEventListenersForPrebid(frameId);
 iabTcf.init();
