@@ -7,6 +7,8 @@ import { getTabId } from '../Shared/utils';
 class Background {
   tabInfos: ITabInfos = {};
   timeoutId: NodeJS.Timeout | null = null;
+  lastWriteToStorage: number | null = null;
+  writeTimeoutId: number | null = null;
 
   constructor() {
     chrome.runtime.onMessage.addListener(this.handleMessagesFromInjected);
@@ -110,14 +112,23 @@ class Background {
     }
   };
 
-  persistInStorage = () => {
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
+  persistInStorageThrottled = () => {
+    const delay = 1500;
+    const now = Date.now();
+
+    if (this.writeTimeoutId) {
+      clearTimeout(this.writeTimeoutId);
     }
-    this.timeoutId = setTimeout(async () => {
-      await chrome.storage?.local.set({ tabInfos: this.tabInfos });
-      this.timeoutId = null;
-    }, 1500);
+
+    this.writeTimeoutId = window.setTimeout(() => {
+      this.persistInStorage();
+      this.lastWriteToStorage = now;
+      this.writeTimeoutId = null;
+    }, delay);
+  };
+
+  persistInStorage = async () => {
+    await chrome.storage?.local.set({ tabInfos: this.tabInfos });
   };
 }
 new Background();
