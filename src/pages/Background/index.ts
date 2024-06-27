@@ -98,9 +98,11 @@ class Background {
     const activeTabId = await getTabId();
     if (!tabId || tabId !== activeTabId) return;
     let prebidCount = 0;
-    for (const [_frameId, frameInfo] of Object.entries(this.tabInfos[tabId])) {
-      if (frameInfo.prebids) {
-        prebidCount += Object.keys(frameInfo.prebids).length;
+    if (this.tabInfos[tabId] && typeof this.tabInfos[tabId] === 'object') {
+      for (const [_frameId, frameInfo] of Object.entries(this.tabInfos[tabId])) {
+        if (frameInfo.prebids) {
+          prebidCount += Object.keys(frameInfo.prebids).length;
+        }
       }
     }
     if (tabId && prebidCount > 0) {
