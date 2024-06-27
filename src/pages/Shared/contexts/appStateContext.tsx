@@ -44,15 +44,15 @@ const AppStateContext = React.createContext<AppState>({
   prebid: {} as IPrebidDetails,
   prebids: {} as IPrebids,
   initiatorOutput: {},
-  setInitiatorOutput: () => {},
+  setInitiatorOutput: () => { },
   isRefresh: false,
-  setIsRefresh: () => {},
+  setIsRefresh: () => { },
   initDataLoaded: false,
-  setInitDataLoaded: () => {},
+  setInitDataLoaded: () => { },
   prebidReleaseInfo: {},
-  setPrebidReleaseInfo: () => {},
+  setPrebidReleaseInfo: () => { },
   topics: [],
-  setTopics: () => {},
+  setTopics: () => { },
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
@@ -88,9 +88,20 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 
   useEffect(() => {
     if (frameId === '' && frames && Object.keys(frames).length > 0) {
-      const defaultFrameIdIndex = Object.keys(frames).findIndex((el) => el === 'top-window');
-      const newValue = defaultFrameIdIndex > -1 ? Object.keys(frames)[defaultFrameIdIndex] : Object.keys(frames)[0];
-      setIframeId(newValue || '');
+      // if there is prebids in top-window, set it as default
+      if (frames['top-window'].prebids) {
+        setIframeId('top-window');
+        return;
+      }
+      // if there is no prebids in top-window, set first frame with prebids as default
+      for (const frameId of Object.keys(frames)) {
+        if (frames[frameId].prebids) {
+          setIframeId(frameId);
+          return;
+        }
+      }
+      // if there is no prebids in any frame, set top-window as default
+      setIframeId('top-window');
     }
   }, [frameId, frames]);
 
