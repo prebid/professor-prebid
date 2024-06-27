@@ -28,7 +28,7 @@ const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject
 const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (event: any) => {
   return (
     event.eventType === eventType &&
-    event.args.auctionId === bidderRequest?.auctionId &&
+    event.args?.auctionId === bidderRequest?.auctionId &&
     (event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode)
   );
 };
