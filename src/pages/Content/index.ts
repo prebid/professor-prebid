@@ -27,7 +27,7 @@ const listenToChromeRuntimeMessages = () => {
   chrome.runtime?.onMessage.addListener(processChromeRuntimeMessages);
 };
 
-const processChromeRuntimeMessages = (request: { type: string; payload?: object; [key: string]: any }) => {
+const processChromeRuntimeMessages = (request: { type: string; payload?: object;[key: string]: any }) => {
   if (request.type === CONSOLE_TOGGLE) {
     sendWindowPostMessage(request.type, { detail: request.consoleState });
   }
