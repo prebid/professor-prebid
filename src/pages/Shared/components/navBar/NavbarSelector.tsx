@@ -59,7 +59,7 @@ export const NavbarSelector = (): JSX.Element => {
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => setExpanded(false)}
       >
-        <FormControl sx={{ minWidth: 110 }} size="small">
+        <FormControl sx={{ minWidth: 110, maxWidth: 330 }} size="small">
           <InputLabel>Frame-ID</InputLabel>
           <Select value={frameId} label="frameId" onChange={handleFrameIdChange}>
             {pageContext &&
@@ -72,7 +72,7 @@ export const NavbarSelector = (): JSX.Element => {
                 ))}
           </Select>
         </FormControl>
-        <FormControl sx={{ minWidth: 110 }} size="small">
+        <FormControl sx={{ minWidth: 110, maxWidth: 330 }} size="small">
           <InputLabel>Namespace</InputLabel>
           <Select value={pbjsNamespace} onChange={handlePbjsNamespaceChange} autoWidth>
             {prebids &&
