@@ -31,7 +31,6 @@ export const sendWindowPostMessage = (type: string, payload: object): void => {
   // in window.postMessage
   // payload = JSON.parse(JSON.stringify(payload));
   payload = JSON.parse(decylce(payload));
-  // console.log('sendWindowPostMessage', type, payload);
   window.top.postMessage(
     {
       profPrebid: true,
@@ -40,6 +39,18 @@ export const sendWindowPostMessage = (type: string, payload: object): void => {
     },
     '*'
   );
+  // send postmessage to all iframes
+  const iframes = document.querySelectorAll('iframe');
+  iframes.forEach((iframe) => {
+    iframe.contentWindow.postMessage(
+      {
+        profPrebid: true,
+        type,
+        payload,
+      },
+      '*'
+    );
+  });
 };
 
 export const createRangeArray = (start: number, end: number, step: number, offsetRight: number): number[] => {
