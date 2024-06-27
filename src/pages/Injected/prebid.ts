@@ -65,22 +65,13 @@ class Prebid {
     window.addEventListener(
       'message',
       (event) => {
-        // if (!event.data.profPrebid) return;
+        if (!event.data.profPrebid) return;
         if (event.data.type === POPUP_LOADED) {
           this.sendDetailsToBackground();
         }
       },
       false
     );
-
-    window.addEventListener('message', (event) => {
-      // We only accept messages from ourselves
-      // if (event.source != window) return;
-
-      if (event.data.type && event.data.type == 'FROM_CONTENT_SCRIPT') {
-        console.log('Content script has received a message: ' + event.data.text);
-      }
-    });
   };
 
   getDebugConfig = () => {
