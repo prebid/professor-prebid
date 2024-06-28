@@ -1,6 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import Typography from '@mui/material/Typography';
-import { ITcfDetails } from '../../../../Content/scripts/tcf';
+import { ITcfDetails } from '../../../../Injected/tcf';
 import { TCString } from '@iabtcf/core';
 import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -12,16 +12,13 @@ import { tileHeight } from '../ConfigComponent';
 import ListItem from '@mui/material/ListItem';
 import CardContent from '@mui/material/CardContent';
 import RenderKeyValueComponent from '../../RenderKeyValueComponent';
-import InspectedPageContext from '../../../contexts/inspectedPageContext';
 import AppStateContext from '../../../contexts/appStateContext';
 
 const PrivacyComponent = (): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
   const ref = React.useRef<HTMLInputElement>(null);
-
-  const { tcf } = useContext(InspectedPageContext);
-  const { prebid } = useContext(AppStateContext);
+  const { prebid, tcf } = useContext(AppStateContext);
   const {
     config: { consentManagement },
   } = prebid;

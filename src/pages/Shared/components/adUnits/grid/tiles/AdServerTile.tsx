@@ -2,10 +2,9 @@ import React, { useContext, useState, useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
-import InspectedPageContext from '../../../../contexts/inspectedPageContext';
-import { IPrebidAdUnit } from '../../../../../Content/scripts/prebid';
+import { IPrebidAdUnit } from '../../../../../Injected/prebid';
 import Box from '@mui/material/Box';
-import { IGoogleAdManagerSlot } from '../../../../../Content/scripts/googleAdManager';
+import { IGoogleAdManagerSlot } from '../../../../../Injected/googleAdManager';
 import JSONViewerComponent from '../../../JSONViewerComponent';
 import Grid from '@mui/material/Grid';
 import AppStateContext from '../../../../contexts/appStateContext';
@@ -14,10 +13,9 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
-  const { googleAdManager } = useContext(InspectedPageContext);
+  const { isPanel, googleAdManager } = useContext(AppStateContext);
   const [slot, setSlot] = useState<IGoogleAdManagerSlot | undefined>(undefined);
   const [expanded, setExpanded] = React.useState(false);
-  const { isPanel } = useContext(AppStateContext);
   const { targeting, sizes, elementId, name } = (slot || {}) as IGoogleAdManagerSlot;
 
   const handleExpandClick = () => {
@@ -26,7 +24,7 @@ const AdServerTile = ({ adUnit }: IAdServerTileProps): JSX.Element => {
 
   useEffect(() => {
     const slot = googleAdManager?.slots?.find(
-      ({ name, elementId }) =>
+      ({ name, elementId }: { name: string; elementId: string }) =>
         name === adUnit.code ||
         elementId === adUnit.code ||
         name.toLowerCase() === adUnit.code.toLowerCase() ||

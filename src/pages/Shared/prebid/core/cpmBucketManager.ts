@@ -1,4 +1,5 @@
-import { IPrebidConfigPriceBucket, IPrebidConfig } from '../../../Content/scripts/prebid';
+import { IPrebidConfig, IPrebidConfigPriceBucket } from "../../../Injected/prebid";
+
 const _defaultPrecision = 2;
 const _lgPriceConfig = {
   buckets: [

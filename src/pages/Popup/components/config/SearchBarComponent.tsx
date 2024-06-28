@@ -1,5 +1,5 @@
 import React from 'react';
-import { IPrebidDetails } from '../../../Content/scripts/prebid';
+import { IPrebidDetails } from '../../../Injected/prebid';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';

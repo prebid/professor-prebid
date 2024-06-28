@@ -39,6 +39,18 @@ export const sendWindowPostMessage = (type: string, payload: object): void => {
     },
     '*'
   );
+  // send postmessage to all iframes
+  const iframes = document.querySelectorAll('iframe');
+  iframes.forEach((iframe) => {
+    iframe.contentWindow.postMessage(
+      {
+        profPrebid: true,
+        type,
+        payload,
+      },
+      '*'
+    );
+  });
 };
 
 export const createRangeArray = (start: number, end: number, step: number, offsetRight: number): number[] => {
@@ -83,3 +95,5 @@ export const detectIframe = (): boolean => {
     return true;
   }
 };
+
+export const generateUniqueId = () => new Date().getTime() + '-' + Math.random().toString(36).substr(2, 9);

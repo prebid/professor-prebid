@@ -1,10 +1,15 @@
+import { IGoogleAdManagerDetails } from '../Injected/googleAdManager';
+import { IPrebidDetails } from '../Injected/prebid';
+import { ITcfDetails } from '../Injected/tcf';
 import { EVENTS } from '../Shared/constants';
-import { IGoogleAdManagerDetails } from '../Content/scripts/googleAdManager';
-import { IPrebidDetails } from '../Content/scripts/prebid';
-import { ITcfDetails } from '../Content/scripts/tcf';
 import { getTabId } from '../Shared/utils';
+
 class Background {
   tabInfos: ITabInfos = {};
+  timeoutId: NodeJS.Timeout | null = null;
+  lastWriteToStorage: number | null = null;
+  writeTimeoutId: number | null = null;
+
   constructor() {
     chrome.runtime.onMessage.addListener(this.handleMessagesFromInjected);
     chrome.webNavigation?.onBeforeNavigate.addListener(this.handleWebNavigationOnBeforeNavigate);
@@ -25,8 +30,7 @@ class Background {
 
   handleMessagesFromInjected = async (
     message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails },
-    sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: undefined) => void
+    sender: chrome.runtime.MessageSender
   ) => {
     const { type, payload } = message;
     const tabId = sender.tab?.id;
@@ -34,17 +38,16 @@ class Background {
     this.tabInfos[tabId] = this.tabInfos[tabId] || {};
     switch (type) {
       case EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
-        sendResponse();
-        this.tabInfos[tabId]['googleAdManager'] = payload as IGoogleAdManagerDetails;
+        this.tabInfos[tabId]['top-window'] = this.tabInfos[tabId]['top-window'] || {};
+        this.tabInfos[tabId]['top-window']['googleAdManager'] = payload as IGoogleAdManagerDetails;
         break;
       case EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
-        sendResponse();
-        const typedPayload = payload as IPrebidDetails;
-        this.tabInfos[tabId]['prebids'] = this.tabInfos[tabId]['prebids'] || {};
-        this.tabInfos[tabId]['prebids']![typedPayload?.namespace] = typedPayload;
+        const { frameId, namespace } = payload as IPrebidDetails;
+        this.tabInfos[tabId][frameId] = this.tabInfos[tabId][frameId] || {};
+        this.tabInfos[tabId][frameId]['prebids'] = this.tabInfos[tabId][frameId]['prebids'] || {};
+        this.tabInfos[tabId][frameId]['prebids'][namespace as keyof IPrebids] = payload as IPrebidDetails;
         break;
       case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
-        sendResponse();
         this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
         break;
     }
@@ -59,7 +62,9 @@ class Background {
   handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
     if (frameId == 0) {
-      this.tabInfos[tabId] = { url };
+      this.tabInfos[tabId] = this.tabInfos[tabId] || {};
+      this.tabInfos[tabId]['top-window'] = this.tabInfos[tabId]['top-window'] || {};
+      this.tabInfos[tabId]['top-window'] = { url };
       this.updateBadge(tabId);
       await this.persistInStorage();
     }
@@ -92,7 +97,15 @@ class Background {
   updateBadge = async (tabId: number | undefined) => {
     const activeTabId = await getTabId();
     if (!tabId || tabId !== activeTabId) return;
-    if (tabId && this.tabInfos[tabId]?.prebids) {
+    let prebidCount = 0;
+    if (this.tabInfos[tabId] && typeof this.tabInfos[tabId] === 'object') {
+      for (const [_frameId, frameInfo] of Object.entries(this.tabInfos[tabId])) {
+        if (frameInfo.prebids) {
+          prebidCount += Object.keys(frameInfo.prebids).length;
+        }
+      }
+    }
+    if (tabId && prebidCount > 0) {
       chrome.action.setBadgeBackgroundColor({ color: '#1ba9e1', tabId: activeTabId });
       chrome.action.setBadgeText({ text: `✓`, tabId: activeTabId });
     } else {
@@ -101,16 +114,32 @@ class Background {
     }
   };
 
+  persistInStorageThrottled = () => {
+    const delay = 1500;
+    const now = Date.now();
+
+    if (this.writeTimeoutId) {
+      clearTimeout(this.writeTimeoutId);
+    }
+
+    this.writeTimeoutId = window.setTimeout(() => {
+      this.persistInStorage();
+      this.lastWriteToStorage = now;
+      this.writeTimeoutId = null;
+    }, delay);
+  };
+
   persistInStorage = async () => {
     await chrome.storage?.local.set({ tabInfos: this.tabInfos });
   };
 }
 new Background();
+
 export interface IPrebids {
   [key: string]: IPrebidDetails;
 }
 
-export interface ITabInfo {
+export interface IFrameInfo {
   googleAdManager?: IGoogleAdManagerDetails;
   prebids?: IPrebids;
   tcf?: ITcfDetails;
@@ -122,8 +151,11 @@ export interface ITabInfo {
   initReqChainResult?: initReqChainResult;
 }
 
+interface IFrameInfos {
+  [key: string]: IFrameInfo;
+}
 export interface ITabInfos {
-  [key: number]: ITabInfo;
+  [key: number]: IFrameInfos;
 }
 
 export interface initReqChainResult {

@@ -8,7 +8,7 @@
     "url": "git+https://github.com/prebid/professor-prebid.git"
   },
   "scripts": {
-    "build": "node utils/build.js",
+    "build": "node utils/build.js && zip -vr build.zip build/ -x '*.DS_Store'",
     "start": "node utils/webserver.js",
     "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}' '!build/**'"
   },
