@@ -46,9 +46,9 @@ const AdUnitCard = ({ adUnit, adUnit: { code: adUnitCode } }: { adUnit: IPrebidA
       ({
         eventType,
         args: {
-          bid: { auctionId },
+          bid
         },
-      }) => eventType === 'adRenderSucceeded' && auctionId === latestAuctionId
+      }) => eventType === 'adRenderSucceeded' && bid?.auctionId === latestAuctionId
     );
 
     setAuctionsWinningBids(auctionsWinningBids);
