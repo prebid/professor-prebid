@@ -46,6 +46,10 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
     };
   }, []);
 
+  useEffect(() => {
+    setLabelText(adUnit.code);
+  }, [adUnit]);
+
   return (
     <Chip
       size="small"
