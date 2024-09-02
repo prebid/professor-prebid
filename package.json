@@ -80,5 +80,10 @@
   "homepage": "https://github.com/prebid/professor-prebid#readme",
   "bugs": {
     "url": "https://github.com/prebid/professor-prebid/issues"
+  },
+  "prettier": {
+    "printWidth": 260,
+    "singleQuote": true, 
+    "tsxSingleQuote": true
   }
 }
