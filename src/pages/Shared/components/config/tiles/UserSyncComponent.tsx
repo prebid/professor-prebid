@@ -22,7 +22,7 @@ const UserSyncComponent = (): JSX.Element => {
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    setMaxWidth(expanded ? 4 : 4);
+    setMaxWidth(expanded ? 4 : 8);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
@@ -11,6 +11,8 @@ import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import { Link } from 'react-router-dom';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import DifferenceIcon from '@mui/icons-material/Difference';
+import PrivacyTipOutlinedIcon from '@mui/icons-material/PrivacyTipOutlined';
+import AppStateContext from '../../contexts/appStateContext';
 
 export const NavBarTabs = (): JSX.Element => {
   const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
@@ -24,6 +26,8 @@ export const NavBarTabs = (): JSX.Element => {
   const handleRouteChange = (input: any) => {
     setActiveRoute(input);
   };
+
+  const { isPanel } = useContext(AppStateContext);
 
   return (
     <Tabs
@@ -71,6 +75,21 @@ export const NavBarTabs = (): JSX.Element => {
         }
         sx={{ padding: '0px 3px', minWidth: 'initial' }}
       />
+      {isPanel && <Tab
+        label={
+          <Button
+            to="paapi"
+            component={Link}
+            size="small"
+            variant={activeRoute === '/paapi' ? 'contained' : 'outlined'}
+            onClick={() => handleRouteChange('/paapi')}
+            startIcon={<PrivacyTipOutlinedIcon />}
+          >
+            Paapi
+          </Button>
+        }
+        sx={{ padding: '0px 3px', minWidth: 'initial' }}
+      />}
       <Tab
         label={
           <Button
