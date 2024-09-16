@@ -77,18 +77,14 @@ const PaapiComponent = (): JSX.Element => {
   return (
     <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 0.5 }}>
       {paapiRunAuctionEvents.map((auctionEvent, index) => (
-        <>
-          {/* <Grid item md={12} lg={6} key={index}> */}
-          <Grid item xs={12} key={index}>
-            <BoxWithLabelAndExpandAndJsonView
-              label={<PaapiTopLevelAuctionHeader auctionEvent={auctionEvent} />}
-              children={PaapiTopLevelAuctionComponentWrapper}
-              input={auctionEvent}
-              sx={{ display: 'flex', flexDirection: 'column', rowGap: 1, backgroundColor: 'background.paper' }}
-            />
-            {/* <Grid item md={12} lg={6} key={index}></Grid> */}
-          </Grid>
-        </>
+        <Grid item xs={12} key={index}>
+          <BoxWithLabelAndExpandAndJsonView
+            label={<PaapiTopLevelAuctionHeader auctionEvent={auctionEvent} />}
+            children={PaapiTopLevelAuctionComponentWrapper}
+            input={auctionEvent}
+            sx={{ display: 'flex', flexDirection: 'column', rowGap: 1, backgroundColor: 'background.paper' }}
+          />
+        </Grid>
       ))}
     </Grid>
   );
