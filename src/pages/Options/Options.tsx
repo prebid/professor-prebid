@@ -87,8 +87,7 @@ const Options: React.FC<{ title: string }> = ({ title }) => {
     <ThemeProvider theme={theme}>
       <OptionsContextProvider>
         <ErrorBoundary FallbackComponent={ErrorCardComponent}>
-          <Box sx={{ backgroundColor: 'primary.light', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-            <Typography variant="h1">{title} Page</Typography>
+          <Box sx={{ backgroundColor: 'primary.light', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100vh', p: 1 }}>
             <NaviOptions />
           </Box>
         </ErrorBoundary>
