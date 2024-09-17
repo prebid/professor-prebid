@@ -6,6 +6,7 @@ import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
 import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import DifferenceIcon from '@mui/icons-material/Difference';
+import LinkIcon from '@mui/icons-material/Link';
 import PrivacyTipOutlinedIcon from '@mui/icons-material/PrivacyTipOutlined';
 import { OverridableComponent } from '@mui/material/OverridableComponent';
 import { SvgIconTypeMap } from '@mui/material';
@@ -92,4 +93,5 @@ export const PAGES: {
     { label: 'Tools', path: 'tools', Icon: DnsOutlinedIcon, beta: false },
     { label: 'Events', path: 'events', Icon: WarningAmberOutlinedIcon, beta: false },
     { label: 'Version', path: 'version', Icon: DifferenceIcon, beta: false },
+    { label: 'Network Inspector', path: 'initiator', Icon: LinkIcon, beta: true },
   ];

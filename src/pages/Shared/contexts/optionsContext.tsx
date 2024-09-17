@@ -15,7 +15,7 @@ export const OptionsContextProvider = ({ children }: ChromeStorageProviderProps)
       if (result.selectedPopUpNavItems) {
         setSelectedPopUpNavItems(result.selectedPopUpNavItems);
       } else {
-        setSelectedPopUpNavItems(PAGES.map((page) => page.path));
+        setSelectedPopUpNavItems(PAGES.filter(({ beta }) => !beta).map((page) => page.path));
       }
     });
     chrome.storage.sync.get(['selectedPanelNavItems'], (result) => {

@@ -46,6 +46,15 @@ const NaviOptions: React.FC<{}> = () => {
     });
   };
 
+  const handleReset = () => {
+    setSelectedPopUpNavItems([]);
+    setSelectedPanelNavItems([]);
+    chrome.storage.sync.clear(() => {
+      console.log('Selected Popup Items reset in Chrome storage');
+      window.location.reload();
+    });
+  };
+
   return (
     <Paper sx={{ p: 1 }}>
       <Typography variant="h2" component="div" gutterBottom>
@@ -76,6 +85,9 @@ const NaviOptions: React.FC<{}> = () => {
         </List>
         <Button type="submit" variant="contained" color="primary">
           Save
+        </Button>
+        <Button variant="contained" color="secondary" onClick={handleReset}>
+          Reset
         </Button>
       </form>
     </Paper>
