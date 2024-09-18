@@ -11,6 +11,7 @@ interface IPrebidPaapiBidEvent {
     auctionConfig: IPrebidPaapiAuctionConfig;
     overriddenAdId: string;
     status: string;
+    bidderCode: string;
   };
   elapsedTime: number;
 }
@@ -166,6 +167,7 @@ interface IPrebidPaapiBidWonEventData {
   auctionConfig: AuctionConfig;
   overriddenAdId: string;
   status: string;
+  bidderCode: string;
 }
 
 interface IPrebidPaapiBidWonEvent {

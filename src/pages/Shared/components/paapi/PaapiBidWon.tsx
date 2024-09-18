@@ -13,6 +13,7 @@ const PaapiBidWonWrapper = ({ expanded, jsonView, input }: { input: IPrebidPaapi
         <Grid item xs={6}>
           <InfoItem label="Elapsed Time" content={input.elapsedTime % 1 !== 0 ? input.elapsedTime.toFixed(2) : input.elapsedTime} />
           <InfoItem label="Ad Unit Code" content={input.args.adUnitCode} />
+          <InfoItem label="Bidder Code" content={input.args.bidderCode} />
         </Grid>
       )}
 
@@ -20,6 +21,7 @@ const PaapiBidWonWrapper = ({ expanded, jsonView, input }: { input: IPrebidPaapi
         <Grid item xs={12}>
           <InfoItem label="Elapsed Time" content={input.elapsedTime % 1 !== 0 ? input.elapsedTime.toFixed(2) : input.elapsedTime} />
           <InfoItem label="Ad Unit Code" content={input.args.adUnitCode} />
+          <InfoItem label="Bidder Code" content={input.args.bidderCode} />
           <InfoItem label="Auction Id" content={input.args.auctionId} />
           <InfoItem label="Ad Id" content={input.args.adId} />
           <InfoItem label="Width" content={input.args.width} />
