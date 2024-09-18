@@ -3,7 +3,7 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import PaapiComponentAuctionConfig from './PaapiComponentAuctionConfig';
 import { BoxWithLabel } from '../BoxWithLabel';
 import { Grid, Typography } from '@mui/material';
-import { InfoItem } from '../InfoItem';
+
 
 const PaapiComponentAuction = ({ expanded, jsonView, input }: { input: IPrebidComponentAuction; expanded: boolean; jsonView: boolean }): JSX.Element => {
   const { seller, decisionLogicURL, decisionLogicUrl } = input;
@@ -12,7 +12,7 @@ const PaapiComponentAuction = ({ expanded, jsonView, input }: { input: IPrebidCo
       {!jsonView && (
         <Grid item xs={6}>
           <BoxWithLabel sx={{ height: 'calc(100% - 18px);' }} label={<Typography variant="h3">Seller</Typography>}>
-            <a target="_blank" href={seller}>
+            <a target="_blank" href={seller} rel="noreferrer">
               {seller}
             </a>
           </BoxWithLabel>
@@ -21,7 +21,7 @@ const PaapiComponentAuction = ({ expanded, jsonView, input }: { input: IPrebidCo
       {!jsonView && (
         <Grid item xs={6}>
           <BoxWithLabel sx={{ height: 'calc(100% - 18px);' }} label={<Typography variant="h3">Decision Logic Url</Typography>}>
-            <a target="_blank" href={decisionLogicURL || decisionLogicUrl}>
+            <a target="_blank" href={decisionLogicURL || decisionLogicUrl} rel="noreferrer">
               {decisionLogicURL || decisionLogicUrl}
             </a>
           </BoxWithLabel>
