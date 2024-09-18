@@ -9,6 +9,7 @@ import PaapiBidWon from './PaapiBidWon';
 import PaapiAuctionConfig from './PaapiAuctionConfig';
 import { InfoItem } from '../InfoItem';
 import PaapiBidEvent from './PaapiBidEvent';
+import NoPaapiAuctionsCardComponent from './NoPaapiAuctionsCardComponent';
 
 const PaapiTopLevelAuctionComponentWrapper = ({ expanded, jsonView, input }: { input: IPrebidPaapiAuctionEvent; expanded: boolean; jsonView: boolean }): JSX.Element => {
   const { allpaapiBidEvents, allpaapiNoBidEvents, allWinningBids, allBidderDoneEvents } = useContext(StateContext);
@@ -77,6 +78,7 @@ const PaapiTopLevelAuctionHeader = ({ auctionEvent }: { auctionEvent: IPrebidPaa
 
 const PaapiComponent = (): JSX.Element => {
   const { paapiRunAuctionEvents } = useContext(StateContext);
+  if (paapiRunAuctionEvents.length === 0) return <NoPaapiAuctionsCardComponent />;
   return (
     <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 0.5 }}>
       {paapiRunAuctionEvents.map((auctionEvent, index, arr) => (
