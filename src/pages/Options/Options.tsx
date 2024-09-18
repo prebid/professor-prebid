@@ -83,12 +83,14 @@ const NaviOptions: React.FC<{}> = () => {
             </ListItem>
           ))}
         </List>
-        <Button type="submit" variant="contained" color="primary">
-          Save
-        </Button>
-        <Button variant="contained" color="secondary" onClick={handleReset}>
-          Reset
-        </Button>
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start', alignContent: 'flex-start', columnGap: 1 }}>
+          <Button type="submit" variant="outlined" color="primary">
+            Save
+          </Button>
+          <Button variant="outlined" color="warning" onClick={handleReset}>
+            Reset
+          </Button>
+        </Box>
       </form>
     </Paper>
   );
