@@ -58,14 +58,6 @@ const FledgeForGPTComponent = (): JSX.Element => {
           <Grid container spacing={2}>
             {!expanded && (
               <RenderKeyValueComponent
-                label="Prebid Version"
-                value={`${prebid.version} ${gte(prebid.version, '8.9.0') ? '✅' : '❗(8.9+ required)'}`}
-                columns={[12, 12]}
-                expanded={expanded}
-              />
-            )}
-            {!expanded && (
-              <RenderKeyValueComponent
                 label="Default For Slots"
                 value={fledgeForGpt.defaultForSlots || 'undefined'}
                 columns={[12, 12]}

@@ -159,10 +159,7 @@ class Prebid {
 
   throttle = (fn: Function) => {
     const now = Date.now();
-    if (
-      !this.sendToContentScriptPending &&
-      (!this.lastTimeUpdateSentToContentScript || now - this.lastTimeUpdateSentToContentScript >= this.updateRateInterval)
-    ) {
+    if (!this.sendToContentScriptPending && (!this.lastTimeUpdateSentToContentScript || now - this.lastTimeUpdateSentToContentScript >= this.updateRateInterval)) {
       this.sendToContentScriptPending = true;
       this.lastTimeUpdateSentToContentScript = now;
       fn();
@@ -411,16 +408,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   maxBids: number;
   syncEndpoint:
-  | string
-  | {
-    [key: string]: string;
-  };
+    | string
+    | {
+        [key: string]: string;
+      };
   syncUrlModifier: object;
   timeout: number;
 }
@@ -590,6 +587,9 @@ export interface IPrebidDetails {
     | IPrebidBidResponseEventData
     | IPrebidAdRenderSucceededEventData
     | IPrebidAuctionDebugEventData
+    | IPrebidPaapiAuctionEvent
+    | IPrebidPaapiBidEvent
+    | IPrebidBidderDoneEventData
   )[];
   config: IPrebidConfig;
   eids: IPrebidEids[];
@@ -671,6 +671,44 @@ export interface IPrebidAuctionEndEventData {
     timeout: number;
     timestamp: number;
     winningBids: IPrebidBid[];
+  };
+  elapsedTime: number;
+  eventType: string;
+  id: string;
+}
+
+export interface IPrebidBidderDoneEventData {
+  args: {
+    auctionId: string;
+    auctionStart: number;
+    bidderCode: string;
+    bidderRequestId: string;
+    bids: IPrebidBid[];
+    metrics: {
+      checkpoint: Function;
+      fork: Function;
+      getMetrics: Function;
+      join: Function;
+      measureHookTime: Function;
+      measureTime: Function;
+      renameWith: Function;
+      setMetric: Function;
+      startTiming: Function;
+      timeBetween: Function;
+      timeSince: Function;
+      toJSON: Function;
+    };
+    ortb2: {
+      [key: string]: any;
+    };
+    paapi: {
+      [key: string]: any;
+    };
+    refererInfo: {
+      [key: string]: any;
+    };
+    start: number;
+    timeout: number;
   };
   elapsedTime: number;
   eventType: string;

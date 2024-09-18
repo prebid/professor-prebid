@@ -6,41 +6,39 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardHeader from '@mui/material/CardHeader';
 import Grid from '@mui/material/Grid';
-import { gte } from 'semver';
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import { tileHeight } from '../ConfigComponent';
-import BorderBottomIcon from '@mui/icons-material/BorderBottom';
 import AppStateContext from '../../../contexts/appStateContext';
 import RenderKeyValueComponent from '../../RenderKeyValueComponent';
 
-const PaapiComponent = (): JSX.Element => {
+const UserSyncComponent = (): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<4 | 8>(4);
   const ref = React.useRef<HTMLInputElement>(null);
 
   const { prebid } = useContext(AppStateContext);
-  const { config } = prebid || {};
-  const { paapi } = config || {};
+  const { config } = prebid;
+  if (!config?.userSync) return null;
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
-    setMaxWidth(expanded ? 4 : 4);
+    setMaxWidth(expanded ? 4 : 8);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
 
-  if (!paapi) return null;
   return (
     <Grid item sm={maxWidth} xs={12} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, maxHeight: expanded ? 'unset' : tileHeight }}>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: 'primary.main' }}>
-              <BorderBottomIcon />
+              <PeopleOutlinedIcon />
             </Avatar>
           }
-          title={<Typography variant="h3">Paapi Module</Typography>}
+          title={<Typography variant="h3">User Sync</Typography>}
           subheader={
             <Typography variant="subtitle1">
-              {!expanded && <RenderKeyValueComponent label="Enabled" value={paapi.enabled} columns={[12, 12]} expanded={expanded} />}
+              {/* {!expanded && <RenderKeyValueComponent label="Enabled" value={fledgeForGpt.enabled} columns={[12, 12]} expanded={expanded} />} */}
             </Typography>
           }
           action={
@@ -55,16 +53,12 @@ const PaapiComponent = (): JSX.Element => {
         />
         <CardContent>
           <Grid container spacing={2}>
-            {!expanded && (
-              <RenderKeyValueComponent
-                label="Default For Slots"
-                value={paapi.defaultForSlots || 'undefined'}
-                columns={[12, 12]}
-                expanded={expanded}
-              />
-            )}
-            {!expanded && <RenderKeyValueComponent label="Bidders" value={paapi.bidders || 'all bidders'} columns={[12, 12]} expanded={expanded} />}
-            {expanded && <RenderKeyValueComponent label="Module Configuration" value={paapi} columns={[12, 12]} expanded={expanded} />}
+            <RenderKeyValueComponent
+              label="User Sync"
+              value={config?.userSync}
+              columns={[12, 12]}
+              expanded={expanded}
+            />
           </Grid>
         </CardContent>
       </Card>
@@ -72,4 +66,4 @@ const PaapiComponent = (): JSX.Element => {
   );
 };
 
-export default PaapiComponent;
+export default UserSyncComponent;

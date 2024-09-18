@@ -8,16 +8,19 @@ import { InspectedPageContextProvider } from '../Shared/contexts/inspectedPageCo
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '../../theme/theme';
 import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
+import { OptionsContextProvider } from '../Shared/contexts/optionsContext';
 
 render(
   <ThemeProvider theme={theme}>
-    <InspectedPageContextProvider>
-      <StateContextProvider>
-        <ErrorBoundary FallbackComponent={ErrorCardComponent}>
-          <Panel />
-        </ErrorBoundary>
-      </StateContextProvider>
-    </InspectedPageContextProvider>
+    <OptionsContextProvider>
+      <InspectedPageContextProvider>
+        <StateContextProvider>
+          <ErrorBoundary FallbackComponent={ErrorCardComponent}>
+            <Panel />
+          </ErrorBoundary>
+        </StateContextProvider>
+      </InspectedPageContextProvider>
+    </OptionsContextProvider>
   </ThemeProvider>,
   window.document.querySelector('#app-container')
 );

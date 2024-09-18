@@ -12,6 +12,8 @@ import Grid from '@mui/material/Grid';
 import { ErrorBoundary } from 'react-error-boundary';
 import PaapiComponent from './tiles/PaapiComponent';
 import InstalledModulesComponent from './tiles/InstalledModules';
+import UserSyncComponent from './tiles/UserSyncComponent';
+;
 
 export const tileHeight = 255;
 
@@ -60,6 +62,10 @@ const ConfigComponent = (): JSX.Element => {
 
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <PaapiComponent />
+      </ErrorBoundary>
+
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <UserSyncComponent />
       </ErrorBoundary>
     </Grid>
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Popup } from './Popup';
+import { OptionsContextProvider } from '../Shared/contexts/optionsContext';
 import { StateContextProvider } from '../Shared/contexts/appStateContext';
 import { InspectedPageContextProvider } from '../Shared/contexts/inspectedPageContext';
 import { ThemeProvider } from '@mui/material/styles';
@@ -9,13 +10,15 @@ import { ErrorBoundary } from 'react-error-boundary';
 import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
 render(
   <ThemeProvider theme={theme}>
-    <InspectedPageContextProvider>
-      <StateContextProvider>
-        <ErrorBoundary FallbackComponent={ErrorCardComponent}>
-          <Popup />
-        </ErrorBoundary>
-      </StateContextProvider>
-    </InspectedPageContextProvider>
+    <OptionsContextProvider>
+      <InspectedPageContextProvider>
+        <StateContextProvider>
+          <ErrorBoundary FallbackComponent={ErrorCardComponent}>
+            <Popup />
+          </ErrorBoundary>
+        </StateContextProvider>
+      </InspectedPageContextProvider>
+    </OptionsContextProvider>
   </ThemeProvider>,
   document.getElementById('root')
 );

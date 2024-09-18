@@ -31,7 +31,8 @@ const AdUnitsComponentState = () => {
           return [...previousValue, currentValue];
         }
       }, [])
-      .sort((a, b) => a.code.localeCompare(b.code));
+    // "fix" https://github.com/prebid/professor-prebid/issues/104 ?
+    // .sort((a, b) => a.code.localeCompare(b.code));
 
     setAdUnits(adUnits);
   }, [auctionInitEvents]);
