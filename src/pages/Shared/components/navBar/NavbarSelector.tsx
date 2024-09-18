@@ -91,7 +91,7 @@ export const NavbarSelector = (): JSX.Element => {
         invisible={prebids && Object.keys(prebids).length < 2}
         badgeContent={(prebids && Object.keys(prebids).length) || null}
         color="primary"
-        sx={{ width: '14%' }}
+        sx={{ width: '14%', pr: '6px' }}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
