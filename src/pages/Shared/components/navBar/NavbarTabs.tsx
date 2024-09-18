@@ -47,14 +47,15 @@ export const NavBarTabs = (): JSX.Element => {
         },
       }}
     >
-      {filteredPages.map(({ label, path, Icon, beta }) => (
+      {filteredPages.map(({ label, path, Icon }) => (
         <Tab
           label={
             <Button component={Link} to={path} size="small" variant={activeRoute === `/${path}` ? 'contained' : 'outlined'} onClick={() => handleRouteChange(`/${path}`)} startIcon={<Icon />}>
               {label}
             </Button>
           }
-          sx={{ padding: '0px 3px', minWidth: 'initial' }}
+          sx={{ padding: 1, minWidth: 'initial' }}
+          key={path}
         ></Tab>
       ))}
     </Tabs>
