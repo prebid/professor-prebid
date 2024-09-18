@@ -16,6 +16,7 @@ const PaapiTopLevelAuctionComponentWrapper = ({ expanded, jsonView, input }: { i
   const filteredPaapiNoBidEvents = allpaapiNoBidEvents.filter((event) => event.args.auctionId === input?.args?.auctionId);
   const filteredWinningBids = allWinningBids.filter((event) => event.args.auctionId === input?.args?.auctionId);
   const filteredBidderDoneEvents = allBidderDoneEvents.filter((event) => event.args.auctionId === input?.args?.auctionId);
+  const bidderCodes = filteredPaapiBidEvents.map((event) => event.args.bidderCode);
   return (
     <>
       {!expanded && !jsonView && (
@@ -23,6 +24,8 @@ const PaapiTopLevelAuctionComponentWrapper = ({ expanded, jsonView, input }: { i
           <InfoItem label="Ad Unit Code" content={input.args.adUnitCode} />
           <InfoItem label="Auction Id" content={input.args.auctionId} />
           <InfoItem label="Seller" content={input.args.auctionConfig.seller} href={input.args.auctionConfig.seller} />
+          {bidderCodes.length > 0 && <InfoItem label="Bidders" content={bidderCodes.join(', ')} />}
+          {filteredWinningBids.length > 0 && <InfoItem label="Winner" content={filteredWinningBids[0]?.args.bidderCode} />}
         </>
       )}
 
@@ -76,13 +79,14 @@ const PaapiComponent = (): JSX.Element => {
   const { paapiRunAuctionEvents } = useContext(StateContext);
   return (
     <Grid container direction="row" justifyContent="space-between" spacing={1} sx={{ p: 0.5 }}>
-      {paapiRunAuctionEvents.map((auctionEvent, index) => (
-        <Grid item xs={12} key={index}>
+      {paapiRunAuctionEvents.map((auctionEvent, index, arr) => (
+        <Grid item xs={12} key={`${arr.length}-${auctionEvent.args.auctionId}`}>
           <BoxWithLabelAndExpandAndJsonView
             label={<PaapiTopLevelAuctionHeader auctionEvent={auctionEvent} />}
             children={PaapiTopLevelAuctionComponentWrapper}
             input={auctionEvent}
             sx={{ display: 'flex', flexDirection: 'column', rowGap: 1, backgroundColor: 'background.paper' }}
+            expanded={index === arr.length - 1}
           />
         </Grid>
       ))}
