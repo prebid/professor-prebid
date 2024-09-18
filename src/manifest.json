@@ -25,7 +25,7 @@
   "name": "Professor Prebid",
   "options_page": "options.html",
   "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
-  "version": "0.2.74",
+  "version": "0.2.75",
   "web_accessible_resources": [
     {
       "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],
