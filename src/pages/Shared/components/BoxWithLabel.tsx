@@ -1,4 +1,4 @@
-import { Box, IconButton, IconButtonProps, Typography, styled } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import React from 'react';
 import { SxProps, Theme } from '@mui/system';
 import ThreeSixtyOutlinedIcon from '@mui/icons-material/ThreeSixtyOutlined';
@@ -18,8 +18,20 @@ export const BoxWithLabel = ({ children, label, sx = {} }: { children: React.Rea
   </Box>
 );
 
-export const BoxWithLabelAndExpandAndJsonView = ({ children, label, sx = {}, input }: { children: React.FunctionComponent<{ expanded: boolean; jsonView: boolean; input: any }>; label: React.ReactNode; sx?: SxProps<Theme>; input: any }) => {
-  const [expanded, setExpanded] = React.useState(false);
+export const BoxWithLabelAndExpandAndJsonView = ({
+  children,
+  label,
+  sx = {},
+  input,
+  expanded = false,
+}: {
+  children: React.FunctionComponent<{ expanded: boolean; jsonView: boolean; input: any }>;
+  label: React.ReactNode;
+  sx?: SxProps<Theme>;
+  input: any;
+  expanded?: boolean;
+}) => {
+  const [exp, setExpanded] = React.useState(expanded);
   const [jsonView, setJsonView] = React.useState(false);
 
   return (
@@ -35,7 +47,7 @@ export const BoxWithLabelAndExpandAndJsonView = ({ children, label, sx = {}, inp
       >
         <Box />
         <Box>
-          {expanded && (
+          {exp && (
             <IconButton
               onClick={() => setJsonView(!jsonView)}
               sx={{
@@ -52,13 +64,13 @@ export const BoxWithLabelAndExpandAndJsonView = ({ children, label, sx = {}, inp
           )}
           <IconButton
             onClick={() => {
-              setExpanded(!expanded);
-              if (expanded === true) {
+              setExpanded(!exp);
+              if (exp === true) {
                 setJsonView(false);
               }
             }}
             sx={{
-              transform: !expanded ? 'scaleY(1)' : 'scaleY(-1)',
+              transform: !exp ? 'scaleY(1)' : 'scaleY(-1)',
               padding: 0,
               transition: 'transform 0.2s',
             }}
@@ -66,11 +78,7 @@ export const BoxWithLabelAndExpandAndJsonView = ({ children, label, sx = {}, inp
           />
         </Box>
       </Box>
-      {children({ expanded, jsonView, input })}
+      {children({ expanded: exp, jsonView, input })}
     </Box>
   );
 };
-
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
