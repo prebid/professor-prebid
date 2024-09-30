@@ -9,7 +9,7 @@ const injectScript = () => {
   script.src = chrome.runtime.getURL('/injected.bundle.js');
   script.id = 'professor prebid injected bundle';
   const node = document.head || document.documentElement;
-  if (node) {
+  if (node && !['challenges.cloudflare.com'].includes(window.location.host)) {
     node.appendChild(script);
     script.onload = () => {
       script.remove();
