@@ -54,7 +54,7 @@ export const NavBarTabs = (): JSX.Element => {
               {label}
             </Button>
           }
-          sx={{ padding: 1, minWidth: 'initial' }}
+          sx={{ padding: '0px 3px', minWidth: 'initial' }}
           key={path}
         ></Tab>
       ))}
