@@ -12,6 +12,7 @@ import AppStateContext from '../../contexts/appStateContext';
 import { getTabId } from '../../../Shared/utils';
 import DebuggingModuleComponent from './debugging/DebuggingModuleComponent';
 import ModifyBidResponsesComponent from './legacyDebugging/ModifyBidResponsesComponent';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const isNewDebugVersion = (input: string): boolean => {
   try {
@@ -51,14 +52,26 @@ const GridItemButton = ({ clickHandler, label, icon }: IGridItemButtonProps): JS
   </Grid>
 );
 
+const download = (input: any, fileName: string) => {
+  delete input.eventsUrl;
+  const dataStr = JSON.stringify(input, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 const ToolsComponent = (): JSX.Element => {
-  const { prebid } = useContext(AppStateContext);
+  const { prebid, prebids } = useContext(AppStateContext);
   return (
     <Grid container direction="row" rowSpacing={0.25} columnSpacing={0.5} justifyContent="stretch" alignItems="center" sx={{ p: 0.5 }}>
       <GridItemButton label="open google AdManager console" clickHandler={dfp_open_console} icon={<GoogleIcon />} />
       <GridItemButton label="open debug tab" clickHandler={openDebugTab} icon={<BugReportIcon />} />
+      <GridItemButton label="download" clickHandler={() => download(prebids, `${prebid.eventsUrl.split('//')[1].split('/')[0]}.json`)} icon={<FileDownloadIcon />} />
       <GridItemButton label="delete tabInfos" clickHandler={() => chrome.storage?.local.set({ tabInfos: null })} icon={<DeleteOutlineIcon />} />
-
       <OverlayControlComponent />
 
       {isNewDebugVersion(prebid.version) ? <DebuggingModuleComponent /> : <ModifyBidResponsesComponent />}
