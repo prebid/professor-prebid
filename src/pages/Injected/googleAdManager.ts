@@ -173,8 +173,8 @@ class GoogleAdManager {
     const gpt = this.googletag as any;
     const googletagSlots: IGoogleAdManagerSlot[] = [];
     const slots = gpt?.pubads()?.getSlots() || [];
-    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    const viewportWidth = window?.innerWidth || document?.documentElement?.clientWidth || document?.body?.clientWidth;
+    const viewportHeight = window?.innerHeight || document?.documentElement?.clientHeight || document?.body?.clientHeight;
 
     for (const slot of slots) {
       const targetingMap = slot.getTargetingMap();
