@@ -20,6 +20,7 @@ class Prebid {
   }
 
   addEventListeners = (): void => {
+    if (typeof this.globalPbjs.onEvent !== 'function') return;
     this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionInit', args: auctionInitData });
@@ -408,16 +409,16 @@ export interface IPrebidConfigS2SConfig {
   };
   enabled: boolean;
   endpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   maxBids: number;
   syncEndpoint:
-    | string
-    | {
-        [key: string]: string;
-      };
+  | string
+  | {
+    [key: string]: string;
+  };
   syncUrlModifier: object;
   timeout: number;
 }
