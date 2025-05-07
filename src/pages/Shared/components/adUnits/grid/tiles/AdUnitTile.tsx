@@ -10,6 +10,8 @@ import JSONViewerComponent from '../../../JSONViewerComponent';
 import AppStateContext from '../../../../contexts/appStateContext';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import InterstitialChipComponent from '../../chips/InterstitialChipComponent';
+import Ortb2ImpExtChipComponent from '../../chips/ortb2impExtChipComponent';
 
 const AdUnitTile = ({ adUnit }: IAdUnitGridRowProps): JSX.Element => {
   const { isPanel } = useContext(AppStateContext);
@@ -62,6 +64,15 @@ const AdUnitTile = ({ adUnit }: IAdUnitGridRowProps): JSX.Element => {
                 <Stack direction="row" flexWrap={'wrap'} gap={1}>
                   <AdUnitChipComponent adUnit={adUnit} />
                 </Stack>
+                {adUnit.ortb2Imp && JSON.stringify(adUnit.ortb2Imp) !== '{}' && (
+                  <>
+                    <Typography variant="caption">Ortb2Imp:</Typography>
+                    <Stack direction="column" alignItems="flex-start" flexWrap={'wrap'} gap={1}>
+                      {adUnit.ortb2Imp.instl === 1 && <InterstitialChipComponent adUnit={adUnit} />}
+                      {adUnit.ortb2Imp.ext && !isPanel && <Ortb2ImpExtChipComponent label="ext" input={adUnit.ortb2Imp.ext} />}
+                    </Stack>
+                  </>
+                )}
               </>
             )}
             {expanded && (
