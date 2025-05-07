@@ -1,6 +1,7 @@
 import React from 'react';
 import Grid from '@mui/material/Grid';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -16,12 +17,14 @@ const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLText
   setSearch(event.target.value.trim());
 };
 
-const handleSwitchChange = (
-  event: React.ChangeEvent<HTMLInputElement>,
-  state: { error: boolean; warning: boolean },
-  setState: (newVal: { error: boolean; warning: boolean }) => void
-): void => {
-  setState({ ...state, [event.target.name]: event.target.checked });
+const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>, state: IEventsHeaderState, setState: (newVal: IEventsHeaderState) => void): void => {
+  if (event.target.name !== 'all') {
+    setState({ ...state, [event.target.name]: event.target.checked });
+  }
+  if (event.target.name === 'all') {
+    // If the "all" switch is checked, uncheck the other switches
+    setState(event.target.checked ? { ...state, error: false, warning: false, all: event.target.checked } : { ...state, error: true, warning: true, all: event.target.checked });
+  }
 };
 
 const EventsHeader = ({ close, search, setSearch, state, setState }: IEventsHeaderProps): JSX.Element => {
@@ -45,7 +48,7 @@ const EventsHeader = ({ close, search, setSearch, state, setState }: IEventsHead
         </Grid>
       )}
 
-      <Grid item xs={9.5}>
+      <Grid item xs={8.5}>
         <TextField
           color="primary"
           focused
@@ -65,7 +68,7 @@ const EventsHeader = ({ close, search, setSearch, state, setState }: IEventsHead
       </Grid>
       <Grid
         item
-        xs={2.5}
+        xs={3.5}
         sx={{
           display: 'flex',
           flexDirection: 'row',
@@ -78,15 +81,18 @@ const EventsHeader = ({ close, search, setSearch, state, setState }: IEventsHead
           <FormGroup sx={{ flexDirection: 'row' }}>
             <FormControlLabel
               labelPlacement="start"
-              control={
-                <Switch checked={state.warning} onChange={(event) => handleSwitchChange(event, state, setState)} name="warning" size="small" />
-              }
+              control={<Switch disabled={state.all} checked={state.warning} onChange={(event) => handleSwitchChange(event, state, setState)} name="warning" size="small" />}
               label={<WarningAmberOutlinedIcon color={state.warning ? 'primary' : 'secondary'} fontSize="small" />}
             />
             <FormControlLabel
               labelPlacement="start"
-              control={<Switch checked={state.error} onChange={(event) => handleSwitchChange(event, state, setState)} name="error" size="small" />}
+              control={<Switch disabled={state.all} checked={state.error} onChange={(event) => handleSwitchChange(event, state, setState)} name="error" size="small" />}
               label={<ErrorOutlineIcon color={state.error ? 'primary' : 'secondary'} fontSize="small" />}
+            />
+            <FormControlLabel
+              labelPlacement="start"
+              control={<Switch checked={state.all} onChange={(event) => handleSwitchChange(event, state, setState)} name="all" size="small" />}
+              label={<PublicOutlinedIcon  color={state.all ? 'primary' : 'secondary'} fontSize="small" />}
             />
           </FormGroup>
         </FormControl>
@@ -95,12 +101,16 @@ const EventsHeader = ({ close, search, setSearch, state, setState }: IEventsHead
   );
 };
 
+type IEventFilter = 'error' | 'warning' | 'all';
+
+export type IEventsHeaderState = Record<IEventFilter, boolean>;
+
 interface IEventsHeaderProps {
-  close?: () => void | undefined;
+  close?: () => void;
   search: string;
-  setSearch: (newVal: string) => void;
-  state: { error: boolean; warning: boolean };
-  setState: (newVal: { error: boolean; warning: boolean }) => void;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  state: IEventsHeaderState;
+  setState: React.Dispatch<React.SetStateAction<IEventsHeaderState>>;
 }
 
 export default EventsHeader;
