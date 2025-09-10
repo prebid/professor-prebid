@@ -1,59 +1,25 @@
-import { IGoogleAdManagerDetails } from '../Injected/googleAdManager';
-import { IPrebidDetails } from '../Injected/prebid';
-import { ITcfDetails } from '../Injected/tcf';
-import { EVENTS } from '../Shared/constants';
-import { getTabId } from '../Shared/utils';
+import { BadgeService } from './BadgeService';
+import { MessageHandler } from './MessageHandler';
+import { TabContextService, debounce } from './TabContextService';
 
-class Background {
-  tabInfos: ITabInfos = {};
-  timeoutId: NodeJS.Timeout | null = null;
-  lastWriteToStorage: number | null = null;
-  writeTimeoutId: number | null = null;
+class BackgroundService {
+  constructor(
+    private tabContextService: TabContextService,
+    private updateBadge: (tabId: number | undefined) => void
+  ) { }
 
-  constructor() {
-    chrome.runtime.onMessage.addListener(this.handleMessagesFromInjected);
+  async start(): Promise<void> {
+    await this.tabContextService.load();
+    await this.cleanStorage();
+
+    const handler = new MessageHandler(this.tabContextService, this.updateBadge);
+    chrome.runtime.onMessage.addListener(handler.handle);
     chrome.webNavigation?.onBeforeNavigate.addListener(this.handleWebNavigationOnBeforeNavigate);
     chrome.tabs.onRemoved.addListener(this.handleOnTabRemoved);
     chrome.tabs.onActivated.addListener(this.handleOnTabActivated);
     chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
     chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 15 });
-    this.init();
   }
-
-  init = async () => {
-    // read state from storage
-    const res = await chrome.storage.local.get(['tabInfos']);
-    this.tabInfos = res.tabInfos || this.tabInfos;
-    // // clean up storage
-    await this.cleanStorage();
-  };
-
-  handleMessagesFromInjected = async (
-    message: { type: string; payload: IGoogleAdManagerDetails | IPrebidDetails | ITcfDetails },
-    sender: chrome.runtime.MessageSender
-  ) => {
-    const { type, payload } = message;
-    const tabId = sender.tab?.id;
-    if (!tabId || !type || !payload || JSON.stringify(payload) === '{}') return;
-    this.tabInfos[tabId] = this.tabInfos[tabId] || {};
-    switch (type) {
-      case EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND:
-        this.tabInfos[tabId]['top-window'] = this.tabInfos[tabId]['top-window'] || {};
-        this.tabInfos[tabId]['top-window']['googleAdManager'] = payload as IGoogleAdManagerDetails;
-        break;
-      case EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND:
-        const { frameId, namespace } = payload as IPrebidDetails;
-        this.tabInfos[tabId][frameId] = this.tabInfos[tabId][frameId] || {};
-        this.tabInfos[tabId][frameId]['prebids'] = this.tabInfos[tabId][frameId]['prebids'] || {};
-        this.tabInfos[tabId][frameId]['prebids'][namespace as keyof IPrebids] = payload as IPrebidDetails;
-        break;
-      case EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND:
-        this.tabInfos[tabId]['tcf'] = payload as ITcfDetails;
-        break;
-    }
-    await this.persistInStorage();
-    this.updateBadge(tabId);
-  };
 
   handleOnTabActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
     this.updateBadge(activeInfo.tabId);
@@ -61,103 +27,45 @@ class Background {
 
   handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
-    if (frameId == 0) {
-      this.tabInfos[tabId] = this.tabInfos[tabId] || {};
-      this.tabInfos[tabId]['top-window'] = this.tabInfos[tabId]['top-window'] || {};
-      this.tabInfos[tabId]['top-window'] = { url };
+    if (frameId === 0) {
+      const tabInfo = this.tabContextService.getOrCreateTabInfo(tabId);
+      tabInfo['top-window'] = { url };
       this.updateBadge(tabId);
-      await this.persistInStorage();
+      await this.tabContextService.persist();
     }
   };
 
-  handleOnTabRemoved = async (tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
-    await this.deleteTabInfo(tabId);
+  handleOnTabRemoved = async (tabId: number, _info: chrome.tabs.TabRemoveInfo) => {
+    await this.tabContextService.deleteTabInfo(tabId);
   };
 
-  handleOnAlarm = async (alarm: chrome.alarms.Alarm) => {
+  handleOnAlarm = async (_alarm: chrome.alarms.Alarm) => {
     await this.cleanStorage();
   };
 
-  cleanStorage = async () => {
+  private cleanStorage = async () => {
     const tabs = await chrome.tabs.query({});
     const activeTabIds = tabs.map((tab) => tab.id);
-    for (const t in this.tabInfos) {
-      if (activeTabIds.includes(parseInt(t))) {
-      } else {
-        await this.deleteTabInfo(parseInt(t));
+    for (const tabIdStr of Object.keys(this.tabContextService.getTabInfos())) {
+      const tabId = parseInt(tabIdStr, 10);
+      if (!activeTabIds.includes(tabId)) {
+        await this.tabContextService.deleteTabInfo(tabId);
       }
     }
   };
+}
 
-  deleteTabInfo = async (tabId: number) => {
-    delete this.tabInfos[tabId];
-    await this.persistInStorage();
+class Background {
+  updateBadge = (tabId: number | undefined) => {
+    return BadgeService.update(this.tabContextService.getTabInfos(), tabId);
   };
+  private tabContextService = new TabContextService();
+  private backgroundService = new BackgroundService(this.tabContextService, this.updateBadge);
+  persistInStorageThrottled = debounce(() => this.tabContextService.persist(), 1500);
 
-  updateBadge = async (tabId: number | undefined) => {
-    const activeTabId = await getTabId();
-    if (!tabId || tabId !== activeTabId) return;
-    let prebidCount = 0;
-    if (this.tabInfos[tabId] && typeof this.tabInfos[tabId] === 'object') {
-      for (const [_frameId, frameInfo] of Object.entries(this.tabInfos[tabId])) {
-        if (frameInfo.prebids) {
-          prebidCount += Object.keys(frameInfo.prebids).length;
-        }
-      }
-    }
-    if (tabId && prebidCount > 0) {
-      chrome.action.setBadgeBackgroundColor({ color: '#1ba9e1', tabId: activeTabId });
-      chrome.action.setBadgeText({ text: `✓`, tabId: activeTabId });
-    } else {
-      chrome.action.setBadgeBackgroundColor({ color: '#ecf3f5' });
-      chrome.action.setBadgeText({ text: `` });
-    }
-  };
+  constructor() {
+    this.backgroundService.start();
+  }
 
-  persistInStorageThrottled = () => {
-    const delay = 1500;
-    const now = Date.now();
-
-    if (this.writeTimeoutId) {
-      clearTimeout(this.writeTimeoutId);
-    }
-
-    this.writeTimeoutId = window.setTimeout(() => {
-      this.persistInStorage();
-      this.lastWriteToStorage = now;
-      this.writeTimeoutId = null;
-    }, delay);
-  };
-
-  persistInStorage = async () => {
-    await chrome.storage?.local.set({ tabInfos: this.tabInfos });
-  };
 }
 new Background();
-
-export interface IPrebids {
-  [key: string]: IPrebidDetails;
-}
-
-export interface IFrameInfo {
-  googleAdManager?: IGoogleAdManagerDetails;
-  prebids?: IPrebids;
-  tcf?: ITcfDetails;
-  url?: string;
-  downloading?: 'true' | 'false' | 'error';
-  namespace?: string;
-  updateNamespace?: (namespace: string) => void;
-  syncState?: string;
-  initReqChainResult?: initReqChainResult;
-}
-
-interface IFrameInfos {
-  [key: string]: IFrameInfo;
-}
-export interface ITabInfos {
-  [key: number]: IFrameInfos;
-}
-
-export interface initReqChainResult {
-  [key: string]: any;
-}

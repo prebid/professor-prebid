@@ -16,16 +16,7 @@ import MinimizeIcon from '@mui/icons-material/Minimize';
 import MaximizeIcon from '@mui/icons-material/Maximize';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 
-const AdOverlayComponent = ({
-  elementId,
-  winningCPM,
-  winningBidder,
-  currency,
-  timeToRespond,
-  closePortal,
-  contentRef,
-  pbjsNameSpace,
-}: AdOverlayComponentProps): JSX.Element => {
+const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal, contentRef, pbjsNameSpace }: AdOverlayComponentProps): JSX.Element => {
   const gridRef = React.useRef<HTMLDivElement>(null);
   const boxRef = React.useRef<HTMLDivElement>(null);
   const [truncate, setTruncate] = useState<boolean>(false);
@@ -53,17 +44,7 @@ const AdOverlayComponent = ({
   }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight, truncate]);
   return (
     <ThemeProvider theme={theme}>
-      <PopOverComponent
-        elementId={elementId}
-        winningCPM={winningCPM}
-        winningBidder={winningBidder}
-        currency={currency}
-        timeToRespond={timeToRespond}
-        closePortal={closePortal}
-        anchorEl={anchorEl}
-        setAnchorEl={setAnchorEl}
-        pbjsNameSpace={pbjsNameSpace}
-      />
+      <PopOverComponent elementId={elementId} winningCPM={winningCPM} winningBidder={winningBidder} currency={currency} timeToRespond={timeToRespond} closePortal={closePortal} anchorEl={anchorEl} setAnchorEl={setAnchorEl} pbjsNameSpace={pbjsNameSpace} />
       <CacheProvider value={cache}>
         <Box
           ref={boxRef}
@@ -82,9 +63,9 @@ const AdOverlayComponent = ({
             overflow: 'hidden',
           }}
         >
-          <Grid container justifyContent="flex-start" alignItems="flex-start" ref={gridRef} rowSpacing={0.2}>
-            <Grid container item justifyContent="space-between" alignItems="flex-start">
-              <Grid item xs={7} lg={3.5} xl={1.5}>
+          <Grid container alignItems="flex-start" ref={gridRef}>
+            <Grid container justifyContent="space-between" alignItems="flex-start">
+              <Grid size={{ xs: 7, lg: 3.5, xl: 1.5 }}>
                 <Paper elevation={1} sx={{ p: 0.25 }}>
                   <Typography
                     variant="h4"
@@ -98,7 +79,6 @@ const AdOverlayComponent = ({
                 </Paper>
               </Grid>
               <Grid
-                item
                 sx={{
                   display: 'flex',
                   flexDirection: 'row',
@@ -106,7 +86,7 @@ const AdOverlayComponent = ({
                   alignItems: 'flex-end',
                   color: 'text.secondary',
                 }}
-                xs={4}
+                size={4}
               >
                 <IconButton sx={{ p: 0 }} onClick={() => setExpanded(!expanded)}>
                   {expanded && <MinimizeIcon sx={{ fontSize: 14 }} />}
@@ -134,9 +114,9 @@ const AdOverlayComponent = ({
               </Grid>
             </Grid>
             {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
-              <Grid container item xs={12} spacing={0.5}>
+              <Grid container>
                 {winningCPM && (
-                  <Grid item>
+                  <Grid>
                     <Paper elevation={1} sx={{ p: 0.5 }}>
                       <Typography>
                         <strong>CPM: </strong>
@@ -146,7 +126,7 @@ const AdOverlayComponent = ({
                   </Grid>
                 )}
                 {winningBidder && (
-                  <Grid item>
+                  <Grid>
                     <Paper elevation={1} sx={{ p: 0.5 }}>
                       <Typography>
                         <strong>Bidder: </strong>
@@ -156,7 +136,7 @@ const AdOverlayComponent = ({
                   </Grid>
                 )}
                 {timeToRespond && (
-                  <Grid item>
+                  <Grid>
                     <Paper elevation={1} sx={{ p: 0.5 }}>
                       <Typography>
                         <strong>TTR: </strong>

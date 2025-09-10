@@ -9,9 +9,7 @@ import StateContext from '../../../Shared/contexts/appStateContext';
 const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>) => {
   const allGridBarsCollection = gridRef?.current?.children;
   const allGridBarsArray = Array.from(allGridBarsCollection || []) as HTMLLIElement[];
-  const nearestGridBar = allGridBarsArray.sort(
-    (a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input)
-  )[0] as HTMLElement;
+  const nearestGridBar = allGridBarsArray.sort((a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input))[0] as HTMLElement;
   return nearestGridBar;
 };
 
@@ -30,18 +28,10 @@ const getListItemStyle = (isTimeOut: boolean, width: number, left: number) => ({
 const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpenClose }: IPopoverWithJSONViewerProps) => {
   const { topics } = useContext(StateContext);
   return (
-    <Popover
-      open={open}
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      onClose={handlePopoverOpenClose}
-      disableRestoreFocus
-      onClick={(e) => e.stopPropagation()}
-    >
+    <Popover open={open} anchorEl={anchorEl} anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }} onClose={handlePopoverOpenClose} disableRestoreFocus onClick={(e) => e.stopPropagation()}>
       <JSONViewerComponent
         src={{ bidderRequest, topics }}
-        name={false}
+        name={''}
         collapsed={3}
         displayObjectSize={false}
         displayDataTypes={false}

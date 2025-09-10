@@ -1,35 +1,57 @@
 {
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icon-34.png"
+    "default_icon": "assets/img/icon-34.png"
   },
   "background": {
     "service_worker": "background.bundle.js"
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*", "<all_urls>"],
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "<all_urls>"
+      ],
       "all_frames": true,
-      "match_about_blank": true,
+      "match_about_blank": false,
       "run_at": "document_idle",
-      "js": ["contentScript.bundle.js"]
+      "js": [
+        "contentScript.bundle.js"
+      ]
     }
   ],
   "devtools_page": "devtools.html",
-  "host_permissions": ["https://*/", "http://*/"],
+  "host_permissions": [
+    "https://*/",
+    "http://*/"
+  ],
   "incognito": "split",
   "icons": {
-    "128": "icon-128.png"
+    "128": "assets/img/icon-128.png"
   },
   "manifest_version": 3,
   "name": "Professor Prebid",
   "options_page": "options.html",
-  "permissions": ["webNavigation", "storage", "unlimitedStorage", "tabs", "scripting"],
-  "version": "0.2.78",
+  "permissions": [
+    "webNavigation",
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "scripting"
+  ],
+  "version": "{__APP_VERSION__}",
   "web_accessible_resources": [
     {
-      "resources": ["injected.bundle.js", "app.html", "openDfpConsole.bundle.js"],
-      "matches": ["http://*/*", "https://*/*"]
+      "resources": [
+        "injected.bundle.js",
+        "app.html",
+        "openDfpConsole.bundle.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
     }
   ]
 }

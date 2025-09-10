@@ -3,7 +3,7 @@ import { EVENTS } from '../Shared/constants';
 
 declare global {
   interface Window {
-    googletag: googletag.Googletag;
+    googletag: typeof googletag;
   }
 }
 class GoogleAdManager {
@@ -11,10 +11,12 @@ class GoogleAdManager {
   slotEvents: ISlotEvents = {};
   postAuctionStartTimestamp: number = null;
   postAuctionEndTimestamp: number = null;
-  googletag: googletag.Googletag;
+  googletag: typeof googletag;
   init() {
-    this.googletag = window.googletag || ({} as googletag.Googletag);
-    this.googletag.cmd = this.googletag.cmd || [];
+    this.googletag = window.googletag || ({} as typeof googletag);
+    if (!Array.isArray(this.googletag.cmd)) {
+      (this.googletag as any).cmd = [];
+    }
     this.googletag.cmd.push(() => this.addEventListeners());
   }
 

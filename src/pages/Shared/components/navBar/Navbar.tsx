@@ -1,6 +1,5 @@
 import React from 'react';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
 import { NavbarSelector } from './NavbarSelector';
 import { NavBarTabs } from './NavbarTabs';
 import { NavBarReload } from './NavbarReload';
@@ -9,6 +8,7 @@ export const NavBar = (): JSX.Element => {
   return (
     <AppBar
       sx={{
+        height: '40px',
         position: 'relative',
         backgroundColor: 'background.paper',
         display: 'flex',
@@ -18,15 +18,8 @@ export const NavBar = (): JSX.Element => {
         '&> a  ': { textDecoration: 'none' },
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          maxWidth: 'calc(100vw - 48px)',
-        }}
-      >
-        <NavbarSelector />
-        <NavBarTabs />
-      </Box>
+      <NavbarSelector />
+      <NavBarTabs />
 
       <NavBarReload />
     </AppBar>

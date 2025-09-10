@@ -16,21 +16,11 @@ export const NavBarReload = (): JSX.Element => {
   };
 
   return (
-    <Box>
-      <IconButton
-        aria-label="refresh"
-        color="default"
-        sx={{ p: 0 }}
-        onClick={() => chrome.tabs.create({ url: 'https://github.com/prebid/professor-prebid/issues' })}
-      >
+    <Box flexDirection={'row'} display="flex" alignItems="top">
+      <IconButton aria-label="refresh" color="default" sx={{ p: 0 }} onClick={() => chrome.tabs.create({ url: 'https://github.com/prebid/professor-prebid/issues' })}>
         <HelpOutlineOutlinedIcon />
       </IconButton>
-      <IconButton
-        sx={{ p: 0 }}
-        aria-label="refresh"
-        onClick={refresh}
-        color={downloading === 'true' ? 'primary' : downloading === 'error' ? 'error' : 'default'}
-      >
+      <IconButton sx={{ p: 0 }} aria-label="refresh" onClick={refresh} color={downloading === 'true' ? 'primary' : downloading === 'error' ? 'error' : 'default'}>
         {downloading === 'true' ? (
           <AutorenewIcon
             sx={{

@@ -1,3 +1,5 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
 # dependencies
 /node_modules
 
@@ -6,6 +8,12 @@
 
 # production
 /build
+**/dist/*.js
+**/dist/**/*.js
+# zip
+/zip
+*.zip
+build.zip
 
 # misc
 .DS_Store
@@ -13,4 +21,17 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.history
+
+# secrets
+secrets.*.js
+*.cert
+*.key
+
+
+**/dist/*.js
+**/dist/**/*.js
+
+**/.DS_Store
+**/dist/
 build.zip

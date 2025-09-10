@@ -33,17 +33,17 @@ const OverlayControlComponent = (): JSX.Element => {
   };
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
-        <Grid container rowSpacing={1} columnSpacing={0.5}>
-          <Grid item sm={1} xs={1}>
+        <Grid container>
+          <Grid size={{ xs: 1, sm: 1 }}>
             <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
               <FormControl>
                 <FormControlLabel control={<Switch checked={showOverlay || false} onChange={handleShowOverlayChange} />} label="" />
               </FormControl>
             </Box>
           </Grid>
-          <Grid item xs={11} sm={11}>
+          <Grid size={{ xs: 11, sm: 11 }}>
             <Box sx={{ border: 1, borderColor: showOverlay ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
               <Typography
                 variant="h4"

@@ -16,6 +16,11 @@
     "no-extra-semi": "off",
     "no-inner-declarations": "off",
     "eqeqeq": "off",
+    "func-style": [
+      "error",
+      "expression"
+    ],
+    "prefer-arrow-callback": "error",
     "no-restricted-imports": [
       "error",
       {

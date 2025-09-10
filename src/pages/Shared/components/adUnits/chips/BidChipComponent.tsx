@@ -27,17 +27,10 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, i
         label={label}
         onClick={() => setPopUpOpen(true)}
       />
-      <Popover
-        open={popUpOpen}
-        anchorReference="anchorPosition"
-        anchorPosition={{ top: 1, left: 1 }}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        onClose={() => setPopUpOpen(false)}
-      >
+      <Popover open={popUpOpen} anchorReference="anchorPosition" anchorPosition={{ top: 1, left: 1 }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }} onClose={() => setPopUpOpen(false)}>
         <JSONViewerComponent
           src={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid', topics }}
-          name={false}
+          name={''}
           collapsed={3}
           displayObjectSize={false}
           displayDataTypes={false}

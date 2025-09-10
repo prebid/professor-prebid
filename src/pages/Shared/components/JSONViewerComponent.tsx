@@ -1,33 +1,30 @@
 import React from 'react';
-import ReactJson, { OnCopyProps } from 'react-json-view';
+import ReactJson from '@uiw/react-json-view';
 
 const JSONViewerComponent = ({
   src = null,
-  name = false,
+  name = '',
   collapsed = 3,
   displayObjectSize = false,
   displayDataTypes = false,
   sortKeys = false,
-  quotesOnKeys = false,
+  // quotesOnKeys = false,
   indentWidth = 2,
   collapseStringsAfterLength = 100,
   style,
 }: IJSONViewerComponentProps): JSX.Element => {
-  const handleCopy = (copy: OnCopyProps) => {
-    navigator.clipboard.writeText(JSON.stringify(copy.src, null, '\t'));
-  };
   return (
     <ReactJson
-      src={src}
-      name={name}
+      value={src}
+      keyName={String(name)}
       collapsed={collapsed}
-      enableClipboard={handleCopy}
+      enableClipboard={true}
       displayObjectSize={displayObjectSize}
       displayDataTypes={displayDataTypes}
-      sortKeys={sortKeys}
-      quotesOnKeys={quotesOnKeys}
+      objectSortKeys={sortKeys}
+      // quotesOnKeys={quotesOnKeys}
       indentWidth={indentWidth}
-      collapseStringsAfterLength={collapseStringsAfterLength}
+      stringEllipsis={collapseStringsAfterLength}
       style={{ fontSize: '12px', fontFamily: 'roboto', padding: '15px', ...style }}
     />
   );
@@ -35,14 +32,14 @@ const JSONViewerComponent = ({
 
 interface IJSONViewerComponentProps {
   src: Object;
-  name?: string | false;
+  name?: string;
   collapsed?: number | boolean;
   displayObjectSize?: boolean;
   displayDataTypes?: boolean;
   sortKeys?: boolean;
   quotesOnKeys?: boolean;
   indentWidth?: number;
-  collapseStringsAfterLength?: number | false;
+  collapseStringsAfterLength?: number | undefined;
   style?: Object;
 }
 

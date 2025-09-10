@@ -29,7 +29,7 @@ const Ortb2ImpExtChipComponent = ({ input, label }: Ortb2ImpExtChipComponentProp
       <Popover open={popUpOpen} anchorReference="anchorPosition" anchorPosition={{ top: 1, left: 1 }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }} onClose={() => setPopUpOpen(false)}>
         <JSONViewerComponent
           src={input}
-          name={false}
+          name={''}
           collapsed={false}
           displayObjectSize={false}
           displayDataTypes={false}

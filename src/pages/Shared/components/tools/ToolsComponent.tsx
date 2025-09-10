@@ -43,7 +43,7 @@ const openDebugTab = async () => {
 };
 
 const GridItemButton = ({ clickHandler, label, icon }: IGridItemButtonProps): JSX.Element => (
-  <Grid item sx={{ height: 36 }}>
+  <Grid sx={{ height: 36 }}>
     <Paper elevation={1} sx={{ alignItems: 'center' }}>
       <Button size="small" variant="outlined" onClick={clickHandler} startIcon={icon}>
         <Typography variant="h3">{label}</Typography>
@@ -67,7 +67,7 @@ const download = (input: any, fileName: string) => {
 const ToolsComponent = (): JSX.Element => {
   const { prebid, prebids } = useContext(AppStateContext);
   return (
-    <Grid container direction="row" rowSpacing={0.25} columnSpacing={0.5} justifyContent="stretch" alignItems="center" sx={{ p: 0.5 }}>
+    <Grid container justifyContent="stretch" alignItems="center">
       <GridItemButton label="open google AdManager console" clickHandler={dfp_open_console} icon={<GoogleIcon />} />
       <GridItemButton label="open debug tab" clickHandler={openDebugTab} icon={<BugReportIcon />} />
       <GridItemButton label="download" clickHandler={() => download(prebids, `${prebid.eventsUrl.split('//')[1].split('/')[0]}.json`)} icon={<FileDownloadIcon />} />

@@ -21,7 +21,7 @@ const AnalyticsComponent = ({ prebid }: InalyticsComponentProps): JSX.Element =>
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   return (
-    <Grid item sm={maxWidth} xs={12} ref={ref}>
+    <Grid size={{ sm: maxWidth, xs: 12 }} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={

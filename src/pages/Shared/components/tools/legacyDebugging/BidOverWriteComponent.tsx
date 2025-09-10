@@ -124,7 +124,7 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
 
   return (
     <React.Fragment>
-      <Grid item md={1} xs={1}>
+      <Grid size={{ xs: 1, md: 1 }}>
         <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
           <FormControl>
             <FormControlLabel label="" control={<Switch checked={bidsOverwriteEnabled} onChange={handleBidOverWriteEnabledChange} />} />
@@ -132,39 +132,23 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
         </Box>
       </Grid>
 
-      <Grid item md={1} xs={1}>
+      <Grid size={{ xs: 1, md: 1 }}>
         <FormControl sx={{ height: 1 }}>
           <Box component="form" noValidate autoComplete="off" sx={{ height: 1 }}>
-            <TextField
-              sx={{ height: 1, '& div': { height: 1 } }}
-              type="number"
-              label="cpm"
-              value={cpm}
-              onChange={handleCpmChange}
-              variant="outlined"
-              disabled={!bidsOverwriteEnabled}
-            />
+            <TextField sx={{ height: 1, '& div': { height: 1 } }} type="number" label="cpm" value={cpm} onChange={handleCpmChange} variant="outlined" disabled={!bidsOverwriteEnabled} />
           </Box>
         </FormControl>
       </Grid>
 
-      <Grid item md={1} xs={1}>
+      <Grid size={{ xs: 1, md: 1 }}>
         <FormControl sx={{ height: 1 }}>
           <Box component="form" noValidate autoComplete="off" sx={{ height: 1 }}>
-            <TextField
-              sx={{ height: 1, '& div': { height: 1 } }}
-              type="string"
-              label="currency"
-              value={currency}
-              onChange={handleCurrencyChange}
-              variant="outlined"
-              disabled={!bidsOverwriteEnabled}
-            />
+            <TextField sx={{ height: 1, '& div': { height: 1 } }} type="string" label="currency" value={currency} onChange={handleCurrencyChange} variant="outlined" disabled={!bidsOverwriteEnabled} />
           </Box>
         </FormControl>
       </Grid>
 
-      <Grid item md={4.5} xs={4.5}>
+      <Grid size={{ xs: 4.5, md: 4.5 }}>
         <FormControl sx={{ height: 1, width: 1, '& .MuiOutlinedInput-root': { height: 1, alignItems: 'baseline' } }}>
           <InputLabel>Select Bidder(s)</InputLabel>
           <Select
@@ -199,7 +183,7 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
           </Select>
         </FormControl>
       </Grid>
-      <Grid item md={4.5} xs={4.5}>
+      <Grid size={{ xs: 4.5, md: 4.5 }}>
         <FormControl sx={{ height: 1, width: 1, '& .MuiOutlinedInput-root': { height: 1, alignItems: 'baseline' } }}>
           <InputLabel>Select AdUnitCode(s)</InputLabel>
           <Select

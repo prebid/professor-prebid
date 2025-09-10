@@ -9,24 +9,11 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
 
   return (
     <React.Fragment>
-      <Chip
-        size="small"
-        variant="outlined"
-        color={popUpOpen ? 'success' : isWinner ? 'secondary' : 'primary'}
-        label={label}
-        onClick={() => setPopUpOpen(true)}
-      />
-      <Popover
-        open={popUpOpen}
-        anchorReference="anchorPosition"
-        anchorPosition={{ top: 1, left: 1 }}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        onClose={() => setPopUpOpen(false)}
-      >
+      <Chip size="small" variant="outlined" color={popUpOpen ? 'success' : isWinner ? 'secondary' : 'primary'} label={label} onClick={() => setPopUpOpen(true)} />
+      <Popover open={popUpOpen} anchorReference="anchorPosition" anchorPosition={{ top: 1, left: 1 }} anchorOrigin={{ vertical: 'top', horizontal: 'left' }} transformOrigin={{ vertical: 'top', horizontal: 'left' }} onClose={() => setPopUpOpen(false)}>
         <JSONViewerComponent
           src={input}
-          name={false}
+          name={''}
           collapsed={false}
           displayObjectSize={false}
           displayDataTypes={false}

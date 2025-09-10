@@ -16,13 +16,13 @@ export const Popup = (): JSX.Element => {
   }, [pbjsNamespace]);
 
   useEffect(() => {
-    // console.log('popup POPUP_LOADED', );  
+    // console.log('popup POPUP_LOADED', );
     sendChromeTabsMessage(POPUP_LOADED, {});
   }, []);
 
   return (
     <BrowserRouter>
-      <Box sx={{ height: 600, overflowX: 'auto', backgroundColor: 'primary.light' }}>
+      <Box sx={{ overflowX: 'auto', backgroundColor: 'primary.light' }}>
         <NavBar />
         {(!prebids || !prebids[pbjsNamespace]) && <NoPrebidCardComponent />}
         {prebids && prebids[pbjsNamespace] && <RoutesComponent />}
