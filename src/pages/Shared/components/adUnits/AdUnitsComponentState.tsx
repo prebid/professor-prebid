@@ -1,12 +1,28 @@
 import { useEffect, useState, useContext } from 'react';
 import { IPrebidAdUnit } from '../../../Injected/prebid';
-import merge from 'lodash/merge';
 import StateContext from '../../contexts/appStateContext';
 
+const merge = (target: any, source: any) => {
+  for (const key in source) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      if (!target[key] || typeof target[key] !== 'object') {
+        target[key] = {};
+      }
+      merge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+};
+
 const AdUnitsComponentState = () => {
+  const [eventsPopUpOpen, setEventsPopUpOpen] = useState(false);
+  const [pbjsVersionPopUpOpen, setPbjsVersionPopUpOpen] = useState(false);
   const { auctionInitEvents } = useContext(StateContext);
   const [adUnits, setAdUnits] = useState<IPrebidAdUnit[]>([]);
-
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState<string | null>(null);
   useEffect(() => {
     const adUnits = auctionInitEvents
       ?.reduce((previousValue, currentValue) => {
@@ -31,8 +47,8 @@ const AdUnitsComponentState = () => {
           return [...previousValue, currentValue];
         }
       }, [])
-    // "fix" https://github.com/prebid/professor-prebid/issues/104 ?
-    // .sort((a, b) => a.code.localeCompare(b.code));
+      // "fix" https://github.com/prebid/professor-prebid/issues/104 ?
+      .sort((a, b) => a.code.localeCompare(b.code));
 
     setAdUnits(adUnits);
   }, [auctionInitEvents]);
@@ -40,6 +56,14 @@ const AdUnitsComponentState = () => {
   return {
     adUnits,
     setAdUnits,
+    query,
+    setQuery,
+    sort,
+    setSort,
+    eventsPopUpOpen,
+    setEventsPopUpOpen,
+    pbjsVersionPopUpOpen,
+    setPbjsVersionPopUpOpen,
   };
 };
 

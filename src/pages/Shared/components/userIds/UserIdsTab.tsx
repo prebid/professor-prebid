@@ -9,11 +9,11 @@ import AppStateContext from '../../contexts/appStateContext';
 const GridPaperItem = ({ cols, value }: { cols: number; value: string | number | object }): JSX.Element => {
   if (typeof value === 'object' && Object.keys(value).length > 0) {
     return (
-      <Grid item xs={cols}>
+      <Grid size={{ xs: cols }}>
         <Paper sx={{ height: 1 }}>
           <JSONViewerComponent
             src={value}
-            name={false}
+            name={''}
             collapsed={2}
             displayObjectSize={false}
             displayDataTypes={false}
@@ -28,10 +28,10 @@ const GridPaperItem = ({ cols, value }: { cols: number; value: string | number |
     );
   }
   return (
-    <Grid item xs={cols}>
+    <Grid size={{ xs: cols }}>
       <Paper sx={{ height: 1 }}>
         <Typography variant="body1" sx={{ whiteSpace: 'normal', wordBreak: 'break-word', p: 0.5 }}>
-          <strong>{value}</strong>
+          <strong>{typeof value === 'object' ? JSON.stringify(value) : value}</strong>
         </Typography>
       </Paper>
     </Grid>
@@ -43,17 +43,17 @@ const UserIdsTab = (): JSX.Element => {
 
   return (
     <React.Fragment>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <TabPanel value={0} index={0}>
           Source
         </TabPanel>
       </Grid>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <TabPanel value={0} index={0}>
           User ID
         </TabPanel>
       </Grid>
-      <Grid item xs={4}>
+      <Grid size={{ xs: 4 }}>
         <TabPanel value={0} index={0}>
           Atype
         </TabPanel>

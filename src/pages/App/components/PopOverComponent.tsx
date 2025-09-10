@@ -1,7 +1,7 @@
 import React from 'react';
 import { IGlobalPbjs, IPrebidAdUnit, IPrebidBid } from '../../Injected/prebid';
 import { getMaxZIndex } from './AdOverlayPortal';
-import { CacheProvider } from '@emotion/react/';
+import { CacheProvider } from '@emotion/react';
 import { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import Popover from '@mui/material/Popover';
@@ -22,20 +22,10 @@ import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Paper } from '@mui/material';
 
-const ExpandableItem = ({
-  avatar,
-  children,
-  title,
-  json,
-}: {
-  avatar: JSX.Element;
-  title: string;
-  children?: JSX.Element;
-  json?: object;
-}): JSX.Element => {
+const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
   return (
-    <Grid item xs={12} sm={8} md={expanded ? 12 : 6} sx={{ minHeight: 250, height: expanded ? 'unset' : 250, overflow: 'hidden' }}>
+    <Grid size={{ xs: 12, sm: 8, md: expanded ? 12 : 6 }} sx={{ minHeight: 250, height: expanded ? 'unset' : 250, overflow: 'hidden' }}>
       <Box sx={{ height: 1 }}>
         <Box elevation={0} sx={{ display: 'flex', justifyContent: 'space-between', p: 1 }} onClick={() => setExpanded(!expanded)}>
           <Avatar sx={{ bgcolor: 'primary.main' }}>{avatar}</Avatar>
@@ -47,19 +37,7 @@ const ExpandableItem = ({
           />
         </Box>
         {children && children}
-        {json && (
-          <JSONViewerComponent
-            src={json}
-            name={false}
-            displayObjectSize={true}
-            displayDataTypes={false}
-            sortKeys={false}
-            quotesOnKeys={false}
-            indentWidth={2}
-            collapsed={false}
-            collapseStringsAfterLength={expanded ? false : 30}
-          />
-        )}
+        {json && <JSONViewerComponent src={json} name={''} displayObjectSize={true} displayDataTypes={false} sortKeys={false} quotesOnKeys={false} indentWidth={2} collapsed={false} collapseStringsAfterLength={expanded ? undefined : 30} />}
       </Box>
     </Grid>
   );
@@ -67,22 +45,13 @@ const ExpandableItem = ({
 
 const Item = ({ children }: any): JSX.Element => {
   return (
-    <Grid item xs={2} sm={4} md={6}>
+    <Grid size={{ xs: 2, sm: 4, md: 6 }}>
       <Box children={children} sx={{ p: 1 }} />
     </Grid>
   );
 };
 
-const PopOverComponent = ({
-  elementId,
-  winningCPM,
-  winningBidder,
-  currency,
-  timeToRespond,
-  anchorEl,
-  setAnchorEl,
-  pbjsNameSpace,
-}: PopOverComponentProps): JSX.Element => {
+const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, anchorEl, setAnchorEl, pbjsNameSpace }: PopOverComponentProps): JSX.Element => {
   const cacheTopPage = createCache({ key: 'css', container: window.top.document?.head, prepend: true });
   const pbjs: IGlobalPbjs = window[pbjsNameSpace as keyof Window];
   const open = Boolean(anchorEl);
@@ -166,7 +135,7 @@ const PopOverComponent = ({
                 padding: 0.5,
               }}
             >
-              <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
+              <Grid size={12} sx={{ display: 'flex', flexDirection: 'row-reverse' }}>
                 <IconButton sx={{ p: 0 }} onClick={() => setAnchorEl(null)}>
                   <Close />
                 </IconButton>
@@ -217,34 +186,21 @@ const PopOverComponent = ({
                   }
                 />
               )}
-              {(lineItemId || creativeId || queryId || slotAdUnitPath || slotElementId) && <Grid item xs={4} sm={8} md={12} children={<Divider />} />}
+              {(lineItemId || creativeId || queryId || slotAdUnitPath || slotElementId) && <Grid size={{ xs: 4, sm: 8, md: 12 }} children={<Divider />} />}
               {lineItemId && (
                 <Item
                   children={
                     <Typography sx={{ '& a': { color: 'secondary.main' } }}>
                       <strong>LineItem-ID: </strong>
-                      <a
-                        href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
+                      <a href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank">
                         {lineItemId}
                       </a>
                       {networktId[1] &&
                         networktId.map((nwId, index) => (
-                          <Typography
-                            key={index}
-                            component={'span'}
-                            variant="body1"
-                            sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}
-                          >
+                          <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                             {index === 0 && ' ('}
                             {index > 0 && (
-                              <a
-                                href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
+                              <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
                                 {`${index}`}
                               </a>
                             )}
@@ -260,28 +216,15 @@ const PopOverComponent = ({
                   children={
                     <Typography sx={{ '& a': { color: 'secondary.main' } }}>
                       <strong>Creative-ID: </strong>
-                      <a
-                        href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
+                      <a href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
                         {creativeId}
                       </a>
                       {networktId[1] &&
                         networktId.map((nwId, index) => (
-                          <Typography
-                            key={index}
-                            component={'span'}
-                            variant="body1"
-                            sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}
-                          >
+                          <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                             {index === 0 && ' ('}
                             {index > 0 && (
-                              <a
-                                href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
+                              <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
                                 {`${index}`}
                               </a>
                             )}
@@ -300,28 +243,15 @@ const PopOverComponent = ({
                         Query-ID:{' '}
                       </Typography>
                       <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-                        <a
-                          href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`}
-                          rel="noreferrer"
-                          target="_blank"
-                        >
+                        <a href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
                           {false ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
                         </a>
                         {networktId[1] &&
                           networktId.map((nwId, index) => (
-                            <Typography
-                              key={index}
-                              component={'span'}
-                              variant="body1"
-                              sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}
-                            >
+                            <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                               {index === 0 && ' ('}
                               {index > 0 && (
-                                <a
-                                  href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`}
-                                  rel="noreferrer"
-                                  target="_blank"
-                                >
+                                <a href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
                                   {`${index}`}
                                 </a>
                               )}
@@ -352,9 +282,7 @@ const PopOverComponent = ({
                   }
                 />
               )}
-              {(winningBid || bidsSorted || winningBid || slotResponseInfo || slotTargeting) && (
-                <Grid item xs={4} sm={8} md={12} children={<Divider />} />
-              )}
+              {(winningBid || bidsSorted || winningBid || slotResponseInfo || slotTargeting) && <Grid size={{ xs: 4, sm: 8, md: 12 }} children={<Divider />} />}
               {adUnit && <ExpandableItem title="AdUnit Info" avatar={<SettingsOutlinedIcon />} json={adUnit} />}
               {winningBid && <ExpandableItem title="Winning Bid" avatar={<GavelIcon />} json={winningBid} />}
               {bidsSorted && bidsSorted[0] && <ExpandableItem title="All Bids for AdUnit" avatar={<AttachMoneyIcon />} json={bidsSorted} />}
@@ -363,17 +291,7 @@ const PopOverComponent = ({
                   title="Creative Preview"
                   avatar={<PreviewIcon />}
                   json={winningBid && winningBid.native}
-                  children={
-                    winningBid &&
-                    winningBid.ad && (
-                      <Box
-                        elevation={0}
-                        sx={{ display: 'flex', justifyContent: 'center' }}
-                        component="div"
-                        dangerouslySetInnerHTML={{ __html: winningBid?.ad || JSON.stringify(winningBid.native) }}
-                      />
-                    )
-                  }
+                  children={winningBid && winningBid.ad && <Box elevation={0} sx={{ display: 'flex', justifyContent: 'center' }} component="div" dangerouslySetInnerHTML={{ __html: winningBid?.ad || JSON.stringify(winningBid.native) }} />}
                 />
               )}
               {slotResponseInfo && <ExpandableItem title="Response Info" avatar={<HelpIcon />} json={slotResponseInfo} />}
@@ -383,15 +301,15 @@ const PopOverComponent = ({
                   avatar={<CrisisAlertIcon />}
                   children={
                     <Box elevation={0} sx={{ display: 'flex', flexGrow: 1, backgroundColor: 'primary.light' }}>
-                      <Grid container spacing={0.25}>
-                        <Grid item xs={6}>
+                      <Grid container>
+                        <Grid size={6}>
                           <Paper sx={{ p: 0.5 }}>
                             <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
                               Key
                             </Typography>
                           </Paper>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                           <Paper sx={{ p: 0.5 }}>
                             <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
                               Value
@@ -400,14 +318,14 @@ const PopOverComponent = ({
                         </Grid>
                         {slotTargeting.map((st, i) => (
                           <React.Fragment key={i}>
-                            <Grid item xs={6} sx={{}}>
+                            <Grid size={6}>
                               <Paper sx={{ p: 0.5, h: 1, minHeight: 1 }}>
                                 <Typography variant={'body1'} sx={{ textAlign: 'left' }}>
                                   {st.key}
                                 </Typography>
                               </Paper>
                             </Grid>
-                            <Grid item xs={6} sx={{}}>
+                            <Grid size={6}>
                               <Paper sx={{ p: 0.5, h: 1, minHeight: 1 }}>
                                 <Typography variant={'body1'} sx={{ textAlign: 'left' }}>
                                   {st.value}

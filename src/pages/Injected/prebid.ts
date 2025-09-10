@@ -11,7 +11,6 @@ class Prebid {
   sendToContentScriptPending: boolean = false;
   events: any[] = [];
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
-  private dataUrlQueue: string[] = [];
 
   constructor(namespace: string, iframeId: string | null) {
     this.namespace = namespace;
@@ -20,18 +19,49 @@ class Prebid {
     this.addEventListeners();
   }
 
-  private registerEvent = (eventName: string) => {
-    this.globalPbjs.onEvent(eventName, (data: any) => {
+  addEventListeners = (): void => {
+    if (typeof this.globalPbjs.onEvent !== 'function') return;
+    this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
       if (!this.eventsApi) {
-        this.events.push({ eventType: eventName, args: data });
+        this.events.push({ eventType: 'auctionInit', args: auctionInitData });
       }
       this.throttle(this.sendDetailsToBackground);
     });
-  };
 
-  addEventListeners = (): void => {
-    if (typeof this.globalPbjs.onEvent !== 'function') return;
-    ['auctionInit', 'auctionEnd', 'bidRequested', 'bidResponse', 'noBid', 'bidWon'].forEach(this.registerEvent);
+    this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'auctionEnd', args: auctionEndData });
+      }
+      this.throttle(this.sendDetailsToBackground);
+    });
+
+    this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'bidRequested', args: bidRequestedData });
+      }
+      this.throttle(this.sendDetailsToBackground);
+    });
+
+    this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'bidResponse', args: bidResponseData });
+      }
+      this.throttle(this.sendDetailsToBackground);
+    });
+
+    this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'noBid', args: noBidData });
+      }
+      this.throttle(this.sendDetailsToBackground);
+    });
+
+    this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
+      if (!this.eventsApi) {
+        this.events.push({ eventType: 'bidWon', args: bidWonData });
+      }
+      this.throttle(this.sendDetailsToBackground);
+    });
 
     window.addEventListener(
       'message',
@@ -100,13 +130,6 @@ class Prebid {
     if (string === '[]') return null;
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
-
-    this.dataUrlQueue.push(objectURL);
-    if (this.dataUrlQueue.length > 10) {
-      const oldUrl = this.dataUrlQueue.shift();
-      if (oldUrl) URL.revokeObjectURL(oldUrl);
-    }
-
     return objectURL;
   };
 
@@ -142,11 +165,12 @@ class Prebid {
       this.lastTimeUpdateSentToContentScript = now;
       fn();
     }
-    clearTimeout(this.updateTimeout);
-    this.updateTimeout = setTimeout(() => {
-      this.sendToContentScriptPending = false;
-      this.throttle(fn);
-    }, this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
+    if (!this.updateTimeout) {
+      this.updateTimeout = setTimeout(() => {
+        this.sendToContentScriptPending = false;
+        this.throttle(fn);
+      }, this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
+    }
   };
 }
 
@@ -549,6 +573,12 @@ export interface IVideoRules {
   image?: string;
   clickUrl?: string;
   title?: string;
+}
+
+export interface IPrebidEvent {
+  eventType: string;
+  args: { type: string;[key: string]: any };
+  elapsedTime: number;
 }
 
 export interface IPrebidDetails {

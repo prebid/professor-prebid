@@ -86,12 +86,11 @@ export const PAGES: {
 }[] = [
     { label: 'Ad Units', path: '', Icon: AdUnitsOutlinedIcon, beta: false },
     { label: 'Bids', path: 'bids', Icon: AccountBalanceOutlinedIcon, beta: false },
-    { label: 'Paapi', path: 'paapi', Icon: PrivacyTipOutlinedIcon, beta: true },
-    { label: 'Timeline', path: 'timeline', Icon: TimelineOutlinedIcon, beta: false },
     { label: 'Config', path: 'config', Icon: SettingsOutlinedIcon, beta: false },
-    { label: 'User Id', path: 'userId', Icon: ContactPageOutlinedIcon, beta: false },
-    { label: 'Tools', path: 'tools', Icon: DnsOutlinedIcon, beta: false },
     { label: 'Events', path: 'events', Icon: WarningAmberOutlinedIcon, beta: false },
-    { label: 'Version', path: 'version', Icon: DifferenceIcon, beta: false },
     { label: 'Network Inspector', path: 'initiator', Icon: LinkIcon, beta: true },
+    { label: 'Timeline', path: 'timeline', Icon: TimelineOutlinedIcon, beta: false },
+    { label: 'Tools', path: 'tools', Icon: DnsOutlinedIcon, beta: false },
+    { label: 'User Id', path: 'userId', Icon: ContactPageOutlinedIcon, beta: false },
+    { label: 'Version', path: 'version', Icon: DifferenceIcon, beta: false },
   ];

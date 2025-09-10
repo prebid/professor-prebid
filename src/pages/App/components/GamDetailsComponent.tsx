@@ -50,17 +50,13 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
   return (
     <React.Fragment>
       {lineItemId && (
-        <Grid item>
+        <Grid>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
             <Typography component={'span'} variant="h4">
               LineItem-ID:{' '}
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a
-                href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`}
-                rel="noreferrer"
-                target="_blank"
-              >
+              <a href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank">
                 {lineItemId}
               </a>
               {networktId[1] &&
@@ -68,11 +64,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                   <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                     {index === 0 && ' ('}
                     {index > 0 && (
-                      <a
-                        href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
+                      <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
                         {`${index}`}
                       </a>
                     )}
@@ -85,17 +77,13 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       )}
 
       {creativeId && (
-        <Grid item>
+        <Grid>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
             <Typography variant="h4" component={'span'}>
               Creative-ID:{' '}
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a
-                href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`}
-                rel="noreferrer"
-                target="_blank"
-              >
+              <a href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
                 {creativeId}
               </a>
               {networktId[1] &&
@@ -103,11 +91,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                   <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                     {index === 0 && ' ('}
                     {index > 0 && (
-                      <a
-                        href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
+                      <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
                         {`${index}`}
                       </a>
                     )}
@@ -120,17 +104,13 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       )}
 
       {queryId && (
-        <Grid item>
+        <Grid>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
             <Typography variant="h4" component={'span'}>
               Query-ID:{' '}
             </Typography>
             <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a
-                href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`}
-                rel="noreferrer"
-                target="_blank"
-              >
+              <a href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
                 {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
               </a>
               {networktId[1] &&
@@ -138,11 +118,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                   <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                     {index === 0 && ' ('}
                     {index > 0 && (
-                      <a
-                        href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
+                      <a href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
                         {`${index}`}
                       </a>
                     )}
@@ -155,7 +131,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       )}
 
       {slotAdUnitPath && (
-        <Grid item>
+        <Grid>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
             <Typography variant="h4" component={'span'}>
               AdUnit Path:{' '}
@@ -168,7 +144,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       )}
 
       {slotElementId && (
-        <Grid item>
+        <Grid>
           <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
             <Typography variant="h4" component={'span'}>
               Element-ID:{' '}
@@ -182,50 +158,40 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
 
       {inPopOver && (
         <React.Fragment>
-          <Grid item xs={12}>
-            <Grid container direction={'column'} spacing={1}>
+          <Grid size={12}>
+            <Grid container direction={'column'}>
               {slotResponseInfo && (
-                <Grid item>
+                <Grid>
                   <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Response-Info:</Typography>
-                    <JSONViewerComponent
-                      name={false}
-                      src={slotResponseInfo}
-                      collapsed={false}
-                      displayObjectSize={true}
-                      displayDataTypes={false}
-                      sortKeys={false}
-                      quotesOnKeys={false}
-                      indentWidth={2}
-                      collapseStringsAfterLength={100}
-                    />
+                    <JSONViewerComponent name={''} src={slotResponseInfo} collapsed={false} displayObjectSize={true} displayDataTypes={false} sortKeys={false} quotesOnKeys={false} indentWidth={2} collapseStringsAfterLength={100} />
                   </Paper>
                 </Grid>
               )}
 
               {slotTargeting && (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Paper elevation={1} sx={{ p: 1 }}>
                     <Typography sx={{ fontWeight: 'bold' }}>Targeting:</Typography>
                     <Box sx={{ display: 'flex', flexGrow: 1 }}>
                       <Grid container>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                           <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
                             Key
                           </Typography>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                           <Typography variant={'h3'} sx={{ textAlign: 'left' }}>
                             Value
                           </Typography>
                         </Grid>
                         {slotTargeting.map((st, i) => (
                           <React.Fragment key={i}>
-                            <Grid item xs={6}>
+                            <Grid size={6}>
                               <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
                               {st.key}
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={6}>
                               <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
                               {st.value}
                             </Grid>

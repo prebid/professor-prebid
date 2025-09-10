@@ -9,8 +9,8 @@ import Badge from '@mui/material/Badge';
 import { InputLabel } from '@mui/material';
 import StateContext from '../../contexts/appStateContext';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
-import logo from '../../../../assets/img/logo.png';
-
+import PrebidLogo from './Logo';
+declare const __APP_VERSION__: string;
 export const NavbarSelector = (): JSX.Element => {
   const [expanded, setExpanded] = useState<boolean>(false);
   const [enterDelay, setEnterDelay] = useState<NodeJS.Timeout | null>(null);
@@ -51,33 +51,54 @@ export const NavbarSelector = (): JSX.Element => {
     setIframeId(event.target.value || '');
   };
 
-  if (isPanel || expanded) {
+  if (
+    isPanel ||
+    expanded
+    // true
+  ) {
     return (
-      <Box
-        component="form"
-        sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: 1, padding: '0 5px' }}
-        onMouseEnter={() => setExpanded(true)}
-        onMouseLeave={() => setExpanded(false)}
-      >
-        <FormControl sx={{ minWidth: 110, maxWidth: 330 }} size="small">
-          <InputLabel>Frame-ID</InputLabel>
-          <Select value={frameId} label="frameId" onChange={handleFrameIdChange}>
+      <Box component="form" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: 1, padding: '0 5px', '& MuiInputLabel': { top: '4px' } }} onMouseEnter={() => setExpanded(true)} onMouseLeave={() => setExpanded(false)}>
+        <FormControl sx={{ minWidth: 90, maxWidth: 180 }} size="small">
+          <InputLabel sx={{ fontSize: '0.8rem', top: '-4px' }}>Frame-ID</InputLabel>
+          <Select
+            size="small"
+            value={frameId}
+            label="frameId"
+            onChange={handleFrameIdChange}
+            sx={{ fontSize: '0.8rem', height: 28, paddingY: 0 }}
+            MenuProps={{
+              PaperProps: {
+                sx: { fontSize: '0.8rem' },
+              },
+            }}
+          >
             {pageContext &&
               Object.keys(pageContext.frames || {})
                 .filter((key) => !['downloading', 'syncState', 'initReqChainResult'].includes(key))
                 .map((frameId, index) => (
-                  <MenuItem value={frameId} key={index}>
+                  <MenuItem value={frameId} key={index} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
                     <em>{frameId}</em>
                   </MenuItem>
                 ))}
           </Select>
         </FormControl>
         <FormControl sx={{ minWidth: 110, maxWidth: 330 }} size="small">
-          <InputLabel>Namespace</InputLabel>
-          <Select value={pbjsNamespace} onChange={handlePbjsNamespaceChange} autoWidth>
+          <InputLabel sx={{ fontSize: '0.8rem', top: '-4px' }}>Namespace</InputLabel>
+          <Select
+            size="small"
+            value={pbjsNamespace}
+            onChange={handlePbjsNamespaceChange}
+            autoWidth
+            sx={{ fontSize: '0.8rem', height: 28, paddingY: 0 }}
+            MenuProps={{
+              PaperProps: {
+                sx: { fontSize: '0.8rem' },
+              },
+            }}
+          >
             {prebids &&
               Object.keys(prebids).map((global, index) => (
-                <MenuItem key={index} value={global}>
+                <MenuItem key={index} value={global} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
                   {global}
                 </MenuItem>
               ))}
@@ -91,22 +112,10 @@ export const NavbarSelector = (): JSX.Element => {
         invisible={prebids && Object.keys(prebids).length < 2}
         badgeContent={(prebids && Object.keys(prebids).length) || null}
         color="primary"
-        sx={{ width: '14%', pr: '6px' }}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        children={
-          <img
-            src={logo}
-            alt="prebid logo"
-            style={{
-              padding: '0 5px',
-              width: '100%',
-              height: 'auto', // This will ensure the aspect ratio is maintained
-              objectFit: 'contain', // This will ensure the image scales correctly
-            }}
-          />
-        }
+        children={<PrebidLogo version={`${__APP_VERSION__.split('.')[0]}.${__APP_VERSION__.split('.')[1]}`} />}
       />
     );
   }

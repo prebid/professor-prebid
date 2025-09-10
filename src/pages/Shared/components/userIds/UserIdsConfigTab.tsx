@@ -9,11 +9,11 @@ import AppStateContext from '../../contexts/appStateContext';
 const GridPaperItem = ({ cols, value }: { cols: number; value: string | number | object }): JSX.Element => {
   if (typeof value === 'object' && Object.keys(value).length > 0) {
     return (
-      <Grid item xs={cols}>
+      <Grid size={{ xs: cols }}>
         <Paper sx={{ height: 1 }}>
           <JSONViewerComponent
             src={value}
-            name={false}
+            name={''}
             collapsed={2}
             displayObjectSize={false}
             displayDataTypes={false}
@@ -28,10 +28,10 @@ const GridPaperItem = ({ cols, value }: { cols: number; value: string | number |
     );
   }
   return (
-    <Grid item xs={cols}>
+    <Grid size={{ xs: cols }}>
       <Paper sx={{ height: 1 }}>
         <Typography variant="body1" sx={{ whiteSpace: 'normal', wordBreak: 'break-word', p: 0.5 }}>
-          <strong>{value}</strong>
+          <strong>{typeof value === 'object' ? JSON.stringify(value) : value}</strong>
         </Typography>
       </Paper>
     </Grid>
@@ -45,27 +45,27 @@ const ConfigTab = (): JSX.Element => {
     prebid.config?.userSync?.userIds &&
     prebid.config?.userSync?.userIds[0] && (
       <React.Fragment>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <TabPanel value={1} index={1}>
             Name
           </TabPanel>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <TabPanel value={1} index={1}>
             Storage Type
           </TabPanel>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <TabPanel value={1} index={1}>
             Storage Expires
           </TabPanel>
         </Grid>
-        <Grid item xs={2}>
+        <Grid size={{ xs: 2 }}>
           <TabPanel value={1} index={1}>
             Storage Name
           </TabPanel>
         </Grid>
-        <Grid item xs={3}>
+        <Grid size={{ xs: 3 }}>
           <TabPanel value={1} index={1}>
             Params
           </TabPanel>

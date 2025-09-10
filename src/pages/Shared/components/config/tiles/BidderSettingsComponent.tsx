@@ -27,7 +27,7 @@ const BidderSettingsComponent = (): JSX.Element => {
 
   if (!bidderSettings) return null;
   return (
-    <Grid item sm={maxWidth} xs={12} ref={ref}>
+    <Grid size={{ xs: 12, sm: maxWidth }} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight, maxHeight: expanded ? 'unset' : tileHeight }}>
         <CardHeader
           avatar={
@@ -48,7 +48,7 @@ const BidderSettingsComponent = (): JSX.Element => {
           onClick={handleExpandClick}
         />
         <CardContent>
-          <Grid container spacing={2}>
+          <Grid container>
             <RenderKeyValueComponent
               label="StorageAccess: "
               value={

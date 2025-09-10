@@ -1,6 +1,5 @@
 import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
-import { ITabInfos } from '../../Background';
 
 const safelyConstructURL = (url: string) => {
   try {

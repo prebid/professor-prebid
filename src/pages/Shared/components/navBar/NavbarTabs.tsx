@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
@@ -6,21 +6,11 @@ import { Link } from 'react-router-dom';
 import { PAGES } from '../../constants';
 import AppStateContext from '../../contexts/appStateContext';
 import OptionsContext from '../../contexts/optionsContext';
+import NavBarState from './NavBarState';
 
 export const NavBarTabs = (): JSX.Element => {
-  const [activeRoute, setActiveRoute] = useState<string>(window.location.hash.replace('#', '') || '/');
-  const [selectedTab, setSelectedTab] = React.useState(0);
-  const [filteredPages, setFilteredPages] = useState(PAGES);
+  const { activeRoute, setActiveRoute, selectedTab, setSelectedTab, filteredPages, setFilteredPages } = NavBarState();
   const { selectedPopUpNavItems, selectedPanelNavItems } = useContext(OptionsContext);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setSelectedTab(newValue);
-  };
-
-  const handleRouteChange = (input: any) => {
-    setActiveRoute(input);
-  };
-
   const { isPanel } = useContext(AppStateContext);
 
   useEffect(() => {
@@ -34,13 +24,19 @@ export const NavBarTabs = (): JSX.Element => {
   return (
     <Tabs
       value={selectedTab}
-      onChange={handleChange}
+      onChange={(event: React.SyntheticEvent, newValue: number) => {
+        setSelectedTab(newValue);
+      }}
       variant="scrollable"
       scrollButtons="auto"
       sx={{
+        display: 'flex',
+        flexGrow: 1,
+        justifyContent: 'top',
+        alignContent: 'top',
         '& .MuiTabs-indicator': { display: 'none' },
         '& .MuiTabScrollButton-root': {
-          width: '19px',
+          width: '10px',
         },
         'svg[data-testid="KeyboardArrowRightIcon"],svg[data-testid="KeyboardArrowLeftIcon"]': {
           fill: 'rgba(0, 0, 0, 0.5)',
@@ -50,7 +46,15 @@ export const NavBarTabs = (): JSX.Element => {
       {filteredPages.map(({ label, path, Icon }) => (
         <Tab
           label={
-            <Button component={Link} to={path} size="small" variant={activeRoute === `/${path}` ? 'contained' : 'outlined'} onClick={() => handleRouteChange(`/${path}`)} startIcon={<Icon />}>
+            <Button
+              sx={{ paddingTop: '2px !important', paddingRight: '5px !important', paddingBottom: '2px !important', paddingLeft: '5px !important' }}
+              component={Link}
+              to={path}
+              size="small"
+              variant={activeRoute === `/${path}` ? 'contained' : 'outlined'}
+              onClick={() => setActiveRoute(`/${path}`)}
+              startIcon={<Icon fontSize="inherit" />}
+            >
               {label}
             </Button>
           }
