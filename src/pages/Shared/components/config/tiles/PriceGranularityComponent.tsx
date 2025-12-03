@@ -32,7 +32,7 @@ const defaultBuckets: IDefaultBuckets = {
 const PriceGranularityComponent = () => {
   const { prebid } = useContext(AppStateContext);
   const {
-    config: { priceGranularity, customPriceBucket },
+    config: { priceGranularity, customPriceBucket, mediaTypePriceGranularity },
   } = prebid;
   const [expanded, setExpanded] = React.useState(false);
   const [maxWidth, setMaxWidth] = React.useState<2 | 4 | 6 | 8 | 10 | 12>(4);
@@ -43,6 +43,16 @@ const PriceGranularityComponent = () => {
     setMaxWidth(expanded ? 4 : 8);
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
+
+  const hasMediaTypePriceGranularityBuckets = (() => {
+    if (!mediaTypePriceGranularity) {
+      return false;
+    }
+
+    const typedMediaTypePg = mediaTypePriceGranularity as Record<string, { buckets?: IPrebidConfigPriceBucket[] }>;
+
+    return Object.values(typedMediaTypePg).some((value) => Array.isArray(value.buckets) && value.buckets.length > 0);
+  })();
 
   return (
     <Grid item xs={12} sm={maxWidth} ref={ref}>
@@ -70,6 +80,122 @@ const PriceGranularityComponent = () => {
           onClick={handleExpandClick}
         />
         <CardContent>
+          {/* Media-type specific price granularities, shown before global priceGranularity */}
+          {hasMediaTypePriceGranularityBuckets && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Media type price granularity (overrides global priceGranularity when present):
+              </Typography>
+
+              {/* Collapsed: just show how many buckets per media type */}
+              {!expanded && (
+                <Grid container spacing={1}>
+                  {Object.entries(mediaTypePriceGranularity)
+                    .filter(([, value]) => value && Array.isArray((value as any).buckets))
+                    .map(([mediaType, value]) => {
+                      const buckets = (value as any).buckets || [];
+
+                      if (!buckets.length) {
+                        return null;
+                      }
+
+                      return (
+                        <Grid item xs={12} key={mediaType}>
+                          <Typography variant="body2">
+                            <strong>{mediaType}</strong>: {buckets.length} bucket{buckets.length > 1 ? 's' : ''}
+                          </Typography>
+                        </Grid>
+                      );
+                    })}
+                </Grid>
+              )}
+
+              {/* Expanded: full table of buckets per media type */}
+              {expanded && (
+                <Grid container spacing={2}>
+                  {Object.entries(mediaTypePriceGranularity)
+                    .filter(([, value]) => value && Array.isArray((value as any).buckets))
+                    .map(([mediaType, value]) => {
+                      const buckets = (value as any).buckets || [];
+
+                      if (!buckets.length) {
+                        return null;
+                      }
+
+                      return (
+                        <Grid item xs={12} key={mediaType}>
+                          <Box sx={{ backgroundColor: 'text.disabled', p: 0.25, borderRadius: 1 }}>
+                            <Typography variant="body1" sx={{ mb: 0.5, ml: 0.5 }}>
+                              <strong>{mediaType}</strong>
+                            </Typography>
+                            <Grid container spacing={0.2}>
+                              <Grid item xs={3}>
+                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                  <Typography variant="h3">Bucket</Typography>
+                                </Paper>
+                              </Grid>
+                              <Grid item xs={3}>
+                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                  <Typography variant="h3">Precision</Typography>
+                                </Paper>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                  <Typography variant="h3">Min</Typography>
+                                </Paper>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                  <Typography variant="h3">Max</Typography>
+                                </Paper>
+                              </Grid>
+                              <Grid item xs={2}>
+                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                  <Typography variant="h3">Increment</Typography>
+                                </Paper>
+                              </Grid>
+
+                              {buckets.map((bucket: IPrebidConfigPriceBucket, index: number) => (
+                                <React.Fragment key={`${mediaType}-${index}`}>
+                                  <Grid item xs={3}>
+                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                      <Typography variant="body1">
+                                        {mediaType} #{index + 1}
+                                      </Typography>
+                                    </Paper>
+                                  </Grid>
+                                  <Grid item xs={3}>
+                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                      <Typography variant="body1">{bucket.precision ?? 2}</Typography>
+                                    </Paper>
+                                  </Grid>
+                                  <Grid item xs={2}>
+                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                      <Typography variant="body1">{bucket.min}</Typography>
+                                    </Paper>
+                                  </Grid>
+                                  <Grid item xs={2}>
+                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                      <Typography variant="body1">{bucket.max}</Typography>
+                                    </Paper>
+                                  </Grid>
+                                  <Grid item xs={2}>
+                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
+                                      <Typography variant="body1">{bucket.increment}</Typography>
+                                    </Paper>
+                                  </Grid>
+                                </React.Fragment>
+                              ))}
+                            </Grid>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
+                </Grid>
+              )}
+            </Box>
+          )}
+
           <Grid container spacing={2}>
             {!expanded &&
               (() => {
