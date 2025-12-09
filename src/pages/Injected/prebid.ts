@@ -5,9 +5,9 @@ class Prebid {
   globalPbjs: IGlobalPbjs = window.pbjs;
   namespace: string;
   frameId: string | null;
-  lastTimeUpdateSentToContentScript: number;
-  updateTimeout: ReturnType<typeof setTimeout>;
-  updateRateInterval: number = 1000;
+  lastTimeUpdateSentToContentScript: number = 0;
+  updateTimeout: ReturnType<typeof setTimeout> | null = null;
+  updateRateInterval: number = 2500; // milliseconds
   sendToContentScriptPending: boolean = false;
   events: any[] = [];
   eventsApi: boolean = typeof this.globalPbjs?.getEvents === 'function' || false;
@@ -135,18 +135,35 @@ class Prebid {
     });
   };
 
-  throttle = (fn: Function) => {
+  throttle = (fn: () => void) => {
     const now = Date.now();
-    if (!this.sendToContentScriptPending && (!this.lastTimeUpdateSentToContentScript || now - this.lastTimeUpdateSentToContentScript >= this.updateRateInterval)) {
-      this.sendToContentScriptPending = true;
+
+    // First call: fire immediately
+    if (!this.lastTimeUpdateSentToContentScript) {
       this.lastTimeUpdateSentToContentScript = now;
       fn();
+      return;
     }
-    clearTimeout(this.updateTimeout);
-    this.updateTimeout = setTimeout(() => {
-      this.sendToContentScriptPending = false;
-      this.throttle(fn);
-    }, this.updateRateInterval - (now - this.lastTimeUpdateSentToContentScript));
+
+    const elapsed = now - this.lastTimeUpdateSentToContentScript;
+    const remaining = this.updateRateInterval - elapsed;
+
+    if (remaining <= 0) {
+      // Window passed: run immediately and clear any pending trailing call
+      if (this.updateTimeout) {
+        clearTimeout(this.updateTimeout);
+        this.updateTimeout = null;
+      }
+      this.lastTimeUpdateSentToContentScript = now;
+      fn();
+    } else if (!this.updateTimeout) {
+      // Schedule a trailing call if not already scheduled
+      this.updateTimeout = setTimeout(() => {
+        this.lastTimeUpdateSentToContentScript = Date.now();
+        this.updateTimeout = null;
+        fn();
+      }, remaining);
+    }
   };
 }
 
