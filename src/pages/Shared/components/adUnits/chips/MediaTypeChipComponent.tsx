@@ -1,8 +1,8 @@
 import React from 'react';
-import { IPrebidAdUnitMediaTypes } from '../../../../Injected/prebid';
 import Chip from '@mui/material/Chip';
 import JSONViewerComponent from '../../JSONViewerComponent';
 import Popover from '@mui/material/Popover';
+import { AdUnit } from 'prebid.js';
 
 const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipComponentProps): JSX.Element => {
   const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
@@ -29,7 +29,7 @@ const MediaTypeChipComponent = ({ input, label, isWinner }: IMediaTypeChipCompon
 };
 
 interface IMediaTypeChipComponentProps {
-  input: IPrebidAdUnitMediaTypes[keyof IPrebidAdUnitMediaTypes];
+  input: AdUnit['mediaTypes']['banner' | 'native' | 'video'];
   label: string;
   isWinner?: boolean;
 }

@@ -4,18 +4,18 @@ import Box from '@mui/material/Box';
 import JSONViewerComponent from '../../../JSONViewerComponent';
 import BidChipComponent from '../../chips/BidChipComponent';
 import StateContext from '../../../../contexts/appStateContext';
-import { IPrebidAdUnit, IPrebidBidWonEventData } from '../../../../../Injected/prebid';
 import { useTileExpansion, TileWrapper, TileContent, TileSection } from './Tiles';
+import { AdUnit, EventRecord } from 'prebid.js';
 
-const matchesSizes = (bidEvent: IPrebidBidWonEventData, adUnit: IPrebidAdUnit): boolean => {
-  const adUnitSizes = adUnit.sizes?.map(([width, height]) => `${width}x${height}`) || adUnit.mediaTypes?.banner?.sizes?.map(([width, height]) => `${width}x${height}`);
+const matchesSizes = (bidEvent: EventRecord<'bidResponse'> | EventRecord<'bidWon'>, adUnit: AdUnit): boolean => {
+  const adUnitSizes = adUnit.mediaTypes?.banner?.sizes?.filter((size) => Array.isArray(size)).map(([w, h]) => `${w}x${h}`) || [];
   const isSizeMatch = adUnitSizes?.includes(bidEvent?.args?.size);
   const isNativeMatch = Object.keys(adUnit.mediaTypes)?.includes('native') && bidEvent.args.mediaType === 'native';
   const isVideoMatch = Object.keys(adUnit.mediaTypes)?.includes('video') && bidEvent.args.mediaType === 'video';
   return isSizeMatch || isNativeMatch || isVideoMatch;
 };
 
-const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode }, colCount }: { adUnit: IPrebidAdUnit; colCount: number }): JSX.Element => {
+const BiddersTile = ({ adUnit, adUnit: { code: adUnitCode }, colCount }: { adUnit: AdUnit; colCount: number }): JSX.Element => {
   const { allWinningBids, allBidResponseEvents, allBidRequestedEvents, adsRendered, isPanel } = useContext(StateContext);
   const { expanded, toggle } = useTileExpansion();
 

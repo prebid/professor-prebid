@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { IPrebidBidWonEventData, IPrebidBid, IPrebidBidRequestedEventData } from '../../../../Injected/prebid';
 import StateContext from '../../../contexts/appStateContext';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
@@ -7,6 +6,7 @@ import JSONViewerComponent from '../../JSONViewerComponent';
 import Popover from '@mui/material/Popover';
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
+import { AdUnitBid, EventRecord } from 'prebid.js';
 
 const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, isRendered }: IBidChipComponentProps): JSX.Element => {
   const { topics } = useContext(StateContext);
@@ -46,11 +46,11 @@ const BidChipComponent = ({ input, label, isWinner, bidReceived, bidRequested, i
 };
 
 interface IBidChipComponentProps {
-  input: IPrebidBid;
+  input: AdUnitBid;
   label: string;
   isWinner: boolean;
-  bidRequested: IPrebidBidRequestedEventData | undefined;
-  bidReceived: IPrebidBidWonEventData | undefined;
+  bidRequested: EventRecord<'bidRequested'> | undefined;
+  bidReceived: EventRecord<'bidResponse'> | undefined;
   isRendered: boolean;
 }
 

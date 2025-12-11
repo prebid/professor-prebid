@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import StateContext from '../../../../contexts/appStateContext';
-import { IPrebidAdUnit } from '../../../../../Injected/prebid';
 import JSONViewerComponent from '../../../JSONViewerComponent';
 import { Box } from '@mui/material';
 import { useTileExpansion, TileWrapper, TileContent, TileSection } from './Tiles';
+import { AdUnit } from 'prebid.js';
 
-const Ortb2ImpTile = ({ adUnit, colCount }: { adUnit: IPrebidAdUnit; colCount: number }): JSX.Element | null => {
+const Ortb2ImpTile = ({ adUnit, colCount }: { adUnit: AdUnit; colCount: number }): JSX.Element | null => {
   const { isPanel } = useContext(StateContext);
   const { expanded, toggle } = useTileExpansion();
 

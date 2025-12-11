@@ -1,8 +1,8 @@
 import React from 'react';
-import { IPrebidAdUnitMediaTypes } from '../../../../Injected/prebid';
 import Chip from '@mui/material/Chip';
 import JSONViewerComponent from '../../JSONViewerComponent';
 import Popover from '@mui/material/Popover';
+import { AdUnitDefinition } from 'prebid.js';
 
 const Ortb2ImpExtChipComponent = ({ input, label }: Ortb2ImpExtChipComponentProps): JSX.Element => {
   const [popUpOpen, setPopUpOpen] = React.useState<boolean>(false);
@@ -45,7 +45,8 @@ const Ortb2ImpExtChipComponent = ({ input, label }: Ortb2ImpExtChipComponentProp
 };
 
 interface Ortb2ImpExtChipComponentProps {
-  input: IPrebidAdUnitMediaTypes[keyof IPrebidAdUnitMediaTypes];
+  // input: IPrebidAdUnitMediaTypes[keyof IPrebidAdUnitMediaTypes];
+  input: AdUnitDefinition['ortb2Imp'];
   label: string;
 }
 

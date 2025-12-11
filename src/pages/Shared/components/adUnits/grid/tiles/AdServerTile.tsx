@@ -2,14 +2,14 @@ import React, { useContext, useState, useEffect } from 'react';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { Box } from '@mui/material';
-import { IPrebidAdUnit } from '../../../../../Injected/prebid';
 import { IGoogleAdManagerSlot } from '../../../../../Injected/googleAdManager';
 import JSONViewerComponent from '../../../JSONViewerComponent';
 import AppStateContext from '../../../../contexts/appStateContext';
 import { useTileExpansion, TileWrapper, TileContent, TileSection } from './Tiles';
+import { AdUnit } from 'prebid.js';
 
 interface IAdServerTileProps {
-  adUnit: IPrebidAdUnit;
+  adUnit: AdUnit;
   colCount: number;
 }
 

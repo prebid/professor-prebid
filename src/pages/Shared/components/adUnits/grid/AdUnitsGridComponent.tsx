@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import AppStateContext from '../../../contexts/appStateContext';
 import { HeaderGridItem } from './HeaderGridItem';
 import { AdUnitGridRow } from './AdUnitGridRow';
-import { IPrebidAdUnit } from '../../../../Injected/prebid';
+import { AdUnit } from 'prebid.js';
 
-export const AdUnitsGridComponent = ({ adUnits }: { adUnits: IPrebidAdUnit[] }): JSX.Element => {
+export const AdUnitsGridComponent = ({ adUnits }: { adUnits: AdUnit[] }): JSX.Element => {
   const headers = ['Code', 'Media Types', 'Bidders'];
 
   const { isPanel, googleAdManager } = useContext(AppStateContext);

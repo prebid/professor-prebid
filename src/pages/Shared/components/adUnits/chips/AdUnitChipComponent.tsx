@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { IPrebidAdUnit } from '../../../../Injected/prebid';
 import Chip from '@mui/material/Chip';
 import { getTabId } from '../../../../Shared/utils';
+import { AdUnit } from 'prebid.js';
 
 const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element => {
   const [labelText, setLabelText] = useState<string | null>(adUnit.code);
@@ -74,6 +74,6 @@ const AdUnitChipComponent = ({ adUnit }: IAdunitChipComponentProps): JSX.Element
 };
 
 interface IAdunitChipComponentProps {
-  adUnit: IPrebidAdUnit;
+  adUnit: AdUnit;
 }
 export default AdUnitChipComponent;

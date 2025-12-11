@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { IPrebidAdUnit } from '../../../../Injected/prebid';
 import Chip from '@mui/material/Chip';
 import ScreenshotMonitorIcon from '@mui/icons-material/ScreenshotMonitor';
 import { Tooltip } from '@mui/material';
+import { AdUnit } from 'prebid.js';
 
 const InterstitialChipComponent = ({ adUnit }: IInterstitialChipComponentProps): JSX.Element => {
   const [labelText, setLabelText] = useState<string | null>();
@@ -34,6 +34,6 @@ const InterstitialChipComponent = ({ adUnit }: IInterstitialChipComponentProps):
 };
 
 interface IInterstitialChipComponentProps {
-  adUnit: IPrebidAdUnit;
+  adUnit: AdUnit;
 }
 export default InterstitialChipComponent;

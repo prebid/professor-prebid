@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import AdUnitChipComponent from '../../chips/AdUnitChipComponent';
-import { IPrebidAdUnit } from '../../../../../Injected/prebid';
+import { AdUnit } from 'prebid.js';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -10,7 +10,7 @@ import InterstitialChipComponent from '../../chips/InterstitialChipComponent';
 import Ortb2ImpExtChipComponent from '../../chips/ortb2impExtChipComponent';
 import { useTileExpansion, TileWrapper, TileContent, TileSection } from './Tiles';
 
-const AdUnitTile = ({ adUnit, colCount }: { adUnit: IPrebidAdUnit; colCount: number }): JSX.Element => {
+const AdUnitTile = ({ adUnit, colCount }: { adUnit: AdUnit; colCount: number }): JSX.Element => {
   const { isPanel } = useContext(AppStateContext);
   const { expanded, toggle } = useTileExpansion();
 

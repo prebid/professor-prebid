@@ -1,13 +1,13 @@
 import React, { useContext } from 'react';
-import { IPrebidAdUnit } from '../../../../Injected/prebid';
 import AppStateContext from '../../../contexts/appStateContext';
 import AdServerTile from './tiles/AdServerTile';
 import AdUnitTile from './tiles/AdUnitTile';
 import BiddersTile from './tiles/BiddersTile';
 import MediaTypesTile from './tiles/MediaTypesTile';
 import Ortb2ImpTile from './tiles/Ortb2ImpTile';
+import { AdUnit } from 'prebid.js';
 
-export const AdUnitGridRow = ({ adUnit }: { adUnit: IPrebidAdUnit }): JSX.Element => {
+export const AdUnitGridRow = ({ adUnit }: { adUnit: AdUnit }): JSX.Element => {
   const { isPanel, googleAdManager } = useContext(AppStateContext);
   const showAdServerColumn = isPanel && googleAdManager?.slots?.length > 0;
   const showOrtb2Imp = isPanel && !!adUnit.ortb2Imp;
