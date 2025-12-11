@@ -80,7 +80,7 @@ const ADUNIT_FIELD_MAP = {
 
   mediatype: (adUnit: AdUnit): string => (adUnit?.mediaTypes ? Object.keys(adUnit.mediaTypes).join(',') : ''),
 
-  bidders: (adUnit: AdUnit) =>
+  bidder: (adUnit: AdUnit) =>
     Array.isArray(adUnit?.bids)
       ? adUnit.bids
           .map((b) => b?.bidder)

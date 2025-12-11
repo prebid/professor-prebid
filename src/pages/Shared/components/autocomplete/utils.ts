@@ -86,18 +86,25 @@ const tokenize = (query: string): string[] => {
         const ch = query[i];
         if (ch === '"') {
             inQuote = !inQuote;
+            cur += ch;
             continue;
         }
         if (!inQuote && /\s/.test(ch)) {
             if (cur) {
-                tokens.push(cur);
+                if (cur.toUpperCase() !== 'AND') {
+                    tokens.push(cur);
+                }
                 cur = '';
             }
             continue;
         }
         cur += ch;
     }
-    if (cur) tokens.push(cur);
+    if (cur) {
+        if (cur.toUpperCase() !== 'AND') {
+            tokens.push(cur);
+        }
+    }
     return tokens;
 };
 
