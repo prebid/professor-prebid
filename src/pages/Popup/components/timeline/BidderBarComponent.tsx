@@ -1,10 +1,11 @@
 import React, { useEffect, useContext } from 'react';
 import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
-import { IPrebidAuctionEndEventData, IPrebidBidderRequest } from '../../../Injected/prebid';
 import ListItem from '@mui/material/ListItem';
 import Typography from '@mui/material/Typography';
 import Popover from '@mui/material/Popover';
 import StateContext from '../../../Shared/contexts/appStateContext';
+import { BidderRequest, EventRecord } from 'prebid.js/types.d.ts';
+import { BidderRequestWithStart } from './GanttChartComponent';
 
 const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>) => {
   const allGridBarsCollection = gridRef?.current?.children;
@@ -47,7 +48,7 @@ const PopoverWithJSONViewer = ({ anchorEl, bidderRequest, open, handlePopoverOpe
 
 const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent, gridRef }: IBidderBarComponentProps): JSX.Element => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  const [bidderRequest, setBidderRequest] = React.useState<IPrebidBidderRequest | null>(null);
+  const [bidderRequest, setBidderRequest] = React.useState<BidderRequestWithStart | null>(null);
   const open = Boolean(anchorEl);
   const startGridBar = getNearestGridBarElement(bidderRequest?.start, gridRef);
   const endGridBar = getNearestGridBarElement(item.end, gridRef);
@@ -58,7 +59,7 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent, gridRef }: 
   const handlePopoverOpenClose = (event: React.MouseEvent<HTMLElement>) => (!open ? setAnchorEl(event.currentTarget) : setAnchorEl(null));
 
   useEffect(() => {
-    setBidderRequest(auctionEndEvent.args.bidderRequests.find((bidderRequest) => bidderRequest.bidderRequestId === item.bidderRequestId));
+    setBidderRequest(auctionEndEvent.args.bidderRequests.find((bidderRequest) => bidderRequest.bidderRequestId === item.bidderRequestId) as BidderRequestWithStart);
   }, [auctionEndEvent.args.bidderRequests, item.bidderRequestId]);
 
   return (
@@ -76,7 +77,7 @@ const BidderBarComponent = ({ item, auctionEndLeft, auctionEndEvent, gridRef }: 
 interface IBidderBarComponentProps {
   item: ITableRow;
   auctionEndLeft: number;
-  auctionEndEvent: IPrebidAuctionEndEventData;
+  auctionEndEvent: EventRecord<'auctionEnd'>;
   gridRef: React.MutableRefObject<any>;
 }
 
@@ -89,7 +90,7 @@ interface ITableRow {
 
 interface IPopoverWithJSONViewerProps {
   anchorEl: HTMLElement | null;
-  bidderRequest: IPrebidBidderRequest | null;
+  bidderRequest: BidderRequest<string> | null;
   open: boolean;
   handlePopoverOpenClose: (event: React.MouseEvent<HTMLElement>) => void;
 }

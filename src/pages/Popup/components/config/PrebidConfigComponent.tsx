@@ -63,12 +63,6 @@ const PrebidConfigComponent = (): JSX.Element => {
                 <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
               </Typography>
             </Grid>
-            <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
-              <Typography variant="body1">
-                <strong> Timeout Buffer: </strong>
-                {config.timeoutBuffer}
-              </Typography>
-            </Grid>
             {expanded && (
               <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
                 <Typography variant="body1">

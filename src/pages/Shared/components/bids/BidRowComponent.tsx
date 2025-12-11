@@ -6,6 +6,7 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { IconCellStyles } from './HeaderRow';
+import { Bid } from 'prebid.js';
 
 export const GridCell = ({ children, cols = 1, sx, variant, ...rest }: { children: React.ReactNode; cols?: number; sx?: SxProps; variant?: 'h2' | 'body1' | 'body2'; [key: string]: any }) => (
   <Grid size={{ xs: cols }} sx={sx} {...rest}>
@@ -39,9 +40,9 @@ const truncate = (text?: string, length = 30): string => (text && text.length > 
 
 const formatCpm = (cpm?: number): string => (Number.isFinite(cpm) && typeof cpm === 'number' ? `${Math.round(cpm * 100) / 100}` : 'no cpm');
 
-const displaySize = (bid: IPrebidBid): string => (bid as any).size ?? (bid.width && bid.height ? `${bid.width} x ${bid.height}` : 'no size');
+const displaySize = (bid: Bid): string => (bid as any).size ?? (bid.width && bid.height ? `${bid.width} x ${bid.height}` : 'no size');
 
-const ExpandedRowComponent = React.memo(({ bid }: { bid: IPrebidBid }) => (
+const ExpandedRowComponent = React.memo(({ bid }: { bid: Bid }) => (
   <>
     <Grid size={{ xs: 0.62 }} />
     <Grid size={{ xs: 11.38 }}>
@@ -52,7 +53,7 @@ const ExpandedRowComponent = React.memo(({ bid }: { bid: IPrebidBid }) => (
   </>
 ));
 
-export const BidRowComponent = React.memo(({ bid, globalOpen }: { bid: IPrebidBid; globalOpen?: boolean }) => {
+export const BidRowComponent = React.memo(({ bid, globalOpen }: { bid: Bid; globalOpen?: boolean }) => {
   const { open, toggle } = useRowExpand(globalOpen);
 
   return (

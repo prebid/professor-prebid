@@ -4,19 +4,18 @@ import AppStateContext from '../../../contexts/appStateContext';
 import RenderKeyValueComponent from '../../RenderKeyValueComponent';
 import { ExpandableTile } from './ExpandableTile';
 import { TCString } from '@iabtcf/core';
-import { ITcfDetails } from '../../../../Injected/tcf';
-import Grid from '@mui/material/Grid';
 
 const PrivacyComponent = (): JSX.Element | null => {
   const { prebid, tcf } = useContext(AppStateContext);
   const { consentManagement } = prebid.config;
   if (!consentManagement) return null;
 
-  const { allowAuctionWithoutConsent, cmpApi, defaultGdprScope, gdpr, timeout, usp } = consentManagement;
+  const { gdpr, usp } = consentManagement;
+  const { cmpApi, defaultGdprScope, timeout } = gdpr || {};
 
   return (
     <ExpandableTile icon={<BusinessIcon />} title="Consent Management" subtitle="TCF, CPA, USP, …" expandedMaxWidth={12}>
-      <RenderKeyValueComponent label="Allow Auction Without Consent" value={allowAuctionWithoutConsent || gdpr?.allowAuctionWithoutConsent} columns={[4, 12]} expanded />
+      {/* <RenderKeyValueComponent label="Allow Auction Without Consent" value={allowAuctionWithoutConsent || gdpr?.allowAuctionWithoutConsent} columns={[4, 12]} expanded /> */}
       <RenderKeyValueComponent label="CMP API" value={cmpApi} columns={[4, 12]} expanded />
       <RenderKeyValueComponent label="Timeout" value={timeout} columns={[4, 12]} expanded />
       <RenderKeyValueComponent label="Default GDPR Scope" value={defaultGdprScope} columns={[4, 12]} expanded />
@@ -28,7 +27,7 @@ const PrivacyComponent = (): JSX.Element | null => {
   );
 };
 
-const TcfComponent = ({ tcf, tcfKey }: { tcf: ITcfDetails; tcfKey: string }): JSX.Element => {
+const TcfComponent = ({ tcf, tcfKey }: { tcf: any; tcfKey: string }): JSX.Element => {
   const [decoded, setDecoded] = React.useState({});
   useEffect(() => {
     try {

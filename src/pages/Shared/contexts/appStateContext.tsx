@@ -2,18 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useMediaQuery, useTheme } from '@mui/material';
 import InspectedPageContext from './inspectedPageContext';
 import { IGoogleAdManagerDetails } from '../../Injected/googleAdManager';
-import {
-  IPrebidDetails,
-  IPrebidBidResponseEventData,
-  IPrebidBidRequestedEventData,
-  IPrebidNoBidEventData,
-  IPrebidAuctionEndEventData,
-  IPrebidBidWonEventData,
-  IPrebidAdRenderSucceededEventData,
-  IPrebidAuctionInitEventData,
-  IPrebidBidderDoneEventData,
-} from '../../Injected/prebid';
-import { ITcfDetails } from '../../Injected/tcf';
+import { IPrebidDetails } from '../../Injected/prebid';
+import type { EventRecord, Config } from 'prebid.js/types.d.ts';
 
 declare global {
   interface Document {
@@ -23,7 +13,7 @@ declare global {
 }
 
 const AppStateContext = React.createContext<AppState>({
-  tcf: {} as ITcfDetails,
+  tcf: {} as Config['consentManagement'],
   googleAdManager: {} as IGoogleAdManagerDetails,
   pbjsNamespace: '',
   setPbjsNamespace: undefined,
@@ -41,9 +31,6 @@ const AppStateContext = React.createContext<AppState>({
   allWinningBids: [],
   auctionInitEvents: [],
   auctionEndEvents: [],
-  paapiRunAuctionEvents: [],
-  allpaapiBidEvents: [],
-  allpaapiNoBidEvents: [],
   adsRendered: [],
   prebid: {} as IPrebidDetails,
   prebids: {} as IPrebids,
@@ -63,21 +50,21 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [frameId, setIframeId] = useState<string>('');
   const [pbjsNamespace, setPbjsNamespace] = useState<string>('');
   const [pbjsNamespaces, setPbjsNamespaces] = useState<string[]>([]);
-  const [tcf, setTcf] = useState<ITcfDetails>({} as ITcfDetails);
+  const [tcf, setTcf] = useState<Config['consentManagement']>({} as Config['consentManagement']);
   const [googleAdManager, setGoogleAdManager] = useState<IGoogleAdManagerDetails>({} as IGoogleAdManagerDetails);
   const [prebids, setPrebids] = useState<IPrebids>({} as IPrebids);
   const [prebid, setPrebid] = useState<IPrebidDetails>({} as IPrebidDetails);
   const [events, setEvents] = useState<IPrebidDetails['events']>([]);
-  const [allBidResponseEvents, setAllBidResponseEvents] = useState<IPrebidBidResponseEventData[]>([]);
-  const [allBidRequestedEvents, setAllBidRequestedEvents] = useState<IPrebidBidRequestedEventData[]>([]);
-  const [allNoBidEvents, setAllNoBidEvents] = useState<IPrebidNoBidEventData[]>([]);
+  const [allBidResponseEvents, setAllBidResponseEvents] = useState<EventRecord<'bidResponse'>[]>([]);
+  const [allBidRequestedEvents, setAllBidRequestedEvents] = useState<EventRecord<'bidRequested'>[]>([]);
+  const [allNoBidEvents, setAllNoBidEvents] = useState<EventRecord<'noBid'>[]>([]);
   const [allBidderEvents, setAllBidderEvents] = useState<IPrebidDetails['events'][]>([]);
-  const [allBidderDoneEvents, setAllBidderDoneEvents] = useState<IPrebidBidderDoneEventData[]>([]);
+  const [allBidderDoneEvents, setAllBidderDoneEvents] = useState<EventRecord<'bidderDone'>[]>([]);
   const [allAdUnitCodes, setAllAdUnitCodes] = useState<string[]>([]);
-  const [auctionInitEvents, setAuctionInitEvents] = useState<IPrebidAuctionEndEventData[]>([]);
-  const [auctionEndEvents, setAuctionEndEvents] = useState<IPrebidAuctionEndEventData[]>([]);
-  const [allWinningBids, setAllWinningBids] = React.useState<IPrebidBidWonEventData[]>([]);
-  const [adsRendered, setAdsRendered] = React.useState<IPrebidAdRenderSucceededEventData[]>([]);
+  const [auctionInitEvents, setAuctionInitEvents] = useState<EventRecord<'auctionInit'>[]>([]);
+  const [auctionEndEvents, setAuctionEndEvents] = useState<EventRecord<'auctionEnd'>[]>([]);
+  const [allWinningBids, setAllWinningBids] = React.useState<EventRecord<'bidWon'>[]>([]);
+  const [adsRendered, setAdsRendered] = React.useState<EventRecord<'adRenderSucceeded'>[]>([]);
   const { frames } = useContext(InspectedPageContext);
   const isSmallScreen = useMediaQuery(useTheme().breakpoints.down('sm'));
   const isPanel = useMediaQuery(useTheme().breakpoints.up('md'));
@@ -86,9 +73,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
   const [prebidReleaseInfo, setPrebidReleaseInfo] = useState<any>({});
   const [topics, setTopics] = useState<string[]>([]);
-  const [paapiRunAuctionEvents, setPaapiRunAuctionEvents] = useState<IPrebidPaapiAuctionEvent[]>([]);
-  const [allpaapiBidEvents, setAllPaapiBidEvents] = useState<IPrebidPaapiBidEvent[]>([]);
-  const [allpaapiNoBidEvents, setAllPaapiNoBidEvents] = useState<IPrebidPaapiBidEvent[]>([]);
 
   useEffect(() => {
     setPbjsNamespaces(Object.keys(prebids).filter((key) => key !== 'tcf'));
@@ -146,18 +130,15 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   useEffect(() => {
     const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
     const events = Array.isArray(prebid.events) ? prebid.events : [];
-    const allBidResponseEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidResponse') || []) as IPrebidBidResponseEventData[];
-    const allBidRequestedEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidRequested') || []) as IPrebidBidRequestedEventData[];
-    const allNoBidEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'noBid') || []) as IPrebidNoBidEventData[];
-    const allBidderDoneEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidderDone') || []) as IPrebidBidderDoneEventData[];
-    const allpaapiBidEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'paapiBid') || []) as IPrebidPaapiBidEvent[];
-    const allpaapiNoBidEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'paapiNoBid') || []) as IPrebidPaapiBidEvent[];
-    const paapiRunAuctionEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'paapiRunAuction') || []) as IPrebidPaapiAuctionEvent[];
+    const allBidResponseEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidResponse') || []) as EventRecord<'bidResponse'>[];
+    const allBidRequestedEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidRequested') || []) as EventRecord<'bidRequested'>[];
+    const allNoBidEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'noBid') || []) as EventRecord<'noBid'>[];
+    const allBidderDoneEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidderDone') || []) as EventRecord<'bidderDone'>[];
     const allAdUnitCodes = Array.from(
       new Set(
         events?.reduce((acc: string[], event: any) => {
           if (event.eventType === 'auctionInit') {
-            const adUnitCodes = (event as IPrebidAuctionInitEventData).args.adUnitCodes;
+            const adUnitCodes = (event as EventRecord<'auctionInit'>).args.adUnitCodes;
             acc = [...acc, ...adUnitCodes];
           }
           return acc;
@@ -165,23 +146,20 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
       )
     ) as string[];
     const allBidderEventsBidders = Array.from(new Set([].concat(allBidResponseEvents, allNoBidEvents).map(({ args: { bidder } }) => bidder)));
-    const auctionInitEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionInit') as IPrebidAuctionEndEventData[])?.sort(({ args: { timestamp: tsa } }, { args: { timestamp: tsb } }) => tsa - tsb);
-    const auctionEndEvents = events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionEnd') as IPrebidAuctionEndEventData[];
-    const allWinningBids = events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidWon') as IPrebidBidWonEventData[];
-    const adsRendered = events?.filter(({ eventType }: { eventType: string }) => eventType === 'adRenderSucceeded') as IPrebidAdRenderSucceededEventData[];
+    const auctionInitEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionInit') as EventRecord<'auctionInit'>[])?.sort(({ args: { timestamp: tsa } }, { args: { timestamp: tsb } }) => tsa - tsb);
+    const auctionEndEvents = events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionEnd') as EventRecord<'auctionEnd'>[];
+    const allWinningBids = events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidWon') as EventRecord<'bidWon'>[];
+    const adsRendered = events?.filter(({ eventType }: { eventType: string }) => eventType === 'adRenderSucceeded') as EventRecord<'adRenderSucceeded'>[];
 
     setPrebid(prebid);
     setEvents(events);
     setAuctionInitEvents(auctionInitEvents);
     setAuctionEndEvents(auctionEndEvents);
-    setPaapiRunAuctionEvents(paapiRunAuctionEvents);
     setAllBidderEvents(allBidderEventsBidders);
     setAllBidderDoneEvents(allBidderDoneEvents);
     setAllBidResponseEvents(allBidResponseEvents);
     setAllBidRequestedEvents(allBidRequestedEvents);
     setAllNoBidEvents(allNoBidEvents);
-    setAllPaapiBidEvents(allpaapiBidEvents);
-    setAllPaapiNoBidEvents(allpaapiNoBidEvents);
     setAllAdUnitCodes(allAdUnitCodes);
     setAllWinningBids(allWinningBids);
     setAdsRendered(adsRendered);
@@ -208,9 +186,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     allWinningBids,
     auctionInitEvents,
     auctionEndEvents,
-    paapiRunAuctionEvents,
-    allpaapiBidEvents,
-    allpaapiNoBidEvents,
     adsRendered,
     initiatorOutput,
     setInitiatorOutput,
@@ -230,7 +205,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 export default AppStateContext;
 
 interface AppState {
-  tcf: ITcfDetails;
+  tcf: Config['consentManagement'];
   googleAdManager: IGoogleAdManagerDetails;
   pbjsNamespace?: string;
   setPbjsNamespace?: React.Dispatch<React.SetStateAction<string>>;
@@ -241,21 +216,17 @@ interface AppState {
   prebid: IPrebidDetails;
   prebids: IPrebids;
   events: IPrebidDetails['events'];
-  allBidResponseEvents: IPrebidBidResponseEventData[];
-  allBidRequestedEvents: IPrebidBidRequestedEventData[];
-  allNoBidEvents: IPrebidNoBidEventData[];
+  allBidResponseEvents: EventRecord<'bidResponse'>[];
+  allBidRequestedEvents: EventRecord<'bidRequested'>[];
+  allNoBidEvents: EventRecord<'noBid'>[];
   allBidderEvents: IPrebidDetails['events'][];
-  allBidderDoneEvents: IPrebidBidderDoneEventData[];
+  allBidderDoneEvents: EventRecord<'bidderDone'>[];
   allAdUnitCodes: string[];
-  allWinningBids: IPrebidBidWonEventData[];
-  auctionInitEvents: IPrebidAuctionEndEventData[];
-  auctionEndEvents: IPrebidAuctionEndEventData[];
+  allWinningBids: EventRecord<'bidWon'>[];
+  auctionInitEvents: EventRecord<'auctionInit'>[];
+  auctionEndEvents: EventRecord<'auctionEnd'>[];
 
-  paapiRunAuctionEvents: IPrebidPaapiAuctionEvent[];
-  allpaapiBidEvents: IPrebidPaapiBidEvent[];
-  allpaapiNoBidEvents: IPrebidPaapiBidEvent[];
-
-  adsRendered: IPrebidAdRenderSucceededEventData[];
+  adsRendered: EventRecord<'adRenderSucceeded'>[];
   initiatorOutput: {
     [key: string]: any;
   };

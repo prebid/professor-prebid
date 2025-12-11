@@ -1,8 +1,9 @@
+import { Config, PrebidJS } from 'prebid.js';
 import { POPUP_LOADED, EVENTS, PREBID_DETECTION_TIMEOUT_IFRAME, PREBID_DETECTION_TIMEOUT } from '../Shared/constants';
 import { sendWindowPostMessage, detectIframe } from '../Shared/utils';
 
 class Prebid {
-  globalPbjs: IGlobalPbjs = window.pbjs;
+  globalPbjs: PrebidJS = window.pbjs;
   namespace: string;
   frameId: string | null;
   lastTimeUpdateSentToContentScript: number;
@@ -21,42 +22,42 @@ class Prebid {
 
   addEventListeners = (): void => {
     if (typeof this.globalPbjs.onEvent !== 'function') return;
-    this.globalPbjs.onEvent('auctionInit', (auctionInitData: IPrebidAuctionInitEventData) => {
+    this.globalPbjs.onEvent('auctionInit', (auctionInitData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionInit', args: auctionInitData });
       }
       this.throttle(this.sendDetailsToBackground);
     });
 
-    this.globalPbjs.onEvent('auctionEnd', (auctionEndData: IPrebidAuctionEndEventData) => {
+    this.globalPbjs.onEvent('auctionEnd', (auctionEndData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'auctionEnd', args: auctionEndData });
       }
       this.throttle(this.sendDetailsToBackground);
     });
 
-    this.globalPbjs.onEvent('bidRequested', (bidRequestedData: IPrebidBidRequestedEventData) => {
+    this.globalPbjs.onEvent('bidRequested', (bidRequestedData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidRequested', args: bidRequestedData });
       }
       this.throttle(this.sendDetailsToBackground);
     });
 
-    this.globalPbjs.onEvent('bidResponse', (bidResponseData: IPrebidBidResponseEventData) => {
+    this.globalPbjs.onEvent('bidResponse', (bidResponseData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidResponse', args: bidResponseData });
       }
       this.throttle(this.sendDetailsToBackground);
     });
 
-    this.globalPbjs.onEvent('noBid', (noBidData: IPrebidNoBidEventData) => {
+    this.globalPbjs.onEvent('noBid', (noBidData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'noBid', args: noBidData });
       }
       this.throttle(this.sendDetailsToBackground);
     });
 
-    this.globalPbjs.onEvent('bidWon', (bidWonData: IPrebidBidWonEventData) => {
+    this.globalPbjs.onEvent('bidWon', (bidWonData) => {
       if (!this.eventsApi) {
         this.events.push({ eventType: 'bidWon', args: bidWonData });
       }
@@ -598,13 +599,13 @@ export interface IPrebidDetails {
     | IPrebidPaapiBidEvent
     | IPrebidBidderDoneEventData
   )[];
-  config: IPrebidConfig;
-  eids: IPrebidEids[];
+  config: Config;
+  eids: ReturnType<PrebidJS['getUserIdsAsEids']>;
   debug: IPrebidDebugConfig;
   namespace: string;
   frameId: string | null;
   installedModules: string[];
-  bidderSettings: IPrebidBidderSettings;
+  bidderSettings: PrebidJS['bidderSettings'];
 }
 
 export interface IPrebidBidderSettings {

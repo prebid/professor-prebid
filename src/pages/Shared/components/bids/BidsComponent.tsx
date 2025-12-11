@@ -1,7 +1,6 @@
 import React, { useContext, useMemo, useState, useCallback } from 'react';
 import Grid from '@mui/material/Grid';
 import AppStateContext from '../../contexts/appStateContext';
-import { IPrebidBid } from '../../../Injected/prebid';
 import { HeaderRow } from './HeaderRow';
 import { BidRowComponent, GridCell } from './BidRowComponent';
 import { IconButton, Paper, Tooltip } from '@mui/material';
@@ -9,6 +8,7 @@ import { createQueryEngine, distinct, getSortValue, getWidthXHeightStringFromBid
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import DownloadIcon from '@mui/icons-material/Download';
 import { download } from '../../utils';
+import { Bid } from 'prebid.js/types.d.ts';
 
 const BID_FIELD_MAP = {
   bidder: (b: any) => b?.bidder,
@@ -24,7 +24,7 @@ const BID_FIELD_MAP = {
   size: (b: any) => b?.size ?? (b?.width && b?.height ? `${b.width}x${b.height}` : ''),
 } as const;
 
-const getBidKey = (bid: IPrebidBid): string => (bid as any).bidId ?? (bid as any).requestId ?? `${bid.adUnitCode || ''}-${bid.bidder || ''}-${bid.timeToRespond || ''}`;
+const getBidKey = (bid: Bid): string => bid.requestId ?? `${bid.adUnitCode || ''}-${bid.bidder || ''}-${bid.timeToRespond || ''}`;
 
 const bidsQueryEngine = createQueryEngine<any>(BID_FIELD_MAP);
 
@@ -41,7 +41,7 @@ const buildBidSuggestions = (bids: any[]): string[] => {
   return Array.from(new Set<string>([...keySuggestions, ...numericStubs, ...bidders, ...mediaTypes, ...currencies, ...adUnits, ...sizes])).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 };
 
-const sortBids = (sort: { key: string; dir: 'asc' | 'desc' }, filteredBids: IPrebidBid[]) => {
+const sortBids = (sort: { key: string; dir: 'asc' | 'desc' }, filteredBids: any[]) => {
   const dir = sort.dir === 'asc' ? 1 : -1;
   return [...filteredBids].sort((a: any, b: any) => {
     const va = getSortValue(a, sort.key);

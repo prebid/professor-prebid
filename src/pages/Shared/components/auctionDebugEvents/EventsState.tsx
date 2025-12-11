@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
-import { IPrebidAdUnit } from '../../../Injected/prebid';
 import StateContext from '../../contexts/appStateContext';
+import { AdUnit } from 'prebid.js';
 
 const merge = (target: any, source: any) => {
   for (const key in source) {
@@ -20,14 +20,14 @@ const EventsState = () => {
   const [eventsPopUpOpen, setEventsPopUpOpen] = useState(false);
   const [pbjsVersionPopUpOpen, setPbjsVersionPopUpOpen] = useState(false);
   const { auctionInitEvents } = useContext(StateContext);
-  const [adUnits, setAdUnits] = useState<IPrebidAdUnit[]>([]);
+  const [adUnits, setAdUnits] = useState<AdUnit[]>([]);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<string | null>(null);
   useEffect(() => {
     const adUnits = auctionInitEvents
       ?.reduce((previousValue, currentValue) => {
         return [...previousValue, ...currentValue.args.adUnits];
-      }, [] as IPrebidAdUnit[])
+      }, [] as AdUnit[])
       ?.reduce((previousValue, currentValue) => {
         let toUpdate = previousValue.find((adUnit) => {
           const adUnitBids = adUnit.bids.map(({ bidder, params }: any) => ({ bidder, params })) || [];

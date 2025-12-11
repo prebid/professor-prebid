@@ -16,44 +16,48 @@ type AutoCompleteProps = {
 export const AutoComplete = ({ query, onQueryChange, options, onPick, placeholder, fieldKeys }: AutoCompleteProps) => {
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
 
-  const keyOnlyOptions = (() => {
-    const numericKeys = Array.from(NUMERIC_FIELD_KEYS);
-    const allKeys = [...fieldKeys, ...numericKeys];
-    return allKeys;
-  })();
-
   const getOptionsForQuery = () => {
     const input = query || '';
-    const last = input.split(/\s+/).pop() ?? '';
-    const q = last.toLowerCase();
+    // Split only on ' AND ' or ' OR ' (case-insensitive)
+    const last = input.split(/\s+(and|or)\s+/i).pop() ?? '';
+    const queryLastToken = last.toLowerCase();
 
     // If no query or query is an operator, show key suggestions
-    if (!q || ['or', 'and'].includes(q)) {
+    if (['or', 'and'].includes(queryLastToken)) {
+      console.log('Showing keyOnlyOptions because query is empty or an operator:', queryLastToken);
       return keyOnlyOptions;
     }
 
-    const colon = q.indexOf(':');
+    const colon = queryLastToken.indexOf(':');
 
     // If no colon, show keys that match the input
     if (colon < 0) {
-      return keyOnlyOptions.filter((key) => key.toLowerCase().startsWith(q));
+      console.log('Filtering keyOnlyOptions for keys starting with:', queryLastToken);
+      return keyOnlyOptions.filter((key) => key.toLowerCase().startsWith(queryLastToken));
     }
 
     // If there's a colon, show values for that key
-    const key = q.slice(0, colon);
-    const val = q.slice(colon + 1);
+    const key = queryLastToken.slice(0, colon);
+    const val = queryLastToken.slice(colon + 1);
 
     // Filter options to show only values for this key
     if (options && options.length) {
       const keyPrefix = `${key}:`;
-      return options
-        .filter((o) => String(o).toLowerCase().startsWith(keyPrefix))
-        .map((o) => String(o).slice(keyPrefix.length)) // Remove the key: prefix
-        .filter((value) => !val || value.toLowerCase().includes(val.toLowerCase()));
+      const filtered = options
+        .filter((option) => String(option).toLowerCase().startsWith(keyPrefix))
+        .map((option) => String(option).slice(keyPrefix.length)) // Remove the key: prefix
+        .filter((value) => !val || value.toLowerCase().includes(val.toLowerCase()))
+        .filter((s) => s); // Remove empty strings
+      console.log('Filtering options for key prefix:', { keyPrefix, val, options, filtered, queryLastToken });
+      return filtered;
     }
-
-    return [];
   };
+
+  const keyOnlyOptions = (() => {
+    const numericKeys = Array.from(NUMERIC_FIELD_KEYS);
+    const allKeys = new Set([...fieldKeys, ...numericKeys]);
+    return Array.from(allKeys).sort((a, b) => a.localeCompare(b));
+  })();
 
   const localOptions = getOptionsForQuery();
   return (
@@ -74,39 +78,39 @@ export const AutoComplete = ({ query, onQueryChange, options, onPick, placeholde
       }}
       onChange={(_e, val, reason) => {
         if (reason === 'selectOption' && val != null) {
-          const tokens = query.split(/\s+/).filter((t) => t.length > 0);
-          const lastToken = tokens[tokens.length - 1]?.toLowerCase() || '';
-          const prevToken = tokens[tokens.length - 2]?.toLowerCase() || '';
-          const endsWithSpace = query.endsWith(' ');
+          const input = query;
 
-          // Check for operators or trailing space
-          if (lastToken === 'or' || lastToken === 'and' || prevToken === 'or' || prevToken === 'and' || endsWithSpace) {
-            // If we have an operator or space, append the selection
-            const separator = endsWithSpace ? '' : ' ';
+          // Find the last occurrence of AND or OR
+          const lastAndIndex = input.toLowerCase().lastIndexOf(' and ');
+          const lastOrIndex = input.toLowerCase().lastIndexOf(' or ');
+          const lastOperatorIndex = Math.max(lastAndIndex, lastOrIndex);
 
-            // Check if we're completing a key (no colon in last token)
-            const hasColon = lastToken.includes(':');
-            if (!hasColon && !endsWithSpace) {
-              // Adding a key, append with colon
-              onQueryChange(`${query}${separator}${val}:`);
+          if (lastOperatorIndex > -1) {
+            // We have an AND or OR operator
+            const beforeOperator = input.substring(0, lastOperatorIndex);
+            const operator = lastAndIndex > lastOrIndex ? ' AND ' : ' OR ';
+            const afterOperator = input.substring(lastOperatorIndex + operator.length).trim();
+
+            // Check if we're completing a key or value
+            if (afterOperator.includes(':')) {
+              // Completing a value
+              const colonIndex = afterOperator.indexOf(':');
+              const key = afterOperator.slice(0, colonIndex);
+              onQueryChange(`${beforeOperator}${operator}${key}:${val}`);
             } else {
-              // Adding a value or after space
-              onQueryChange(`${query}${separator}${val}`);
+              // Completing a key
+              onQueryChange(`${beforeOperator}${operator}${val}:`);
             }
           } else {
-            // Handle the last token replacement
-            const hasColon = lastToken.includes(':');
+            // No operator, handle as before
+            const hasColon = input.includes(':');
             if (hasColon) {
-              // We're completing a value for a key:value pair
-              const colonIndex = lastToken.indexOf(':');
-              const key = lastToken.slice(0, colonIndex);
-              const newQuery = tokens
-                .slice(0, -1)
-                .concat([`${key}:${val}`])
-                .join(' ');
-              onQueryChange(newQuery);
+              // Completing a value
+              const colonIndex = input.indexOf(':');
+              const key = input.slice(0, colonIndex);
+              onQueryChange(`${key}:${val}`);
             } else {
-              // We're selecting a key, replace with key:
+              // Completing a key
               onPick?.(`${val}:`);
             }
           }
