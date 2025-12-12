@@ -9,8 +9,7 @@
   },
   "scripts": {
     "build": "node utils/build.js && npx rimraf `src/**/dist`",
-    "start": "node utils/webserver.js",
-    "prettier": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss,md}' '!build/**'"
+    "start": "node utils/webserver.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

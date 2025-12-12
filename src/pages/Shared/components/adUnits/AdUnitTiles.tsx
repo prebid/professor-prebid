@@ -263,7 +263,7 @@ export const MediaTypesTile = ({ adUnit, colCount }: { adUnit: AdUnit; colCount:
           <>
             {(JSON.stringify(mediaTypes) === '{}' || !mediaTypes) && (
               <TileSection label="Media Types Object">
-                <Typography variant="caption">{JSON.stringify(mediaTypes)}</Typography>
+                <JSONViewerComponent style={{ padding: 0 }} src={mediaTypes} collapsed={!expanded ? 1 : 2} />
               </TileSection>
             )}
             {mediaTypes?.banner?.sizes && (
@@ -278,9 +278,9 @@ export const MediaTypesTile = ({ adUnit, colCount }: { adUnit: AdUnit; colCount:
           </>
         }
         expandedView={
-          <TileSection label="Full Media Types">
-            <pre>{JSON.stringify(mediaTypes, null, 2)}</pre>
-          </TileSection>
+          <Box sx={{ p: 0.5 }}>
+            <JSONViewerComponent style={{ padding: 0 }} src={mediaTypes} collapsed={2} />
+          </Box>
         }
       />
     </TileWrapper>
