@@ -1,6 +1,6 @@
 import React from 'react';
 import Grid from '@mui/material/Grid';
-import { AdUnitsGridComponent } from './grid/AdUnitsGridComponent';
+import { AdUnitsGridComponent } from './AdUnitsGridComponent';
 import { conditionalPluralization as cP } from '../../utils';
 import AdUnitsComponentState from './AdUnitsComponentState';
 import { Tooltip, IconButton } from '@mui/material';
@@ -11,17 +11,25 @@ import DownloadIcon from '@mui/icons-material/Download';
 import { download } from '../../utils';
 import { replaceLastToken } from '../autocomplete/utils';
 
-const AdUnitsComponent = (): JSX.Element => {
-  const { adUnits, query, setQuery, setPbjsVersionPopUpOpen, pbjsVersionPopUpOpen, filteredAdUnits, suggestions, prebid, allBidderEvents, allAdUnitCodes, ADUNIT_FIELD_MAP } = AdUnitsComponentState();
+interface AdUnitsHeaderProps {
+  prebid: any;
+  allAdUnitCodes: string[];
+  allBidderEvents: any[];
+  query: string;
+  setQuery: (q: string | ((prev: string) => string)) => void;
+  suggestions: any[]; // Adjust type if possible
+  ADUNIT_FIELD_MAP: any;
+  setPbjsVersionPopUpOpen: (open: boolean) => void;
+  pbjsVersionPopUpOpen: boolean;
+  adUnits: any[];
+}
+
+const AdUnitsHeader = ({ prebid, allAdUnitCodes, allBidderEvents, query, setQuery, suggestions, ADUNIT_FIELD_MAP, setPbjsVersionPopUpOpen, pbjsVersionPopUpOpen, adUnits }: AdUnitsHeaderProps): JSX.Element => {
   return (
-    <Grid container justifyContent="space-between">
+    <React.Fragment>
       <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setPbjsVersionPopUpOpen(true)}>
         <Tooltip title="Click for more info" children={<>Version: {prebid.version}</>} />
       </GridCell>
-
-      {/* <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }}>
-        Timeout: {prebid.config?.bidderTimeout}
-      </GridCell> */}
 
       <GridCell cols={1.5} variant="h2">
         AdUnit{cP(allAdUnitCodes)}: {allAdUnitCodes.length}
@@ -30,24 +38,6 @@ const AdUnitsComponent = (): JSX.Element => {
       <GridCell cols={1.5} variant="h2">
         Bidder{cP(allBidderEvents)}: {allBidderEvents.length}
       </GridCell>
-
-      {/* <GridCell
-        cols={1.5}
-        variant="h2"
-        onClick={() => {
-          setSelectedTab(2);
-        }}
-        sx={{ border: 0, cursor: 'pointer' }}
-      >
-        <Tooltip
-          title="Click for more info"
-          children={
-            <>
-              Event{cP(events)}: {events?.length}
-            </>
-          }
-        />
-      </GridCell> */}
 
       <Grid size={{ xs: 6.5 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
         <AutoComplete query={query} fieldKeys={Object.keys(ADUNIT_FIELD_MAP) as string[]} options={suggestions} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter Ad Units..." />
@@ -62,6 +52,17 @@ const AdUnitsComponent = (): JSX.Element => {
       </GridCell>
 
       <PbjsVersionInfoPopOver pbjsVersionPopUpOpen={pbjsVersionPopUpOpen} setPbjsVersionPopUpOpen={setPbjsVersionPopUpOpen} />
+    </React.Fragment>
+  );
+};
+
+const AdUnitsComponent = (): JSX.Element => {
+  const state = AdUnitsComponentState();
+  const { filteredAdUnits } = state;
+
+  return (
+    <Grid container justifyContent="space-between">
+      <AdUnitsHeader {...state} />
 
       {filteredAdUnits.length === 0 ? (
         <GridCell cols={12} variant="body1">
