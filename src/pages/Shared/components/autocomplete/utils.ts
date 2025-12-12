@@ -108,6 +108,45 @@ const tokenize = (query: string): string[] => {
     return tokens;
 };
 
+export const getAutocompleteOptions = (query: string, fieldKeys: string[], options: string[] = []): string[] => {
+    const input = query || '';
+    // Split only on ' AND ' or ' OR ' (case-insensitive)
+    const last = input.split(/\s+(and|or)\s+/i).pop() ?? '';
+    const queryLastToken = last.toLowerCase();
+
+    const numericKeys = Array.from(NUMERIC_FIELD_KEYS);
+    const allKeys = new Set([...fieldKeys, ...numericKeys]);
+    const keyOnlyOptions = Array.from(allKeys).sort((a, b) => a.localeCompare(b));
+
+    // If no query or query is an operator, show key suggestions
+    if (['or', 'and'].includes(queryLastToken)) {
+        return keyOnlyOptions;
+    }
+
+    const colon = queryLastToken.indexOf(':');
+
+    // If no colon, show keys that match the input
+    if (colon < 0) {
+        return keyOnlyOptions.filter((key) => key.toLowerCase().startsWith(queryLastToken));
+    }
+
+    // If there's a colon, show values for that key
+    const key = queryLastToken.slice(0, colon);
+    const val = queryLastToken.slice(colon + 1);
+
+    // Filter options to show only values for this key
+    if (options && options.length) {
+        const keyPrefix = `${key}:`;
+        const filtered = options
+            .filter((option) => String(option).toLowerCase().startsWith(keyPrefix))
+            .map((option) => String(option).slice(keyPrefix.length)) // Remove the key: prefix
+            .filter((value) => !val || value.toLowerCase().includes(val.toLowerCase()))
+            .filter((s) => s); // Remove empty strings
+        return filtered;
+    }
+    return [];
+};
+
 export const createQueryEngine = <T,>(fieldMapInput: FieldMap<T>): QueryEngine<T> => {
     const opts: QueryEngineOptions<T> = {
         numericKeys: NUMERIC_FIELD_KEYS,
