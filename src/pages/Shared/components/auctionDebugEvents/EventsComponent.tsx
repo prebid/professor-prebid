@@ -1,7 +1,7 @@
 import React, { useContext, useMemo, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import { IconButton, Paper, Tooltip } from '@mui/material';
-import { GridCell } from '../bids/BidRowComponent';
+import { GridCell } from '../bids/BidsComponent';
 import JSONViewerComponent from '../JSONViewerComponent';
 import StateContext from '../../contexts/appStateContext';
 import { AutoComplete } from '../autocomplete/AutoComplete';

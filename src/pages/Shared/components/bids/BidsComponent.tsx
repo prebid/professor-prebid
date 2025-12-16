@@ -1,99 +1,20 @@
-import React, { useContext, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useContext } from 'react';
 import Grid from '@mui/material/Grid';
-import AppStateContext from '../../contexts/appStateContext';
-import { HeaderRow } from './HeaderRow';
-import { BidRowComponent, GridCell } from './BidRowComponent';
-import { IconButton, Paper, Tooltip } from '@mui/material';
-import { createQueryEngine, distinct, getSortValue, getWidthXHeightStringFromBid, NUMERIC_FIELD_KEYS, replaceLastToken } from '../autocomplete/utils';
+import { IconButton, Paper, Tooltip, Typography } from '@mui/material';
+import { replaceLastToken } from '../autocomplete/utils';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import DownloadIcon from '@mui/icons-material/Download';
 import { download } from '../../utils';
 import { Bid } from 'prebid.js/types.d.ts';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { SxProps } from '@mui/material';
+import AppsIcon from '@mui/icons-material/Apps';
+import JSONViewerComponent from '../JSONViewerComponent';
+import BidsComponentState, { getBidKey } from './BidsComponentState';
 
-const BID_FIELD_MAP = {
-  bidder: (b: any) => b?.bidder,
-  currency: (b: any) => b?.currency,
-  adunitcode: (b: any) => b?.adUnitCode,
-  mediatype: (b: any) => b?.mediaType,
-  cpm: (b: any) => b?.cpm,
-  width: (b: any) => b?.width,
-  height: (b: any) => b?.height,
-  ttl: (b: any) => b?.ttl,
-  timetorespond: (b: any) => b?.timeToRespond,
-  originalcpm: (b: any) => b?.originalCpm,
-  size: (b: any) => b?.size ?? (b?.width && b?.height ? `${b.width}x${b.height}` : ''),
-} as const;
-
-const getBidKey = (bid: Bid): string => bid.requestId ?? `${bid.adUnitCode || ''}-${bid.bidder || ''}-${bid.timeToRespond || ''}`;
-
-const bidsQueryEngine = createQueryEngine<any>(BID_FIELD_MAP);
-
-const buildBidSuggestions = (bids: any[]): string[] => {
-  const keySuggestions = (Object.keys(BID_FIELD_MAP) as string[]).map((key) => `${key}:`);
-  const numericStubs = (NUMERIC_FIELD_KEYS as readonly string[]).flatMap((key) => [`${key}>`, `${key}>=`, `${key}<`, `${key}<=`, `${key}=`]);
-
-  const bidders = distinct(bids.map((b) => (b?.bidder ? `bidder:${String(b.bidder)}` : undefined)));
-  const mediaTypes = distinct(bids.map((b) => (b?.mediaType ? `mediatype:${String(b.mediaType)}` : undefined)));
-  const currencies = distinct(bids.map((b) => (b?.currency ? `currency:${String(b.currency)}` : undefined)));
-  const adUnits = distinct(bids.map((b) => (b?.adUnitCode ? `adunitcode:${String(b.adUnitCode)}` : undefined)));
-  const sizes = distinct(bids.map((bid) => (getWidthXHeightStringFromBid(bid) ? `size:${getWidthXHeightStringFromBid(bid)}` : undefined)));
-
-  return Array.from(new Set<string>([...keySuggestions, ...numericStubs, ...bidders, ...mediaTypes, ...currencies, ...adUnits, ...sizes])).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-};
-
-const sortBids = (sort: { key: string; dir: 'asc' | 'desc' }, filteredBids: any[]) => {
-  const dir = sort.dir === 'asc' ? 1 : -1;
-  return [...filteredBids].sort((a: any, b: any) => {
-    const va = getSortValue(a, sort.key);
-    const vb = getSortValue(b, sort.key);
-
-    const aMissing = typeof va === 'number' ? !Number.isFinite(va) : va === '';
-    const bMissing = typeof vb === 'number' ? !Number.isFinite(vb) : vb === '';
-
-    // Missing handling: end for ASC, start for DESC
-    if (aMissing !== bMissing) {
-      if (sort.dir === 'asc') return aMissing ? 1 : -1;
-      return aMissing ? -1 : 1;
-    }
-
-    if (typeof va === 'number' && typeof vb === 'number') {
-      if (va === vb) return 0;
-      return (va < vb ? -1 : 1) * dir;
-    }
-
-    // String compare with numeric option (e.g., bidder2 before bidder10)
-    const sa = String(va);
-    const sb = String(vb);
-    const cmp = sa.localeCompare(sb, undefined, { numeric: true, sensitivity: 'base' });
-    return cmp * dir;
-  });
-};
-
-const BidsComponent = (): JSX.Element => {
-  const [globalOpen, setGlobalOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: 'cpm', dir: 'desc' });
-
-  const { auctionEndEvents } = useContext(AppStateContext);
-
-  const bidsReceived = auctionEndEvents.flatMap((e) => e.args?.bidsReceived ?? []);
-  const noBids = auctionEndEvents.flatMap((e) => e.args?.noBids ?? []);
-
-  const counts = {
-    all: bidsReceived.length + noBids.length,
-    received: bidsReceived.length,
-    nobid: noBids.length,
-  };
-
-  const suggestions = useMemo(() => buildBidSuggestions(bidsReceived as any[]), [bidsReceived]);
-
-  const toggleSort = useCallback((key: string) => setSort((prev) => (prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })), []);
-
-  const filteredBids = useMemo(() => [...bidsReceived, ...noBids].filter(bidsQueryEngine.runQuery(query)), [bidsReceived, noBids, query]);
-
-  const sortedBids = useMemo(() => sortBids(sort, filteredBids), [filteredBids, sort]);
-
-  const toggleGlobalOpen = () => setGlobalOpen((prev) => !prev);
+export const BidsComponent = (): JSX.Element => {
+  const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, filteredBids, BID_FIELD_MAP } = BidsComponentState();
 
   return (
     <Grid container sx={{ width: '100%' }}>
@@ -134,5 +55,99 @@ const BidsComponent = (): JSX.Element => {
     </Grid>
   );
 };
+
+export const GridCell = ({ children, cols = 1, sx, variant, ...rest }: { children: React.ReactNode; cols?: number; sx?: SxProps; variant?: 'h2' | 'body1' | 'body2'; [key: string]: any }) => (
+  <Grid size={{ xs: cols }} sx={sx} {...rest}>
+    <Paper sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Typography sx={{ p: 0.5, width: '100%' }} variant={variant || 'body1'} component="div" align="center">
+        {children}
+      </Typography>
+    </Paper>
+  </Grid>
+);
+
+const useRowExpand = (globalOpen?: boolean) => {
+  const [open, setOpen] = useState(false);
+  useEffect(() => setOpen(globalOpen ?? false), [globalOpen]);
+  const toggle = useCallback(() => setOpen((prev) => !prev), []);
+  return { open, toggle } as const;
+};
+
+const truncate = (text?: string, length = 30): string => (text && text.length > length ? `${text.substring(0, length)}…` : text ?? '');
+
+const formatCpm = (cpm?: number): string => (Number.isFinite(cpm) && typeof cpm === 'number' ? `${Math.round(cpm * 100) / 100}` : 'no cpm');
+
+const displaySize = (bid: Bid): string => (bid as any).size ?? (bid.width && bid.height ? `${bid.width} x ${bid.height}` : 'no size');
+
+const ExpandedRowComponent = React.memo(({ bid }: { bid: Bid }) => (
+  <>
+    <Grid size={{ xs: 0.62 }} />
+    <Grid size={{ xs: 11.38 }}>
+      <Paper sx={{ width: '100%', height: '100%' }}>
+        <JSONViewerComponent src={bid} />
+      </Paper>
+    </Grid>
+  </>
+));
+
+export const BidRowComponent = React.memo(({ bid, globalOpen }: { bid: Bid; globalOpen?: boolean }) => {
+  const { open, toggle } = useRowExpand(globalOpen);
+
+  return (
+    <>
+      <GridCell sx={IconCellStyles} cols={0.62}>
+        <Tooltip title={open ? 'Collapse' : 'Expand'}>
+          <IconButton size="small" onClick={toggle} aria-label={open ? 'collapse row' : 'expand row'} aria-expanded={open}>
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </Tooltip>
+      </GridCell>
+      <GridCell cols={2.38}>{bid.bidder}</GridCell>
+      <GridCell cols={1}>{formatCpm(bid.cpm)}</GridCell>
+      <GridCell cols={2}>{bid.currency || 'no currency'}</GridCell>
+      <GridCell cols={3}>{truncate(bid.adUnitCode, 30)}</GridCell>
+      <GridCell cols={1}>{displaySize(bid)}</GridCell>
+      <GridCell cols={2}>{bid.mediaType || 'no mediaType'}</GridCell>
+      {open && <ExpandedRowComponent bid={bid} />}
+    </>
+  );
+});
+
+export const IconCellStyles: SxProps = {
+  justifyContent: 'center',
+  '& div > p > svg': { fontSize: 15 },
+  '& div ': { display: 'flex', justifyContent: 'center', alignContent: 'center' },
+};
+
+const HEADERS: ReadonlyArray<{ label: string; cols: number; key: string }> = Object.freeze([
+  { label: 'Bidder Code', cols: 2.38, key: 'bidder' },
+  { label: 'CPM', cols: 1, key: 'cpm' },
+  { label: 'Currency', cols: 2, key: 'currency' },
+  { label: 'AdUnit Code', cols: 3, key: 'adUnitCode' },
+  { label: 'Size', cols: 1, key: 'size' },
+  { label: 'Media Type', cols: 2, key: 'mediaType' },
+]);
+
+export const HeaderRow = React.memo(({ globalOpen, toggleGlobalOpen, sort, onSort }: { globalOpen: boolean; toggleGlobalOpen: () => void; sort: { key: string; dir: 'asc' | 'desc' }; onSort: (key: string) => void }) => (
+  <>
+    <GridCell cols={0.62} sx={IconCellStyles}>
+      <Tooltip title={globalOpen ? 'Collapse all' : 'Expand all'}>
+        <IconButton size="small" onClick={toggleGlobalOpen} aria-label={globalOpen ? 'collapse all rows' : 'expand all rows'}>
+          <AppsIcon />
+        </IconButton>
+      </Tooltip>
+    </GridCell>
+    {HEADERS.map((h) => (
+      <GridCell key={h.label} variant="h2" cols={h.cols} sx={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => onSort(h.key)} role="columnheader" aria-sort={sort.key === h.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+        <Tooltip title={`Sort by ${h.label}`}>
+          <span>
+            {h.label}
+            {sort.key === h.key ? (sort.dir === 'asc' ? ' ▲' : ' ▼') : ''}
+          </span>
+        </Tooltip>
+      </GridCell>
+    ))}
+  </>
+));
 
 export default BidsComponent;

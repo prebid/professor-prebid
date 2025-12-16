@@ -104,7 +104,6 @@ const buildAdUnitSuggestions = (adUnits: AdUnit[], allSizes: string[]): string[]
   const mediaTypes = distinct(adUnits.flatMap((adUnit) => (adUnit?.mediaTypes ? Object.keys(adUnit.mediaTypes).map((mt) => `mediatype:${mt}`) : [])));
 
   const suggestions = Array.from(new Set<string>([...keySuggestions, ...numericStubs, ...adUnitCodeSuggestions, ...bidderSuggestions, ...mediaTypes, ...allSizes])).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-  console.log('Suggestions:', suggestions);
   return suggestions;
 };
 

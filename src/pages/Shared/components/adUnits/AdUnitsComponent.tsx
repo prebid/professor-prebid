@@ -5,7 +5,7 @@ import { conditionalPluralization as cP } from '../../utils';
 import AdUnitsComponentState from './AdUnitsComponentState';
 import { Tooltip, IconButton } from '@mui/material';
 import { AutoComplete } from '../autocomplete/AutoComplete';
-import { GridCell } from '../bids/BidRowComponent';
+import { GridCell } from '../bids/BidsComponent';
 import PbjsVersionInfoPopOver from '../pbjsVersionInfo/PbjsVersionInfoPopOver';
 import DownloadIcon from '@mui/icons-material/Download';
 import { download } from '../../utils';
