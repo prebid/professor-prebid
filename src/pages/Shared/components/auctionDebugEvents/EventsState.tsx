@@ -1,69 +1,80 @@
-import { useEffect, useState, useContext } from 'react';
+import { useContext, useDeferredValue, useMemo, useState } from 'react';
 import StateContext from '../../contexts/appStateContext';
-import { AdUnit } from 'prebid.js';
+import { IPrebidEvent } from '../../../Injected/prebid';
+import { createQueryEngine, distinct } from '../autocomplete/utils';
 
-const merge = (target: any, source: any) => {
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      if (!target[key] || typeof target[key] !== 'object') {
-        target[key] = {};
-      }
-      merge(target[key], source[key]);
-    } else {
-      target[key] = source[key];
+const EVENT_FIELD_MAP = {
+  eventtype: (e: any) => e?.eventType,
+  elapsedtime: (e: any) => parseInt(e?.elapsedTime),
+  argstype: (e: any) => e?.args?.type,
+  argsarguments: (e: any) => e?.args?.arguments,
+  argsmessage: (e: any) => {
+    if (!e?.args?.arguments) return '';
+    return Object.values(e.args.arguments).join(' ');
+  },
+} as const;
+
+const eventsQueryEngine = createQueryEngine<any>(EVENT_FIELD_MAP);
+
+const buildEventSuggestions = (events: any[]): string[] => {
+  const suggestions = new Set<string>();
+  (Object.keys(EVENT_FIELD_MAP) as string[]).forEach((key) => suggestions.add(`${key}:`));
+
+  for (const e of events) {
+    if (e?.eventType) {
+      suggestions.add(`eventtype:${String(e.eventType)}`);
+    }
+    if (e?.args?.type) {
+      suggestions.add(`argstype:${String(e.args.type)}`);
+    }
+    if (e?.args?.arguments) {
+      suggestions.add(`argsmessage:${Object.values(e.args.arguments).join(' ')}`);
     }
   }
-  return target;
+
+  return Array.from(suggestions).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 };
 
+const sortEvents = (events: IPrebidEvent[]) => [...events].sort((a, b) => a.elapsedTime - b.elapsedTime);
+
 const EventsState = () => {
-  const [eventsPopUpOpen, setEventsPopUpOpen] = useState(false);
-  const [pbjsVersionPopUpOpen, setPbjsVersionPopUpOpen] = useState(false);
-  const { auctionInitEvents } = useContext(StateContext);
-  const [adUnits, setAdUnits] = useState<AdUnit[]>([]);
   const [query, setQuery] = useState('');
-  const [sort, setSort] = useState<string | null>(null);
-  useEffect(() => {
-    const adUnits = auctionInitEvents
-      ?.reduce((previousValue, currentValue) => {
-        return [...previousValue, ...currentValue.args.adUnits];
-      }, [] as AdUnit[])
-      ?.reduce((previousValue, currentValue) => {
-        let toUpdate = previousValue.find((adUnit) => {
-          const adUnitBids = adUnit.bids.map(({ bidder, params }: any) => ({ bidder, params })) || [];
-          const currentValueBids = currentValue.bids.map(({ bidder, params }: any) => ({ bidder, params })) || [];
-          return (
-            adUnit.code === currentValue.code &&
-            JSON.stringify(adUnit.mediaTypes) === JSON.stringify(currentValue.mediaTypes) &&
-            JSON.stringify(adUnit.sizes) === JSON.stringify(currentValue.sizes) &&
-            JSON.stringify(adUnitBids) === JSON.stringify(currentValueBids)
-          );
-        });
+  const deferredQuery = useDeferredValue(query);
+  const isPending = query !== deferredQuery;
 
-        if (toUpdate) {
-          toUpdate = merge(toUpdate, currentValue);
-          return previousValue;
-        } else {
-          return [...previousValue, currentValue];
-        }
-      }, [])
-      // "fix" https://github.com/prebid/professor-prebid/issues/104 ?
-      .sort((a, b) => a.code.localeCompare(b.code));
+  const { prebid } = useContext(StateContext);
+  const events = prebid.events as IPrebidEvent[];
 
-    setAdUnits(adUnits);
-  }, [auctionInitEvents]);
+  const warningEvents = useMemo(() => events?.filter(({ eventType, args: { type } }) => eventType === 'auctionDebug' && type === 'WARNING'), [events]);
+  const errorEvents = useMemo(() => events?.filter(({ eventType, args: { type } }) => eventType === 'auctionDebug' && type === 'ERROR'), [events]);
+
+  const counts = useMemo(
+    () => ({
+      all: events?.length ?? 0,
+      warning: warningEvents?.length ?? 0,
+      error: errorEvents?.length ?? 0,
+    }),
+    [events, warningEvents, errorEvents]
+  );
+
+  const suggestions = useMemo(() => buildEventSuggestions(events as any[]), [events]);
+
+  const filteredEvents = useMemo(() => events.filter(eventsQueryEngine.runQuery(deferredQuery)), [events, deferredQuery]);
+
+  const sortedEvents = useMemo(() => sortEvents(filteredEvents as IPrebidEvent[]), [filteredEvents]);
 
   return {
-    adUnits,
-    setAdUnits,
     query,
     setQuery,
-    sort,
-    setSort,
-    eventsPopUpOpen,
-    setEventsPopUpOpen,
-    pbjsVersionPopUpOpen,
-    setPbjsVersionPopUpOpen,
+    isPending,
+    events,
+    warningEvents,
+    errorEvents,
+    counts,
+    suggestions,
+    filteredEvents,
+    sortedEvents,
+    EVENT_FIELD_MAP,
   };
 };
 
