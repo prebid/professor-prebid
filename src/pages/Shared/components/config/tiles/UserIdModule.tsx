@@ -14,7 +14,7 @@ const UserIdModuleComponent = (): JSX.Element | null => {
   if (!userSync) return null;
 
   return (
-    <ExpandableTile icon={<ContactPageOutlinedIcon />} title="User IDs" subtitle={userSync.userIds?.length ? `${userSync.userIds.length} detected` : 'No UserIds detected'} expandedMaxWidth={12}>
+    <ExpandableTile icon={<ContactPageOutlinedIcon />} title="User IDs" subtitle={userSync.userIds?.length ? `${userSync.userIds.length} detected` : 'No UserIds detected'} defaultMaxWidth={4} expandedMaxWidth={12}>
       <Grid container>
         {userSync.userIds?.map((userId, index) => (
           <Grid size={{ xs: 12, sm: 6 }} key={index}>

@@ -6,7 +6,7 @@ import { ExpandableTile } from './ExpandableTile';
 import { Config } from 'prebid.js';
 
 const RenderPrebidServerComponent = ({ s2sConfig }: { s2sConfig: Config['s2sConfig'] }) => (
-  <ExpandableTile icon={<DnsIcon />} title="Prebid Server" subtitle="Server Config" expandedMaxWidth={8}>
+  <ExpandableTile icon={<DnsIcon />} title="Prebid Server" subtitle="Server Config" defaultMaxWidth={4} expandedMaxWidth={8}>
     {Object.entries(s2sConfig).map(([key, value], i) => (
       <RenderKeyValueComponent key={i} label={key} value={value} columns={[4, 12]} expanded />
     ))}

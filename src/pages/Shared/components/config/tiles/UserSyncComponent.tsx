@@ -10,7 +10,7 @@ const UserSyncComponent = (): JSX.Element | null => {
   if (!config?.userSync) return null;
 
   return (
-    <ExpandableTile icon={<PeopleOutlinedIcon />} title="User Sync" subtitle="User sync configuration">
+    <ExpandableTile icon={<PeopleOutlinedIcon />} title="User Sync" subtitle="User sync configuration" defaultMaxWidth={4} expandedMaxWidth={8}>
       <RenderKeyValueComponent label="User Sync" value={config.userSync} columns={[12, 12]} expanded />
     </ExpandableTile>
   );

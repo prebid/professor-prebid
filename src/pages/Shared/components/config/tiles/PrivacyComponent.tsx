@@ -14,7 +14,7 @@ const PrivacyComponent = (): JSX.Element | null => {
   const { cmpApi, defaultGdprScope, timeout } = gdpr || {};
 
   return (
-    <ExpandableTile icon={<BusinessIcon />} title="Consent Management" subtitle="TCF, CPA, USP, …" expandedMaxWidth={12}>
+    <ExpandableTile icon={<BusinessIcon />} title="Consent Management" subtitle="TCF, CPA, USP, …" defaultMaxWidth={4} expandedMaxWidth={12}>
       {/* <RenderKeyValueComponent label="Allow Auction Without Consent" value={allowAuctionWithoutConsent || gdpr?.allowAuctionWithoutConsent} columns={[4, 12]} expanded /> */}
       <RenderKeyValueComponent label="CMP API" value={cmpApi} columns={[4, 12]} expanded />
       <RenderKeyValueComponent label="Timeout" value={timeout} columns={[4, 12]} expanded />
