@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import InjectedApp from '../App/InjectedApp';
 import { googleAdManager } from './googleAdManager';
 import { addEventListenersForPrebid } from './prebid';
@@ -16,7 +16,11 @@ const injectApp = () => {
     const root = document.createElement('div');
     root.id = 'professor_prebid-root';
     document.body.appendChild(root);
-    ReactDOM.render(<InjectedApp />, document.getElementById(root.id));
+    const container = document.getElementById(root.id);
+    if (container) {
+      const root = createRoot(container);
+      root.render(<InjectedApp />);
+    }
   } else {
     if (requestIdleCallback && typeof requestIdleCallback === 'function') {
       requestIdleCallback(injectApp);

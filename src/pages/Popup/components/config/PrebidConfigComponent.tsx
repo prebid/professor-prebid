@@ -24,7 +24,7 @@ const PrebidConfigComponent = (): JSX.Element => {
   };
 
   return (
-    <Grid item sm={maxWidth} xs={12} ref={ref}>
+    <Grid size={{ sm: maxWidth, xs: 12 }} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
@@ -45,46 +45,40 @@ const PrebidConfigComponent = (): JSX.Element => {
           onClick={handleExpandClick}
         />
         <CardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
+          <Grid container>
+            <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
               <Typography variant="body1">
                 <strong> Bidder Sequence: </strong>
                 {config.bidderSequence}
               </Typography>
             </Grid>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
+            <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
               <Typography variant="body1">
                 <strong> Bidder Timeout: </strong>
                 {config.bidderTimeout}
               </Typography>
             </Grid>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
+            <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
               <Typography variant="body1">
                 <strong> Send All Bids:</strong> {String(config.enableSendAllBids)}
               </Typography>
             </Grid>
-            <Grid item xs={12} sm={expanded ? 6 : 12}>
-              <Typography variant="body1">
-                <strong> Timeout Buffer: </strong>
-                {config.timeoutBuffer}
-              </Typography>
-            </Grid>
             {expanded && (
-              <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
                 <Typography variant="body1">
                   <strong> Max Nested Iframes:</strong> {config.maxNestedIframes}
                 </Typography>
               </Grid>
             )}
             {expanded && (
-              <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
                 <Typography variant="body1">
                   <strong> Use Bid Cache:</strong> {String(config.useBidCache)}
                 </Typography>
               </Grid>
             )}
             {expanded && (
-              <Grid item xs={12} sm={expanded ? 6 : 12}>
+              <Grid size={{ xs: 12, sm: expanded ? 6 : 12 }}>
                 <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
                   <strong> Bid Cache Url:</strong> {config.cache?.url}
                 </Typography>

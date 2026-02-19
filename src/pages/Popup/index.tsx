@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Popup } from './Popup';
 import { OptionsContextProvider } from '../Shared/contexts/optionsContext';
 import { StateContextProvider } from '../Shared/contexts/appStateContext';
@@ -8,7 +8,9 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '../../theme/theme';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
-render(
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
   <ThemeProvider theme={theme}>
     <OptionsContextProvider>
       <InspectedPageContextProvider>
@@ -19,14 +21,16 @@ render(
         </StateContextProvider>
       </InspectedPageContextProvider>
     </OptionsContextProvider>
-  </ThemeProvider>,
-  document.getElementById('root')
+  </ThemeProvider>
 );
 const handleResize = () => {
   const width = window.innerWidth;
+  const height = window.innerHeight;
   const body = document.querySelector('body');
   body.style.width = width + 'px';
+  body.style.height = height + 'px';
+  body.style.backgroundColor = theme.palette.primary.light;
 };
-const interval = setInterval(() => handleResize, 1000);
+const interval = setInterval(handleResize, 1000);
 window.addEventListener('resize', handleResize);
 window.addEventListener('beforeunload', () => clearInterval(interval));

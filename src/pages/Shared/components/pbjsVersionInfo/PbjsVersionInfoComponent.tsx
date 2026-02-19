@@ -4,10 +4,10 @@ import PbjsVersionInfoContent from './PbjsVersionInfoContent';
 import { Paper } from '@mui/material';
 const PbjsVersionInfoComponent = ({ close }: PbjsVersionInfoComponentProps): JSX.Element => {
   return (
-    <Grid container spacing={1} sx={{ p: 0.5 }}>
-      <Grid item xs={12}>
+    <Grid container>
+      <Grid size={{ xs: 12 }}>
         <Paper>
-          <Grid container spacing={1} sx={{ p: 0.5 }}>
+          <Grid container>
             <PbjsVersionInfoContent close={close}></PbjsVersionInfoContent>
           </Grid>
         </Paper>

@@ -1,127 +1,31 @@
 import React, { useContext } from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import JSONViewerComponent from '../../JSONViewerComponent';
-import Avatar from '@mui/material/Avatar';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ContactPageOutlinedIcon from '@mui/icons-material/ContactPageOutlined';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import { tileHeight } from '../ConfigComponent';
 import AppStateContext from '../../../contexts/appStateContext';
+import JSONViewerComponent from '../../JSONViewerComponent';
+import { ExpandableTile } from './ExpandableTile';
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
 
-const UserIdModuleComponent = (): JSX.Element => {
-  const [expanded, setExpanded] = React.useState(false);
-  const [maxWidth, setMaxWidth] = React.useState<4 | 12>(4);
-  const ref = React.useRef<HTMLInputElement>(null);
-
+const UserIdModuleComponent = (): JSX.Element | null => {
   const { prebid } = useContext(AppStateContext);
   const {
     config: { userSync },
   } = prebid;
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-    setMaxWidth(expanded ? 4 : 12);
-    setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
-  };
   if (!userSync) return null;
+
   return (
-    <Grid item sm={maxWidth} xs={12} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight }}>
-        <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
-              <ContactPageOutlinedIcon />
-            </Avatar>
-          }
-          title={<Typography variant="h3">UserIds</Typography>}
-          subheader={
-            <Typography variant="subtitle1">
-              {userSync.userIds?.length > 0
-                ? `${userSync.userIds?.length} UserId${userSync.userIds?.length > 1 ? 's' : ''} detected:`
-                : 'No UserIds detected!'}
+    <ExpandableTile icon={<ContactPageOutlinedIcon />} title="User IDs" subtitle={userSync.userIds?.length ? `${userSync.userIds.length} detected` : 'No UserIds detected'} defaultMaxWidth={4} expandedMaxWidth={12}>
+      <Grid container>
+        {userSync.userIds?.map((userId, index) => (
+          <Grid size={{ xs: 12, sm: 6 }} key={index}>
+            <Typography variant="body1">
+              <strong>{userId.name}</strong> — {userId.storage?.type}
             </Typography>
-          }
-          action={
-            <ExpandMoreIcon
-              sx={{
-                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
-                marginLeft: 'auto',
-              }}
-            />
-          }
-          onClick={handleExpandClick}
-        />
-        <CardContent>
-          <Grid container spacing={2}>
-            {!expanded &&
-              userSync.userIds?.length > 0 &&
-              userSync.userIds.slice(0, 6).map((userId, index) => (
-                <Grid item xs={12} sm={expanded ? 3 : 6} key={index}>
-                  <Typography variant="body1">
-                    <strong>#{index}: </strong> {userId.name}
-                  </Typography>
-                </Grid>
-              ))}
-            {!expanded && userSync.userIds?.length > 5 && (
-              <Grid item xs={12}>
-                <Typography variant="body2">+ {userSync.userIds?.length - 5} more user ids...</Typography>
-              </Grid>
-            )}
-            {expanded && (
-              <Grid item xs={12}>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Storage Type</TableCell>
-                        <TableCell>Storage Expires</TableCell>
-                        <TableCell>Storage Name</TableCell>
-                        <TableCell>Params</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {userSync?.userIds?.map((userId, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            <strong>{userId.name}</strong>
-                          </TableCell>
-                          <TableCell>{userId.storage?.type}</TableCell>
-                          <TableCell>{userId.storage?.expires}</TableCell>
-                          <TableCell>{userId.storage?.name}</TableCell>
-                          <TableCell>
-                            {userId.params && JSON.stringify(userId.params) !== '{}' && (
-                              <JSONViewerComponent
-                                src={userId.params}
-                                name={false}
-                                collapsed={1}
-                                displayObjectSize={false}
-                                displayDataTypes={false}
-                                sortKeys={false}
-                                quotesOnKeys={false}
-                              />
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-            )}
+            {userId.params && JSON.stringify(userId.params) !== '{}' && <JSONViewerComponent src={userId.params} name={''} collapsed={1} />}
           </Grid>
-        </CardContent>
-      </Card>
-    </Grid>
+        ))}
+      </Grid>
+    </ExpandableTile>
   );
 };
 

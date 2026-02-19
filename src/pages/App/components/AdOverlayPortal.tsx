@@ -2,11 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
 import { createPortal } from 'react-dom';
 
-export const getMaxZIndex = () =>
-  Math.max(
-    ...Array.from(document.querySelectorAll('*'), (el) => parseFloat(window.getComputedStyle(el).zIndex)).filter((zIndex) => !Number.isNaN(zIndex)),
-    0
-  );
+export const getMaxZIndex = () => Math.max(...Array.from(document.querySelectorAll('*'), (el) => parseFloat(window.getComputedStyle(el).zIndex)).filter((zIndex) => !Number.isNaN(zIndex)), 0);
 
 const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, mask, consoleState, pbjsNameSpace }) => {
   const [contentRef, setContentRef] = useState(null);
@@ -43,14 +39,7 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
   }, [mask, consoleState, container]);
 
   return createPortal(
-    <iframe
-      title={element.current.id}
-      ref={setContentRef}
-      width={`${container?.offsetWidth || container?.clientWidth}px`}
-      height={`${container?.offsetHeight || container?.clientHeight}px`}
-      scrolling="no"
-      frameBorder="0"
-    >
+    <iframe title={element.current.id} ref={setContentRef} width={`${container?.offsetWidth || container?.clientWidth}px`} height={`${container?.offsetHeight || container?.clientHeight}px`} scrolling="no" frameBorder="0">
       {iFrameBody &&
         createPortal(
           <AdOverlayComponent

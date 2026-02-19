@@ -51,19 +51,19 @@ const ModifyBidResponsesComponent = (): JSX.Element => {
   }, [pbjsNamespace]);
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
-        <Grid container rowSpacing={1} columnSpacing={0.5}>
-          <Grid item xs={12}>
-            <Grid container rowSpacing={1} columnSpacing={0.5}>
-              <Grid item md={1} xs={1}>
+        <Grid container>
+          <Grid size={{ xs: 12 }}>
+            <Grid container>
+              <Grid size={{ xs: 1, md: 1 }}>
                 <Box sx={{ alignContent: 'center', transform: isSmallScreen ? 'rotate(90deg)' : 'unset' }}>
                   <FormControl>
                     <FormControlLabel control={<Switch checked={!!debugConfgigState?.enabled} onChange={handleEnabledChange} />} label="" />
                   </FormControl>
                 </Box>
               </Grid>
-              <Grid item xs={11} md={11}>
+              <Grid size={{ xs: 11, md: 11 }}>
                 <Box sx={{ border: 1, borderColor: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
                   <Typography variant="h4" sx={{ width: 1, p: 1, color: debugConfgigState?.enabled ? 'primary.main' : 'text.disabled' }}>
                     Enable Debugging

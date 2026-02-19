@@ -67,14 +67,14 @@ const BidderFilter = ({ debugConfigState, setDebugConfigState }: IBidderFilterPr
 
   return (
     <React.Fragment>
-      <Grid item md={1} xs={1}>
+      <Grid size={{ xs: 1, md: 1 }}>
         <Box sx={{ [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
           <FormControl>
             <FormControlLabel label=" " control={<Switch checked={bidderFilterEnabled} onChange={handleBidderFilterEnabledChange} />} />
           </FormControl>
         </Box>
       </Grid>
-      <Grid item xs={11} md={11}>
+      <Grid size={{ xs: 11, md: 11 }}>
         <FormControl sx={{ display: 'flex' }}>
           <InputLabel>Filter Bidder(s)</InputLabel>
           <Select
@@ -102,11 +102,7 @@ const BidderFilter = ({ debugConfigState, setDebugConfigState }: IBidderFilterPr
             disabled={!bidderFilterEnabled}
           >
             {detectedBidderNames.map((name) => (
-              <MenuItem
-                key={name}
-                value={name}
-                sx={{ fontWeight: selectedBidders?.indexOf(name) === -1 ? 'typography.fontWeightRegular' : 'typography.fontWeightMedium' }}
-              >
+              <MenuItem key={name} value={name} sx={{ fontWeight: selectedBidders?.indexOf(name) === -1 ? 'typography.fontWeightRegular' : 'typography.fontWeightMedium' }}>
                 {name}
               </MenuItem>
             ))}

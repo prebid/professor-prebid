@@ -1,5 +1,4 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { IFrameInfo, initReqChainResult } from '../../Background';
 import { getTabId } from '../utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';
@@ -29,18 +28,13 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
 
   useEffect(() => {
     // Subscribe to changes in local storage
-    const handler = async (changes: any, areaName: 'sync' | 'local' | 'managed') => {
+    const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
       if (areaName === 'local' && changes?.tabInfos) {
-        const tabId = await getTabId();
-        if (JSON.stringify(changes.tabInfos.newValue[tabId]) !== JSON.stringify(changes.tabInfos.oldValue[tabId])) {
-          const tabInfoWithEvents = await fetchEvents(
-            { ...changes.tabInfos.newValue, [tabId]: changes.tabInfos.newValue[tabId] },
-            setDownloading,
-            setSyncInfo,
-            downloadingUrls
-          );
-          setFrames(tabInfoWithEvents);
-        }
+        getTabId().then((tabId) => {
+          if (JSON.stringify(changes.tabInfos.newValue[tabId]) !== JSON.stringify(changes.tabInfos.oldValue[tabId])) {
+            fetchEvents({ ...changes.tabInfos.newValue, [tabId]: changes.tabInfos.newValue[tabId] }, setDownloading, setSyncInfo, downloadingUrls).then(setFrames);
+          }
+        });
       }
     };
     chrome.storage.onChanged.addListener(handler);
@@ -58,8 +52,8 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
 
   useEffect(() => {
     // Subscribe to changes in local storage
-    const handler = async (changes: any, areaName: 'sync' | 'local' | 'managed') => {
-      if (areaName === 'local' && changes.initReqChain && changes) {
+    const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
+      if (areaName === 'local' && changes.initReqChain && changes.initReqChain.newValue) {
         setInitReqChainData(JSON.parse(changes.initReqChain.newValue));
       }
     };

@@ -7,14 +7,28 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import FormGroup from '@mui/material/FormGroup';
 import AddIcon from '@mui/icons-material/Add';
-import set from 'lodash/set';
-import get from 'lodash/get';
 import { getTabId } from '../../../../Shared/utils';
 import { IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../../../Injected/prebid';
 import { STORE_RULES_TOGGLE } from '../../../constants';
 import RuleComponent from './RuleComponent';
 import AppStateContext from '../../../contexts/appStateContext';
 import { sendChromeTabsMessage } from '../../../../Shared/utils';
+
+const get = (obj: any, path: string[] = []): any => {
+  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+};
+
+const set = (obj: any, path: string[], value: any): any => {
+  let temp = obj;
+  path.slice(0, -1).forEach((key) => {
+    if (typeof temp[key] !== 'object' || temp[key] === null) {
+      temp[key] = {};
+    }
+    temp = temp[key];
+  });
+  temp[path[path.length - 1]] = value;
+  return obj;
+};
 
 const DebuggingModuleComponent = (): JSX.Element => {
   const { prebid, pbjsNamespace } = useContext(AppStateContext);
@@ -48,12 +62,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
     });
   };
 
-  const handleRulesFormChange = async (
-    _action: string,
-    value: string | number | boolean | IPrebidDebugModuleConfigRule[],
-    path: string[],
-    deletePath?: string[]
-  ) => {
+  const handleRulesFormChange = async (_action: string, value: string | number | boolean | IPrebidDebugModuleConfigRule[], path: string[], deletePath?: string[]) => {
     const newFormValues = { ...debuggingModuleConfig };
     set(newFormValues, path, value);
     if (deletePath) {
@@ -111,10 +120,10 @@ const DebuggingModuleComponent = (): JSX.Element => {
   }, [pbjsNamespace]);
 
   return (
-    <Grid item xs={12}>
+    <Grid size={{ xs: 12 }}>
       <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
-        <Grid container rowSpacing={1} columnSpacing={0.5}>
-          <Grid item xs={12}>
+        <Grid container>
+          <Grid size={{ xs: 12 }}>
             <FormGroup sx={{ flexDirection: 'row' }}>
               <FormControlLabel
                 sx={{ width: 0.33 }}
@@ -144,11 +153,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
               <Button
                 startIcon={<AddIcon />}
                 onClick={() => {
-                  handleRulesFormChange(
-                    'update',
-                    [...debuggingModuleConfig.intercept, { when: { adUnitCode: '' }, then: { cpm: 20 } }],
-                    ['intercept']
-                  );
+                  handleRulesFormChange('update', [...debuggingModuleConfig.intercept, { when: { adUnitCode: '' }, then: { cpm: 20 } }], ['intercept']);
                 }}
                 sx={{ width: 0.3 }}
               >
@@ -157,9 +162,9 @@ const DebuggingModuleComponent = (): JSX.Element => {
             </FormGroup>
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Box component="form" noValidate autoComplete="off">
-              <Grid container rowSpacing={1} columnSpacing={0.5}>
+              <Grid container>
                 {prebid &&
                   debuggingModuleConfig?.intercept?.map((rule, index) => (
                     <RuleComponent

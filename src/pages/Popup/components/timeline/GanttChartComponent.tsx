@@ -1,10 +1,4 @@
-import {
-  IPrebidBidRequestedEventData,
-  IPrebidAuctionEndEventData,
-  IPrebidBidResponseEventData,
-  IPrebidNoBidEventData,
-  IPrebidBidderRequest,
-} from '../../../Injected/prebid';
+import { IPrebidBidRequestedEventData, IPrebidBidResponseEventData, IPrebidNoBidEventData } from '../../../Injected/prebid';
 import React, { useEffect, useRef, useContext } from 'react';
 import { createRangeArray } from '../../../Shared/utils';
 import List from '@mui/material/List';
@@ -15,22 +9,21 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import BidderBarComponent from './BidderBarComponent';
 import AppStateContext from '../../../Shared/contexts/appStateContext';
+import { BidderRequest, EventRecord } from 'prebid.js';
+
+export type BidderRequestWithStart = BidderRequest<string> & {
+  start: number;
+};
 
 const getNearestGridBarElement = (input: number, gridRef: React.MutableRefObject<HTMLElement>): HTMLLIElement => {
   const allGridBarsCollection = (gridRef?.current?.children || []) as HTMLLIElement[];
   const allGridBarsArray = Array.from(allGridBarsCollection);
-  const nearestGridBar = allGridBarsArray.sort(
-    (a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input)
-  )[0] as HTMLLIElement;
+  const nearestGridBar = allGridBarsArray.sort((a, b) => Math.abs(Number(a.dataset.timestamp) - input) - Math.abs(Number(b.dataset.timestamp) - input))[0] as HTMLLIElement;
   return nearestGridBar;
 };
 
-const findEvent = (bidderRequest: IPrebidBidderRequest, eventType: string) => (event: any) => {
-  return (
-    event.eventType === eventType &&
-    event.args?.auctionId === bidderRequest?.auctionId &&
-    (event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode)
-  );
+const findEvent = (bidderRequest: BidderRequest<string>, eventType: string) => (event: any) => {
+  return event.eventType === eventType && event.args?.auctionId === bidderRequest?.auctionId && (event.args.bidderCode === bidderRequest.bidderCode || event.args.bidder === bidderRequest.bidderCode);
 };
 
 const listStyle = {
@@ -69,7 +62,7 @@ const GanttChart = ({ auctionEndEvent }: IGanttChartProps): JSX.Element => {
     setAuctionEndLeft(getNearestGridBarElement(auctionEnd, gridRef)?.offsetLeft);
     setRangeArray(createRangeArray(timestamp, auctionEnd, gridStep, 50));
     setBidderArray(
-      bidderRequests
+      (bidderRequests as BidderRequestWithStart[])
         .sort((a, b) => a.start - b.start)
         .map((bidderRequest) => {
           const { bidderCode, start } = bidderRequest;
@@ -83,7 +76,7 @@ const GanttChart = ({ auctionEndEvent }: IGanttChartProps): JSX.Element => {
   }, [auctionEnd, bidderRequests, gridStep, events, timestamp]);
 
   return (
-    <Grid xs={12} item>
+    <Grid size={{ xs: 12 }}>
       <Paper sx={{ p: 1, pb: 3 }} elevation={1}>
         <Box sx={{ position: 'relative', width: 1, maxWidth: 1 }}>
           <List ref={gridRef} sx={listStyle}>
@@ -122,7 +115,7 @@ const GanttChart = ({ auctionEndEvent }: IGanttChartProps): JSX.Element => {
 };
 
 interface IGanttChartProps {
-  auctionEndEvent: IPrebidAuctionEndEventData;
+  auctionEndEvent: EventRecord<'auctionEnd'>;
 }
 
 interface ITableRow {

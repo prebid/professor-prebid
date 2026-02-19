@@ -26,9 +26,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
     let text = '';
 
     if (Number(years) >= 1) {
-      text = `${years} year${Number(years) > 1 ? 's' : ''}, ${months} month${Number(months) > 1 ? 's' : ''} and ${days} day${
-        Number(days) > 1 ? 's' : ''
-      }`;
+      text = `${years} year${Number(years) > 1 ? 's' : ''}, ${months} month${Number(months) > 1 ? 's' : ''} and ${days} day${Number(days) > 1 ? 's' : ''}`;
     } else if (Number(months) >= 1) {
       text = `${months} month${Number(months) > 1 ? 's' : ''} and ${days} day${Number(days) > 1 ? 's' : ''}`;
     } else {
@@ -191,7 +189,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
     <React.Fragment>
       {close && (
         <Grid
-          item
+          size={{ xs: 12 }}
           sx={{
             display: 'flex',
             flexDirection: 'row',
@@ -199,14 +197,13 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
             alignItems: 'flex-end',
             color: 'text.secondary',
           }}
-          xs={12}
         >
           <IconButton sx={{ p: 0 }} onClick={() => close()}>
             <Close sx={{ fontSize: 14 }} />
           </IconButton>
         </Grid>
       )}
-      <Grid className="version-info__body" item xs={7}>
+      <Grid size={{ xs: 7 }} className="version-info__body">
         {Object.keys(prebidReleaseInfo).length > 0 ? (
           <>
             <div className="title__wrapper">
@@ -222,12 +219,10 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
               </div>
               <div className="sub-title__wrapper">
                 <p>
-                  <strong>Latest PBJS Version:</strong> v{prebidReleaseInfo.latestVersion} -{' '}
-                  <em>({formatDate(prebidReleaseInfo.latestVersionPublishedAt)})</em>
+                  <strong>Latest PBJS Version:</strong> v{prebidReleaseInfo.latestVersion} - <em>({formatDate(prebidReleaseInfo.latestVersionPublishedAt)})</em>
                 </p>
                 <p>
-                  <strong>Installed PBJS Version:</strong> {prebidReleaseInfo.installedVersion} -{' '}
-                  <em>({formatDate(prebidReleaseInfo.installedVersionPublishedAt)})</em>
+                  <strong>Installed PBJS Version:</strong> {prebidReleaseInfo.installedVersion} - <em>({formatDate(prebidReleaseInfo.installedVersionPublishedAt)})</em>
                 </p>
               </div>
             </div>
@@ -244,9 +239,7 @@ const PbjsVersionInfoContent = ({ close }: PbjsVersionInfoContentProps): JSX.Ele
               ) : (
                 <>
                   <p>
-                    <strong>Details:</strong> {prebidReleaseInfo.installedVersion} was released{' '}
-                    {moment(prebidReleaseInfo.installedVersionPublishedAt).fromNow()}. Approximately, the following number of updates have been pushed
-                    since it's release:
+                    <strong>Details:</strong> {prebidReleaseInfo.installedVersion} was released {moment(prebidReleaseInfo.installedVersionPublishedAt).fromNow()}. Approximately, the following number of updates have been pushed since it's release:
                   </p>
                   <ul className="updates__wrapper">
                     <li>

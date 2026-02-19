@@ -21,7 +21,7 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
     setTimeout(() => ref.current.scrollIntoView({ behavior: 'smooth' }), 150);
   };
   return (
-    <Grid item sm={maxWidth} xs={12} ref={ref}>
+    <Grid size={{ sm: maxWidth, xs: 12 }} ref={ref}>
       <Card sx={{ width: 1, minHeight: tileHeight }}>
         <CardHeader
           avatar={
@@ -41,16 +41,16 @@ const FirstPartyDataComponent = ({ floors }: IFirstPartyDataComponentProps): JSX
           }
           onClick={handleExpandClick}
         />
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Typography variant="body1">
             <strong>Floor Data</strong>
           </Typography>
         </Grid>
         {expanded && (
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <JSONViewerComponent
               src={floors}
-              name={false}
+              name={''}
               collapsed={false}
               displayObjectSize={false}
               displayDataTypes={false}

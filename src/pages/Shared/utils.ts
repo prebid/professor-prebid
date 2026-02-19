@@ -97,3 +97,16 @@ export const detectIframe = (): boolean => {
 };
 
 export const generateUniqueId = () => new Date().getTime() + '-' + Math.random().toString(36).substr(2, 9);
+
+
+export const download = (input: object, filename: string) => {
+  const dataStr = JSON.stringify(input, null, 2);
+  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+  const exportFileDefaultName = `f${filename}-${new Date().toISOString().split('T')[0]}.json`;
+
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+};
