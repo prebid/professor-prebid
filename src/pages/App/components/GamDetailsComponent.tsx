@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/system/Box';
 import Paper from '@mui/material/Paper';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
+import { getSlotTargeting } from '../../Shared/gptTargeting';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
   const [networktId, setNetworkId] = useState<string[]>(null);
@@ -24,7 +25,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
         setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-        setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
+        setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
         setSlotResponseInfo(slot.getResponseInformation());
         setQueryId(document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id') || null);
         if (slotResponseInfo) {
