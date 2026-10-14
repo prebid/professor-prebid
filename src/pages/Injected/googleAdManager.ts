@@ -1,5 +1,6 @@
 import { sendWindowPostMessage } from '../Shared/utils';
 import { EVENTS } from '../Shared/constants';
+import { getSlotTargeting } from '../Shared/gptTargeting';
 
 declare global {
   interface Window {
@@ -179,16 +180,10 @@ class GoogleAdManager {
     const viewportHeight = window?.innerHeight || document?.documentElement?.clientHeight || document?.body?.clientHeight;
 
     for (const slot of slots) {
-      const targetingMap = slot.getTargetingMap();
-      const slotTargeting = [];
-      for (const targeting in targetingMap) {
-        if (targetingMap.hasOwnProperty(targeting)) {
-          slotTargeting.push({
-            key: targeting,
-            value: targetingMap[targeting]?.join(',') || '',
-          });
-        }
-      }
+      const slotTargeting = Object.entries(getSlotTargeting(slot)).map(([key, values]) => ({
+        key,
+        value: values.join(','),
+      }));
 
       let sizes = slot.getSizes(viewportWidth, viewportHeight);
       if (!sizes) {

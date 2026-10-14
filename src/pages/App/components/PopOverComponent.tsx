@@ -21,6 +21,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import { Paper } from '@mui/material';
+import { getSlotTargeting } from '../../Shared/gptTargeting';
 
 const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
   const [expanded, setExpanded] = React.useState(false);
@@ -88,7 +89,7 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
       setSlotElementId(slot?.getSlotElementId());
       setSlotAdUnitPath(slot?.getAdUnitPath());
       setNetworkId(slot?.getAdUnitPath()?.split('/')[1]?.split(','));
-      setSlotTargeting(slot?.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
+      setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
       setSlotResponseInfo(slot?.getResponseInformation());
       setQueryId(document.getElementById(slot?.getSlotElementId())?.getAttribute('data-google-query-id') || null);
 
