@@ -1,9 +1,9 @@
 import { useContext, useDeferredValue, useMemo, useState } from 'react';
 import StateContext from '../../contexts/appStateContext';
 import { IPrebidEvent } from '../../../Injected/prebid';
-import { createQueryEngine, distinct } from '../autocomplete/utils';
+import { createQueryEngine} from '../autocomplete/utils';
 
-const EVENT_FIELD_MAP = {
+export const EVENT_FIELD_MAP = {
   eventtype: (e: any) => e?.eventType,
   elapsedtime: (e: any) => parseInt(e?.elapsedTime),
   argstype: (e: any) => e?.args?.type,
@@ -59,7 +59,8 @@ const EventsState = () => {
 
   const suggestions = useMemo(() => buildEventSuggestions(events as any[]), [events]);
 
-  const filteredEvents = useMemo(() => events.filter(eventsQueryEngine.runQuery(deferredQuery)), [events, deferredQuery]);
+  const filterFn = useMemo(() => eventsQueryEngine.runQuery(deferredQuery), [deferredQuery]);
+  const filteredEvents = useMemo(() => events.filter(filterFn), [events, filterFn]);
 
   const sortedEvents = useMemo(() => sortEvents(filteredEvents as IPrebidEvent[]), [filteredEvents]);
 

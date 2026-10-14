@@ -1,12 +1,10 @@
 import { BadgeService } from './BadgeService';
 import { MessageHandler } from './MessageHandler';
-import { TabContextService, debounce } from './TabContextService';
+import { TabContextService } from './TabContextService';
+import { preAuctionHarKey } from '../Shared/constants';
 
 class BackgroundService {
-  constructor(
-    private tabContextService: TabContextService,
-    private updateBadge: (tabId: number | undefined) => void
-  ) { }
+  constructor(private tabContextService: TabContextService, private updateBadge: (tabId: number | undefined) => void) {}
 
   async start(): Promise<void> {
     await this.tabContextService.load();
@@ -18,7 +16,11 @@ class BackgroundService {
     chrome.tabs.onRemoved.addListener(this.handleOnTabRemoved);
     chrome.tabs.onActivated.addListener(this.handleOnTabActivated);
     chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
-    chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 15 });
+    chrome.alarms?.get('cleanUpTabInfo', (alarm) => {
+      if (!alarm) {
+        chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 15 });
+      }
+    });
   }
 
   handleOnTabActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
@@ -28,15 +30,16 @@ class BackgroundService {
   handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
     if (frameId === 0) {
-      const tabInfo = this.tabContextService.getOrCreateTabInfo(tabId);
+      const tabInfo = await this.tabContextService.getTabInfo(tabId);
       tabInfo['top-window'] = { url };
+      await this.tabContextService.saveTabInfo(tabId, tabInfo);
       this.updateBadge(tabId);
-      await this.tabContextService.persist();
     }
   };
 
   handleOnTabRemoved = async (tabId: number, _info: chrome.tabs.TabRemoveInfo) => {
     await this.tabContextService.deleteTabInfo(tabId);
+    await chrome.storage.session?.remove(preAuctionHarKey(tabId));
   };
 
   handleOnAlarm = async (_alarm: chrome.alarms.Alarm) => {
@@ -46,26 +49,33 @@ class BackgroundService {
   private cleanStorage = async () => {
     const tabs = await chrome.tabs.query({});
     const activeTabIds = tabs.map((tab) => tab.id);
-    for (const tabIdStr of Object.keys(this.tabContextService.getTabInfos())) {
-      const tabId = parseInt(tabIdStr, 10);
-      if (!activeTabIds.includes(tabId)) {
-        await this.tabContextService.deleteTabInfo(tabId);
+    const allStorage = (await chrome.storage.local.get(null)) as any;
+    const keysToRemove: string[] = [];
+    for (const key of Object.keys(allStorage)) {
+      if (key.startsWith('tab_info_')) {
+        const tabId = parseInt(key.replace('tab_info_', ''), 10);
+        if (!activeTabIds.includes(tabId)) {
+          keysToRemove.push(key);
+        }
       }
+    }
+    if (keysToRemove.length > 0) {
+      await chrome.storage.local.remove(keysToRemove);
     }
   };
 }
 
 class Background {
-  updateBadge = (tabId: number | undefined) => {
-    return BadgeService.update(this.tabContextService.getTabInfos(), tabId);
+  updateBadge = async (tabId: number | undefined) => {
+    if (tabId === undefined) return;
+    const tabInfo = await this.tabContextService.getTabInfo(tabId);
+    BadgeService.update(tabInfo, tabId);
   };
   private tabContextService = new TabContextService();
   private backgroundService = new BackgroundService(this.tabContextService, this.updateBadge);
-  persistInStorageThrottled = debounce(() => this.tabContextService.persist(), 1500);
 
   constructor() {
     this.backgroundService.start();
   }
-
 }
 new Background();

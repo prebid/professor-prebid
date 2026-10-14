@@ -5,6 +5,10 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/blob-report
+/reports
 
 # production
 /build
@@ -35,3 +39,7 @@ secrets.*.js
 **/.DS_Store
 **/dist/
 build.zip
+
+# Third-party vendor payloads fetched for analysis (scanVendorPayloads.mjs) - never commit them
+*.payload.js
+/vendor-payloads/

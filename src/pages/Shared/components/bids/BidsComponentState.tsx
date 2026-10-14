@@ -1,7 +1,7 @@
 import { useState, useContext, useMemo, useCallback } from 'react';
 import AppStateContext from '../../contexts/appStateContext';
 import { createQueryEngine, distinct, getSortValue, getWidthXHeightStringFromBid, NUMERIC_FIELD_KEYS } from '../autocomplete/utils';
-import { Bid } from 'prebid.js/types.d.ts';
+
 
 export const BID_FIELD_MAP = {
   bidder: (b: any) => b?.bidder,
@@ -17,7 +17,7 @@ export const BID_FIELD_MAP = {
   size: (b: any) => b?.size ?? (b?.width && b?.height ? `${b.width}x${b.height}` : ''),
 } as const;
 
-export const getBidKey = (bid: Bid): string => bid.requestId ?? `${bid.adUnitCode || ''}-${bid.bidder || ''}-${bid.timeToRespond || ''}`;
+export const getBidKey = (bid: any): string => bid._stableKey ?? bid.requestId ?? `${bid.auctionId || ''}-${bid.adUnitCode || ''}-${bid.bidder || ''}`;
 
 const bidsQueryEngine = createQueryEngine<any>(BID_FIELD_MAP);
 
@@ -43,10 +43,9 @@ const sortBids = (sort: { key: string; dir: 'asc' | 'desc' }, filteredBids: any[
     const aMissing = typeof va === 'number' ? !Number.isFinite(va) : va === '';
     const bMissing = typeof vb === 'number' ? !Number.isFinite(vb) : vb === '';
 
-    // Missing handling: end for ASC, start for DESC
+    // Missing handling: always put missing values at the bottom
     if (aMissing !== bMissing) {
-      if (sort.dir === 'asc') return aMissing ? 1 : -1;
-      return aMissing ? -1 : 1;
+      return aMissing ? 1 : -1;
     }
 
     if (typeof va === 'number' && typeof vb === 'number') {
@@ -69,8 +68,14 @@ const BidsComponentState = () => {
 
   const { auctionEndEvents } = useContext(AppStateContext);
 
-  const bidsReceived = useMemo(() => auctionEndEvents.flatMap((e) => e.args?.bidsReceived ?? []), [auctionEndEvents]);
-  const noBids = useMemo(() => auctionEndEvents.flatMap((e) => e.args?.noBids ?? []), [auctionEndEvents]);
+  const bidsReceived = useMemo(
+    () => auctionEndEvents.flatMap((e, eventIndex) => (e.args?.bidsReceived ?? []).map((b: any, i: number) => ({ ...b, auctionId: b.auctionId || e.args?.auctionId, _stableKey: `bidsReceived-${e.args?.auctionId || eventIndex}-${i}` }))),
+    [auctionEndEvents]
+  );
+  const noBids = useMemo(
+    () => auctionEndEvents.flatMap((e, eventIndex) => (e.args?.noBids ?? []).map((b: any, i: number) => ({ ...b, auctionId: b.auctionId || e.args?.auctionId, _stableKey: `noBids-${e.args?.auctionId || eventIndex}-${i}` }))),
+    [auctionEndEvents]
+  );
 
   const counts = useMemo(
     () => ({
@@ -85,7 +90,8 @@ const BidsComponentState = () => {
 
   const toggleSort = useCallback((key: string) => setSort((prev) => (prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })), []);
 
-  const filteredBids = useMemo(() => [...bidsReceived, ...noBids].filter(bidsQueryEngine.runQuery(query)), [bidsReceived, noBids, query]);
+  const filterFn = useMemo(() => bidsQueryEngine.runQuery(query), [query]);
+  const filteredBids = useMemo(() => [...bidsReceived, ...noBids].filter(filterFn), [bidsReceived, noBids, filterFn]);
 
   const sortedBids = useMemo(() => sortBids(sort, filteredBids), [filteredBids, sort]);
 

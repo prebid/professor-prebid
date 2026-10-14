@@ -13,7 +13,7 @@ const ProfPrebidLogo: React.FC<ProfPrebidLogoProps> = ({ version = 'v0.3', barCo
 
   return (
     <svg width={110} height={28} viewBox="0 0 200 56" xmlns="http://www.w3.org/2000/svg">
-      {/* Bars */}
+      {}
       <g fill={barColor}>
         <rect x="5" y={0 * (barHeight + gap)} width="38" height={barHeight} rx="4" />
         <rect x="15" y={1 * (barHeight + gap)} width="40" height={barHeight} rx="4" />
@@ -22,7 +22,7 @@ const ProfPrebidLogo: React.FC<ProfPrebidLogoProps> = ({ version = 'v0.3', barCo
         <rect x="5" y={4 * (barHeight + gap)} width="55" height={barHeight} rx="4" />
       </g>
 
-      {/* Text */}
+      {}
       <text x="70" y="20" fontSize="28" fontFamily="roboto" fontWeight="bold" fill={textColor}>
         Professor
       </text>
@@ -30,7 +30,7 @@ const ProfPrebidLogo: React.FC<ProfPrebidLogoProps> = ({ version = 'v0.3', barCo
         Prebid
       </text>
 
-      {/* Version */}
+      {}
       <text x="155" y="50" fontSize="26" fontFamily="roboto" fill={textColor}>
         {version}
       </text>

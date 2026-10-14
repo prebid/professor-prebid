@@ -59,7 +59,7 @@ const BidderFilter = ({ debugConfigState, setDebugConfigState }: IBidderFilterPr
     const auctionInitEndEvents = events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
     const bidderNamesSet = auctionInitEndEvents.reduce((previousValue, currentValue) => {
       const adUnitsArray = (currentValue as IPrebidAuctionEndEventData).args.adUnits || [];
-      adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
+      adUnitsArray.forEach((adUnit: any) => adUnit?.bids?.forEach((bid: any) => bid?.bidder && previousValue.add(bid.bidder)));
       return previousValue;
     }, new Set<string>());
     setDetectedBidderNames(Array.from(bidderNamesSet));

@@ -1,65 +1,53 @@
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
-import React, { useEffect, useState } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import LayerIcon from '@mui/icons-material/Layers';
 import { CONSOLE_TOGGLE } from '../../constants';
-import { useTheme } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import FormControl from '@mui/material/FormControl';
 import { sendChromeTabsMessage } from '../../utils';
 
 const OverlayControlComponent = (): JSX.Element => {
-  const theme = useTheme();
-  const [showOverlay, setShowOverlay] = useState<boolean>(null);
+  const [showOverlay, setShowOverlay] = useState<boolean>(false);
 
   useEffect(() => {
-    chrome.storage.local.get(CONSOLE_TOGGLE, (result) => {
-      const checked = result ? result[CONSOLE_TOGGLE] : false;
+    chrome.storage?.local.get(CONSOLE_TOGGLE, (result) => {
+      const checked = result ? !!result[CONSOLE_TOGGLE] : false;
       setShowOverlay(checked);
     });
-  }, [showOverlay]);
+  }, []);
 
   const handleShowOverlayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setShowOverlay(event.target.checked);
-    const { checked } = event.target;
-    chrome.storage.local.set({ [CONSOLE_TOGGLE]: checked }, () => {
+    const checked = event.target.checked;
+    setShowOverlay(checked);
+    chrome.storage?.local.set({ [CONSOLE_TOGGLE]: checked }, () => {
       sendChromeTabsMessage(CONSOLE_TOGGLE, { consoleState: checked });
-      // chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-      //   const tab = tabs[0];
-      //   chrome.tabs.sendMessage(tab.id as number, { type: CONSOLE_TOGGLE, consoleState: checked });
-      // });
     });
   };
 
   return (
-    <Grid size={{ xs: 12 }}>
-      <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }}>
-        <Grid container>
-          <Grid size={{ xs: 1, sm: 1 }}>
-            <Box sx={{ alignContent: 'center', [theme.breakpoints.down('sm')]: { transform: 'rotate(90deg)' } }}>
-              <FormControl>
-                <FormControlLabel control={<Switch checked={showOverlay || false} onChange={handleShowOverlayChange} />} label="" />
-              </FormControl>
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 11, sm: 11 }}>
-            <Box sx={{ border: 1, borderColor: showOverlay ? 'primary.main' : 'text.disabled', borderRadius: 1 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  width: 1,
-                  p: 1,
-                  color: showOverlay ? 'primary.main' : 'text.disabled',
-                }}
-              >
-                Show AdUnit Info Overlay
+    <Card elevation={1} sx={{ border: '1px solid', borderColor: showOverlay ? 'primary.main' : 'divider' }}>
+      <CardContent sx={{ p: '10px 14px !important', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <LayerIcon color={showOverlay ? 'primary' : 'action'} />
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h3" component="span" sx={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                On-Page AdUnit Info Overlay
               </Typography>
+              <Chip label={showOverlay ? 'ACTIVE' : 'DISABLED'} size="small" color={showOverlay ? 'primary' : 'default'} sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }} />
             </Box>
-          </Grid>
-        </Grid>
-      </Box>
-    </Grid>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+              Display interactive debugging badges and bid CPM metadata directly over ad slots on the page.
+            </Typography>
+          </Box>
+        </Box>
+        <FormControlLabel control={<Switch checked={showOverlay} onChange={handleShowOverlayChange} color="primary" size="small" />} label="" sx={{ mr: 0 }} />
+      </CardContent>
+    </Card>
   );
 };
 

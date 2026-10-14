@@ -1,6 +1,6 @@
 import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, POPUP_LOADED } from '../Shared/constants';
 import { IPrebidDetails } from '../Injected/prebid';
-import { detectIframe, sendWindowPostMessage } from '../Shared/utils';
+import { detectIframe, EventBus } from '../Shared/utils';
 
 const NamespaceStore = (() => {
   let ns: string | null = null;
@@ -24,42 +24,10 @@ const injectScript = () => {
   }
 };
 
-const listenToWindowMessages = () => {
-  window.addEventListener('message', processWindowMessages, false);
-};
-
-const listenToChromeRuntimeMessages = () => {
-  chrome.runtime?.onMessage.addListener(processChromeRuntimeMessages);
-};
-
-type ChromeMessage =
-  | { type: typeof CONSOLE_TOGGLE; consoleState: boolean }
-  | { type: typeof PBJS_NAMESPACE_CHANGE; pbjsNamespace: string }
-  | { type: typeof POPUP_LOADED; payload: object };
-
-const processChromeRuntimeMessages = (request: ChromeMessage) => {
-  switch (request.type) {
-    case CONSOLE_TOGGLE:
-      sendWindowPostMessage(request.type, { detail: request.consoleState });
-      break;
-    case PBJS_NAMESPACE_CHANGE:
-      NamespaceStore.set(request.pbjsNamespace);
-      sendWindowPostMessage(request.type, { detail: request.pbjsNamespace });
-      break;
-    case POPUP_LOADED:
-      window.postMessage({ type: 'FROM_CONTENT_SCRIPT', text: 'Hello from the content script!' }, '*');
-      sendWindowPostMessage(request.type, request.payload);
-      break;
-  }
-};
-
-export const processWindowMessages = async (event: MessageEvent<{ type: string; payload: object; profPrebid: boolean }>) => {
-  if (!event?.data?.profPrebid || !event.data.type) return;
-  const { type, payload } = event.data;
-
+export const processEventBusMessages = async (type: string, payload: any) => {
   if (type === EVENTS.REQUEST_CONSOLE_STATE) {
     const result = await chrome.storage?.local.get(CONSOLE_TOGGLE);
-    const checked = result[CONSOLE_TOGGLE];
+    const checked = result?.[CONSOLE_TOGGLE];
     document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: !!checked }));
   }
 
@@ -69,6 +37,35 @@ export const processWindowMessages = async (event: MessageEvent<{ type: string; 
 
   sendToServiceWorker(type, payload);
   updateOverlays(NamespaceStore.get());
+};
+
+const listenToEventBus = () => {
+  EventBus.onAny(processEventBusMessages, [EVENTS.REQUEST_CONSOLE_STATE, EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND]);
+};
+
+const listenToChromeRuntimeMessages = () => {
+  chrome.runtime?.onMessage.addListener(processChromeRuntimeMessages);
+};
+
+type ChromeMessage = { type: typeof CONSOLE_TOGGLE; consoleState: boolean } | { type: typeof PBJS_NAMESPACE_CHANGE; pbjsNamespace: string } | { type: typeof POPUP_LOADED; payload: object };
+
+const processChromeRuntimeMessages = (request: ChromeMessage) => {
+  switch (request.type) {
+    case CONSOLE_TOGGLE:
+      document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: request.consoleState }));
+      EventBus.emit(request.type, { detail: request.consoleState });
+      if (request.consoleState) {
+        updateOverlays(NamespaceStore.get() || 'pbjs');
+      }
+      break;
+    case PBJS_NAMESPACE_CHANGE:
+      NamespaceStore.set(request.pbjsNamespace);
+      EventBus.emit(request.type, { detail: request.pbjsNamespace });
+      break;
+    case POPUP_LOADED:
+      EventBus.emit(request.type, request.payload);
+      break;
+  }
 };
 
 export const sendToServiceWorker = (type: string, payload: object) => {
@@ -83,7 +80,7 @@ export const updateOverlays = (namespace: string | null) => {
 };
 
 const setUpListeners = () => {
-  listenToWindowMessages();
+  listenToEventBus();
   listenToChromeRuntimeMessages();
 };
 injectScript();

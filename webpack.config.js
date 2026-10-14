@@ -40,7 +40,6 @@ const options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
     app: path.join(__dirname, 'src', 'pages', 'App', 'index.tsx'),
-    newtab: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.jsx'),
     options: path.join(__dirname, 'src', 'pages', 'Options', 'index.tsx'),
     popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.tsx'),
     background: path.join(__dirname, 'src', 'pages', 'Background', 'index.ts'),
@@ -59,30 +58,15 @@ const options = {
     clean: true,
     publicPath: ASSET_PATH,
   },
+  cache: {
+    type: 'filesystem',
+  },
   module: {
     rules: [
-      // {
-      //   test: /\.(css|scss)$/,
-      //   use: [
-      //     'style-loader',
-      //     'css-loader',
-      //     {
-      //       loader: 'sass-loader',
-      //       options: {
-      //         implementation: require('sass'),
-      //         sourceMap: true,
-      //       },
-      //     },
-      //   ],
-      // },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
         type: 'asset/resource',
         exclude: /node_modules/,
-        // loader: 'file-loader',
-        // options: {
-        //   name: '[name].[ext]',
-        // },
       },
       {
         test: /\.html$/,
@@ -101,7 +85,7 @@ const options = {
                   Boolean
                 ),
               }),
-              transpileOnly: isDevelopment,
+              transpileOnly: true,
             },
           },
         ],
@@ -181,12 +165,6 @@ const options = {
       ],
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, 'src', 'pages', 'Newtab', 'index.html'),
-      filename: 'newtab.html',
-      chunks: ['newtab'],
-      cache: false,
-    }),
-    new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'Options', 'index.html'),
       filename: 'options.html',
       chunks: ['options'],
@@ -220,9 +198,10 @@ if (env.NODE_ENV === 'development') {
   options.devtool = 'cheap-module-source-map';
 } else {
   options.optimization = {
-    minimize: true,
+    minimize: !process.env.NO_MINIFY,
     minimizer: [
       new TerserPlugin({
+        parallel: true,
         extractComments: false,
       }),
     ],

@@ -2,6 +2,8 @@ import React, { createContext, useEffect, useState } from 'react';
 import { getTabId } from '../utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';
+import { preAuctionHarKey } from '../constants';
+import { IHarEntry } from '../components/preAuction/harCorrelation';
 
 const InspectedPageContext = createContext<IPageContext | undefined>(undefined);
 
@@ -16,23 +18,32 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const initReqChainResult = useDebounce(initReqChainData, 2000);
   const [downloadingUrls, setDownloadingUrls] = useState<string[]>([]);
 
+  const [harLogData, setHarLogData] = useState<IHarEntry[]>([]);
+  const harLog = useDebounce(harLogData, 1000);
+
   useEffect(() => {
-    // Read initial value from chrome.storage.local
-    chrome.storage.local.get(['tabInfos'], async ({ tabInfos, url }) => {
-      if (tabInfos && url) {
-        const tabInfoWithEvents = await fetchEvents(tabInfos, setDownloading, setSyncInfo, []);
-        setFrames(tabInfoWithEvents);
-      }
+    getTabId().then((tabId) => {
+      const key = `tab_info_${tabId}`;
+      chrome.storage.local.get([key], async (res) => {
+        const tabInfo = res[key];
+        if (tabInfo) {
+          const tabInfoWithEvents = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+          setFrames(tabInfoWithEvents);
+        }
+      });
     });
   }, []);
 
   useEffect(() => {
     // Subscribe to changes in local storage
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'local' && changes?.tabInfos) {
+      if (areaName === 'local') {
         getTabId().then((tabId) => {
-          if (JSON.stringify(changes.tabInfos.newValue[tabId]) !== JSON.stringify(changes.tabInfos.oldValue[tabId])) {
-            fetchEvents({ ...changes.tabInfos.newValue, [tabId]: changes.tabInfos.newValue[tabId] }, setDownloading, setSyncInfo, downloadingUrls).then(setFrames);
+          const key = `tab_info_${tabId}`;
+          if (changes[key]) {
+            if (JSON.stringify(changes[key].newValue) !== JSON.stringify(changes[key].oldValue)) {
+              fetchEvents(changes[key].newValue || {}, setDownloading, setSyncInfo, downloadingUrls).then(setFrames);
+            }
           }
         });
       }
@@ -65,11 +76,42 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     };
   }, []);
 
+  useEffect(() => {
+    const read = (raw: string) => {
+      try {
+        setHarLogData(JSON.parse(raw) || []);
+      } catch (error) {
+        setHarLogData([]);
+      }
+    };
+
+    let key: string | null = null;
+    getTabId().then((tabId) => {
+      if (tabId === undefined) return;
+      key = preAuctionHarKey(tabId);
+      chrome.storage?.session?.get(key, (result) => {
+        if (result?.[key]) read(result[key]);
+      });
+    });
+
+    const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
+      if (areaName === 'session' && key && changes[key] && changes[key].newValue) {
+        read(changes[key].newValue);
+      }
+    };
+    chrome.storage.onChanged.addListener(handler);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handler);
+    };
+  }, []);
+
   const contextValue: IPageContext = {
     frames,
     downloading,
     syncState: syncInfo,
     initReqChainResult,
+    harLog,
   };
 
   return <InspectedPageContext.Provider value={contextValue}>{children}</InspectedPageContext.Provider>;
@@ -82,4 +124,5 @@ export interface IPageContext {
   downloading: string;
   syncState: string;
   initReqChainResult: any;
+  harLog: IHarEntry[];
 }

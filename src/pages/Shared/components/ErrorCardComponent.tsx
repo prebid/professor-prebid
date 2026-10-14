@@ -44,22 +44,14 @@ const ErrorCardComponent = ({ error }: any) => {
               </IconButton>
             }
             title={<Typography variant="h1">Oops! An Error Occurred</Typography>}
-            subheader={
-              error?.message
-                ? `Error Message: ${error.message}`
-                : syncState && syncState !== '' && syncState !== 'null'
-                ? 'SyncState: ' + syncState
-                : ''
-            }
+            subheader={error?.message ? `Error Message: ${error.message}` : syncState && syncState !== '' && syncState !== 'null' ? 'SyncState: ' + syncState : ''}
           />
           <CardContent>
             <Typography variant="body1" paragraph>
-              We apologize for the inconvenience, but it seems that an error has occurred. We highly value your privacy and therefore do not track any
-              bugs or user activities.
+              We apologize for the inconvenience, but it seems that an error has occurred. We highly value your privacy and therefore do not track any bugs or user activities.
             </Typography>
             <Typography variant="body1" paragraph>
-              To help us improve your experience and resolve this issue, we kindly request you to consider opening an issue on our{' '}
-              <span onClick={() => chrome.tabs.create({ url: 'https://github.com/prebid/professor-prebid/issues' })}>GitHub page</span>.
+              To help us improve your experience and resolve this issue, we kindly request you to consider opening an issue on our <span onClick={() => chrome.tabs.create({ url: 'https://github.com/prebid/professor-prebid/issues' })}>GitHub page</span>.
             </Typography>
             <Typography variant="body1" paragraph>
               Your feedback is crucial in enhancing our extension and ensuring a seamless browsing experience for all our users.

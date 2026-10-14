@@ -1,26 +1,20 @@
 // Do this as the first thing so that any code reading it knows the right env.
+const WebpackDevServer = require('webpack-dev-server');
+const webpack = require('webpack');
+const config = require('../webpack.config.js');
+const env = require('./env.js');
+const path = require('path');
+
 process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 process.env.ASSET_PATH = '/';
-import devcert from 'devcert';
-import WebpackDevServer from 'webpack-dev-server';
-import webpack from 'webpack';
-import config from '../webpack.config.js';
-import env from './env.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-const httpsOptions = await devcert.certificateFor('localhost');
+
 var options = config.chromeExtensionBoilerplate || {};
 var excludeEntriesToHotReload = options.notHotReload || [];
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+
 for (var entryName in config.entry) {
   if (excludeEntriesToHotReload.indexOf(entryName) === -1) {
-    config.entry[entryName] = [
-      'webpack/hot/dev-server',
-      `webpack-dev-server/client?hot=true&hostname=localhost&port=${env.PORT}`,
-    ].concat(config.entry[entryName]);
+    config.entry[entryName] = ['webpack/hot/dev-server', `webpack-dev-server/client?hot=true&hostname=localhost&port=${env.PORT}`].concat(config.entry[entryName]);
   }
 }
 
@@ -30,17 +24,11 @@ var compiler = webpack(config);
 
 var server = new WebpackDevServer(
   {
-    https: httpsOptions,
+    https: true,
     hot: true,
     liveReload: false,
     client: {
       webSocketTransport: 'sockjs',
-      // webSocketURL: {
-      //   protocol: 'wss',
-      //   hostname: 'localhost',
-      //   port: env.PORT,
-      //   pathname: '/ws',
-      // },
     },
     webSocketServer: 'sockjs',
     host: 'localhost',

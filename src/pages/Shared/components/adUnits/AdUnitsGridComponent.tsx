@@ -18,12 +18,12 @@ export const AdUnitsGridComponent = ({ adUnits }: { adUnits: AdUnit[] }): JSX.El
 
   return (
     <>
-      {headers.map((header, i) => (
-        <HeaderGridItem key={i} label={header} xs={12 / headers.length} />
+      {headers.map((header) => (
+        <HeaderGridItem key={header} label={header} xs={12 / headers.length} />
       ))}
 
       {adUnits.map((adUnit, index) => (
-        <AdUnitGridRow adUnit={adUnit} key={index} />
+        <AdUnitGridRow adUnit={adUnit} key={adUnit.code || index} />
       ))}
     </>
   );

@@ -24,5 +24,3 @@ render(
   </ThemeProvider>,
   window.document.querySelector('#app-container')
 );
-
-// (module as any)?.hot?.accept();

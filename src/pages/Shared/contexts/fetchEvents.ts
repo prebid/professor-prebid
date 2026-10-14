@@ -1,4 +1,4 @@
-import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
+import {  sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
 
 const safelyConstructURL = (url: string) => {
@@ -26,24 +26,18 @@ const getCurrentTabURL = async (): Promise<URL> => {
   });
 };
 
-export const fetchEvents = async (
-  tabInfos: ITabInfos,
-  setDownloading: React.Dispatch<React.SetStateAction<'true' | 'false' | 'error'>>,
-  setSyncInfo: React.Dispatch<React.SetStateAction<string | null>>,
-  downloadingUrls: string[]
-) => {
-  const tabId = await getTabId();
-  const tabInfo = tabInfos[tabId];
+export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Dispatch<React.SetStateAction<'true' | 'false' | 'error'>>, setSyncInfo: React.Dispatch<React.SetStateAction<string | null>>, downloadingUrls: string[]) => {
+  if (!tabInfo) return {};
 
   for (const frameId of Object.keys(tabInfo)) {
     const { prebids } = tabInfo[frameId];
     if (!prebids) continue;
     for (const [namespace, prebid] of Object.entries(prebids)) {
-      //  would be better if not written to ls from wrong domain in the first place
+      if (!prebid?.eventsUrl) continue;
       const { hostname: eventsURLHost } = safelyConstructURL(prebid.eventsUrl);
       const { hostname: currentTabURLHost } = frameId === 'top-window' ? await getCurrentTabURL() : safelyConstructURL(frameId);
       if (eventsURLHost !== currentTabURLHost) continue;
-      // END
+
       setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
       setDownloading('true');
       try {
@@ -69,5 +63,5 @@ export const fetchEvents = async (
       }
     }
   }
-  return { ...tabInfos[tabId] };
+  return { ...tabInfo };
 };

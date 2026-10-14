@@ -17,7 +17,7 @@ interface AdUnitsHeaderProps {
   allBidderEvents: any[];
   query: string;
   setQuery: (q: string | ((prev: string) => string)) => void;
-  suggestions: any[]; // Adjust type if possible
+  suggestions: any[];
   ADUNIT_FIELD_MAP: any;
   setPbjsVersionPopUpOpen: (open: boolean) => void;
   pbjsVersionPopUpOpen: boolean;

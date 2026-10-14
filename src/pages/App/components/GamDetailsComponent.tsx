@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { getParentGamPubAds } from '../InjectedApp';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/system/Box';
 import Paper from '@mui/material/Paper';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
+import { getSlotTargeting } from '../../Shared/gptTargeting';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
   const [networktId, setNetworkId] = useState<string[]>(null);
@@ -16,19 +18,20 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
   const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
 
   useEffect(() => {
-    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
-      const pubads = googletag.pubads();
+    const pubads = getParentGamPubAds();
+    if (pubads) {
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
       if (slot) {
         setSlotElementId(slot.getSlotElementId());
         setSlotAdUnitPath(slot.getAdUnitPath());
         setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-        setSlotTargeting(slot.getTargetingKeys().map((key, id) => ({ key, value: slot.getTargeting(key), id })));
-        setSlotResponseInfo(slot.getResponseInformation());
+        setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
+        const responseInfo = slot.getResponseInformation();
+        setSlotResponseInfo(responseInfo);
         setQueryId(document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id') || null);
-        if (slotResponseInfo) {
-          const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = slotResponseInfo as any;
+        if (responseInfo) {
+          const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
           setCreativeId(creativeId || sourceAgnosticCreativeId);
           setLineItemId(lineItemId || sourceAgnosticLineItemId);
         }
@@ -45,115 +48,185 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
         };
       }
     }
-  }, [elementId, inPopOver, slotResponseInfo]);
+  }, [elementId, inPopOver]);
 
   return (
     <React.Fragment>
       {lineItemId && (
-        <Grid>
-          <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography component={'span'} variant="h4">
-              LineItem-ID:{' '}
-            </Typography>
-            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank">
-                {lineItemId}
-              </a>
-              {networktId[1] &&
-                networktId.map((nwId, index) => (
-                  <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
-                    {index === 0 && ' ('}
-                    {index > 0 && (
-                      <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
-                        {`${index}`}
-                      </a>
-                    )}
-                    {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
-                  </Typography>
-                ))}
-            </Typography>
-          </Paper>
-        </Grid>
+        <div
+          className="prpb-chip"
+          style={{
+            padding: inPopOver ? '8px' : '3px 6px',
+            borderRadius: '4px',
+            backgroundColor: inPopOver ? undefined : '#ffffff',
+            border: inPopOver ? undefined : '1px solid rgba(67, 142, 217, 0.3)',
+            boxShadow: inPopOver ? undefined : '0 1px 2px rgba(0,0,0,0.06)',
+            fontSize: inPopOver ? undefined : '11px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            color: '#1e293b',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Typography component={'span'} variant="caption" sx={{ color: 'text.primary', fontSize: 'inherit' }}>
+            <strong style={{ color: '#d97706', fontWeight: 700 }}>LineItem-ID: </strong>
+          </Typography>
+          <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
+            <a href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+              {lineItemId}
+            </a>
+            {networktId[1] &&
+              networktId.map((nwId, index) => (
+                <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                  {index === 0 && ' ('}
+                  {index > 0 && (
+                    <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
+                      {`${index}`}
+                    </a>
+                  )}
+                  {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                </Typography>
+              ))}
+          </Typography>
+        </div>
       )}
 
       {creativeId && (
-        <Grid>
-          <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              Creative-ID:{' '}
-            </Typography>
-            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
-                {creativeId}
-              </a>
-              {networktId[1] &&
-                networktId.map((nwId, index) => (
-                  <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
-                    {index === 0 && ' ('}
-                    {index > 0 && (
-                      <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
-                        {`${index}`}
-                      </a>
-                    )}
-                    {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
-                  </Typography>
-                ))}
-            </Typography>
-          </Paper>
-        </Grid>
+        <div
+          className="prpb-chip"
+          style={{
+            padding: inPopOver ? '8px' : '3px 6px',
+            borderRadius: '4px',
+            backgroundColor: inPopOver ? undefined : '#ffffff',
+            border: inPopOver ? undefined : '1px solid rgba(67, 142, 217, 0.3)',
+            boxShadow: inPopOver ? undefined : '0 1px 2px rgba(0,0,0,0.06)',
+            fontSize: inPopOver ? undefined : '11px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            color: '#1e293b',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Typography variant="caption" component={'span'} sx={{ color: 'text.primary', fontSize: 'inherit' }}>
+            <strong style={{ color: '#d97706', fontWeight: 700 }}>Creative-ID: </strong>
+          </Typography>
+          <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
+            <a href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+              {creativeId}
+            </a>
+            {networktId[1] &&
+              networktId.map((nwId, index) => (
+                <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                  {index === 0 && ' ('}
+                  {index > 0 && (
+                    <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
+                      {`${index}`}
+                    </a>
+                  )}
+                  {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                </Typography>
+              ))}
+          </Typography>
+        </div>
       )}
 
       {queryId && (
-        <Grid>
-          <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              Query-ID:{' '}
-            </Typography>
-            <Typography component={'span'} variant="body1" sx={{ '& a': { color: 'secondary.main' } }}>
-              <a href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
-                {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
-              </a>
-              {networktId[1] &&
-                networktId.map((nwId, index) => (
-                  <Typography key={index} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
-                    {index === 0 && ' ('}
-                    {index > 0 && (
-                      <a href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
-                        {`${index}`}
-                      </a>
-                    )}
-                    {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
-                  </Typography>
-                ))}
-            </Typography>
-          </Paper>
-        </Grid>
+        <div
+          className="prpb-chip"
+          style={{
+            padding: inPopOver ? '8px' : '3px 6px',
+            borderRadius: '4px',
+            backgroundColor: inPopOver ? undefined : '#ffffff',
+            border: inPopOver ? undefined : '1px solid rgba(67, 142, 217, 0.3)',
+            boxShadow: inPopOver ? undefined : '0 1px 2px rgba(0,0,0,0.06)',
+            fontSize: inPopOver ? undefined : '11px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            color: '#1e293b',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Typography variant="caption" component={'span'} sx={{ color: 'text.primary', fontSize: 'inherit' }}>
+            <strong style={{ color: '#d97706', fontWeight: 700 }}>Query-ID: </strong>
+          </Typography>
+          <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
+            <a href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+              {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
+            </a>
+            {networktId[1] &&
+              networktId.map((nwId, index) => (
+                <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
+                  {index === 0 && ' ('}
+                  {index > 0 && (
+                    <a href={`https://admanager.google.com/${nwId}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank">
+                      {`${index}`}
+                    </a>
+                  )}
+                  {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                </Typography>
+              ))}
+          </Typography>
+        </div>
       )}
 
       {slotAdUnitPath && (
-        <Grid>
-          <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              AdUnit Path:{' '}
-            </Typography>
-            <Typography variant="body1" component={'span'}>
-              {slotAdUnitPath}
-            </Typography>
-          </Paper>
-        </Grid>
+        <div
+          className="prpb-chip"
+          style={{
+            padding: inPopOver ? '8px' : '3px 6px',
+            borderRadius: '4px',
+            backgroundColor: inPopOver ? undefined : '#ffffff',
+            border: inPopOver ? undefined : '1px solid rgba(67, 142, 217, 0.3)',
+            boxShadow: inPopOver ? undefined : '0 1px 2px rgba(0,0,0,0.06)',
+            fontSize: inPopOver ? undefined : '11px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            color: '#1e293b',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Typography variant="caption" component={'span'} sx={{ color: 'text.primary', fontSize: 'inherit' }}>
+            <strong style={{ color: '#d97706', fontWeight: 700 }}>AdUnit Path: </strong>
+          </Typography>
+          <Typography variant="caption" component={'span'} sx={{ color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', verticalAlign: 'bottom', maxWidth: 'calc(100% - 80px)', fontSize: 'inherit' }}>
+            {slotAdUnitPath}
+          </Typography>
+        </div>
       )}
 
       {slotElementId && (
-        <Grid>
-          <Paper elevation={1} sx={{ p: inPopOver ? 1 : 0.5 }}>
-            <Typography variant="h4" component={'span'}>
-              Element-ID:{' '}
-            </Typography>
-            <Typography variant="body1" component={'span'}>
-              {slotElementId}
-            </Typography>
-          </Paper>
-        </Grid>
+        <div
+          className="prpb-chip"
+          style={{
+            padding: inPopOver ? '8px' : '3px 6px',
+            borderRadius: '4px',
+            backgroundColor: inPopOver ? undefined : '#ffffff',
+            border: inPopOver ? undefined : '1px solid rgba(67, 142, 217, 0.3)',
+            boxShadow: inPopOver ? undefined : '0 1px 2px rgba(0,0,0,0.06)',
+            fontSize: inPopOver ? undefined : '11px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '3px',
+            color: '#1e293b',
+            maxWidth: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Typography variant="caption" component={'span'} sx={{ color: 'text.primary', fontSize: 'inherit' }}>
+            <strong style={{ color: '#d97706', fontWeight: 700 }}>Element-ID: </strong>
+          </Typography>
+          <Typography variant="caption" component={'span'} sx={{ color: 'text.primary', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', verticalAlign: 'bottom', maxWidth: 'calc(100% - 80px)', fontSize: 'inherit' }}>
+            {slotElementId}
+          </Typography>
+        </div>
       )}
 
       {inPopOver && (
@@ -186,7 +259,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                           </Typography>
                         </Grid>
                         {slotTargeting.map((st, i) => (
-                          <React.Fragment key={i}>
+                          <React.Fragment key={st.key}>
                             <Grid size={6}>
                               <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
                               {st.key}

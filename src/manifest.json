@@ -15,7 +15,7 @@
       ],
       "all_frames": true,
       "match_about_blank": false,
-      "run_at": "document_idle",
+      "run_at": "document_start",
       "js": [
         "contentScript.bundle.js"
       ]

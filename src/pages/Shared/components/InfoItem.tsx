@@ -9,7 +9,7 @@ export const InfoItem = ({ label, content, href }: { label: React.ReactNode; con
     return (
       <Typography variant="body1">
         <b>{label}: </b>
-        <a href={href} target="_blank">
+        <a href={href} target="_blank" rel="noreferrer">
           {content}
         </a>
       </Typography>

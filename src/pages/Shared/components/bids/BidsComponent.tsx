@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, useEffect, useContext } from 'react';
+import React, {  useState, useCallback, useEffect} from 'react';
 import Grid from '@mui/material/Grid';
 import { IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import { replaceLastToken } from '../autocomplete/utils';
@@ -35,7 +35,16 @@ export const BidsComponent = (): JSX.Element => {
       </Grid>
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
         <Tooltip title="Download filtered bids as JSON" arrow>
-          <IconButton size="small" onClick={() => download(sortedBids, 'filtered-bids')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
+          <IconButton
+            size="small"
+            onClick={() =>
+              download(
+                sortedBids.map(({ _stableKey, ...b }: any) => b),
+                'filtered-bids'
+              )
+            }
+            sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}
+          >
             <DownloadIcon fontSize="inherit" />
           </IconButton>
         </Tooltip>
@@ -75,20 +84,29 @@ const useRowExpand = (globalOpen?: boolean) => {
 
 const truncate = (text?: string, length = 30): string => (text && text.length > length ? `${text.substring(0, length)}…` : text ?? '');
 
-const formatCpm = (cpm?: number): string => (Number.isFinite(cpm) && typeof cpm === 'number' ? `${Math.round(cpm * 100) / 100}` : 'no cpm');
-
+const formatCpm = (cpm?: any): string => {
+  if (cpm == null || String(cpm).trim() === '') return 'no cpm';
+  if (typeof cpm === 'number' && Number.isFinite(cpm)) return `${Math.round(cpm * 100) / 100}`;
+  const raw = String(cpm);
+  const normalized = raw.includes(',') && !raw.includes('.') ? raw.replace(',', '.') : raw;
+  const num = Number(normalized.replace(/[^0-9.\-]/g, ''));
+  return Number.isFinite(num) ? `${Math.round(num * 100) / 100}` : 'no cpm';
+};
 const displaySize = (bid: Bid): string => (bid as any).size ?? (bid.width && bid.height ? `${bid.width} x ${bid.height}` : 'no size');
 
-const ExpandedRowComponent = React.memo(({ bid }: { bid: Bid }) => (
-  <>
-    <Grid size={{ xs: 0.62 }} />
-    <Grid size={{ xs: 11.38 }}>
-      <Paper sx={{ width: '100%', height: '100%' }}>
-        <JSONViewerComponent src={bid} />
-      </Paper>
-    </Grid>
-  </>
-));
+const ExpandedRowComponent = React.memo(({ bid }: { bid: Bid }) => {
+  const { _stableKey, ...cleanBid } = bid as any;
+  return (
+    <>
+      <Grid size={{ xs: 0.62 }} />
+      <Grid size={{ xs: 11.38 }}>
+        <Paper sx={{ width: '100%', height: '100%' }}>
+          <JSONViewerComponent src={cleanBid} />
+        </Paper>
+      </Grid>
+    </>
+  );
+});
 
 export const BidRowComponent = React.memo(({ bid, globalOpen }: { bid: Bid; globalOpen?: boolean }) => {
   const { open, toggle } = useRowExpand(globalOpen);

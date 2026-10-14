@@ -10,6 +10,7 @@ import EventsComponent from './auctionDebugEvents/EventsComponent';
 import { Routes, Route } from 'react-router-dom';
 import InitiatorComponent from './initiator/InitiatorComponent';
 import PbjsVersionInfoComponent from './pbjsVersionInfo/PbjsVersionInfoComponent';
+import PreAuctionComponent from './preAuction/PreAuctionComponent';
 
 const RoutesComponent = (): JSX.Element => {
   return (
@@ -25,6 +26,7 @@ const RoutesComponent = (): JSX.Element => {
       <Route path="events" element={<EventsComponent />} />
       <Route path="events" element={<EventsComponent />} />
       <Route path="initiator" element={<InitiatorComponent />} />
+      <Route path="preAuction" element={<PreAuctionComponent />} />
       <Route path="version" element={<PbjsVersionInfoComponent />} />
     </Routes>
   );

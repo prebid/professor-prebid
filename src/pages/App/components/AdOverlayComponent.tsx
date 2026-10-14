@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
+import { alpha } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
 import { theme } from '../../../theme/theme';
 import { ThemeProvider } from '@mui/material';
 import GamDetailsComponent from './GamDetailsComponent';
-import Paper from '@mui/material/Paper';
+
 import PopOverComponent from './PopOverComponent';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
@@ -15,143 +16,180 @@ import Refresh from '@mui/icons-material/Refresh';
 import MinimizeIcon from '@mui/icons-material/Minimize';
 import MaximizeIcon from '@mui/icons-material/Maximize';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import { getParentGamPubAds } from '../InjectedApp';
 
-const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal, contentRef, pbjsNameSpace }: AdOverlayComponentProps): JSX.Element => {
+const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal, shadowRoot, contentRef, pbjsNameSpace, attachVersion, onOpenPopover }: AdOverlayComponentProps): JSX.Element => {
   const gridRef = React.useRef<HTMLDivElement>(null);
   const boxRef = React.useRef<HTMLDivElement>(null);
   const [truncate, setTruncate] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<boolean>(true);
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [slot, setSlot] = React.useState<googletag.Slot>(null);
-  const cache = createCache({ key: 'css', container: contentRef?.contentWindow?.document?.head, prepend: true });
+
+  const containerNode = shadowRoot || contentRef?.contentWindow?.document?.head || document.head;
+  const cache = React.useMemo(() => {
+    return createCache({
+      key: 'prpb-overlay',
+      container: containerNode,
+      prepend: true,
+    });
+  }, [containerNode]);
+
   const openInPopOver = () => {
-    setAnchorEl(window.top.document.body);
+    let bodyContainer = window.document.body;
+    try {
+      if (window.top && window.top.document) {
+        bodyContainer = window.top.document.body;
+      }
+    } catch (e) {}
+    setIsOpen(true);
   };
+
+  const handleOpenPopover = () => {
+    if (onOpenPopover) {
+      onOpenPopover();
+    } else {
+      openInPopOver();
+    }
+  };
+
   useEffect(() => {
-    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
-      const pubads = googletag.pubads();
+    const pubads = getParentGamPubAds();
+    if (pubads) {
       const slots = pubads.getSlots();
-      const slot = slots.find((slot) => slot.getSlotElementId() === elementId);
+      const slot = slots.find((slot: any) => slot.getSlotElementId() === elementId);
       if (slot) {
         setSlot(slot);
       }
     }
   }, [elementId]);
+
   useEffect(() => {
     if (!truncate) {
       setTruncate(gridRef.current?.offsetHeight > boxRef.current?.offsetHeight || false);
     }
   }, [gridRef.current?.offsetHeight, boxRef.current?.offsetHeight, truncate]);
+
   return (
-    <ThemeProvider theme={theme}>
-      <PopOverComponent elementId={elementId} winningCPM={winningCPM} winningBidder={winningBidder} currency={currency} timeToRespond={timeToRespond} closePortal={closePortal} anchorEl={anchorEl} setAnchorEl={setAnchorEl} pbjsNameSpace={pbjsNameSpace} />
-      <CacheProvider value={cache}>
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        {!onOpenPopover && <PopOverComponent elementId={elementId} winningCPM={winningCPM} winningBidder={winningBidder} currency={currency} timeToRespond={timeToRespond} closePortal={closePortal} open={isOpen} onClose={() => setIsOpen(false)} pbjsNameSpace={pbjsNameSpace} />}
+        <style>{`
+          :host {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          }
+          * {
+            box-sizing: border-box;
+          }
+        `}</style>
         <Box
           ref={boxRef}
           sx={{
             height: expanded ? '100%' : 'auto',
+            minHeight: expanded ? 'fit-content' : 'auto',
             width: '100%',
-            opacity: 0.9,
-            backgroundColor: 'primary.light',
+            backgroundColor: 'rgba(238, 246, 255, 0.96)',
+            backdropFilter: 'blur(4px)',
             color: 'text.primary',
-            padding: 0.5,
+            padding: 0.75,
             boxSizing: 'border-box',
-            flexGrow: 1,
-            '&:hover': { opacity: 1 },
+            border: '1px solid',
+            borderColor: 'rgba(67, 142, 217, 0.5)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
+            overflow: 'auto',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 999999,
+            pointerEvents: 'auto',
           }}
         >
-          <Grid container alignItems="flex-start" ref={gridRef}>
-            <Grid container justifyContent="space-between" alignItems="flex-start">
-              <Grid size={{ xs: 7, lg: 3.5, xl: 1.5 }}>
-                <Paper elevation={1} sx={{ p: 0.25 }}>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      wordWrap: 'break-word',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {elementId}
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'flex-end',
-                  alignItems: 'flex-end',
-                  color: 'text.secondary',
-                }}
-                size={4}
-              >
-                <IconButton sx={{ p: 0 }} onClick={() => setExpanded(!expanded)}>
-                  {expanded && <MinimizeIcon sx={{ fontSize: 14 }} />}
-                  {!expanded && <MaximizeIcon sx={{ fontSize: 14 }} />}
-                </IconButton>
-
-                <IconButton sx={{ p: 0 }} onClick={openInPopOver}>
-                  <OpenInFullIcon sx={{ fontSize: 14 }} />
-                </IconButton>
-
-                {window.parent.googletag && typeof window.parent.googletag?.pubads === 'function' && (
-                  <IconButton
-                    sx={{ p: 0 }}
-                    onClick={() => {
-                      window.parent.googletag.pubads().refresh([slot]);
-                    }}
-                  >
-                    <Refresh sx={{ fontSize: 14 }} />
-                  </IconButton>
-                )}
-
-                <IconButton sx={{ p: 0 }} onClick={closePortal}>
-                  <Close sx={{ fontSize: 14 }} />
-                </IconButton>
-              </Grid>
+          <Grid container alignItems="center" ref={gridRef} sx={{ flexWrap: 'nowrap', justifyContent: 'space-between', mb: 0.5 }}>
+            <Grid sx={{ display: 'flex', alignItems: 'center', overflow: 'hidden', maxWidth: 'calc(100% - 95px)' }}>
+              <Box sx={{ px: 0.75, py: 0.2, backgroundColor: 'primary.main', borderRadius: '4px', maxWidth: '100%', overflow: 'hidden' }}>
+                <Typography variant="body2" sx={{ fontWeight: 700, color: '#ffffff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', fontSize: 10 }}>
+                  {elementId}
+                </Typography>
+              </Box>
             </Grid>
-            {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
-              <Grid container>
-                {winningCPM && (
-                  <Grid>
-                    <Paper elevation={1} sx={{ p: 0.5 }}>
-                      <Typography>
-                        <strong>CPM: </strong>
-                        {winningCPM} {currency}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
-                {winningBidder && (
-                  <Grid>
-                    <Paper elevation={1} sx={{ p: 0.5 }}>
-                      <Typography>
-                        <strong>Bidder: </strong>
-                        {winningBidder}
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
-                {timeToRespond && (
-                  <Grid>
-                    <Paper elevation={1} sx={{ p: 0.5 }}>
-                      <Typography>
-                        <strong>TTR: </strong>
-                        {timeToRespond}ms
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                )}
-                {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} truncate={truncate} />}
-              </Grid>
-            )}
+            <Grid sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+              <IconButton
+                sx={{ p: 0.25, width: 20, height: 20, borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.85)', border: '1px solid rgba(67, 142, 217, 0.3)', color: 'primary.main', '&:hover': { backgroundColor: '#ffffff' } }}
+                onClick={() => setExpanded(!expanded)}
+                title={expanded ? 'Minimize' : 'Maximize'}
+              >
+                {expanded ? <MinimizeIcon sx={{ fontSize: 13 }} /> : <MaximizeIcon sx={{ fontSize: 13 }} />}
+              </IconButton>
+
+              <IconButton
+                sx={{ p: 0.25, width: 20, height: 20, borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.85)', border: '1px solid rgba(67, 142, 217, 0.3)', color: 'primary.main', '&:hover': { backgroundColor: '#ffffff' } }}
+                onClick={handleOpenPopover}
+                title="Open in Popover"
+              >
+                <OpenInFullIcon sx={{ fontSize: 12 }} />
+              </IconButton>
+
+              {getParentGamPubAds() && (
+                <IconButton
+                  sx={{ p: 0.25, width: 20, height: 20, borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.85)', border: '1px solid rgba(67, 142, 217, 0.3)', color: 'primary.main', '&:hover': { backgroundColor: '#ffffff' } }}
+                  onClick={() => {
+                    getParentGamPubAds()?.refresh([slot]);
+                  }}
+                  title="Refresh Slot"
+                >
+                  <Refresh sx={{ fontSize: 13 }} />
+                </IconButton>
+              )}
+
+              <IconButton
+                sx={{ p: 0.25, width: 20, height: 20, borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.85)', border: '1px solid rgba(67, 142, 217, 0.3)', color: 'primary.main', '&:hover': { backgroundColor: '#ffffff', color: 'error.main' } }}
+                onClick={closePortal}
+                title="Close"
+              >
+                <Close sx={{ fontSize: 13 }} />
+              </IconButton>
+            </Grid>
           </Grid>
+
+          {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, width: '100%' }}>
+              {winningCPM && (
+                <Box sx={{ p: 0.5, borderRadius: 1, backgroundColor: '#ffffff', border: '1px solid', borderColor: 'rgba(67, 142, 217, 0.3)', boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary', fontSize: 11 }}>
+                    <strong style={{ color: '#d97706' }}>CPM: </strong>
+                    {winningCPM} {currency}
+                  </Typography>
+                </Box>
+              )}
+              {winningBidder && (
+                <Box sx={{ p: 0.5, borderRadius: 1, backgroundColor: '#ffffff', border: '1px solid', borderColor: 'rgba(67, 142, 217, 0.3)', boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary', fontSize: 11 }}>
+                    <strong style={{ color: '#d97706' }}>Bidder: </strong>
+                    {winningBidder}
+                  </Typography>
+                </Box>
+              )}
+              {timeToRespond && (
+                <Box sx={{ p: 0.5, borderRadius: 1, backgroundColor: '#ffffff', border: '1px solid', borderColor: 'rgba(67, 142, 217, 0.3)', boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }}>
+                  <Typography variant="caption" sx={{ color: 'text.primary', fontSize: 11 }}>
+                    <strong style={{ color: '#d97706' }}>TTR: </strong>
+                    {timeToRespond}ms
+                  </Typography>
+                </Box>
+              )}
+              {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} truncate={truncate} />}
+            </Box>
+          )}
         </Box>
-      </CacheProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </CacheProvider>
   );
 };
 
@@ -163,7 +201,10 @@ export interface AdOverlayComponentProps {
   timeToRespond: number;
   closePortal?: () => void;
   contentRef?: any;
+  shadowRoot?: ShadowRoot | null;
   pbjsNameSpace?: string;
+  attachVersion?: number;
+  onOpenPopover?: () => void;
 }
 
 export default AdOverlayComponent;

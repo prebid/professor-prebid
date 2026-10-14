@@ -1,34 +1,31 @@
 import { StorageService } from './StorageService';
 
 export class TabContextService {
-    private tabInfos: ITabInfos = {};
+  async load(): Promise<void> {}
 
-    async load(): Promise<void> {
-        this.tabInfos = await StorageService.loadTabInfos();
-    }
+  async getTabInfo(tabId: number): Promise<IFrameInfos> {
+    return await StorageService.loadTabInfo(tabId);
+  }
 
-    getTabInfos(): ITabInfos {
-        return this.tabInfos;
-    }
+  async getOrCreateTabInfo(tabId: number): Promise<IFrameInfos> {
+    return await StorageService.loadTabInfo(tabId);
+  }
 
-    getOrCreateTabInfo(tabId: number): IFrameInfos {
-        if (!this.tabInfos[tabId]) this.tabInfos[tabId] = {};
-        return this.tabInfos[tabId];
-    }
+  async deleteTabInfo(tabId: number): Promise<void> {
+    await StorageService.deleteTabInfo(tabId);
+  }
 
-    async deleteTabInfo(tabId: number): Promise<void> {
-        await StorageService.deleteTabInfo(this.tabInfos, tabId);
-    }
+  async saveTabInfo(tabId: number, tabInfo: IFrameInfos): Promise<void> {
+    await StorageService.saveTabInfo(tabId, tabInfo);
+  }
 
-    async persist(): Promise<void> {
-        await StorageService.saveTabInfos(this.tabInfos);
-    }
+  async persist(): Promise<void> {}
 }
-// Debounce utility function
-export function debounce<T extends (...args: any[]) => void>(fn: T, delay: number): T {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    return ((...args: any[]) => {
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn(...args), delay);
-    }) as T;
+
+export const debounce = function <T extends (...args: any[]) => void>(fn: T, delay: number): T {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  return ((...args: any[]) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  }) as T;
 }

@@ -13,11 +13,9 @@ import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../Injected
 
 const sanityCheck = (rule: IPrebidDebugModuleConfigRule, mediaType: string) => {
   if (mediaType === 'native') {
-    // if (Object.keys(rule.when).includes('mediaType') && Object.values(rule.when).includes('native')) return true; // matching on mediaType not working
     if (Object.keys(rule.then).includes('mediaType') && Object.values(rule.then).includes('native')) return true;
   }
   if (mediaType === 'video') {
-    // if (Object.keys(rule.when).includes('mediaType') && Object.values(rule.when).includes('video')) return true; // matching on mediaType not working
     if (Object.keys(rule.then).includes('mediaType') && Object.values(rule.then).includes('video')) return true;
   }
   if (['allMediaTypes', 'banner'].includes(mediaType)) return true;
@@ -74,12 +72,12 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
       >
         {mediaTypes
           .filter((mediaType) => sanityCheck(rule, mediaType))
-          ?.map((group, index) => (
-            <optgroup key={index} label={group !== 'allMediaTypes' ? `mediaType: ${group}` : 'all mediaTypes'}>
+          ?.map((group) => (
+            <optgroup key={group} label={group !== 'allMediaTypes' ? `mediaType: ${group}` : 'all mediaTypes'}>
               {replaceRuleTargets
                 ?.filter((replaceRuleTarget) => replaceRuleTarget.mediaType === group)
-                .map((option, index) => (
-                  <option key={index} value={option.value}>
+                .map((option) => (
+                  <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
@@ -105,8 +103,8 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
           ruleKey === 'mediaType' &&
           replaceRuleTargets
             .find((target) => target.value === ruleKey)
-            ?.options.map((option, index) => (
-              <MenuItem key={index} value={option} dense>
+            ?.options.map((option) => (
+              <MenuItem key={option} value={option} dense>
                 {option}
               </MenuItem>
             ))

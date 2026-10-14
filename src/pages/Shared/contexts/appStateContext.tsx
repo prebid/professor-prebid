@@ -3,7 +3,7 @@ import { useMediaQuery, useTheme } from '@mui/material';
 import InspectedPageContext from './inspectedPageContext';
 import { IGoogleAdManagerDetails } from '../../Injected/googleAdManager';
 import { IPrebidDetails } from '../../Injected/prebid';
-import type { EventRecord, Config } from 'prebid.js/types.d.ts';
+import type { EventRecord, Config } from 'prebid.js';
 
 declare global {
   interface Document {
@@ -80,19 +80,18 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 
   useEffect(() => {
     if (frameId === '' && frames && Object.keys(frames).length > 0) {
-      // if there is prebids in top-window, set it as default
       if (frames['top-window']?.prebids) {
         setIframeId('top-window');
         return;
       }
-      // if there is no prebids in top-window, set first frame with prebids as default
+
       for (const frameId of Object.keys(frames)) {
         if (frames[frameId].prebids) {
           setIframeId(frameId);
           return;
         }
       }
-      // if there is no prebids in any frame, set top-window as default
+
       setIframeId('top-window');
     }
   }, [frameId, frames]);

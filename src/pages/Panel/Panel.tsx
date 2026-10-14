@@ -17,7 +17,7 @@ const Panel = (): JSX.Element => {
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    // set showDownloadCard to true when downloading is true for more than 1 second
+
     if (downloading === 'true' || downloading === 'error') {
       timeout = setTimeout(() => {
         setShowDownloadCard(true);

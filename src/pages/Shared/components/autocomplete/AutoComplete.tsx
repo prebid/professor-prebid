@@ -1,55 +1,47 @@
-import { Autocomplete, TextField, Tooltip, IconButton, Paper, AutocompleteChangeReason, AutocompleteChangeDetails, AutocompleteRenderInputParams } from '@mui/material';
+import { Autocomplete, TextField, Tooltip, IconButton, Paper, AutocompleteChangeReason, AutocompleteRenderInputParams } from '@mui/material';
 import React, { useState } from 'react';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
-import { NUMERIC_FIELD_KEYS } from './utils';
+import { getAutocompleteOptions, replaceLastToken } from './utils';
 
 type AutoCompleteProps = {
   query: string;
   onQueryChange: (v: string) => void;
   placeholder: string;
-  fieldKeys: string[];
+  fieldKeys?: string[];
   options?: string[];
   onPick?: (opt: string) => void;
   onDownloadFilteredBids?: () => void;
 };
 
-const keyOnlyOptions = (fieldKeys: string[]) => {
-  const numericKeys = Array.from(NUMERIC_FIELD_KEYS);
-  const allKeys = new Set([...fieldKeys, ...numericKeys]);
-  return Array.from(allKeys).sort((a, b) => a.localeCompare(b));
-};
-
-const getOptionsForQuery = (query: string, fieldKeys: string[], options?: string[]) => {
-  const input = query || '';
-  // Split only on ' AND ' or ' OR ' (case-insensitive)
-  const last = input.split(/\s+(and|or)\s+/i).pop() ?? '';
-  const queryLastToken = last.toLowerCase();
-
-  // If no query or query is an operator, show key suggestions
-  if (['or', 'and'].includes(queryLastToken)) return keyOnlyOptions(fieldKeys);
-
-  const colon = queryLastToken.indexOf(':');
-
-  // If no colon, show keys that match the input
-  if (colon < 0) return keyOnlyOptions(fieldKeys).filter((key) => key.toLowerCase().startsWith(queryLastToken));
-
-  // If there's a colon, show values for that key
-  const key = queryLastToken.slice(0, colon);
-  const val = queryLastToken.slice(colon + 1);
-
-  // Filter options to show only values for this key
-  if (options && options.length) {
-    const keyPrefix = `${key}:`;
-    const filtered = options
-      .filter((option) => String(option).toLowerCase().startsWith(keyPrefix))
-      .map((option) => String(option).slice(keyPrefix.length)) // Remove the key: prefix
-      .filter((value) => !val || value.toLowerCase().includes(val.toLowerCase()))
-      .filter((s) => s); // Remove empty strings
-    return filtered;
+const getTooltipTitle = (fieldKeys: string[] = []) => {
+  if (!fieldKeys || fieldKeys.length === 0) {
+    return 'Query tips: Free text search or key:value · OR to combine';
   }
+  const cleanKeys = fieldKeys.map((k) => k.replace(/:$/, ''));
+  const sampleKey = cleanKeys[0] || 'key';
+  const sampleSecondKey = cleanKeys[1];
+  const hasNumeric = cleanKeys.some((k) => ['cpm', 'ttl', 'elapsedtime', 'width', 'height', 'timetorespond'].includes(k.toLowerCase()));
+  const hasSize = cleanKeys.includes('size');
+
+  const tips: string[] = ['key:value'];
+  if (hasNumeric) {
+    const numKey = cleanKeys.find((k) => ['cpm', 'elapsedtime', 'ttl'].includes(k.toLowerCase())) || 'cpm';
+    tips.push(`${numKey}>1`);
+  }
+  if (hasSize) {
+    tips.push('size:300x250');
+  }
+  tips.push('OR to combine');
+
+  let example = `${sampleKey}:value`;
+  if (sampleSecondKey) {
+    example += ` OR ${sampleSecondKey}:value`;
+  }
+
+  return `Query tips: ${tips.join(' · ')}. e.g., ${example}`;
 };
 
-const renderInput = (params: AutocompleteRenderInputParams, placeholder: string) => (
+const renderInput = (params: AutocompleteRenderInputParams, placeholder: string, fieldKeys: string[] = []) => (
   <Paper sx={{ borderRadius: '4px', pb: '2px' }}>
     <TextField
       {...params}
@@ -61,7 +53,7 @@ const renderInput = (params: AutocompleteRenderInputParams, placeholder: string)
           disableUnderline: true,
           endAdornment: (
             <>
-              <Tooltip title={'Query tips: key:value · cpm>1 · size:300x250 · OR to combine. e.g., bidder:criteo cpm>=0.5 | mediatype:video OR bidder:appnexus'} arrow>
+              <Tooltip title={getTooltipTitle(fieldKeys)} arrow>
                 <IconButton size="small" tabIndex={-1} sx={{ mr: 0.5 }}>
                   <HelpOutlineOutlinedIcon fontSize="small" />
                 </IconButton>
@@ -75,12 +67,12 @@ const renderInput = (params: AutocompleteRenderInputParams, placeholder: string)
   </Paper>
 );
 
-export const AutoComplete = ({ query, onQueryChange, options, onPick, placeholder, fieldKeys }: AutoCompleteProps) => {
+export const AutoComplete = ({ query = '', onQueryChange, options = [], onPick, placeholder, fieldKeys = [] }: AutoCompleteProps) => {
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
 
   const onChange = (_event: React.SyntheticEvent<Element, Event>, val: string, reason: AutocompleteChangeReason) => {
     if (reason === 'selectOption' && val != null) {
-      const input = query;
+      const input = query || '';
 
       // Find the last occurrence of AND or OR
       const lastAndIndex = input.toLowerCase().lastIndexOf(' and ');
@@ -98,22 +90,26 @@ export const AutoComplete = ({ query, onQueryChange, options, onPick, placeholde
           // Completing a value
           const colonIndex = afterOperator.indexOf(':');
           const key = afterOperator.slice(0, colonIndex);
-          onQueryChange(`${beforeOperator}${operator}${key}:${val}`);
+          onQueryChange?.(`${beforeOperator}${operator}${key}:${val}`);
         } else {
           // Completing a key
-          onQueryChange(`${beforeOperator}${operator}${val}:`);
+          onQueryChange?.(`${beforeOperator}${operator}${val}:`);
         }
       } else {
-        // No operator, handle as before
+        // No operator, handle single token
         const hasColon = input.includes(':');
         if (hasColon) {
           // Completing a value
           const colonIndex = input.indexOf(':');
           const key = input.slice(0, colonIndex);
-          onQueryChange(`${key}:${val}`);
+          onQueryChange?.(`${key}:${val}`);
         } else {
           // Completing a key
-          onPick?.(`${val}:`);
+          if (onPick) {
+            onPick(`${val}:`);
+          } else {
+            onQueryChange?.(replaceLastToken(input, `${val}:`));
+          }
         }
       }
       setSelectedValue(null);
@@ -122,7 +118,7 @@ export const AutoComplete = ({ query, onQueryChange, options, onPick, placeholde
     }
   };
 
-  const localOptions = getOptionsForQuery(query, fieldKeys, options);
+  const localOptions = getAutocompleteOptions(query, fieldKeys, options);
 
   return (
     <Autocomplete
@@ -135,9 +131,9 @@ export const AutoComplete = ({ query, onQueryChange, options, onPick, placeholde
       inputValue={query}
       isOptionEqualToValue={(o, v) => o === v}
       filterOptions={(opts) => opts}
-      onInputChange={(_event, val, reason) => reason !== 'reset' && onQueryChange(val || '')}
+      onInputChange={(_event, val, reason) => reason !== 'reset' && onQueryChange?.(val || '')}
       onChange={onChange}
-      renderInput={(params) => renderInput(params, placeholder)}
+      renderInput={(params) => renderInput(params, placeholder, fieldKeys)}
     />
   );
 };
