@@ -22,6 +22,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ThemeProvider } from '@mui/material';
 import { theme } from '../../../theme/theme';
+import { getSlotTargeting } from '../../Shared/gptTargeting';
 
 
 const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
@@ -174,7 +175,7 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
           setSlotElementId(slot.getSlotElementId());
           setSlotAdUnitPath(slot.getAdUnitPath());
           setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-          setSlotTargeting(slot.getTargetingKeys().map((key: string, id: number) => ({ key, value: slot.getTargeting(key), id })));
+          setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
           const responseInfo = slot.getResponseInformation();
           setSlotResponseInfo(responseInfo);
           const queryIdAttr = document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id');

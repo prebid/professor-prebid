@@ -221,20 +221,24 @@ describe('GoogleAdManager', () => {
       Object.defineProperty(window, 'innerWidth', { value: 0, configurable: true });
       Object.defineProperty(window, 'innerHeight', { value: 0, configurable: true });
 
+      const deprecatedGetter = () => {
+        throw new Error('deprecated GPT method called');
+      };
       const mockSlot1 = {
         getSlotElementId: () => 'slot-1',
         getAdUnitPath: () => '/1234/unit1',
-        getTargetingMap: () => ({
-          kv1: ['v1', 'v2'],
-          kv2: null,
-        }),
+        getConfig: () => ({ targeting: { kv1: ['v1', 'v2'], kv2: null, kv3: 'single' } }),
+        getTargetingMap: deprecatedGetter,
+        getTargetingKeys: deprecatedGetter,
+        getTargeting: deprecatedGetter,
         getSizes: (w: number, h: number) => ['300x250', { getWidth: () => 728, getHeight: () => 90 }],
       };
 
       const mockSlot2 = {
         getSlotElementId: () => 'slot-2',
         getAdUnitPath: () => '/1234/unit2',
-        getTargetingMap: () => ({}),
+        getTargetingKeys: () => [],
+        getTargeting: () => [],
         getSizes: (w?: number) => {
           if (w !== undefined) return null;
           return null;
@@ -255,7 +259,7 @@ describe('GoogleAdManager', () => {
         sizes: ['300x250', '728x90'],
         targeting: [
           { key: 'kv1', value: 'v1,v2' },
-          { key: 'kv2', value: '' },
+          { key: 'kv3', value: 'single' },
         ],
         creativeRenderTime: undefined,
       });

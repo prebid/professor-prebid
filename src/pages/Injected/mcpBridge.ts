@@ -1,3 +1,5 @@
+import { getSlotTargeting } from '../Shared/gptTargeting';
+
 export interface McpAuctionFilter {
   auctionId?: string;
   adUnitCode?: string;
@@ -236,12 +238,7 @@ export class ProfessorPrebidMcpBridge {
         const slots = pubads.getSlots ? pubads.getSlots() : [];
         slots.forEach((slot: any) => {
           const slotId = slot.getSlotElementId ? slot.getSlotElementId() : slot.getAdUnitPath();
-          const targetKeys = slot.getTargetingKeys ? slot.getTargetingKeys() : [];
-          const slotTargeting: Record<string, string[]> = {};
-          targetKeys.forEach((key: string) => {
-            slotTargeting[key] = slot.getTargeting(key);
-          });
-          result[slotId] = slotTargeting;
+          result[slotId] = slot.getConfig || slot.getTargetingKeys ? getSlotTargeting(slot) : {};
         });
       }
     } catch (e) {}

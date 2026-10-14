@@ -162,6 +162,30 @@ describe('ProfessorPrebidMcpBridge', () => {
     expect(targeting['ad-slot-1']['hb_bidder']).toEqual(['appnexus']);
   });
 
+  it('reads GAM targeting through the current GPT API without deprecated getters', () => {
+    const deprecated = vi.fn(() => {
+      throw new Error('deprecated GPT method called');
+    });
+    (window as any).googletag = {
+      pubads: () => ({
+        getSlots: () => [
+          {
+            getSlotElementId: () => 'ad-slot-1',
+            getConfig: () => ({ targeting: { hb_pb: '2.50', hb_bidder: ['appnexus'] } }),
+            getTargetingKeys: deprecated,
+            getTargeting: deprecated,
+          },
+          { getSlotElementId: () => 'ad-slot-no-api' },
+        ],
+      }),
+    };
+
+    const targeting = bridge.getGamTargeting();
+    expect(targeting['ad-slot-1']).toEqual({ hb_pb: ['2.50'], hb_bidder: ['appnexus'] });
+    expect(targeting['ad-slot-no-api']).toEqual({});
+    expect(deprecated).not.toHaveBeenCalled();
+  });
+
   it('queries TCF consent status via __tcfapi', () => {
     (window as any).__tcfapi = vi.fn((cmd, version, cb) => {
       cb({ gdprApplies: true, tcString: 'CP12345EXAMPLE', tcfPolicyVersion: 2, cmpLoaded: true }, true);
