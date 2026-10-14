@@ -24,7 +24,9 @@ export const waitForMcpBridge = async function(page: Page, timeoutMs: number = 1
   await page.waitForFunction(
     () => {
       const win = window as any;
-      return typeof win.__PROFESSOR_PREBID_MCP__ !== 'undefined';
+      if (typeof win.__PROFESSOR_PREBID_MCP__ !== 'undefined') return true;
+      document.dispatchEvent(new CustomEvent('PP_MCP_BRIDGE_ENABLE'));
+      return false;
     },
     null,
     { timeout: timeoutMs }

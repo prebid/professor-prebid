@@ -310,7 +310,21 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
                     title="Creative Preview"
                     avatar={<PreviewIcon />}
                     json={winningBid.native}
-                    children={winningBid.ad && <Box sx={{ backgroundColor: '#fff', p: 1, borderRadius: 1 }} dangerouslySetInnerHTML={{ __html: winningBid.ad }} />}
+                    children={
+                      winningBid.ad && (
+                        <Box sx={{ backgroundColor: '#fff', p: 1, borderRadius: 1 }}>
+                          <iframe
+                            title="Creative Preview"
+                            data-testid="creative-preview-frame"
+                            sandbox="allow-scripts"
+                            srcDoc={winningBid.ad}
+                            width={winningBid.width || 300}
+                            height={winningBid.height || 250}
+                            style={{ border: 0, maxWidth: '100%' }}
+                          />
+                        </Box>
+                      )
+                    }
                   />
                 )}
                 {slotTargeting && (

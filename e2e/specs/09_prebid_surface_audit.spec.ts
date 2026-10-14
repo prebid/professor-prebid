@@ -117,6 +117,7 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     // 5. Read MCP Snapshot if bridge is available
     const mcpSnapshot = await page
       .evaluate(() => {
+        document.dispatchEvent(new CustomEvent('PP_MCP_BRIDGE_ENABLE'));
         const win = window as any;
         return win.__PROFESSOR_PREBID_MCP__?.getSnapshot ? win.__PROFESSOR_PREBID_MCP__.getSnapshot() : null;
       })

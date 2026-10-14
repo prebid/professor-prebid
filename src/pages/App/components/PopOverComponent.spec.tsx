@@ -98,6 +98,15 @@ describe('PopOverComponent', () => {
     fireEvent.click(adUnitSection);
   });
 
+  it('renders the creative in a sandboxed iframe instead of the publisher DOM', () => {
+    render(<PopOverComponent {...defaultProps} />);
+
+    const frame = screen.getByTestId('creative-preview-frame') as HTMLIFrameElement;
+    expect(frame.getAttribute('sandbox')).toBe('allow-scripts');
+    expect(frame.getAttribute('srcdoc')).toBe('<div>Ad Creative Banner</div>');
+    expect(screen.queryByText('Ad Creative Banner')).toBeNull();
+  });
+
   it('does not render content when isOpen is false', () => {
     render(<PopOverComponent {...defaultProps} open={false} />);
     expect(screen.queryByText('div-gpt-ad-1234567-0')).toBeNull();

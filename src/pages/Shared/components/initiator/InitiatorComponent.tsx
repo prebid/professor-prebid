@@ -23,8 +23,8 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import { GridCell } from '../bids/BidsComponent';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { createQueryEngine, distinct } from '../autocomplete/utils';
-import { download } from '../../utils';
-import { PRE_AUCTION_HAR } from '../../constants';
+import { download, getTabId } from '../../utils';
+import { preAuctionHarKey } from '../../constants';
 
 import { classifyRequest, IClassifiedNetworkEntry, NetworkCategory } from './networkClassifier';
 import { NetworkWaterfallView } from './NetworkWaterfallView';
@@ -160,7 +160,9 @@ const InitiatorComponent = (): JSX.Element => {
 
   const handleClearLog = () => {
     setSelectedEntry(null);
-    chrome.storage?.local?.set({ [PRE_AUCTION_HAR]: JSON.stringify([]) });
+    getTabId().then((tabId) => {
+      if (tabId !== undefined) chrome.storage?.session?.set({ [preAuctionHarKey(tabId)]: JSON.stringify([]) });
+    });
   };
 
   const handleReloadPage = () => {

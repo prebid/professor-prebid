@@ -16,6 +16,8 @@ export class Prebid {
   eventsApi: boolean = false;
   listenersAdded: boolean = false;
   hasQueuedListenerHook: boolean = false;
+  lastEventsUrl: string | null = null;
+  staleUrlRevokeDelay: number = 30000;
 
   constructor(namespace: string, iframeId: string | null) {
     this.namespace = namespace;
@@ -163,17 +165,24 @@ export class Prebid {
       })
       .join()}]`;
 
+    if (string === '[]') return null;
     const blob = new Blob([string], { type: 'application/json' });
     const objectURL = URL.createObjectURL(blob);
+    if (this.lastEventsUrl) {
+      // The popup/panel may still be downloading the previous URL, so free it only after a grace period.
+      const staleUrl = this.lastEventsUrl;
+      setTimeout(() => URL.revokeObjectURL(staleUrl), this.staleUrlRevokeDelay);
+    }
+    this.lastEventsUrl = objectURL;
     return objectURL;
   };
 
   sendDetailsToBackground = (): void => {
     const run = () => {
       this.globalPbjs = window[this.namespace as keyof Window] || this.globalPbjs;
-      const eventsUrl = this.getEventsObjUrl();
-      if (!eventsUrl) return;
-      const config = typeof this.globalPbjs?.getConfig === 'function' ? this.globalPbjs.getConfig() : {};
+      // Empty logs produce no URL but are still reported, so Prebid is detected before its first auction.
+      const eventsUrl = this.getEventsObjUrl() || '';
+      const config = typeof this.globalPbjs?.getConfig === 'function' ? this.globalPbjs.getConfig() : ({} as Config);
       const eids = typeof this.globalPbjs?.getUserIdsAsEids === 'function' ? this.globalPbjs.getUserIdsAsEids() : [];
       const timeout = window.PREBID_TIMEOUT || null;
       const prebidDetail: IPrebidDetails = {

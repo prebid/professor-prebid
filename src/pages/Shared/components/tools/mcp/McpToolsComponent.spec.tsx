@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import McpToolsComponent, { generateMcpAiPrompt, injectDevtoolsMcpScript } from './McpToolsComponent';
 import AppStateContext from '../../../../Shared/contexts/appStateContext';
+import { MCP_BRIDGE_ENABLE } from '../../../constants';
 
 vi.mock('../../../../Shared/utils', () => ({
   getTabId: vi.fn().mockResolvedValue(1),
@@ -16,7 +17,7 @@ describe('McpToolsComponent', () => {
         executeScript: vi.fn().mockImplementation((opts) => {
           if (typeof opts?.func === 'function') {
             (window as any).pbjs = { onEvent: vi.fn(), installedModules: [] };
-            opts.func();
+            opts.func(...(opts.args || []));
           }
           return Promise.resolve([{ result: true }]);
         }),
@@ -154,10 +155,14 @@ describe('McpToolsComponent', () => {
 
   it('exercises injectDevtoolsMcpScript inner function and handles event recording and custom globals', async () => {
     let capturedFunc: Function = () => {};
+    let capturedArgs: any[] = [];
     global.chrome.scripting.executeScript = vi.fn().mockImplementation((opts) => {
       capturedFunc = opts.func;
+      capturedArgs = opts.args || [];
       return Promise.resolve([{ result: true }]);
     });
+    const bridgeEnableListener = vi.fn();
+    document.addEventListener(MCP_BRIDGE_ENABLE, bridgeEnableListener);
 
     await injectDevtoolsMcpScript();
 
@@ -172,7 +177,9 @@ describe('McpToolsComponent', () => {
     (window as any).pbjs = mockPbjs;
     (window as any)._pbjsGlobals = ['pbjs'];
 
-    capturedFunc();
+    capturedFunc(...capturedArgs);
+    expect(bridgeEnableListener).toHaveBeenCalledTimes(1);
+    document.removeEventListener(MCP_BRIDGE_ENABLE, bridgeEnableListener);
 
     registeredHandlers['auctionInit']?.({ auctionId: 'auc-1', timeout: 2000 });
     registeredHandlers['bidResponse']?.({ auctionId: 'auc-1', cpm: 2.0 });
@@ -182,7 +189,7 @@ describe('McpToolsComponent', () => {
     expect((window as any).__PREBID_DEVTOOLS_MCP__.getEvents().length).toBe(4);
     expect((window as any).__PREBID_DEVTOOLS_MCP__.getAuctions().length).toBe(1);
 
-    capturedFunc();
+    capturedFunc(...capturedArgs);
   });
 
   it('triggers export MCP JSON download', () => {

@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import InitiatorComponent from './InitiatorComponent';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
-import { PRE_AUCTION_HAR } from '../../constants';
+import { preAuctionHarKey } from '../../constants';
 
 describe('InitiatorComponent', () => {
   const sampleHarLog: any[] = [
@@ -65,12 +65,13 @@ describe('InitiatorComponent', () => {
     vi.clearAllMocks();
     global.chrome = {
       storage: {
-        local: {
+        session: {
           set: vi.fn(),
         },
       },
       devtools: {
         inspectedWindow: {
+          tabId: 7,
           reload: vi.fn(),
         },
       },
@@ -219,7 +220,7 @@ describe('InitiatorComponent', () => {
     expect(screen.getByText(/test-auction/)).toBeTruthy();
   });
 
-  it('handles clearing the network log and raw JSON toggle', () => {
+  it('handles clearing the network log and raw JSON toggle', async () => {
     const mockContext: any = {
       harLog: sampleHarLog,
       frames: {},
@@ -240,6 +241,6 @@ describe('InitiatorComponent', () => {
     const clearBtn = screen.getByRole('button', { name: /Clear Captured Network Log/i });
     fireEvent.click(clearBtn);
 
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({ [PRE_AUCTION_HAR]: JSON.stringify([]) });
+    await waitFor(() => expect(chrome.storage.session.set).toHaveBeenCalledWith({ [preAuctionHarKey(7)]: JSON.stringify([]) }));
   });
 });

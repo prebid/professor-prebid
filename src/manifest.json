@@ -46,8 +46,7 @@
       "resources": [
         "injected.bundle.js",
         "app.html",
-        "openDfpConsole.bundle.js",
-        "devtoolsMcpStandalone.bundle.js"
+        "openDfpConsole.bundle.js"
       ],
       "matches": [
         "http://*/*",

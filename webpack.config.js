@@ -48,7 +48,6 @@ const options = {
     panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.tsx'),
     injected: path.join(__dirname, 'src', 'pages', 'Injected', 'index.tsx'),
     openDfpConsole: path.join(__dirname, 'src', 'pages', 'Injected', 'openDfpConsole.ts'),
-    devtoolsMcpStandalone: path.join(__dirname, 'src', 'pages', 'Injected', 'devtoolsMcpStandalone.ts'),
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['background', 'contentScript', 'devtools'],

@@ -1,8 +1,10 @@
 import React, { useContext } from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import InspectedPageContext, { InspectedPageContextProvider } from './inspectedPageContext';
-import { PRE_AUCTION_HAR } from '../constants';
+import { preAuctionHarKey } from '../constants';
+
+const HAR_KEY = preAuctionHarKey(123);
 
 vi.mock('../utils', () => ({
   getTabId: vi.fn().mockResolvedValue(123),
@@ -38,11 +40,14 @@ describe('InspectedPageContextProvider', () => {
           get: vi.fn((keys, cb) => {
             if (Array.isArray(keys) && keys.includes('tab_info_123')) {
               cb({ tab_info_123: { 'top-window': {} } });
-            } else if (keys === PRE_AUCTION_HAR) {
-              cb({ [PRE_AUCTION_HAR]: JSON.stringify([{ url: 'https://example.com' }]) });
             } else {
               cb({});
             }
+          }),
+        },
+        session: {
+          get: vi.fn((key, cb) => {
+            cb(key === HAR_KEY ? { [HAR_KEY]: JSON.stringify([{ url: 'https://example.com' }]) } : {});
           }),
         },
         onChanged: {
@@ -66,6 +71,29 @@ describe('InspectedPageContextProvider', () => {
 
     expect(screen.getByTestId('frames').textContent).toContain('top-window');
     expect(screen.getByTestId('downloading').textContent).toBe('false');
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://example.com'), { timeout: 2000 });
+  });
+
+  it('only applies network log changes for the inspected tab from session storage', async () => {
+    await act(async () => {
+      render(
+        <InspectedPageContextProvider>
+          <TestComponent />
+        </InspectedPageContextProvider>
+      );
+    });
+
+    await act(async () => {
+      listeners.forEach((listener) => {
+        listener({ [preAuctionHarKey(999)]: { newValue: JSON.stringify([{ url: 'https://other-tab.com' }]) } }, 'session');
+        listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://wrong-area.com' }]) } }, 'local');
+        listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://inspected-tab.com' }]) } }, 'session');
+      });
+    });
+
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://inspected-tab.com'), { timeout: 2000 });
+    expect(screen.getByTestId('harLog').textContent).not.toContain('other-tab');
+    expect(screen.getByTestId('harLog').textContent).not.toContain('wrong-area');
   });
 
   it('handles initial mount when tabInfo does not exist in local storage', async () => {
@@ -104,7 +132,7 @@ describe('InspectedPageContextProvider', () => {
             initReqChain: {
               newValue: JSON.stringify({ chain: true }),
             },
-            [PRE_AUCTION_HAR]: {
+            [HAR_KEY]: {
               newValue: JSON.stringify([{ url: 'https://test.com/new' }]),
             },
           },
@@ -133,11 +161,11 @@ describe('InspectedPageContextProvider', () => {
       listeners.forEach((listener) => {
         listener(
           {
-            [PRE_AUCTION_HAR]: {
+            [HAR_KEY]: {
               newValue: 'not-valid-json',
             },
           },
-          'local'
+          'session'
         );
       });
     });

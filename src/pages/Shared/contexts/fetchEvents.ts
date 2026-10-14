@@ -33,6 +33,7 @@ export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Di
     const { prebids } = tabInfo[frameId];
     if (!prebids) continue;
     for (const [namespace, prebid] of Object.entries(prebids)) {
+      if (!prebid?.eventsUrl) continue;
       const { hostname: eventsURLHost } = safelyConstructURL(prebid.eventsUrl);
       const { hostname: currentTabURLHost } = frameId === 'top-window' ? await getCurrentTabURL() : safelyConstructURL(frameId);
       if (eventsURLHost !== currentTabURLHost) continue;

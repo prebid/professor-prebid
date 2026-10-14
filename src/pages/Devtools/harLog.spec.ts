@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { isRecordableUrl, toLogEntry, collectHarLog} from './harLog';
-import { PRE_AUCTION_HAR } from '../Shared/constants';
+import { preAuctionHarKey } from '../Shared/constants';
+
+const TAB_ID = 42;
+const HAR_KEY = preAuctionHarKey(TAB_ID);
 
 describe('harLog', () => {
   beforeEach(() => {
@@ -8,12 +11,21 @@ describe('harLog', () => {
     vi.useFakeTimers();
     global.chrome = {
       storage: {
+        session: {
+          set: vi.fn().mockResolvedValue(undefined),
+          get: vi.fn(),
+        },
         local: {
           set: vi.fn(),
-          get: vi.fn(),
+        },
+        onChanged: {
+          addListener: vi.fn(),
         },
       },
       devtools: {
+        inspectedWindow: {
+          tabId: TAB_ID,
+        },
         network: {
           onRequestFinished: {
             addListener: vi.fn(),
@@ -88,6 +100,32 @@ describe('harLog', () => {
       expect(entry.timings?.wait).toBe(50.2);
     });
 
+    it('redacts credential headers and cookie values', () => {
+      const entry = toLogEntry({
+        request: {
+          url: 'https://example.com/',
+          headers: [
+            { name: 'Cookie', value: 'session=abc' },
+            { name: 'Authorization', value: 'Bearer secret' },
+            { name: 'Sec-GPC', value: '1' },
+          ],
+          cookies: [{ name: 'session', value: 'abc' }],
+        },
+        response: {
+          headers: [{ name: 'set-cookie', value: 'session=abc; Secure' }],
+          cookies: [{ name: 'session', value: 'abc' }],
+        },
+      });
+      expect(entry.requestHeaders).toEqual([
+        { name: 'Cookie', value: '[redacted]' },
+        { name: 'Authorization', value: '[redacted]' },
+        { name: 'Sec-GPC', value: '1' },
+      ]);
+      expect(entry.responseHeaders).toEqual([{ name: 'set-cookie', value: '[redacted]' }]);
+      expect(entry.requestCookies).toEqual([{ name: 'session', value: '[redacted]' }]);
+      expect(entry.responseCookies).toEqual([{ name: 'session', value: '[redacted]' }]);
+    });
+
     it('handles malformed URL and missing fields gracefully', () => {
       const harEntry = {
         request: {
@@ -117,76 +155,98 @@ describe('harLog', () => {
   });
 
   describe('collectHarLog', () => {
+    const setup = () => {
+      const listeners: { network: (entry: any) => void; tabs: (tabId: number, info: any) => void; storage: (changes: any, area: string) => void } = {
+        network: () => {},
+        tabs: () => {},
+        storage: () => {},
+      };
+      (global.chrome.devtools.network.onRequestFinished.addListener as any).mockImplementation((fn: any) => (listeners.network = fn));
+      (global.chrome.tabs.onUpdated.addListener as any).mockImplementation((fn: any) => (listeners.tabs = fn));
+      (global.chrome.storage.onChanged.addListener as any).mockImplementation((fn: any) => (listeners.storage = fn));
+      collectHarLog();
+      return listeners;
+    };
+    const sessionSet = () => global.chrome.storage.session.set as any;
+    const lastSaved = () => JSON.parse(sessionSet().mock.calls.slice(-1)[0][0][HAR_KEY]);
+    const request = (url: string) => ({ request: { url, method: 'GET' }, response: { status: 200 }, startedDateTime: '2026-08-17T10:00:00.000Z', time: 10 });
+
     it('does nothing if chrome.devtools.network is unavailable', () => {
       global.chrome.devtools = {} as any;
       collectHarLog();
+      expect(sessionSet()).not.toHaveBeenCalled();
+    });
+
+    it('stores the log per inspected tab in session storage, never in local storage', async () => {
+      const listeners = setup();
+      expect(sessionSet()).toHaveBeenCalledWith({ [HAR_KEY]: JSON.stringify([]) });
+
+      listeners.network(request('https://example.com/test'));
+      expect(sessionSet()).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(300);
+      expect(sessionSet()).toHaveBeenCalledTimes(2);
+      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/test']);
+
+      listeners.network({ request: { url: 'chrome-extension://123/script.js' } });
+      await vi.advanceTimersByTimeAsync(300);
+      expect(sessionSet()).toHaveBeenCalledTimes(2);
       expect(global.chrome.storage.local.set).not.toHaveBeenCalled();
     });
 
-    it('initializes and records incoming requests when devtools network is available', () => {
-      let networkListener: (entry: any) => void = () => {};
-      let tabsListener: (tabId: number, info: any) => void = () => {};
+    it('resets only when the inspected tab starts loading', async () => {
+      const listeners = setup();
+      listeners.network(request('https://example.com/a'));
+      await vi.advanceTimersByTimeAsync(300);
 
-      (global.chrome.devtools.network.onRequestFinished.addListener as any).mockImplementation((fn: any) => {
-        networkListener = fn;
-      });
-      (global.chrome.tabs.onUpdated.addListener as any).mockImplementation((fn: any) => {
-        tabsListener = fn;
-      });
+      listeners.tabs(TAB_ID + 1, { status: 'loading' });
+      expect(lastSaved()).toHaveLength(1);
 
-      collectHarLog();
+      listeners.tabs(TAB_ID, { status: 'complete' });
+      expect(lastSaved()).toHaveLength(1);
 
-      expect(global.chrome.storage.local.set).toHaveBeenCalledWith({
-        [PRE_AUCTION_HAR]: JSON.stringify([]),
-      });
-
-      networkListener({
-        request: { url: 'https://example.com/test', method: 'GET' },
-        response: { status: 200 },
-        startedDateTime: '2026-08-17T10:00:00.000Z',
-        time: 50,
-      });
-
-      expect(global.chrome.storage.local.set).toHaveBeenCalledTimes(1);
-
-      vi.advanceTimersByTime(300);
-
-      expect(global.chrome.storage.local.set).toHaveBeenCalledTimes(2);
-      const saved = JSON.parse((global.chrome.storage.local.set as any).mock.calls[1][0][PRE_AUCTION_HAR]);
-      expect(saved.length).toBe(1);
-      expect(saved[0].url).toBe('https://example.com/test');
-
-      networkListener({
-        request: { url: 'chrome-extension://123/script.js' },
-      });
-      vi.advanceTimersByTime(300);
-      expect(global.chrome.storage.local.set).toHaveBeenCalledTimes(2);
-
-      tabsListener(1, { status: 'loading' });
-      expect(global.chrome.storage.local.set).toHaveBeenLastCalledWith({
-        [PRE_AUCTION_HAR]: JSON.stringify([]),
-      });
+      listeners.tabs(TAB_ID, { status: 'loading' });
+      expect(lastSaved()).toEqual([]);
     });
 
-    it('caps entries at MAX_ENTRIES (1000)', () => {
-      let networkListener: (entry: any) => void = () => {};
-      (global.chrome.devtools.network.onRequestFinished.addListener as any).mockImplementation((fn: any) => {
-        networkListener = fn;
-      });
+    it('drops the in-memory log when the panel clears the stored log', async () => {
+      const listeners = setup();
+      listeners.network(request('https://example.com/a'));
+      await vi.advanceTimersByTimeAsync(300);
 
-      collectHarLog();
+      listeners.storage({ [HAR_KEY]: { newValue: '[]' } }, 'session');
+      listeners.network(request('https://example.com/b'));
+      await vi.advanceTimersByTimeAsync(300);
+      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/b']);
+    });
 
-      for (let i = 0; i < 1050; i++) {
-        networkListener({
-          request: { url: `https://example.com/req_${i}`, method: 'GET' },
-          response: { status: 200 },
-          startedDateTime: '2026-08-17T10:00:00.000Z',
-          time: 10,
-        });
-      }
+    it('ignores clears for other tabs or storage areas', async () => {
+      const listeners = setup();
+      listeners.network(request('https://example.com/a'));
+      await vi.advanceTimersByTimeAsync(300);
 
-      vi.advanceTimersByTime(300);
-      const saved = JSON.parse((global.chrome.storage.local.set as any).mock.calls.slice(-1)[0][0][PRE_AUCTION_HAR]);
+      listeners.storage({ [preAuctionHarKey(TAB_ID + 1)]: { newValue: '[]' } }, 'session');
+      listeners.storage({ [HAR_KEY]: { newValue: '[]' } }, 'local');
+      listeners.network(request('https://example.com/b'));
+      await vi.advanceTimersByTimeAsync(300);
+      expect(lastSaved()).toHaveLength(2);
+    });
+
+    it('keeps the newest half and retries once when the session quota is exceeded', async () => {
+      const listeners = setup();
+      for (let i = 0; i < 10; i++) listeners.network(request(`https://example.com/req_${i}`));
+      sessionSet().mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
+
+      await vi.advanceTimersByTimeAsync(300);
+      expect(lastSaved().map((e: any) => e.url)).toEqual([5, 6, 7, 8, 9].map((i) => `https://example.com/req_${i}`));
+    });
+
+    it('caps entries at MAX_ENTRIES (1000)', async () => {
+      const listeners = setup();
+      for (let i = 0; i < 1050; i++) listeners.network(request(`https://example.com/req_${i}`));
+
+      await vi.advanceTimersByTimeAsync(300);
+      const saved = lastSaved();
       expect(saved.length).toBe(1000);
       expect(saved[saved.length - 1].url).toBe('https://example.com/req_1049');
     });

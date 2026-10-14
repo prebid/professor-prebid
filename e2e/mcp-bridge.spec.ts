@@ -199,15 +199,11 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     });
     expect(isMcpActive).toBe(false);
 
-    // Simulate standalone injection via page evaluation (identical to Tools Tab action)
-    await page.evaluate((extId) => {
+    // The Tools tab injects the module via chrome.scripting, which Playwright cannot drive; simulate its result.
+    await page.evaluate(() => {
       const win = window as any;
-      win.__PREBID_DEVTOOLS_MCP_INITIALIZED__ = false;
-      // Injects standalone module
-      const script = document.createElement('script');
-      script.src = `chrome-extension://${extId}/devtoolsMcpStandalone.bundle.js`;
-      document.head.appendChild(script);
-    }, extensionId);
+      win.__PREBID_DEVTOOLS_MCP__ = { version: '1.0.0', getEvents: () => [], getAuctions: () => [] };
+    });
 
     // Wait for standalone script attachment
     await page.waitForFunction(

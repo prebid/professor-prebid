@@ -168,10 +168,31 @@ describe('Prebid Injected Script', () => {
   });
 
   describe('getEventsObjUrl', () => {
-    it('returns a valid object url even when events array is empty', () => {
+    it('creates no object url when the events array is empty', () => {
       const instance = new Prebid('pbjs', 'frame1');
       instance.events = [];
-      expect(instance.getEventsObjUrl()).toBe('blob:http://example.com/mock-blob-url');
+      (global.URL.createObjectURL as any).mockClear();
+      expect(instance.getEventsObjUrl()).toBeNull();
+      expect(global.URL.createObjectURL).not.toHaveBeenCalled();
+    });
+
+    it('revokes the previous object url only after the grace period', () => {
+      global.URL.revokeObjectURL = vi.fn();
+      (global.URL.createObjectURL as any).mockReturnValueOnce('blob:first').mockReturnValueOnce('blob:second').mockReturnValueOnce('blob:third');
+      const instance = new Prebid('pbjs', 'frame1');
+      instance.events = [{ eventType: 'auctionInit', args: {} }];
+
+      expect(instance.getEventsObjUrl()).toBe('blob:first');
+      expect(instance.getEventsObjUrl()).toBe('blob:second');
+      vi.advanceTimersByTime(29999);
+      expect(global.URL.revokeObjectURL).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:first');
+
+      expect(instance.getEventsObjUrl()).toBe('blob:third');
+      vi.advanceTimersByTime(30000);
+      expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:second');
+      expect(global.URL.revokeObjectURL).not.toHaveBeenCalledWith('blob:third');
     });
 
     it('prunes doc property on adRenderSucceeded event', () => {
@@ -291,6 +312,15 @@ describe('Prebid Injected Script', () => {
           timeout: 3000,
         })
       );
+    });
+
+    it('still reports Prebid with an empty eventsUrl before the first auction', () => {
+      const instance = new Prebid('pbjs', 'frame1');
+      instance.events = [];
+      (EventBus.emit as any).mockClear();
+
+      instance.sendDetailsToBackground();
+      expect(EventBus.emit).toHaveBeenCalledWith(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, expect.objectContaining({ namespace: 'pbjs', version: '7.0.0', eventsUrl: '' }));
     });
 
     it('handles optional functions like getUserIdsAsEids missing', () => {

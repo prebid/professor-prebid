@@ -175,6 +175,7 @@ test.describe('Professor Prebid Extension', () => {
     expect(tabInfoKeys.length).toBeGreaterThan(0);
     // Also verify that the MCP bridge is available on page
     const isBridgeReady = await page.evaluate(() => {
+      document.dispatchEvent(new CustomEvent('PP_MCP_BRIDGE_ENABLE'));
       const win = window as any;
       return typeof win.__PROFESSOR_PREBID_MCP__ !== 'undefined' && win.__PROFESSOR_PREBID_MCP__.bridgeVersion === '1.0.0';
     });

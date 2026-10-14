@@ -6,12 +6,13 @@ import { addEventListenersForPrebid } from './prebid';
 import { iabTcf } from './tcf';
 import { initProfessorPrebidMcpBridge } from './mcpBridge';
 import { detectIframe, generateUniqueId } from '../Shared/utils';
+import { MCP_BRIDGE_ENABLE } from '../Shared/constants';
 
 const frameId = detectIframe() ? `${window.location.href}-${generateUniqueId()}` : 'top-window';
 googleAdManager.init();
 addEventListenersForPrebid(frameId);
 iabTcf.init();
-initProfessorPrebidMcpBridge();
+document.addEventListener(MCP_BRIDGE_ENABLE, () => initProfessorPrebidMcpBridge(), { once: true });
 
 const injectApp = () => {
   if (document.body) {

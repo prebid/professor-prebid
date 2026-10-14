@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import { getTabId } from '../utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';
-import { PRE_AUCTION_HAR } from '../constants';
+import { preAuctionHarKey } from '../constants';
 import { IHarEntry } from '../components/preAuction/harCorrelation';
 
 const InspectedPageContext = createContext<IPageContext | undefined>(undefined);
@@ -85,13 +85,18 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
       }
     };
 
-    chrome.storage?.local?.get(PRE_AUCTION_HAR, (result) => {
-      if (result?.[PRE_AUCTION_HAR]) read(result[PRE_AUCTION_HAR]);
+    let key: string | null = null;
+    getTabId().then((tabId) => {
+      if (tabId === undefined) return;
+      key = preAuctionHarKey(tabId);
+      chrome.storage?.session?.get(key, (result) => {
+        if (result?.[key]) read(result[key]);
+      });
     });
 
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'local' && changes[PRE_AUCTION_HAR] && changes[PRE_AUCTION_HAR].newValue) {
-        read(changes[PRE_AUCTION_HAR].newValue);
+      if (areaName === 'session' && key && changes[key] && changes[key].newValue) {
+        read(changes[key].newValue);
       }
     };
     chrome.storage.onChanged.addListener(handler);

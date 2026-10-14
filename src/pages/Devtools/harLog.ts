@@ -1,19 +1,25 @@
-import { PRE_AUCTION_HAR } from '../Shared/constants';
+import { preAuctionHarKey } from '../Shared/constants';
 
 /**
  * Records a rich log of network requests the inspected page makes, powering both:
  * - The Pre-Auction tab (latency and timing correlation with RTD/ID providers)
  * - The modernized Network Inspector tab (Prebid traffic categories, visual initiator cascades, privacy auditing)
  *
+ * Privacy:
+ * - Stored per inspected tab in chrome.storage.session (memory only, never written to disk)
+ * - Credential headers and cookie values are redacted before storing
+ *
  * Performance-optimized:
  * - Bound to MAX_ENTRIES ring buffer to prevent memory leaks on long sessions
- * - Batched writes to chrome.storage.local
+ * - Batched writes to chrome.storage.session
  * - String and payload truncation to keep storage serialization lightweight
  */
 
 const MAX_ENTRIES = 1000;
 const MAX_POST_TEXT_LENGTH = 10000;
 const MAX_ARRAY_ITEMS = 50;
+const REDACTED = '[redacted]';
+const SENSITIVE_HEADERS = ['cookie', 'set-cookie', 'authorization', 'proxy-authorization'];
 
 let entries: IHarLogEntry[] = [];
 let flushTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -100,6 +106,11 @@ const sanitizeNameValuePairs = (arr?: any[]): Array<{ name: string; value: strin
   }));
 };
 
+const redactHeaders = (arr?: any[]): Array<{ name: string; value: string }> | undefined =>
+  sanitizeNameValuePairs(arr)?.map((h) => (SENSITIVE_HEADERS.includes(h.name.toLowerCase()) ? { name: h.name, value: REDACTED } : h));
+
+const redactCookies = (arr?: any[]): Array<{ name: string; value: string }> | undefined => sanitizeNameValuePairs(arr)?.map((c) => ({ name: c.name, value: REDACTED }));
+
 const extractQueryParams = (harEntry: any, url: string): Array<{ name: string; value: string }> | undefined => {
   const fromHar = sanitizeNameValuePairs(harEntry?.request?.queryString);
   if (fromHar && fromHar.length > 0) return fromHar;
@@ -161,10 +172,10 @@ export const toLogEntry = (harEntry: any): IHarLogEntry => {
     resourceType: harEntry?._resourceType,
     mimeType: harEntry?.response?.content?.mimeType,
     queryString: extractQueryParams(harEntry, url),
-    requestHeaders: sanitizeNameValuePairs(harEntry?.request?.headers),
-    responseHeaders: sanitizeNameValuePairs(harEntry?.response?.headers),
-    requestCookies: sanitizeNameValuePairs(harEntry?.request?.cookies),
-    responseCookies: sanitizeNameValuePairs(harEntry?.response?.cookies),
+    requestHeaders: redactHeaders(harEntry?.request?.headers),
+    responseHeaders: redactHeaders(harEntry?.response?.headers),
+    requestCookies: redactCookies(harEntry?.request?.cookies),
+    responseCookies: redactCookies(harEntry?.response?.cookies),
     redirectURL: harEntry?.response?.redirectURL || undefined,
     initiator: harEntry?._initiator || undefined,
     postData: extractPostData(harEntry?.request?.postData),
@@ -174,10 +185,26 @@ export const toLogEntry = (harEntry: any): IHarLogEntry => {
   };
 };
 
+const inspectedTabId = (): number | undefined => chrome.devtools?.inspectedWindow?.tabId;
+
+const write = async (list: IHarLogEntry[]): Promise<void> => {
+  const tabId = inspectedTabId();
+  if (tabId === undefined || !chrome.storage?.session) return;
+  await chrome.storage.session.set({ [preAuctionHarKey(tabId)]: JSON.stringify(list) });
+};
+
 /** Batched so high-frequency network bursts do not cause redundant writes. */
-const flush = () => {
+const flush = async () => {
   flushTimeout = null;
-  chrome.storage.local.set({ [PRE_AUCTION_HAR]: JSON.stringify(entries) });
+  try {
+    await write(entries);
+  } catch {
+    // storage.session has a 10 MB quota; keep the newest half and retry once.
+    entries = entries.slice(-Math.floor(entries.length / 2));
+    try {
+      await write(entries);
+    } catch {}
+  }
 };
 
 const scheduleFlush = () => {
@@ -196,7 +223,7 @@ const record = (harEntry: any) => {
 export const reset = () => {
   entries = [];
   idCounter = 1;
-  chrome.storage.local.set({ [PRE_AUCTION_HAR]: JSON.stringify(entries) });
+  write(entries).catch(() => {});
 };
 
 export const collectHarLog = () => {
@@ -204,6 +231,12 @@ export const collectHarLog = () => {
   reset();
   chrome.devtools.network.onRequestFinished.addListener(record);
   chrome.tabs?.onUpdated.addListener((tabId, info) => {
-    if (info.status === 'loading') reset();
+    if (tabId === inspectedTabId() && info.status === 'loading') reset();
+  });
+  // The panel's "Clear log" button empties the stored list; drop the in-memory copy too so the next flush does not restore it.
+  chrome.storage?.onChanged?.addListener((changes, areaName) => {
+    const tabId = inspectedTabId();
+    if (areaName !== 'session' || tabId === undefined) return;
+    if (changes[preAuctionHarKey(tabId)]?.newValue === '[]') entries = [];
   });
 };

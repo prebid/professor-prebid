@@ -54,7 +54,11 @@ export const findAdContainer = (adUnitCode: string): HTMLElement | null => {
   }
 
   // 3. Fallback querySelector (exclude masks, scripts, styles, and extension root)
-  const candidate = document.querySelector(`[id*="${adUnitCode}"]:not(#professor_prebid-root *):not([id^=prpb-mask--container-]):not(script):not(style)`) as HTMLElement;
+  // Matched in JS rather than via an [id*="..."] selector so ad unit codes with quotes or backslashes cannot break the query.
+  const extensionRoot = document.getElementById('professor_prebid-root');
+  const candidate = Array.from(document.querySelectorAll<HTMLElement>('[id]')).find(
+    (el) => el.id.includes(adUnitCode) && !el.id.startsWith('prpb-mask--container-') && el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE' && !(extensionRoot && extensionRoot !== el && extensionRoot.contains(el))
+  );
   if (candidate) {
     return candidate.tagName === 'IFRAME' ? candidate.parentElement : candidate;
   }
@@ -112,7 +116,7 @@ const InjectedApp = (): JSX.Element => {
       .filter((event) => event.eventType === 'auctionEnd')
       .forEach((event) => {
         if (Array.isArray(event.args?.adUnitCodes)) {
-          event.args.adUnitCodes.forEach((code) => adUnitCodesSet.add(code));
+          event.args.adUnitCodes.forEach((code: string) => adUnitCodesSet.add(code));
         }
       });
 

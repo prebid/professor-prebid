@@ -14,6 +14,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AppStateContext from '../../../contexts/appStateContext';
 import { getTabId } from '../../../../Shared/utils';
+import { MCP_BRIDGE_ENABLE } from '../../../constants';
 
 export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
   try {
@@ -21,7 +22,9 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
     await chrome.scripting.executeScript({
       target: { tabId },
       world: 'MAIN',
-      func: () => {
+      args: [MCP_BRIDGE_ENABLE],
+      func: (bridgeEnableEvent: string) => {
+        document.dispatchEvent(new CustomEvent(bridgeEnableEvent));
         const win = window as any;
         if (win.__PREBID_DEVTOOLS_MCP_INITIALIZED__) {
           console.info('[Professor Prebid] DevTools MCP is already active on this page.');

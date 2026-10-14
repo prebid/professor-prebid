@@ -1,6 +1,7 @@
 import { BadgeService } from './BadgeService';
 import { MessageHandler } from './MessageHandler';
-import { TabContextService} from './TabContextService';
+import { TabContextService } from './TabContextService';
+import { preAuctionHarKey } from '../Shared/constants';
 
 class BackgroundService {
   constructor(private tabContextService: TabContextService, private updateBadge: (tabId: number | undefined) => void) {}
@@ -38,6 +39,7 @@ class BackgroundService {
 
   handleOnTabRemoved = async (tabId: number, _info: chrome.tabs.TabRemoveInfo) => {
     await this.tabContextService.deleteTabInfo(tabId);
+    await chrome.storage.session?.remove(preAuctionHarKey(tabId));
   };
 
   handleOnAlarm = async (_alarm: chrome.alarms.Alarm) => {

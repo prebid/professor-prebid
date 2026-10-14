@@ -36,7 +36,9 @@ export const DOWNLOAD_FAILED = 'PP_DOWNLOAD_FAILED';
 export const INITIATOR_TOGGLE = 'initiator_state';
 export const INITIATOR_ROOT_URL = 'initiator_root_url';
 export const PRE_AUCTION_HAR = 'preAuctionHar';
+export const preAuctionHarKey = (tabId: number) => `${PRE_AUCTION_HAR}_${tabId}`;
 export const POPUP_LOADED = 'PP_POPUP_LOADED';
+export const MCP_BRIDGE_ENABLE = 'PP_MCP_BRIDGE_ENABLE';
 export const PREBID_DETECTION_TIMEOUT = 60000;
 export const PREBID_DETECTION_TIMEOUT_IFRAME = 3000;
 

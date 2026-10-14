@@ -38,6 +38,22 @@ describe('fetchEvents', () => {
     expect(setDownloading).not.toHaveBeenCalled();
   });
 
+  it('keeps a Prebid instance without an eventsUrl and does not fetch', async () => {
+    (global.chrome.tabs.query as any).mockImplementation((queryInfo: any, cb: any) => cb([{}]));
+    global.fetch = vi.fn();
+    const tabInfo: any = {
+      'top-window': {
+        prebids: {
+          pbjs: { eventsUrl: '', events: [], version: '11.29.0' },
+        },
+      },
+    };
+
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(result['top-window'].prebids.pbjs).toEqual({ eventsUrl: '', events: [], version: '11.29.0' });
+  });
+
   it('successfully fetches events for top-window', async () => {
     const tabInfo: any = {
       'top-window': {

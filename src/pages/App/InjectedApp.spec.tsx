@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
-import InjectedApp from './InjectedApp';
+import InjectedApp, { findAdContainer } from './InjectedApp';
 import { EVENTS, CONSOLE_TOGGLE, SAVE_MASKS } from '../Shared/constants';
 import { EventBus } from '../Shared/utils';
 
@@ -419,5 +419,41 @@ describe('InjectedApp Component', () => {
       closeBtn.click();
     });
     expect(screen.queryByTestId('injected-popover-dialog')).toBeNull();
+  });
+});
+
+describe('findAdContainer', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('matches ad unit codes containing CSS special characters via the fallback selector', () => {
+    const el = document.createElement('div');
+    el.id = 'wrap-ad"unit\\1-x';
+    document.body.appendChild(el);
+
+    expect(findAdContainer('ad"unit\\1')).toBe(el);
+  });
+
+  it('skips extension-owned elements, masks, scripts and styles', () => {
+    const root = document.createElement('div');
+    root.id = 'professor_prebid-root';
+    const inner = document.createElement('div');
+    inner.id = 'inside-slot-a';
+    root.appendChild(inner);
+    const mask = document.createElement('div');
+    mask.id = 'prpb-mask--container-slot-a';
+    const script = document.createElement('script');
+    script.id = 'script-slot-a';
+    const target = document.createElement('div');
+    target.id = 'page-slot-a';
+    document.body.append(root, mask, script, target);
+
+    expect(findAdContainer('slot-a')).toBe(target);
+  });
+
+  it('returns null instead of throwing when nothing matches', () => {
+    expect(() => findAdContainer('a"b]c')).not.toThrow();
+    expect(findAdContainer('a"b]c')).toBeNull();
   });
 });
