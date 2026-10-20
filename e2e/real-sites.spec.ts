@@ -1,15 +1,18 @@
 import { test, expect, chromium, BrowserContext, Page } from '@playwright/test';
+import fs from 'fs';
 import path from 'path';
 const REAL_PREBID_SITES = [
   {
     name: 'eatpicks.com',
     url: 'https://www.eatpicks.com/',
     description: 'Food blog with Prebid.js header bidding',
+    prebidRequired: true,
   },
   {
     name: 'heise.de',
     url: 'https://www.heise.de/',
     description: 'German tech news site with Prebid.js',
+    prebidRequired: true,
   },
 ];
 const acceptConsentDialog = async function(page: Page): Promise<void> {
@@ -68,9 +71,10 @@ const acceptConsentDialog = async function(page: Page): Promise<void> {
 test.describe('Real-Site Prebid Detection', () => {
   let browserContext: BrowserContext;
   let extensionId: string;
+  let userDataDir: string;
   test.beforeAll(async () => {
     const pathToExtension = path.join(__dirname, '../build');
-    const userDataDir = '/tmp/test_real_sites_' + Date.now();
+    userDataDir = '/tmp/test_real_sites_' + Date.now();
     browserContext = await chromium.launchPersistentContext(userDataDir, {
       headless: false,
       bypassCSP: true,
@@ -104,97 +108,97 @@ test.describe('Real-Site Prebid Detection', () => {
   });
   test.afterAll(async () => {
     await browserContext?.close();
+    if (userDataDir) {
+      fs.rmSync(userDataDir, { recursive: true, force: true });
+    }
   });
-  for (const site of REAL_PREBID_SITES) {
-    test(`detects Prebid on ${site.name}`, async () => {
-      test.setTimeout(60000);
-      const page = await browserContext.newPage();
-      // Collect console errors
-      const pageErrors: string[] = [];
-      page.on('pageerror', (err) => pageErrors.push(err.message));
-      // Navigate
-      try {
-        await page.goto(site.url, {
-          waitUntil: 'domcontentloaded',
-          timeout: 20000,
-        });
-      } catch (e) {}
-      // Wait for initial page load
-      await page.waitForTimeout(3000);
-      // Accept consent dialog (GDPR)
-      await acceptConsentDialog(page);
-      // Wait for Prebid to load after consent
-      await page.waitForTimeout(10000);
-      // 1. Check the page itself for Prebid objects
-      const pageHasPrebid = await page.evaluate(() => {
-        const w = window as any;
-        return {
-          hasPbjsGlobals: !!w._pbjsGlobals,
-          pbjsGlobals: w._pbjsGlobals || [],
-          hasPbjs: !!w.pbjs,
-          pbjsVersion: w.pbjs?.version || null,
-          hasHbObj: !!w.hb_obj,
-        };
+  const verifySitePrebidDetection = async (site: (typeof REAL_PREBID_SITES)[number]) => {
+    test.setTimeout(60000);
+    const page = await browserContext.newPage();
+    // Collect console errors
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(err.message));
+    // Navigate
+    try {
+      await page.goto(site.url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 20000,
       });
-      // 2. Verify the extension's service worker is still alive
-      const serviceWorker = browserContext.serviceWorkers().find((sw) => sw.url().includes(extensionId));
-      expect(serviceWorker, 'Service worker should be alive').toBeTruthy();
-      // 3. Check extension storage for detected Prebid data
-      const storageData = await serviceWorker!.evaluate(async () => {
-        return await chrome.storage.local.get(null);
-      });
-      // 4. Verify tab_info keys exist
-      const tabKeys = Object.keys(storageData).filter((key) => key.startsWith('tab_info_'));
-      expect(tabKeys.length, `Should have at least one tab entry`).toBeGreaterThan(0);
-      // 5. Analyze stored data
-      let prebidDetected = false;
-      let prebidNamespaces: string[] = [];
-      let prebidVersion: string | undefined;
+    } catch (e) {}
+    // Wait for initial page load
+    await page.waitForTimeout(3000);
+    // Accept consent dialog (GDPR)
+    await acceptConsentDialog(page);
+    // Wait for Prebid to load after consent
+    await page.waitForTimeout(10000);
+    // 1. Check the page itself for Prebid objects
+    const pageHasPrebid = await page.evaluate(() => {
+      const w = window as any;
+      return {
+        hasPbjsGlobals: !!w._pbjsGlobals,
+        pbjsGlobals: w._pbjsGlobals || [],
+        hasPbjs: !!w.pbjs,
+        pbjsVersion: w.pbjs?.version || null,
+        hasHbObj: !!w.hb_obj,
+      };
+    });
+    // 2. Verify the extension's service worker is still alive
+    const serviceWorker = browserContext.serviceWorkers().find((sw) => sw.url().includes(extensionId));
+    expect(serviceWorker, 'Service worker should be alive').toBeTruthy();
+    // 3. Check extension storage for detected Prebid data
+    const storageData = await serviceWorker!.evaluate(async () => {
+      return await chrome.storage.local.get(null);
+    });
+    // 4. Verify tab_info keys exist
+    const tabKeys = Object.keys(storageData).filter((key) => key.startsWith('tab_info_'));
+    expect(tabKeys.length, `Should have at least one tab entry`).toBeGreaterThan(0);
+    // 5. Analyze stored data
+    let prebidDetected = false;
+    let prebidNamespaces: string[] = [];
+    let prebidVersion: string | undefined;
+    for (const tabKey of tabKeys) {
+      const tabData = storageData[tabKey];
+      for (const frameKey of Object.keys(tabData)) {
+        const frame = tabData[frameKey];
+        if (frame.prebids && Object.keys(frame.prebids).length > 0) {
+          prebidDetected = true;
+          prebidNamespaces = Object.keys(frame.prebids);
+          const firstPrebid = frame.prebids[prebidNamespaces[0]];
+          prebidVersion = firstPrebid?.version;
+        }
+      }
+    }
+    if (prebidDetected) {
+      expect(prebidNamespaces.length).toBeGreaterThan(0);
+      if (prebidVersion) {
+        expect(prebidVersion).toMatch(/^\d+\.\d+/);
+      }
       for (const tabKey of tabKeys) {
         const tabData = storageData[tabKey];
         for (const frameKey of Object.keys(tabData)) {
           const frame = tabData[frameKey];
-          if (frame.prebids && Object.keys(frame.prebids).length > 0) {
-            prebidDetected = true;
-            prebidNamespaces = Object.keys(frame.prebids);
-            const firstPrebid = frame.prebids[prebidNamespaces[0]];
-            prebidVersion = firstPrebid?.version;
-          }
-        }
-      }
-      // Report results
-      if (!prebidDetected) {
-      }
-      if ((site as any).prebidRequired) {
-        expect(prebidDetected, `Extension should detect Prebid that's present on ${site.name}`).toBe(true);
-        expect(prebidNamespaces.length).toBeGreaterThan(0);
-        if (prebidVersion) {
-          expect(prebidVersion).toMatch(/^\d+\.\d+/);
-        }
-        for (const tabKey of tabKeys) {
-          const tabData = storageData[tabKey];
-          for (const frameKey of Object.keys(tabData)) {
-            const frame = tabData[frameKey];
-            if (frame.prebids) {
-              for (const [ns, details] of Object.entries(frame.prebids) as [string, any][]) {
-                expect(details).toHaveProperty('namespace');
-                expect(details).toHaveProperty('version');
-                expect(details).toHaveProperty('config');
-              }
+          if (frame.prebids) {
+            for (const [, details] of Object.entries(frame.prebids) as [string, any][]) {
+              expect(details).toHaveProperty('namespace');
+              expect(details).toHaveProperty('version');
+              expect(details).toHaveProperty('config');
             }
           }
         }
-      } else if (pageHasPrebid.hasPbjsGlobals) {
-        // _pbjsGlobals exists but is empty — Prebid stub loaded, awaiting consent
-        // Extension should NOT crash in this scenario
-        expect(serviceWorker, 'Service worker alive with partial Prebid').toBeTruthy();
-      } else {
-        // No Prebid at all on the page
       }
-      // 6. Verify no extension-related crashes
-      const extensionErrors = pageErrors.filter((e) => e.toLowerCase().includes('profprebid') || e.toLowerCase().includes('professor'));
-      expect(extensionErrors, `No extension errors on ${site.name}`).toEqual([]);
-      await page.close();
+    } else if (pageHasPrebid.hasPbjsGlobals) {
+      // _pbjsGlobals exists but is empty — Prebid stub loaded, awaiting consent
+      // Extension should NOT crash in this scenario
+      expect(serviceWorker, 'Service worker alive with partial Prebid').toBeTruthy();
+    }
+    // 6. Verify no extension-related crashes
+    const extensionErrors = pageErrors.filter((e) => e.toLowerCase().includes('profprebid') || e.toLowerCase().includes('professor'));
+    expect(extensionErrors, `No extension errors on ${site.name}`).toEqual([]);
+    await page.close();
+  };
+  for (const site of REAL_PREBID_SITES) {
+    test(`detects Prebid on ${site.name}`, async () => {
+      await verifySitePrebidDetection(site);
     });
   }
   test('extension survives rapid page navigation', async () => {

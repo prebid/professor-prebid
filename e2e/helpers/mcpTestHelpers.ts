@@ -159,8 +159,8 @@ export const simulatePrebidAuction = async function(page: Page, options: Simulat
 /**
  * Attaches AI diagnostic context to Playwright test report if a test failed.
  */
-export const attachAiDiagnosticOnFailure = async function(testInfo: TestInfo, page: Page): Promise<void> {
-  if (testInfo.status !== testInfo.expectedStatus) {
+export const attachAiDiagnosticOnFailure = async function (testInfo: TestInfo, page?: Page): Promise<void> {
+  if (testInfo.status !== testInfo.expectedStatus && page && !page.isClosed()) {
     try {
       const aiPrompt = await page.evaluate(() => {
         const win = window as any;

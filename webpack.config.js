@@ -39,7 +39,6 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const options = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    app: path.join(__dirname, 'src', 'pages', 'App', 'index.tsx'),
     options: path.join(__dirname, 'src', 'pages', 'Options', 'index.tsx'),
     popup: path.join(__dirname, 'src', 'pages', 'Popup', 'index.tsx'),
     background: path.join(__dirname, 'src', 'pages', 'Background', 'index.ts'),
@@ -47,7 +46,6 @@ const options = {
     devtools: path.join(__dirname, 'src', 'pages', 'Devtools', 'index.ts'),
     panel: path.join(__dirname, 'src', 'pages', 'Panel', 'index.tsx'),
     injected: path.join(__dirname, 'src', 'pages', 'Injected', 'index.tsx'),
-    openDfpConsole: path.join(__dirname, 'src', 'pages', 'Injected', 'openDfpConsole.ts'),
   },
   chromeExtensionBoilerplate: {
     notHotReload: ['background', 'contentScript', 'devtools'],
@@ -64,7 +62,7 @@ const options = {
   module: {
     rules: [
       {
-        test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
+        test: new RegExp('\\.(' + fileExtensions.join('|') + ')$'),
         type: 'asset/resource',
         exclude: /node_modules/,
       },
@@ -137,8 +135,8 @@ const options = {
             return Buffer.from(
               JSON.stringify({
                 ...manifest,
-                description: process.env.npm_package_description,
-                version: process.env.npm_package_version,
+                description: process.env.npm_package_description || packageJson.description,
+                version: process.env.npm_package_version || packageJson.version,
                 action: {
                   ...manifest.action,
                   default_icon: 'assets/img/icon-34.png',

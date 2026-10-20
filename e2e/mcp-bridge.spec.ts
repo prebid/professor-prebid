@@ -4,7 +4,6 @@ import { waitForMcpBridge, simulatePrebidAuction, attachAiDiagnosticOnFailure } 
 
 test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
   let browserContext: BrowserContext;
-  let extensionId: string;
 
   test.beforeAll(async () => {
     const pathToExtension = path.join(__dirname, '../build');
@@ -41,8 +40,6 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     if (!serviceWorker) {
       throw new Error('Service worker not found');
     }
-
-    extensionId = serviceWorker.url().split('/')[2];
   });
 
   test.afterAll(async () => {
@@ -51,8 +48,11 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     }
   });
 
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
 
   const setupMockPage = async (page: Page) => {

@@ -13,8 +13,11 @@ test.describe('04 - Live Timeline & Network Initiator Tracking', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('calculates accurate bidder waterfall latencies and min/max response times on live site (eatpicks.com)', async () => {
     test.setTimeout(60000);

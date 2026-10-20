@@ -13,8 +13,11 @@ test.describe('02 - Live Ad Units & Bids Waterfall', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('captures live ad units and multi-bidder responses on lifestyle publisher (eatpicks.com)', async () => {
     test.setTimeout(60000);

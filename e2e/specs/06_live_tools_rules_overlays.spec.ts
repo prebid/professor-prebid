@@ -14,8 +14,11 @@ test.describe('06 - Live Tools, Debugging Rules & DOM Overlays', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('toggles and activates on-page ad overlays via Tools panel', async () => {
     test.setTimeout(60000);

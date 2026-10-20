@@ -13,8 +13,11 @@ test.describe('05 - Live User IDs & Pre-Auction Module Diagnostics', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('extracts EID identity structures and userSync sub-modules on live publisher site', async () => {
     test.setTimeout(60000);
@@ -26,6 +29,7 @@ test.describe('05 - Live User IDs & Pre-Auction Module Diagnostics', () => {
     const snapshot = await liveSite.getMcpSnapshot();
     expect(snapshot).toBeDefined();
     if (snapshot.userEids && snapshot.userEids.length > 0) {
+      expect(Array.isArray(snapshot.userEids)).toBe(true);
     }
     await page.close();
   });

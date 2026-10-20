@@ -13,8 +13,11 @@ test.describe('03 - Live Prebid Config & Auction Events Feed', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('extracts live Prebid config and active bidder settings on real publisher (eatpicks.com)', async () => {
     test.setTimeout(60000);

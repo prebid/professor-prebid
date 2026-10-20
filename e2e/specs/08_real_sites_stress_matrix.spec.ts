@@ -13,8 +13,11 @@ test.describe('08 - Real Sites Multi-Publisher Stress Matrix', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('survives sequential navigation across multiple distinct publisher setups', async () => {
     test.setTimeout(240000);
@@ -25,6 +28,7 @@ test.describe('08 - Real Sites Multi-Publisher Stress Matrix', () => {
       await liveSite.navigateAndHandleConsent(site.url, 15000);
       await liveSite.waitForMcpBridge(6000);
       const snapshot = await liveSite.getMcpSnapshot();
+      expect(snapshot).toBeDefined();
       await page.close();
     }
     // Verify service worker is still alive and responsive

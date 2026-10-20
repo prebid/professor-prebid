@@ -5,7 +5,6 @@ import { autoAcceptConsent } from '../fixtures/cmpConsentHandlers';
 import { reconcilePrebidSurface, formatAuditReportMarkdown, PrebidGroundTruth, ExtensionCapturedState } from '../../utils/audit/surfaceReconciler';
 test.describe('Professor Prebid Data Surface Audit E2E', () => {
   let browserContext: BrowserContext;
-  let extensionId: string;
   let serviceWorker: any;
   test.beforeAll(async () => {
     const pathToExtension = path.join(__dirname, '../../build');
@@ -36,7 +35,6 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     if (!serviceWorker) {
       throw new Error('Service worker could not be loaded.');
     }
-    extensionId = serviceWorker.url().split('/')[2];
   });
   test.afterAll(async () => {
     if (browserContext) {

@@ -13,8 +13,11 @@ test.describe('01 - Live Prebid Detection & Extension Lifecycle', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('detects Prebid.js and TCF v2 CMP on German tech publisher (heise.de)', async () => {
     test.setTimeout(60000);

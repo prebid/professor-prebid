@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test';
-export const autoAcceptConsent = async function(page: Page, timeoutMs: number = 3000): Promise<boolean> {
+export const autoAcceptConsent = async function (page: Page): Promise<boolean> {
   const consentSelectors = [
     '#onetrust-accept-btn-handler',
     '#onetrust-accept-all-handler',
@@ -30,9 +30,6 @@ export const autoAcceptConsent = async function(page: Page, timeoutMs: number = 
     'button:has-text("Accepter")',
     'button:has-text("Tout accepter")',
     'button:has-text("Accepter & Fermer")',
-    'button:has-text("Continuer sans accepter")',
-    '#didomi-notice-agree-button',
-    '.didomi-continue-without-agreeing',
     'button:has-text("Akkoord")',
     'button:has-text("Alles accepteren")',
     'button:has-text("Accepteren")',

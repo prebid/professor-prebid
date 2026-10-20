@@ -12,7 +12,6 @@ for (let i = 0; i < args.length; i++) {
 const env = { ...process.env };
 if (targetUrl) {
   env.AUDIT_URL = targetUrl;
-} else {
 }
 const testPath = path.resolve(__dirname, '../../e2e/specs/09_prebid_surface_audit.spec.ts');
 const npxCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';

@@ -14,8 +14,11 @@ test.describe('07 - Live Version Inspector & Extension Popup', () => {
       await extInfo.browserContext.close();
     }
   });
-  test.afterEach(async ({ page }, testInfo) => {
-    await attachAiDiagnosticOnFailure(testInfo, page);
+  test.afterEach(async () => {
+    await attachAiDiagnosticOnFailure(
+      test.info(),
+      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
+    );
   });
   test('inspects live Prebid core version and list of installed bid adapters on live publisher (theguardian.com)', async () => {
     test.setTimeout(60000);

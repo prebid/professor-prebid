@@ -119,37 +119,8 @@ test.describe('Professor Prebid Extension', () => {
     // We can verify this via the Service Worker.
     const serviceWorker = browserContext.serviceWorkers().find((sw) => sw.url().includes(extensionId));
     expect(serviceWorker).toBeTruthy();
-    // Evaluate in Service Worker to check if tab data was stored
-    // We need to wait a bit for message passing
+    // Wait for message passing
     await page.waitForTimeout(1000);
-    const tabId = page.mainFrame().page().context().pages().indexOf(page);
-    // Wait, tabId in extension != index.
-    // We can get the tabId from the page handle in some ways, or just query storage in SW.
-    // Let's just check if ANY data is stored in storage
-    const storageData = await serviceWorker.evaluate(async () => {
-      return await chrome.storage.local.get(null);
-    });
-    // We expect *some* data if the content script detected prebid and sent a message
-    // The previous logic sends POPUP_LOADED or detected events.
-    // actually, `prebid.ts` detects `window._pbjsGlobals` and instantiates `Prebid`.
-    // It sends "POPUP_LOADED" only when popup opens? No.
-    // It sends details on specific events.
-    // However, `addEventListenersForPrebid` runs immediately.
-    // It creates `new Prebid()`.
-    // That doesn't automatically send data unless an event happens.
-    // But `detectPrebid` loops or uses defineProperty.
-    // Check if content script injected the bundle
-    const scriptTag = await page.$('#professor\\ prebid\\ injected\\ bundle');
-    if (scriptTag) {
-    } else {
-    }
-    // Listen for messages from injected script
-    await page.evaluate(() => {
-      window.addEventListener('message', (event) => {
-        if (event.data && event.data.profPrebid) {
-        }
-      });
-    });
     // Wait for the injected script to register listeners
     await page.waitForFunction(
       () => {
