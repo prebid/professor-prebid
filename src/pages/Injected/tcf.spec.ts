@@ -36,10 +36,6 @@ describe('IabTcf', () => {
     expect(iabTcf.isTCFInpage()).toBeTruthy();
   });
 
-  it('criteoVendorId is 91', () => {
-    expect(iabTcf.criteoVendorId).toBe(91);
-  });
-
   it('init sets stopLoop to true after 8000ms and calls loop', () => {
     vi.useFakeTimers();
     const loopSpy = vi.spyOn(iabTcf, 'loop').mockImplementation(() => {});

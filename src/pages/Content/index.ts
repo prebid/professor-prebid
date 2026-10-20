@@ -1,4 +1,4 @@
-import { CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, POPUP_LOADED } from '../Shared/constants';
+import { CONSOLE_TOGGLE, DOWNLOAD_FAILED, PBJS_NAMESPACE_CHANGE, EVENTS, SAVE_MASKS, POPUP_LOADED } from '../Shared/constants';
 import { IPrebidDetails } from '../Injected/prebid';
 import { detectIframe, EventBus } from '../Shared/utils';
 
@@ -12,11 +12,12 @@ const NamespaceStore = (() => {
 })();
 
 const injectScript = () => {
+  if (['challenges.cloudflare.com'].includes(window.location.host)) return;
   const script = document.createElement('script');
   script.src = chrome.runtime.getURL('/injected.bundle.js');
   script.id = 'professor prebid injected bundle';
   const node = document.head || document.documentElement;
-  if (node && !['challenges.cloudflare.com'].includes(window.location.host)) {
+  if (node) {
     node.appendChild(script);
     script.addEventListener('load', () => script.remove());
   } else {
@@ -47,7 +48,7 @@ const listenToChromeRuntimeMessages = () => {
   chrome.runtime?.onMessage.addListener(processChromeRuntimeMessages);
 };
 
-type ChromeMessage = { type: typeof CONSOLE_TOGGLE; consoleState: boolean } | { type: typeof PBJS_NAMESPACE_CHANGE; pbjsNamespace: string } | { type: typeof POPUP_LOADED; payload: object };
+type ChromeMessage = { type: typeof CONSOLE_TOGGLE; consoleState: boolean } | { type: typeof PBJS_NAMESPACE_CHANGE; pbjsNamespace: string } | { type: typeof POPUP_LOADED; payload: object } | { type: typeof DOWNLOAD_FAILED; payload: object };
 
 const processChromeRuntimeMessages = (request: ChromeMessage) => {
   switch (request.type) {
@@ -63,6 +64,7 @@ const processChromeRuntimeMessages = (request: ChromeMessage) => {
       EventBus.emit(request.type, { detail: request.pbjsNamespace });
       break;
     case POPUP_LOADED:
+    case DOWNLOAD_FAILED:
       EventBus.emit(request.type, request.payload);
       break;
   }
@@ -70,7 +72,7 @@ const processChromeRuntimeMessages = (request: ChromeMessage) => {
 
 export const sendToServiceWorker = (type: string, payload: object) => {
   if (!type || !payload || !chrome.runtime?.id || !chrome.runtime?.sendMessage) return;
-  chrome.runtime.sendMessage({ type, payload });
+  chrome.runtime.sendMessage({ type, payload })?.catch(() => {});
 };
 
 export const updateOverlays = (namespace: string | null) => {
@@ -85,6 +87,15 @@ const setUpListeners = () => {
 };
 injectScript();
 
-if (detectIframe() === false) {
+const isSameOriginIframe = (): boolean => {
+  if (!detectIframe()) return false;
+  try {
+    return Boolean(window.top?.document);
+  } catch {
+    return false;
+  }
+};
+
+if (!isSameOriginIframe()) {
   setUpListeners();
 }

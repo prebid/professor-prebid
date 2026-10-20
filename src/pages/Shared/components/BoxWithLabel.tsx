@@ -35,7 +35,7 @@ export const BoxWithLabelAndExpandAndJsonView = ({
   const [jsonView, setJsonView] = React.useState(false);
 
   return (
-    <Box component="fieldset" sx={{ postion: 'relative', p: 1, border: 1, borderColor: 'primary.light', borderRadius: 1.5, ...sx }}>
+    <Box component="fieldset" sx={{ position: 'relative', p: 1, border: 1, borderColor: 'primary.light', borderRadius: 1.5, ...sx }}>
       <legend>{label}</legend>
       <Box
         sx={{

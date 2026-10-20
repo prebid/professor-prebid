@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EVENTS, CONSOLE_TOGGLE, PBJS_NAMESPACE_CHANGE, POPUP_LOADED, SAVE_MASKS } from '../Shared/constants';
-import { EventBus } from '../Shared/utils';
+import { EVENTS, CONSOLE_TOGGLE, DOWNLOAD_FAILED, PBJS_NAMESPACE_CHANGE, POPUP_LOADED, SAVE_MASKS } from '../Shared/constants';
 
 global.requestIdleCallback = vi.fn((cb) => 1) as any;
 
@@ -31,8 +30,10 @@ global.chrome = {
 
 describe('Content Script', () => {
   let contentScript: any;
+  let EventBus: any;
 
   beforeEach(async () => {
+    vi.resetModules();
     vi.clearAllMocks();
     if (document.head) {
       vi.spyOn(document.head, 'appendChild').mockImplementation((node: any) => node);
@@ -40,6 +41,7 @@ describe('Content Script', () => {
     if (document.documentElement) {
       vi.spyOn(document.documentElement, 'appendChild').mockImplementation((node: any) => node);
     }
+    ({ EventBus } = await import('../Shared/utils'));
     contentScript = await import('./index');
   });
 
@@ -54,16 +56,18 @@ describe('Content Script', () => {
       }
     });
 
-    it('defers injection via requestIdleCallback on Cloudflare domains', async () => {
+    it('skips script injection on Cloudflare domains without calling requestIdleCallback', async () => {
       const originalHost = window.location.host;
       try {
+        vi.resetModules();
+        vi.clearAllMocks();
         Object.defineProperty(window, 'location', {
           writable: true,
           value: { ...window.location, host: 'challenges.cloudflare.com' },
         });
-        // Call processEventBusMessages to exercise event bus processing
-        await contentScript.processEventBusMessages('TEST', {});
-        expect(global.requestIdleCallback).toBeDefined();
+        await import('./index');
+        expect(document.head.appendChild).not.toHaveBeenCalled();
+        expect(global.requestIdleCallback).not.toHaveBeenCalled();
       } finally {
         Object.defineProperty(window, 'location', {
           writable: true,
@@ -79,12 +83,37 @@ describe('Content Script', () => {
     it('sets up listeners when not in iframe', async () => {
       expect(capturedRuntimeListener).not.toBeNull();
     });
+
+    it('sets up listeners in cross-origin iframes where window.top.document throws', async () => {
+      const originalSelf = window.self;
+      const originalTop = window.top;
+      try {
+        vi.resetModules();
+        vi.clearAllMocks();
+        capturedRuntimeListener = null;
+        Object.defineProperty(window, 'self', { configurable: true, value: {} });
+        Object.defineProperty(window, 'top', {
+          configurable: true,
+          value: {
+            get document() {
+              throw new DOMException('Blocked a frame with origin', 'SecurityError');
+            },
+          },
+        });
+        await import('./index');
+        expect(capturedRuntimeListener).not.toBeNull();
+      } finally {
+        Object.defineProperty(window, 'self', { configurable: true, value: originalSelf });
+        Object.defineProperty(window, 'top', { configurable: true, value: originalTop });
+      }
+    });
   });
 
   describe('sendToServiceWorker', () => {
-    it('sends message to runtime', () => {
+    it('sends message to runtime and ignores promise rejections', () => {
       const payload = { foo: 'bar' };
-      contentScript.sendToServiceWorker('TEST_TYPE', payload);
+      mockSendMessage.mockRejectedValueOnce(new Error('Extension context invalidated'));
+      expect(() => contentScript.sendToServiceWorker('TEST_TYPE', payload)).not.toThrow();
       expect(mockSendMessage).toHaveBeenCalledWith({ type: 'TEST_TYPE', payload });
     });
 
@@ -232,6 +261,16 @@ describe('Content Script', () => {
       if (capturedRuntimeListener) {
         capturedRuntimeListener({ type: POPUP_LOADED, payload });
         expect(emitSpy).toHaveBeenCalledWith(POPUP_LOADED, payload);
+      }
+    });
+
+    it('emits event on DOWNLOAD_FAILED message', () => {
+      const emitSpy = vi.spyOn(EventBus, 'emit');
+      const payload = { syncState: 'failed' };
+
+      if (capturedRuntimeListener) {
+        capturedRuntimeListener({ type: DOWNLOAD_FAILED, payload });
+        expect(emitSpy).toHaveBeenCalledWith(DOWNLOAD_FAILED, payload);
       }
     });
 

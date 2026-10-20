@@ -50,166 +50,158 @@ interface TrackingDataProps {
   };
 }
 
+const msToTime = (ms: number) => {
+  const minutes = (ms / (1000 * 60)).toFixed(1);
+  const hours = (ms / (1000 * 60 * 60)).toFixed(1);
+  const days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+  const months = (ms / (1000 * 60 * 60 * 24 * 30)).toFixed(1);
+  const years = (ms / (1000 * 60 * 60 * 24 * 365)).toFixed(1);
+  let text = '';
+
+  if (Number(years) >= 1) {
+    text = `${years} year${Number(years) > 1 ? 's' : ''}, ${months} mo`;
+  } else if (Number(months) >= 1) {
+    text = `${months} month${Number(months) > 1 ? 's' : ''}`;
+  } else {
+    text = `${days} day${Number(days) > 1 ? 's' : ''}`;
+  }
+
+  return { years, months, days, hours, minutes, text };
+};
+
+const isCachedReleaseDataExpired = (cachedData: string) => {
+  let result = false;
+  try {
+    if (cachedData && Object.keys(cachedData).length > 0) {
+      const data = JSON.parse(cachedData);
+      if (Array.isArray(data) && data[0]?.cached_at) {
+        const cachedTime = data[0].cached_at;
+        const currentTime = Date.now();
+        const differenceInMilliseconds = Math.round(currentTime - cachedTime);
+        const timeElapsed = msToTime(differenceInMilliseconds);
+
+        if (Number(timeElapsed.days) >= 1) {
+          result = true;
+        }
+      }
+    }
+  } catch {
+    result = true;
+  }
+  return result;
+};
+
+const formatDate = (date: string) => {
+  try {
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) return date;
+    const month = dateObj.toLocaleString('default', { month: 'long' });
+    const day = dateObj.toLocaleString('default', { day: 'numeric' });
+    const year = dateObj.toLocaleString('default', { year: 'numeric' });
+    return `${month} ${day}, ${year}`;
+  } catch {
+    return date;
+  }
+};
+
 export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ close }): JSX.Element => {
   const { prebid, prebidReleaseInfo, setPrebidReleaseInfo } = useContext(AppStateContext);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const msToTime = (ms: number) => {
-    const minutes = (ms / (1000 * 60)).toFixed(1);
-    const hours = (ms / (1000 * 60 * 60)).toFixed(1);
-    const days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
-    const months = (ms / (1000 * 60 * 60 * 24 * 30)).toFixed(1);
-    const years = (ms / (1000 * 60 * 60 * 24 * 365)).toFixed(1);
-    let text = '';
-
-    if (Number(years) >= 1) {
-      text = `${years} year${Number(years) > 1 ? 's' : ''}, ${months} mo`;
-    } else if (Number(months) >= 1) {
-      text = `${months} month${Number(months) > 1 ? 's' : ''}`;
-    } else {
-      text = `${days} day${Number(days) > 1 ? 's' : ''}`;
-    }
-
-    return { years, months, days, hours, minutes, text };
-  };
-
-  const isCachedReleaseDataExpired = (cachedData: string) => {
-    let result = false;
-    try {
-      if (cachedData && Object.keys(cachedData).length > 0) {
-        const data = JSON.parse(cachedData);
-        if (Array.isArray(data) && data[0]?.cached_at) {
-          const cachedTime = data[0].cached_at;
-          const currentTime = Date.now();
-          const differenceInMilliseconds = Math.round(currentTime - cachedTime);
-          const timeElapsed = msToTime(differenceInMilliseconds);
-
-          if (Number(timeElapsed.days) >= 1) {
-            result = true;
-          }
-        }
-      }
-    } catch {
-      result = true;
-    }
-    return result;
-  };
-
-  const formatDate = (date: string) => {
-    try {
-      const dateObj = new Date(date);
-      if (isNaN(dateObj.getTime())) return date;
-      const month = dateObj.toLocaleString('default', { month: 'long' });
-      const day = dateObj.toLocaleString('default', { day: 'numeric' });
-      const year = dateObj.toLocaleString('default', { year: 'numeric' });
-      return `${month} ${day}, ${year}`;
-    } catch {
-      return date;
-    }
-  };
-
-  const processReleaseData = useCallback(
-    (releaseData: any[], trackingData: TrackingDataProps, page: number) => {
-      const installedVer = prebid?.version || '';
-      const installedClean = installedVer.startsWith('v') ? installedVer : `v${installedVer}`;
-
-      const dataForCurrentUsedRelease = releaseData.find((release: ReleaseProps) => {
-        try {
-          const text = release.body || '';
-          trackingData.releasesSinceInstalledVersion.push(release);
-
-          const newFeaturesCount = getSectionCount(text, 'new features');
-          const maintenanceCount = getSectionCount(text, 'maintenance');
-          const bugfixesCount = getSectionCount(text, 'bug fixes');
-
-          trackingData.totalNewFeaturesCount += newFeaturesCount;
-          trackingData.totalMaintenanceCount += maintenanceCount;
-          trackingData.totalBugfixesCount += bugfixesCount;
-
-          const releaseTagClean = release.tag_name?.startsWith('v') ? release.tag_name : `v${release.tag_name}`;
-          return releaseTagClean === installedClean || release.tag_name === installedVer;
-        } catch {
-          return false;
-        }
-      });
-
-      if (dataForCurrentUsedRelease && trackingData.releasesSinceInstalledVersion.length > 0) {
-        const oldVersionPublishedAtDate = dataForCurrentUsedRelease.published_at;
-        const currentDate = new Date();
-        const differenceInMilliseconds = Math.round(currentDate.valueOf() - Date.parse(oldVersionPublishedAtDate));
-        trackingData.timeElapsed = msToTime(differenceInMilliseconds);
-
-        const latestRel = trackingData.releasesSinceInstalledVersion[0];
-        const processedReleaseInfoObj = {
-          latestVersion: latestRel.tag_name,
-          latestVersionPublishedAt: latestRel.published_at,
-          installedVersion: prebid?.version,
-          installedVersionPublishedAt: oldVersionPublishedAtDate,
-          timeElapsedSinceLatestVersion: trackingData.timeElapsed,
-          featureCountSinceInstalledVersion: trackingData.totalNewFeaturesCount,
-          maintenanceCountSinceInstalledVersion: trackingData.totalMaintenanceCount,
-          bugfixCountSinceInstalledVersion: trackingData.totalBugfixesCount,
-          releasesSinceInstalledVersion: trackingData.releasesSinceInstalledVersion,
-        };
-
-        setPrebidReleaseInfo(processedReleaseInfoObj);
-        setIsRefreshing(false);
-        setFetchError(null);
-
-        if (page && chrome?.storage?.local) {
-          trackingData.releasesSinceInstalledVersion[0].cached_at = Date.now();
-          chrome.storage.local.set({ pbjsReleasesData: JSON.stringify(trackingData.releasesSinceInstalledVersion) });
-        }
-      } else {
-        if (page && releaseData.length === 100) {
-          fetchReleaseInfo(page + 1, trackingData);
-        } else {
-          if (!page) {
-            fetchReleaseInfo(1, {
-              totalNewFeaturesCount: 0,
-              totalMaintenanceCount: 0,
-              totalBugfixesCount: 0,
-              timeElapsed: { text: '', years: '', months: '', days: '', hours: '', minutes: '' },
-              releasesSinceInstalledVersion: [],
-            });
-          } else {
-            setIsRefreshing(false);
-            setFetchError('No release data found on GitHub for the current Prebid.js version.');
-          }
-        }
-      }
-    },
-    [prebid?.version, setPrebidReleaseInfo]
-  );
-
-  const fetchReleaseInfo = useCallback(
-    async (page: number, trackingData: any) => {
-      try {
-        setIsRefreshing(true);
-        const response = await fetch(
-          `https://api.github.com/repos/prebid/Prebid.js/releases?per_page=100&page=${page}&owner=prebid&repo=Prebid.js`
-        );
-
-        if (!response.ok) {
-          setIsRefreshing(false);
-          setFetchError(`GitHub API returned status ${response.status}`);
-          return;
-        }
-
-        const releaseData = await response.json();
-        processReleaseData(releaseData, trackingData, page);
-      } catch (error: any) {
-        setIsRefreshing(false);
-        setFetchError(error?.message || 'Failed to fetch Prebid.js releases');
-      }
-    },
-    [processReleaseData]
-  );
-
   const loadReleaseData = useCallback(
     (force = false) => {
       if (!prebid?.version) return;
+
+      const processReleaseData = (releaseData: any[], trackingData: TrackingDataProps, page: number) => {
+        const installedVer = prebid?.version || '';
+        const installedClean = installedVer.startsWith('v') ? installedVer : `v${installedVer}`;
+
+        const dataForCurrentUsedRelease = releaseData.find((release: ReleaseProps) => {
+          try {
+            const text = release.body || '';
+            trackingData.releasesSinceInstalledVersion.push(release);
+
+            const newFeaturesCount = getSectionCount(text, 'new features');
+            const maintenanceCount = getSectionCount(text, 'maintenance');
+            const bugfixesCount = getSectionCount(text, 'bug fixes');
+
+            trackingData.totalNewFeaturesCount += newFeaturesCount;
+            trackingData.totalMaintenanceCount += maintenanceCount;
+            trackingData.totalBugfixesCount += bugfixesCount;
+
+            const releaseTagClean = release.tag_name?.startsWith('v') ? release.tag_name : `v${release.tag_name}`;
+            return releaseTagClean === installedClean || release.tag_name === installedVer;
+          } catch {
+            return false;
+          }
+        });
+
+        if (dataForCurrentUsedRelease && trackingData.releasesSinceInstalledVersion.length > 0) {
+          const oldVersionPublishedAtDate = dataForCurrentUsedRelease.published_at;
+          const currentDate = new Date();
+          const differenceInMilliseconds = Math.round(currentDate.valueOf() - Date.parse(oldVersionPublishedAtDate));
+          trackingData.timeElapsed = msToTime(differenceInMilliseconds);
+
+          const latestRel = trackingData.releasesSinceInstalledVersion[0];
+          const processedReleaseInfoObj = {
+            latestVersion: latestRel.tag_name,
+            latestVersionPublishedAt: latestRel.published_at,
+            installedVersion: prebid?.version,
+            installedVersionPublishedAt: oldVersionPublishedAtDate,
+            timeElapsedSinceLatestVersion: trackingData.timeElapsed,
+            featureCountSinceInstalledVersion: trackingData.totalNewFeaturesCount,
+            maintenanceCountSinceInstalledVersion: trackingData.totalMaintenanceCount,
+            bugfixCountSinceInstalledVersion: trackingData.totalBugfixesCount,
+            releasesSinceInstalledVersion: trackingData.releasesSinceInstalledVersion,
+          };
+
+          setPrebidReleaseInfo(processedReleaseInfoObj);
+          setIsRefreshing(false);
+          setFetchError(null);
+
+          if (page && chrome?.storage?.local) {
+            trackingData.releasesSinceInstalledVersion[0].cached_at = Date.now();
+            chrome.storage.local.set({ pbjsReleasesData: JSON.stringify(trackingData.releasesSinceInstalledVersion) });
+          }
+        } else {
+          if (page && releaseData.length === 100) {
+            fetchReleaseInfo(page + 1, trackingData);
+          } else {
+            if (!page) {
+              fetchReleaseInfo(1, {
+                totalNewFeaturesCount: 0,
+                totalMaintenanceCount: 0,
+                totalBugfixesCount: 0,
+                timeElapsed: { text: '', years: '', months: '', days: '', hours: '', minutes: '' },
+                releasesSinceInstalledVersion: [],
+              });
+            } else {
+              setIsRefreshing(false);
+              setFetchError('No release data found on GitHub for the current Prebid.js version.');
+            }
+          }
+        }
+      };
+
+      const fetchReleaseInfo = async (page: number, trackingData: any) => {
+        try {
+          setIsRefreshing(true);
+          const response = await fetch(`https://api.github.com/repos/prebid/Prebid.js/releases?per_page=100&page=${page}&owner=prebid&repo=Prebid.js`);
+
+          if (!response.ok) {
+            setIsRefreshing(false);
+            setFetchError(`GitHub API returned status ${response.status}`);
+            return;
+          }
+
+          const releaseData = await response.json();
+          processReleaseData(releaseData, trackingData, page);
+        } catch (error: any) {
+          setIsRefreshing(false);
+          setFetchError(error?.message || 'Failed to fetch Prebid.js releases');
+        }
+      };
 
       const dataToTrackOverIterations: TrackingDataProps = {
         totalNewFeaturesCount: 0,
@@ -235,7 +227,7 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
         fetchReleaseInfo(1, dataToTrackOverIterations);
       }
     },
-    [prebid?.version, processReleaseData, fetchReleaseInfo]
+    [prebid?.version, setPrebidReleaseInfo]
   );
 
   useEffect(() => {

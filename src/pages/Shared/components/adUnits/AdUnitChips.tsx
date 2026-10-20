@@ -175,10 +175,13 @@ export const AdUnitChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element
       }
     };
     chrome.scripting.executeScript({ target: { tabId }, func, args: [elementId] }, (injectionResults) => {
-      if (injectionResults[0].result) {
+      if (injectionResults?.[0]?.result) {
         setLabelText(`✓ ${adUnit.code}`);
       } else {
         setLabelText(`✗ Element with id="${adUnit.code}" not found.`);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => setLabelText(adUnit.code), 1500);
     });

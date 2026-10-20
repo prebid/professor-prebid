@@ -1,18 +1,15 @@
 import { BadgeService } from './BadgeService';
 import { MessageHandler } from './MessageHandler';
 import { TabContextService } from './TabContextService';
-import { preAuctionHarKey } from '../Shared/constants';
+import { PRE_AUCTION_HAR, preAuctionHarKey } from '../Shared/constants';
 
 class BackgroundService {
   constructor(private tabContextService: TabContextService, private updateBadge: (tabId: number | undefined) => void) {}
 
   async start(): Promise<void> {
-    await this.tabContextService.load();
-    await this.cleanStorage();
-
     const handler = new MessageHandler(this.tabContextService, this.updateBadge);
     chrome.runtime.onMessage.addListener(handler.handle);
-    chrome.webNavigation?.onBeforeNavigate.addListener(this.handleWebNavigationOnBeforeNavigate);
+    chrome.webNavigation?.onCommitted.addListener(this.handleWebNavigationOnCommitted);
     chrome.tabs.onRemoved.addListener(this.handleOnTabRemoved);
     chrome.tabs.onActivated.addListener(this.handleOnTabActivated);
     chrome.alarms?.onAlarm.addListener(this.handleOnAlarm);
@@ -21,18 +18,21 @@ class BackgroundService {
         chrome.alarms?.create('cleanUpTabInfo', { periodInMinutes: 15 });
       }
     });
+
+    await this.tabContextService.load();
+    await this.cleanStorage();
   }
 
   handleOnTabActivated = (activeInfo: chrome.tabs.TabActiveInfo) => {
     this.updateBadge(activeInfo.tabId);
   };
 
-  handleWebNavigationOnBeforeNavigate = async (web_navigation: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
+  // Reset on commit (not on onBeforeNavigate) so navigations that never replace the document (downloads, 204s, cancelled loads) keep the current page's data.
+  handleWebNavigationOnCommitted = async (web_navigation: chrome.webNavigation.WebNavigationTransitionCallbackDetails) => {
     const { frameId, tabId, url } = web_navigation;
+    if ((web_navigation as { documentLifecycle?: string }).documentLifecycle === 'prerender') return;
     if (frameId === 0) {
-      const tabInfo = await this.tabContextService.getTabInfo(tabId);
-      tabInfo['top-window'] = { url };
-      await this.tabContextService.saveTabInfo(tabId, tabInfo);
+      await this.tabContextService.saveTabInfo(tabId, { 'top-window': { url } });
       this.updateBadge(tabId);
     }
   };
@@ -51,7 +51,7 @@ class BackgroundService {
     const activeTabIds = tabs.map((tab) => tab.id);
     const allStorage = (await chrome.storage.local.get(null)) as any;
     const keysToRemove: string[] = [];
-    for (const key of Object.keys(allStorage)) {
+    for (const key of Object.keys(allStorage || {})) {
       if (key.startsWith('tab_info_')) {
         const tabId = parseInt(key.replace('tab_info_', ''), 10);
         if (!activeTabIds.includes(tabId)) {
@@ -61,6 +61,21 @@ class BackgroundService {
     }
     if (keysToRemove.length > 0) {
       await chrome.storage.local.remove(keysToRemove);
+    }
+    if (chrome.storage.session?.get) {
+      const allSession = (await chrome.storage.session.get(null)) as any;
+      const sessionKeysToRemove: string[] = [];
+      for (const key of Object.keys(allSession || {})) {
+        if (key.startsWith(`${PRE_AUCTION_HAR}_`)) {
+          const tabId = parseInt(key.slice(PRE_AUCTION_HAR.length + 1), 10);
+          if (!activeTabIds.includes(tabId)) {
+            sessionKeysToRemove.push(key);
+          }
+        }
+      }
+      if (sessionKeysToRemove.length > 0) {
+        await chrome.storage.session.remove(sessionKeysToRemove);
+      }
     }
   };
 }

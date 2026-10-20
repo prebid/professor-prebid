@@ -27,7 +27,7 @@ describe('Devtools index', () => {
 
     await import('./index');
 
-    expect(createMock).toHaveBeenCalledWith('Professor Prebid', 'icon-34.png', 'panel.html', expect.any(Function));
+    expect(createMock).toHaveBeenCalledWith('Professor Prebid', 'assets/img/icon-34.png', 'panel.html', expect.any(Function));
     expect(collectHarLog).toHaveBeenCalled();
   });
 

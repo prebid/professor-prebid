@@ -19,7 +19,7 @@ export const NavBarTabs = (): JSX.Element => {
     } else {
       setFilteredPages(PAGES.filter((page) => selectedPopUpNavItems.includes(page.path)));
     }
-  }, [isPanel, selectedPanelNavItems, selectedPopUpNavItems]);
+  }, [isPanel, selectedPanelNavItems, selectedPopUpNavItems, setFilteredPages]);
 
   return (
     <Tabs

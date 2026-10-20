@@ -15,7 +15,7 @@ import JSONViewerComponent from '../../JSONViewerComponent';
 const BidderSettingsComponent = (): JSX.Element | null => {
   const { prebid } = useContext(AppStateContext);
   const [showJson, setShowJson] = useState(false);
-  const { bidderSettings } = prebid;
+  const { bidderSettings } = prebid || {};
 
   if (!bidderSettings || Object.keys(bidderSettings).length === 0) return null;
 

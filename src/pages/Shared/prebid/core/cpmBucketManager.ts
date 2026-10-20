@@ -103,22 +103,25 @@ const getCpmStringValue = (cpm: string, config: any, granularityMultiplier: numb
   );
 
   let bucketFloor = 0;
-  let bucket = config.buckets.find((bucket: IPrebidConfigPriceBucket) => {
+  let bucketMin = 0;
+  const bucket = config.buckets.find((bucket: IPrebidConfigPriceBucket) => {
+    const currentMin = bucket.min > bucketFloor ? bucket.min : bucketFloor;
     if (Number(cpm) > cap.max * granularityMultiplier) {
       let precision = bucket.precision;
       if (typeof precision === 'undefined') {
         precision = _defaultPrecision;
       }
       cpmStr = (bucket.max * granularityMultiplier).toFixed(precision);
-    } else if (Number(cpm) <= bucket.max * granularityMultiplier && Number(cpm) >= bucketFloor * granularityMultiplier) {
-      bucket.min = bucketFloor;
-      return bucket;
+    } else if (Number(cpm) <= bucket.max * granularityMultiplier && Number(cpm) >= currentMin * granularityMultiplier) {
+      bucketMin = currentMin;
+      return true;
     } else {
       bucketFloor = bucket.max;
     }
+    return false;
   });
   if (bucket) {
-    cpmStr = getCpmTarget(cpm, bucket, granularityMultiplier);
+    cpmStr = getCpmTarget(cpm, { ...bucket, min: bucketMin }, granularityMultiplier);
   }
   return cpmStr;
 };

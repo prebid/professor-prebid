@@ -13,24 +13,11 @@ import { Avatar } from '@mui/material';
 
 const ErrorCardComponent = ({ error }: any) => {
   const context = useContext(InspectedPageContext);
-  const { syncState } = context;
+  const syncState = context?.syncState;
 
   return (
     <Box sx={{ backgroundColor: 'primary.light' }}>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 10000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          backgroundColor: '#ABDDF',
-        }}
-      ></Box>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ABDDF' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'primary.light' }}>
         <Card sx={{ maxWidth: 0.75, minWidth: 0.75 }}>
           <CardHeader
             avatar={

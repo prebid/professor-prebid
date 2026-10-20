@@ -93,7 +93,7 @@ export const createRangeArray = (start: number, end: number, step: number, offse
   if (endValueIndex === -1) {
     arr1.push(end);
   }
-  return arr1.sort();
+  return arr1.sort((a, b) => a - b);
 };
 
 export const getMinAndMaxNumber = (timestampArray: number[]): { min: number; max: number } => {
@@ -119,7 +119,8 @@ export const reloadPage = async () => {
 
 export const sendChromeTabsMessage = async (type: string, payload: object | string): Promise<void> => {
   const tabId = await getTabId();
-  chrome.tabs.sendMessage(tabId, { type, payload });
+  if (tabId === undefined) return;
+  chrome.tabs?.sendMessage(tabId, { type, payload })?.catch?.(() => {});
 };
 
 export const detectIframe = (): boolean => {

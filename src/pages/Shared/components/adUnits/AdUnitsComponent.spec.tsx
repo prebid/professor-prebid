@@ -79,7 +79,7 @@ describe('AdUnitsComponent & Grid', () => {
       </AppStateContext.Provider>
     );
 
-    const downloadBtn = screen.getByLabelText('Download filtered bids as JSON');
+    const downloadBtn = screen.getByLabelText('Download filtered ad units as JSON');
     fireEvent.click(downloadBtn);
 
     expect(utils.download).toHaveBeenCalled();

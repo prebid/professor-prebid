@@ -43,10 +43,10 @@ const EventsState = () => {
   const isPending = query !== deferredQuery;
 
   const { prebid } = useContext(StateContext);
-  const events = prebid.events as IPrebidEvent[];
+  const events = useMemo(() => (prebid?.events || []) as IPrebidEvent[], [prebid?.events]);
 
-  const warningEvents = useMemo(() => events?.filter(({ eventType, args: { type } }) => eventType === 'auctionDebug' && type === 'WARNING'), [events]);
-  const errorEvents = useMemo(() => events?.filter(({ eventType, args: { type } }) => eventType === 'auctionDebug' && type === 'ERROR'), [events]);
+  const warningEvents = useMemo(() => events.filter(({ eventType, args }) => eventType === 'auctionDebug' && args?.type === 'WARNING'), [events]);
+  const errorEvents = useMemo(() => events.filter(({ eventType, args }) => eventType === 'auctionDebug' && args?.type === 'ERROR'), [events]);
 
   const counts = useMemo(
     () => ({

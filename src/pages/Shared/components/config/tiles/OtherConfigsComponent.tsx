@@ -25,6 +25,7 @@ const KNOWN_CONFIG_KEYS = new Set([
   'deviceAccess',
   's2sConfig',
   'consentManagement',
+  'coppa',
   'userSync',
   'userIds',
   'floors',
@@ -36,8 +37,6 @@ const KNOWN_CONFIG_KEYS = new Set([
   'realTimeData',
   'installedModules',
   'bidderSettings',
-  'paapi',
-  'fledge',
 ]);
 
 const OtherConfigsComponent = (): JSX.Element | null => {

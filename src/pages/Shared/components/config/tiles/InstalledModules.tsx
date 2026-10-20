@@ -9,7 +9,7 @@ import { ExpandableTile } from './ExpandableTile';
 
 const InstalledModulesComponent = (): JSX.Element | null => {
   const { prebid } = useContext(AppStateContext);
-  const { installedModules } = prebid;
+  const { installedModules } = prebid || {};
   if (!installedModules?.length) return null;
 
   const moduleTypes = [

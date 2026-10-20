@@ -147,7 +147,7 @@ describe('LegacyDebugging components', () => {
 
     const switchBtn = screen.getAllByRole('checkbox')[0];
     fireEvent.click(switchBtn);
-    expect(setDebugConfigState).toBeDefined();
+    expect(setDebugConfigState).toHaveBeenCalled();
 
     const selects = screen.getAllByRole('combobox');
     if (selects.length >= 2) {

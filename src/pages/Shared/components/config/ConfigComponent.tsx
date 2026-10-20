@@ -51,7 +51,7 @@ const ConfigComponent = (): JSX.Element => {
   const { prebid } = useContext(AppStateContext);
   const [query, setQuery] = useState('');
 
-  const fullConfig = (prebid?.config || {}) as Record<string, any>;
+  const fullConfig = useMemo(() => (prebid?.config || {}) as Record<string, any>, [prebid?.config]);
   const fieldKeys = useMemo(() => Object.keys(fullConfig), [fullConfig]);
   const options = useMemo(() => Object.keys(fullConfig).map((k) => `${k}:`), [fullConfig]);
 

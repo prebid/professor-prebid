@@ -1,6 +1,6 @@
 import type { AdUnit, AdUnitBid, Bid, BidderRequest, Config, EventRecord, EventPayload, PrebidJS } from 'prebid.js';
-import { POPUP_LOADED, EVENTS} from '../Shared/constants';
-import { EventBus} from '../Shared/utils';
+import { DOWNLOAD_FAILED, POPUP_LOADED, EVENTS } from '../Shared/constants';
+import { EventBus } from '../Shared/utils';
 
 export type { AdUnit, AdUnitBid, Bid, BidderRequest, Config, EventRecord, EventPayload, PrebidJS };
 
@@ -11,7 +11,6 @@ export class Prebid {
   lastTimeUpdateSentToContentScript: number = 0;
   updateTimeout: ReturnType<typeof setTimeout> | null = null;
   updateRateInterval: number = 2500;
-  sendToContentScriptPending: boolean = false;
   events: any[] = [];
   eventsApi: boolean = false;
   listenersAdded: boolean = false;
@@ -95,12 +94,20 @@ export class Prebid {
       this.throttle(this.sendDetailsToBackground);
     });
 
+    EventBus.on(POPUP_LOADED, () => {
+      this.sendDetailsToBackground();
+    });
+
+    EventBus.on(DOWNLOAD_FAILED, () => {
+      this.sendDetailsToBackground();
+    });
+
     window.addEventListener(
       'message',
       (event) => {
         if (event.source !== window || event.origin !== window.origin) return;
-        if (!event.data.profPrebid) return;
-        if (event.data.type === POPUP_LOADED) {
+        if (!event.data?.profPrebid) return;
+        if (event.data.type === POPUP_LOADED || event.data.type === DOWNLOAD_FAILED) {
           this.sendDetailsToBackground();
         }
       },
@@ -109,11 +116,12 @@ export class Prebid {
   };
 
   getDebugConfig = () => {
-    const pbjsDebugString = window.sessionStorage.getItem('pbjs:debugging');
     try {
+      const pbjsDebugString = window.sessionStorage.getItem('pbjs:debugging');
+      if (!pbjsDebugString) return undefined;
       return JSON.parse(pbjsDebugString);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      return undefined;
     }
   };
 
@@ -199,7 +207,6 @@ export class Prebid {
         bidderSettings: this.globalPbjs?.bidderSettings,
       };
       EventBus.emit(EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, prebidDetail);
-      this.sendToContentScriptPending = false;
     };
 
     if (this.globalPbjs?.que && typeof this.globalPbjs.que.push === 'function') {

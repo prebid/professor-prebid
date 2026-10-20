@@ -57,11 +57,11 @@ const NaviOptions: React.FC<{}> = () => {
       </Typography>
       <form onSubmit={handleSubmit}>
         <List sx={{ display: 'flex', flexDirection: 'row' }}>
-          {PAGES.map(({ path, label, Icon, beta }) => (
+          {PAGES.map(({ path, label, Icon }) => (
             <ListItem key={path} dense onClick={() => handleTogglePopUp(path)}>
-              <Checkbox edge="start" checked={selectedPopUpNavItems.indexOf(path) !== -1} tabIndex={-1} disableRipple inputProps={{ 'aria-labelledby': `checkbox-list-label-${path}` }} />
+              <Checkbox edge="start" checked={selectedPopUpNavItems.indexOf(path) !== -1} tabIndex={-1} disableRipple inputProps={{ 'aria-labelledby': `checkbox-list-label-popup-${path}` }} />
               <Icon />
-              <ListItemText id={`checkbox-list-label-${path}`} primary={label} />
+              <ListItemText id={`checkbox-list-label-popup-${path}`} primary={label} />
             </ListItem>
           ))}
         </List>
@@ -70,11 +70,11 @@ const NaviOptions: React.FC<{}> = () => {
           Enable or disable the following pages in the dev-tools-panel:
         </Typography>
         <List sx={{ display: 'flex', flexDirection: 'row' }}>
-          {PAGES.map(({ path, label, Icon, beta }) => (
+          {PAGES.map(({ path, label, Icon }) => (
             <ListItem key={path} dense onClick={() => handleTogglePanel(path)}>
-              <Checkbox edge="start" checked={selectedPanelNavItems.indexOf(path) !== -1} tabIndex={-1} disableRipple inputProps={{ 'aria-labelledby': `checkbox-list-label-${path}` }} />
+              <Checkbox edge="start" checked={selectedPanelNavItems.indexOf(path) !== -1} tabIndex={-1} disableRipple inputProps={{ 'aria-labelledby': `checkbox-list-label-panel-${path}` }} />
               <Icon />
-              <ListItemText id={`checkbox-list-label-${path}`} primary={label} />
+              <ListItemText id={`checkbox-list-label-panel-${path}`} primary={label} />
             </ListItem>
           ))}
         </List>
@@ -91,7 +91,7 @@ const NaviOptions: React.FC<{}> = () => {
   );
 };
 
-const Options: React.FC<{ title: string }> = ({ title }) => {
+const Options: React.FC<{ title?: string }> = () => {
   return (
     <ThemeProvider theme={theme}>
       <OptionsContextProvider>

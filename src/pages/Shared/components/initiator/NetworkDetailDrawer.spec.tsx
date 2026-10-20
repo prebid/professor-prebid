@@ -56,7 +56,7 @@ describe('NetworkDetailDrawer', () => {
   });
 
   it('renders nothing open when selectedEntry is null', () => {
-    const { container } = render(<NetworkDetailDrawer selectedEntry={null} onClose={vi.fn()} />);
+    render(<NetworkDetailDrawer selectedEntry={null} onClose={vi.fn()} />);
     expect(screen.queryByText('General Information')).toBeNull();
   });
 

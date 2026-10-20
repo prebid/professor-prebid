@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 import Panel from './Panel';
 import { StateContextProvider } from '../Shared/contexts/appStateContext';
@@ -10,17 +9,19 @@ import { theme } from '../../theme/theme';
 import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
 import { OptionsContextProvider } from '../Shared/contexts/optionsContext';
 
-render(
-  <ThemeProvider theme={theme}>
-    <OptionsContextProvider>
-      <InspectedPageContextProvider>
-        <StateContextProvider>
-          <ErrorBoundary FallbackComponent={ErrorCardComponent}>
-            <Panel />
-          </ErrorBoundary>
-        </StateContextProvider>
-      </InspectedPageContextProvider>
-    </OptionsContextProvider>
-  </ThemeProvider>,
-  window.document.querySelector('#app-container')
-);
+const container = window.document.querySelector('#app-container') || document.getElementById('root');
+if (container) {
+  createRoot(container).render(
+    <ThemeProvider theme={theme}>
+      <OptionsContextProvider>
+        <InspectedPageContextProvider>
+          <StateContextProvider>
+            <ErrorBoundary FallbackComponent={ErrorCardComponent}>
+              <Panel />
+            </ErrorBoundary>
+          </StateContextProvider>
+        </InspectedPageContextProvider>
+      </OptionsContextProvider>
+    </ThemeProvider>
+  );
+}

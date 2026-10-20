@@ -23,16 +23,16 @@ export const AdUnitsGridComponent = ({ adUnits }: { adUnits: AdUnit[] }): JSX.El
       ))}
 
       {adUnits.map((adUnit, index) => (
-        <AdUnitGridRow adUnit={adUnit} key={adUnit.code || index} />
+        <AdUnitGridRow adUnit={adUnit} showOrtb2ImpColumn={showOrtb2ImpColumn} key={adUnit.code || index} />
       ))}
     </>
   );
 };
 
-export const AdUnitGridRow = ({ adUnit }: { adUnit: AdUnit }): JSX.Element => {
+export const AdUnitGridRow = ({ adUnit, showOrtb2ImpColumn }: { adUnit: AdUnit; showOrtb2ImpColumn?: boolean }): JSX.Element => {
   const { isPanel, googleAdManager } = useContext(AppStateContext);
   const showAdServerColumn = isPanel && googleAdManager?.slots?.length > 0;
-  const showOrtb2Imp = isPanel && !!adUnit.ortb2Imp;
+  const showOrtb2Imp = isPanel && (showOrtb2ImpColumn ?? !!adUnit.ortb2Imp);
   const colCount = 3 + (showAdServerColumn ? 1 : 0) + (showOrtb2Imp ? 1 : 0);
 
   return (
@@ -41,7 +41,7 @@ export const AdUnitGridRow = ({ adUnit }: { adUnit: AdUnit }): JSX.Element => {
       <MediaTypesTile adUnit={adUnit} colCount={colCount} />
       <BiddersTile adUnit={adUnit} colCount={colCount} />
       {showAdServerColumn && <AdServerTile adUnit={adUnit} colCount={colCount} />}
-      {showOrtb2Imp && <Ortb2ImpTile adUnit={adUnit} colCount={colCount} />}
+      {showOrtb2Imp && (adUnit.ortb2Imp ? <Ortb2ImpTile adUnit={adUnit} colCount={colCount} /> : <Grid size={{ xs: 12, md: 12 / colCount }} />)}
     </>
   );
 };

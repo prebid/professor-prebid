@@ -1,6 +1,5 @@
 import React from 'react';
 import type { PrebidJS, AdUnit, AdUnitDefinition, Bid } from 'prebid.js';
-import { getMaxZIndex } from './AdOverlayPortal';
 import { CacheProvider } from '@emotion/react';
 import { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
@@ -146,17 +145,17 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
 
   useEffect(() => {
     if (!pbjs || !pbjs.getBidResponsesForAdUnitCode) return;
-    const { bids } = pbjs.getBidResponsesForAdUnitCode(elementId);
-    const bidsSorted = bids.sort((a: any, b: any) => b.cpm - a.cpm);
-    const { 0: winningBid } = pbjs.getAllWinningBids().filter(({ adUnitCode }) => adUnitCode === elementId);
+    const bidResponses = pbjs.getBidResponsesForAdUnitCode?.(elementId);
+    const bids = [...(bidResponses?.bids || [])].sort((a: any, b: any) => b.cpm - a.cpm);
+    const allWinningBids = pbjs.getAllWinningBids?.() || [];
+    const { 0: winningBid } = allWinningBids.filter(({ adUnitCode }) => adUnitCode === elementId);
     setAdunit(pbjs.adUnits?.find((el) => el.code === elementId) || null);
-    setBidsSorted(bidsSorted);
+    setBidsSorted(bids);
     setWinningBid(winningBid || null);
   }, [elementId, pbjs]);
 
   // gam stuff
   const [networktId, setNetworkId] = useState<string[]>(null);
-  const [slotElementId, setSlotElementId] = useState<string>(null);
   const [creativeId, setCreativeId] = useState<number>(null);
   const [queryId, setQueryId] = useState<string>(null);
   const [lineItemId, setLineItemId] = useState<number>(null);
@@ -166,44 +165,47 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
 
   useEffect(() => {
     if (!isEffectiveOpen) return;
-    if (window.parent.googletag && typeof window.parent.googletag?.pubads === 'function') {
-      const pubads = window.parent.googletag.pubads();
-      const syncSlotData = () => {
-        const slots = pubads.getSlots ? pubads.getSlots() : [];
-        const slot = slots.find((s: any) => s.getSlotElementId() === elementId) || slots.find((s: any) => s.getAdUnitPath() === elementId);
-        if (slot) {
-          setSlotElementId(slot.getSlotElementId());
-          setSlotAdUnitPath(slot.getAdUnitPath());
-          setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-          setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
-          const responseInfo = slot.getResponseInformation();
-          setSlotResponseInfo(responseInfo);
-          const queryIdAttr = document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id');
-          setQueryId(queryIdAttr || null);
+    try {
+      if (window.parent?.googletag && typeof window.parent.googletag?.pubads === 'function') {
+        const pubads = window.parent.googletag.pubads();
+        const syncSlotData = () => {
+          const slots = pubads.getSlots ? pubads.getSlots() : [];
+          const slot = slots.find((s: any) => s.getSlotElementId() === elementId) || slots.find((s: any) => s.getAdUnitPath() === elementId);
+          if (slot) {
+            setSlotAdUnitPath(slot.getAdUnitPath());
+            setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
+            setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
+            const responseInfo = slot.getResponseInformation();
+            setSlotResponseInfo(responseInfo);
+            const queryIdAttr = document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id');
+            setQueryId(queryIdAttr || null);
 
-          if (responseInfo) {
-            const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
-            setCreativeId(creativeId || sourceAgnosticCreativeId);
-            setLineItemId(lineItemId || sourceAgnosticLineItemId);
+            if (responseInfo) {
+              const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
+              setCreativeId(creativeId || sourceAgnosticCreativeId);
+              setLineItemId(lineItemId || sourceAgnosticLineItemId);
+            }
           }
-        }
-      };
+        };
 
-      syncSlotData();
+        syncSlotData();
 
-      const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
-        const slotElId = event.slot?.getSlotElementId ? event.slot.getSlotElementId() : null;
-        const slotPath = event.slot?.getAdUnitPath ? event.slot.getAdUnitPath() : null;
-        if (slotElId === elementId || slotPath === elementId || (slotElId && elementId.includes(slotElId)) || (slotPath && elementId.includes(slotPath))) {
-          syncSlotData();
-        }
-      };
-      pubads.addEventListener('slotResponseReceived', eventHandler);
-      pubads.addEventListener('slotRenderEnded', eventHandler);
-      return () => {
-        pubads.removeEventListener('slotResponseReceived', eventHandler);
-        pubads.removeEventListener('slotRenderEnded', eventHandler);
-      };
+        const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
+          const slotElId = event.slot?.getSlotElementId ? event.slot.getSlotElementId() : null;
+          const slotPath = event.slot?.getAdUnitPath ? event.slot.getAdUnitPath() : null;
+          if (slotElId === elementId || slotPath === elementId || (slotElId && elementId.includes(slotElId)) || (slotPath && elementId.includes(slotPath))) {
+            syncSlotData();
+          }
+        };
+        pubads.addEventListener('slotResponseReceived', eventHandler);
+        pubads.addEventListener('slotRenderEnded', eventHandler);
+        return () => {
+          pubads.removeEventListener('slotResponseReceived', eventHandler);
+          pubads.removeEventListener('slotRenderEnded', eventHandler);
+        };
+      }
+    } catch {
+      // Ignore cross-origin access errors
     }
   }, [elementId, isEffectiveOpen]);
 
@@ -366,18 +368,3 @@ interface PopOverComponentProps {
 }
 
 export default PopOverComponent;
-export interface IGamDetailComponentProps {
-  elementId: string;
-  inPopOver: boolean;
-  truncate: boolean;
-}
-
-export interface IGamInfos {
-  slotAdUnitPath?: string;
-  slotName?: string;
-  slotResponseInfo?: googletag.ResponseInformation;
-  slotElementId?: string;
-  accountId?: string;
-  slotTargeting?: unknown[];
-  slotTargetingKeys?: string[];
-}

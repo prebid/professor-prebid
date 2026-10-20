@@ -16,22 +16,20 @@ document.addEventListener(MCP_BRIDGE_ENABLE, () => initProfessorPrebidMcpBridge(
 
 const injectApp = () => {
   if (document.body) {
-    const root = document.createElement('div');
-    root.id = 'professor_prebid-root';
-    root.style.position = 'fixed';
-    root.style.top = '0';
-    root.style.left = '0';
-    root.style.width = '0';
-    root.style.height = '0';
-    root.style.overflow = 'visible';
-    root.style.pointerEvents = 'none';
-    root.style.zIndex = '9999999';
-    document.body.appendChild(root);
-    const container = document.getElementById(root.id);
-    if (container) {
-      const root = createRoot(container);
-      root.render(<InjectedApp />);
-    }
+    if (document.getElementById('professor_prebid-root')) return;
+    const container = document.createElement('div');
+    container.id = 'professor_prebid-root';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '0';
+    container.style.height = '0';
+    container.style.overflow = 'visible';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '9999999';
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    root.render(<InjectedApp />);
   } else {
     if (requestIdleCallback && typeof requestIdleCallback === 'function') {
       requestIdleCallback(injectApp);

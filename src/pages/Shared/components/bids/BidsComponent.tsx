@@ -14,7 +14,7 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import BidsComponentState, { getBidKey } from './BidsComponentState';
 
 export const BidsComponent = (): JSX.Element => {
-  const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, filteredBids, BID_FIELD_MAP } = BidsComponentState();
+  const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, BID_FIELD_MAP } = BidsComponentState();
 
   return (
     <Grid container sx={{ width: '100%' }}>
@@ -89,7 +89,7 @@ const formatCpm = (cpm?: any): string => {
   if (typeof cpm === 'number' && Number.isFinite(cpm)) return `${Math.round(cpm * 100) / 100}`;
   const raw = String(cpm);
   const normalized = raw.includes(',') && !raw.includes('.') ? raw.replace(',', '.') : raw;
-  const num = Number(normalized.replace(/[^0-9.\-]/g, ''));
+  const num = Number(normalized.replace(/[^0-9.-]/g, ''));
   return Number.isFinite(num) ? `${Math.round(num * 100) / 100}` : 'no cpm';
 };
 const displaySize = (bid: Bid): string => (bid as any).size ?? (bid.width && bid.height ? `${bid.width} x ${bid.height}` : 'no size');

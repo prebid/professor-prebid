@@ -452,7 +452,13 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
                                   URL Decoded:
                                 </Typography>
                                 <Typography variant="caption" sx={{ wordBreak: 'break-all', fontFamily: 'monospace' }}>
-                                  {decodeURIComponent(p.value)}
+                                  {(() => {
+                                    try {
+                                      return decodeURIComponent(p.value);
+                                    } catch {
+                                      return p.value;
+                                    }
+                                  })()}
                                 </Typography>
                               </Box>
                             )}

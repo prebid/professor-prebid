@@ -12,14 +12,15 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
   const [attachVersion, setAttachVersion] = useState<number>(0);
 
   useEffect(() => {
-    if (!element.current.shadowRoot) {
-      setShadowRoot(element.current.attachShadow({ mode: 'open' }));
+    const el = element.current;
+    if (!el.shadowRoot) {
+      setShadowRoot(el.attachShadow({ mode: 'open' }));
     } else {
-      setShadowRoot(element.current.shadowRoot);
+      setShadowRoot(el.shadowRoot);
     }
     return () => {
-      if (element.current.parentNode) {
-        element.current.parentNode.removeChild(element.current);
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
       }
     };
   }, []);

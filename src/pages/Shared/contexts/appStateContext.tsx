@@ -114,7 +114,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 
   useEffect(() => {
     const fetchTopics = async () => {
-      if ('browsingTopics' in document && document.featurePolicy.allowsFeature('browsing-topics')) {
+      if ('browsingTopics' in document && document.featurePolicy?.allowsFeature?.('browsing-topics')) {
         try {
           const topics = await document.browsingTopics();
           setTopics(topics);
@@ -137,15 +137,22 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
       new Set(
         events?.reduce((acc: string[], event: any) => {
           if (event.eventType === 'auctionInit') {
-            const adUnitCodes = (event as EventRecord<'auctionInit'>).args.adUnitCodes;
+            const adUnitCodes = (event as EventRecord<'auctionInit'>).args?.adUnitCodes || [];
             acc = [...acc, ...adUnitCodes];
           }
           return acc;
         }, [] as string[])
       )
     ) as string[];
-    const allBidderEventsBidders = Array.from(new Set([].concat(allBidResponseEvents, allNoBidEvents).map(({ args: { bidder } }) => bidder)));
-    const auctionInitEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionInit') as EventRecord<'auctionInit'>[])?.sort(({ args: { timestamp: tsa } }, { args: { timestamp: tsb } }) => tsa - tsb);
+    const allBidderEventsBidders = Array.from(
+      new Set(
+        []
+          .concat(allBidResponseEvents, allNoBidEvents)
+          .map((event: any) => event?.args?.bidder)
+          .filter(Boolean)
+      )
+    );
+    const auctionInitEvents = (events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionInit') as EventRecord<'auctionInit'>[])?.sort((a, b) => (a?.args?.timestamp ?? 0) - (b?.args?.timestamp ?? 0));
     const auctionEndEvents = events?.filter(({ eventType }: { eventType: string }) => eventType === 'auctionEnd') as EventRecord<'auctionEnd'>[];
     const allWinningBids = events?.filter(({ eventType }: { eventType: string }) => eventType === 'bidWon') as EventRecord<'bidWon'>[];
     const adsRendered = events?.filter(({ eventType }: { eventType: string }) => eventType === 'adRenderSucceeded') as EventRecord<'adRenderSucceeded'>[];

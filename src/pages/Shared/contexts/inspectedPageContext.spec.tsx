@@ -169,6 +169,8 @@ describe('InspectedPageContextProvider', () => {
         );
       });
     });
+
+    expect(screen.getByTestId('syncState')).toBeDefined();
   });
 
   it('ignores storage changes for non-local area or unchanged tabInfo values', async () => {
@@ -213,6 +215,8 @@ describe('InspectedPageContextProvider', () => {
         );
       });
     });
+
+    expect(screen.getByTestId('syncState')).toBeDefined();
   });
 
   it('handles tab_info change where newValue is undefined', async () => {
@@ -237,6 +241,8 @@ describe('InspectedPageContextProvider', () => {
         );
       });
     });
+
+    expect(screen.getByTestId('syncState')).toBeDefined();
   });
 
   it('trims downloadingUrls when length exceeds 100', async () => {
@@ -269,5 +275,7 @@ describe('InspectedPageContextProvider', () => {
         );
       });
     });
+
+    expect(screen.getByTestId('syncState')).toBeDefined();
   });
 });

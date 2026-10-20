@@ -3,15 +3,17 @@ import type { AdUnit, EventRecord } from 'prebid.js/types.d.ts';
 import StateContext from '../../contexts/appStateContext';
 import { createQueryEngine, distinct } from '../autocomplete/utils';
 
-const merge = (target: any, source: any) => {
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      if (!target[key] || typeof target[key] !== 'object') {
-        target[key] = {};
+const merge = (target: any, ...sources: any[]) => {
+  for (const source of sources) {
+    for (const key in source) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        if (!target[key] || typeof target[key] !== 'object') {
+          target[key] = {};
+        }
+        merge(target[key], source[key]);
+      } else {
+        target[key] = source[key];
       }
-      merge(target[key], source[key]);
-    } else {
-      target[key] = source[key];
     }
   }
   return target;
@@ -26,7 +28,7 @@ const processAdUnits = (auctionInitEvents: EventRecord<'auctionInit'>[]): AdUnit
     }, [] as AdUnit[])
     .reduce((previousValue: AdUnit[], currentValue: AdUnit) => {
       if (!currentValue) return previousValue;
-      let toUpdate = previousValue.find((adUnit) => {
+      const toUpdateIndex = previousValue.findIndex((adUnit) => {
         const adUnitBids = (adUnit.bids || []).map(({ bidder, params }) => ({ bidder, params }));
         const currentValueBids = (currentValue.bids || []).map(({ bidder, params }) => ({ bidder, params }));
         return (
@@ -37,9 +39,10 @@ const processAdUnits = (auctionInitEvents: EventRecord<'auctionInit'>[]): AdUnit
         );
       });
 
-      if (toUpdate) {
-        toUpdate = merge(toUpdate, currentValue);
-        return previousValue;
+      if (toUpdateIndex !== -1) {
+        const updated = [...previousValue];
+        updated[toUpdateIndex] = merge({}, previousValue[toUpdateIndex], currentValue);
+        return updated;
       } else {
         return [...previousValue, currentValue];
       }
@@ -145,7 +148,7 @@ const AdUnitsComponentState = () => {
     });
   }, [adUnits]);
 
-  const suggestions = useMemo(() => buildAdUnitSuggestions(adUnits, allSizes), [adUnits]);
+  const suggestions = useMemo(() => buildAdUnitSuggestions(adUnits, allSizes), [adUnits, allSizes]);
   return {
     adUnits,
     query,

@@ -132,6 +132,7 @@ describe('TimeLineComponent', () => {
     );
 
     const preAuctionBtn = screen.getByTestId('HourglassTopIcon').closest('button');
+    expect(preAuctionBtn).toBeTruthy();
     if (preAuctionBtn) {
       fireEvent.click(preAuctionBtn);
     }

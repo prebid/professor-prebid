@@ -121,8 +121,9 @@ const DebuggingModuleComponent = (): JSX.Element => {
     const newFormValues = { ...debuggingModuleConfig };
     set(newFormValues, path, value);
     if (deletePath) {
-      const last = deletePath.pop();
-      const targetObj = get(newFormValues, deletePath);
+      const targetPath = [...deletePath];
+      const last = targetPath.pop();
+      const targetObj = get(newFormValues, targetPath);
       if (targetObj && last) delete targetObj[last];
     }
     setDebuggingModuleConfig(newFormValues);
@@ -339,7 +340,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
           ))
         ) : (
           <Grid size={{ xs: 12 }}>
-            <Box sx={{ p: 1.5, textAlign: 'center', border: '1px stroke', borderColor: 'divider', borderRadius: 1, backgroundColor: 'action.hover' }}>
+            <Box sx={{ p: 1.5, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 1, backgroundColor: 'action.hover' }}>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                 No active debug rules configured. Click <strong>Add Custom Intercept Rule</strong> or <strong>Insert Preset Template</strong> to start mocking bid responses.
               </Typography>

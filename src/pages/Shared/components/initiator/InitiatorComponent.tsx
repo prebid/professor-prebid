@@ -111,7 +111,7 @@ const InitiatorComponent = (): JSX.Element => {
     return () => {
       active = false;
     };
-  }, [harLog]);
+  }, [harLog, decompressedMap]);
 
   // Classify all incoming HAR entries
   const classifiedEntries: IClassifiedNetworkEntry[] = useMemo(() => {

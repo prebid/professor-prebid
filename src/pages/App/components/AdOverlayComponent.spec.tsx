@@ -27,7 +27,7 @@ describe('AdOverlayComponent', () => {
   });
 
   it('renders correctly with default props', () => {
-    const { container } = render(<AdOverlayComponent elementId="div-gpt-ad-1234567-0" winningBidder="rubicon" winningCPM={1.5} currency="USD" timeToRespond={250} closePortal={vi.fn()} />);
+    render(<AdOverlayComponent elementId="div-gpt-ad-1234567-0" winningBidder="rubicon" winningCPM={1.5} currency="USD" timeToRespond={250} closePortal={vi.fn()} />);
     expect(screen.getAllByText('div-gpt-ad-1234567-0')).toBeDefined();
     expect(screen.getByText('rubicon')).toBeDefined();
     expect(screen.getByText('1.5 USD')).toBeDefined();

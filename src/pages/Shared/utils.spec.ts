@@ -1,7 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { decycle, getTabId, conditionalPluralization, detectIframe, generateUniqueId, createRangeArray, getMinAndMaxNumber, EventBus, sendChromeTabsMessage, reloadPage, download } from './utils';
 
 describe('Shared Utils', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   describe('decycle', () => {
     it('handles simple objects', () => {
       const obj = { a: 1, b: 'test' };

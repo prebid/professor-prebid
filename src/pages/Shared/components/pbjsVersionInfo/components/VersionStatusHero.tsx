@@ -106,7 +106,16 @@ export const VersionStatusHero: React.FC<VersionStatusHeroProps> = ({ installedV
         <Tooltip title="Check GitHub for release updates" arrow>
           <span>
             <IconButton size="small" onClick={onRefresh} disabled={isRefreshing} sx={{ border: '1px solid', borderColor: 'divider', p: 0.5 }}>
-              <RefreshIcon fontSize="small" sx={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }} />
+              <RefreshIcon
+                fontSize="small"
+                sx={{
+                  animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                  '@keyframes spin': {
+                    '0%': { transform: 'rotate(0deg)' },
+                    '100%': { transform: 'rotate(360deg)' },
+                  },
+                }}
+              />
             </IconButton>
           </span>
         </Tooltip>

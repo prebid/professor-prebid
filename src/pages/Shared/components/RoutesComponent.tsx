@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import AdUnitsComponent from './adUnits/AdUnitsComponent';
 import UserIdsComponent from './userIds/UserIdsComponent';
@@ -23,7 +22,6 @@ const RoutesComponent = (): JSX.Element => {
       <Route path="config" element={<ConfigComponent />} />
       <Route path="userId" element={<UserIdsComponent />} />
       <Route path="tools" element={<ToolsComponent />} />
-      <Route path="events" element={<EventsComponent />} />
       <Route path="events" element={<EventsComponent />} />
       <Route path="initiator" element={<InitiatorComponent />} />
       <Route path="preAuction" element={<PreAuctionComponent />} />

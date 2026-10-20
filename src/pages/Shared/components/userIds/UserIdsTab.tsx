@@ -39,7 +39,7 @@ const UserIdsTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element
     setExpandedEids((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const eids = prebid?.eids || [];
+  const eids = useMemo(() => prebid?.eids || [], [prebid?.eids]);
   const filterFn = useMemo(() => eidQueryEngine.runQuery(searchQuery), [searchQuery]);
   const filteredEids = useMemo(() => eids.filter((eid) => eid && filterFn(eid)), [eids, filterFn]);
 

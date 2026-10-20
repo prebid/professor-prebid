@@ -40,7 +40,7 @@ export const getSortValue = (b: any, key: string): string | number => {
       const raw = String(b?.cpm ?? '').trim();
       if (!raw) return Number.NEGATIVE_INFINITY;
       const normalized = raw.includes(',') && !raw.includes('.') ? raw.replace(',', '.') : raw;
-      const cleaned = normalized.replace(/[^0-9.\-]/g, '');
+      const cleaned = normalized.replace(/[^0-9.-]/g, '');
       if (!cleaned) return Number.NEGATIVE_INFINITY;
       const n = Number(cleaned);
       return Number.isFinite(n) ? n : Number.NEGATIVE_INFINITY;
@@ -73,7 +73,7 @@ const normalize = (v: unknown): string => (v == null ? '' : String(v)).toLowerCa
 
 const parseNumber = (raw: string): number => {
   const normalized = raw.includes(',') && !raw.includes('.') ? raw.replace(',', '.') : raw;
-  const cleaned = normalized.replace(/[^0-9.\-]/g, '');
+  const cleaned = normalized.replace(/[^0-9.-]/g, '');
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : Number.NEGATIVE_INFINITY; // sentinel for missing/invalid
 };
@@ -189,10 +189,10 @@ export const createQueryEngine = <T>(fieldMapInput: FieldMap<T>): QueryEngine<T>
     if (m) {
       const key = normalize(m[1]).replace(/[^a-z0-9]/g, '');
       const op = m[2] as Op;
-      const value = m[3].replace(/^\"|\"$/g, '');
+      const value = m[3].replace(/^"|"$/g, '');
       if (FIELD_SET.has(key)) return { kind: 'kv', key, op, value };
     }
-    return { kind: 'text', value: raw.replace(/^\"|\"$/g, '') };
+    return { kind: 'text', value: raw.replace(/^"|"$/g, '') };
   };
 
   const getField = (row: T, key: string): unknown => fieldMap[key]?.(row);

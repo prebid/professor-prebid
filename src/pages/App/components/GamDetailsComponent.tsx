@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getParentGamPubAds } from '../InjectedApp';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import Box from '@mui/system/Box';
+import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
 import { getSlotTargeting } from '../../Shared/gptTargeting';
@@ -23,21 +23,24 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
       const slots = pubads.getSlots();
       const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
       if (slot) {
-        setSlotElementId(slot.getSlotElementId());
-        setSlotAdUnitPath(slot.getAdUnitPath());
-        setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-        setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
-        const responseInfo = slot.getResponseInformation();
-        setSlotResponseInfo(responseInfo);
-        setQueryId(document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id') || null);
-        if (responseInfo) {
-          const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
-          setCreativeId(creativeId || sourceAgnosticCreativeId);
-          setLineItemId(lineItemId || sourceAgnosticLineItemId);
-        }
+        const syncSlot = () => {
+          setSlotElementId(slot.getSlotElementId());
+          setSlotAdUnitPath(slot.getAdUnitPath());
+          setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
+          setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
+          const responseInfo = slot.getResponseInformation();
+          setSlotResponseInfo(responseInfo);
+          setQueryId(document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id') || null);
+          if (responseInfo) {
+            const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
+            setCreativeId(creativeId || sourceAgnosticCreativeId);
+            setLineItemId(lineItemId || sourceAgnosticLineItemId);
+          }
+        };
+        syncSlot();
         const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
           if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
-            setSlotResponseInfo(slot.getResponseInformation());
+            syncSlot();
           }
         };
         pubads.addEventListener('slotResponseReceived', eventHandler);
@@ -74,15 +77,15 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             <strong style={{ color: '#d97706', fontWeight: 700 }}>LineItem-ID: </strong>
           </Typography>
           <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
-            <a href={`https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+            <a href={`https://admanager.google.com/${networktId?.[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
               {lineItemId}
             </a>
-            {networktId[1] &&
+            {networktId?.[1] &&
               networktId.map((nwId, index) => (
                 <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                   {index === 0 && ' ('}
                   {index > 0 && (
-                    <a href={`https://admanager.google.com/${nwId}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank">
+                    <a href={`https://admanager.google.com/${nwId}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank">
                       {`${index}`}
                     </a>
                   )}
@@ -115,10 +118,10 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             <strong style={{ color: '#d97706', fontWeight: 700 }}>Creative-ID: </strong>
           </Typography>
           <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
-            <a href={`https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+            <a href={`https://admanager.google.com/${networktId?.[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
               {creativeId}
             </a>
-            {networktId[1] &&
+            {networktId?.[1] &&
               networktId.map((nwId, index) => (
                 <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                   {index === 0 && ' ('}
@@ -156,10 +159,10 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             <strong style={{ color: '#d97706', fontWeight: 700 }}>Query-ID: </strong>
           </Typography>
           <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
-            <a href={`https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+            <a href={`https://admanager.google.com/${networktId?.[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
               {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
             </a>
-            {networktId[1] &&
+            {networktId?.[1] &&
               networktId.map((nwId, index) => (
                 <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                   {index === 0 && ' ('}
@@ -261,12 +264,14 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                         {slotTargeting.map((st, i) => (
                           <React.Fragment key={st.key}>
                             <Grid size={6}>
-                              <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
-                              {st.key}
+                              <Typography variant={'body1'} sx={{ textAlign: 'left' }}>
+                                {st.key}
+                              </Typography>
                             </Grid>
                             <Grid size={6}>
-                              <Typography variant={'body1'} sx={{ textAlign: 'left' }}></Typography>
-                              {st.value}
+                              <Typography variant={'body1'} sx={{ textAlign: 'left' }}>
+                                {st.value}
+                              </Typography>
                             </Grid>
                           </React.Fragment>
                         ))}

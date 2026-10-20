@@ -44,8 +44,13 @@ const ModifyBidResponsesComponent = (): JSX.Element => {
         args: [pbjsNamespace],
       });
 
-      const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
-      setDebugConfigState(savedConfig);
+      if (!result?.[0]?.result) return;
+      try {
+        const savedConfig: IPrebidDebugConfig = JSON.parse(result[0].result);
+        setDebugConfigState(savedConfig);
+      } catch {
+        // Ignore malformed JSON in sessionStorage
+      }
     };
     getInitialState();
   }, [pbjsNamespace]);

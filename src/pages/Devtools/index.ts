@@ -1,5 +1,5 @@
 import { collectHarLog } from './harLog';
 
-chrome.devtools?.panels?.create('Professor Prebid', 'icon-34.png', 'panel.html', async (panel) => {});
+chrome.devtools?.panels?.create('Professor Prebid', 'assets/img/icon-34.png', 'panel.html', async () => {});
 
 collectHarLog();

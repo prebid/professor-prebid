@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EVENTS, CONSOLE_TOGGLE, SAVE_MASKS } from '../Shared/constants';
 import { EventBus } from '../Shared/utils';
 import AdOverlayPortal from './components/AdOverlayPortal';
@@ -106,7 +106,7 @@ const InjectedApp = (): JSX.Element => {
     setConsoleState(checked);
   };
 
-  const updateMasksFromPbjs = (pbjsNameSpace: string) => {
+  const updateMasksFromPbjs = useCallback((pbjsNameSpace: string) => {
     setPbjsNameSpace(pbjsNameSpace);
     const pbsjsEvents = (window[pbjsNameSpace]?.getEvents ? window[pbjsNameSpace].getEvents() : []) as unknown[];
     const adUnitCodesSet = new Set<string>();
@@ -188,46 +188,49 @@ const InjectedApp = (): JSX.Element => {
       const updated = masks.find((m) => m.elementId === current.elementId);
       return updated ? { ...current, ...updated } : current;
     });
-  };
+  }, []);
 
-  const handleNewMasks = (event: Event) => {
-    const customEvent = event as CustomEvent;
-    const pbjsNameSpace: string = customEvent.detail;
+  const handleNewMasks = useCallback(
+    (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const pbjsNameSpace: string = customEvent.detail;
 
-    if (!pbjsNameSpace || !consoleStateRef.current) {
-      return;
-    }
-
-    pendingNamespaceRef.current = pbjsNameSpace;
-
-    const now = Date.now();
-    const interval = 1000;
-    const last = lastGetEventsRef.current;
-
-    if (!last || now - last >= interval) {
-      lastGetEventsRef.current = now;
-      const ns = pendingNamespaceRef.current;
-      pendingNamespaceRef.current = null;
-      if (ns) {
-        updateMasksFromPbjs(ns);
+      if (!pbjsNameSpace || !consoleStateRef.current) {
+        return;
       }
-      return;
-    }
 
-    if (getEventsTimeoutRef.current == null) {
-      const remaining = interval - (now - last);
-      getEventsTimeoutRef.current = window.setTimeout(() => {
-        lastGetEventsRef.current = Date.now();
+      pendingNamespaceRef.current = pbjsNameSpace;
+
+      const now = Date.now();
+      const interval = 1000;
+      const last = lastGetEventsRef.current;
+
+      if (!last || now - last >= interval) {
+        lastGetEventsRef.current = now;
         const ns = pendingNamespaceRef.current;
         pendingNamespaceRef.current = null;
-        getEventsTimeoutRef.current = null;
-
-        if (ns && consoleStateRef.current) {
+        if (ns) {
           updateMasksFromPbjs(ns);
         }
-      }, remaining);
-    }
-  };
+        return;
+      }
+
+      if (getEventsTimeoutRef.current == null) {
+        const remaining = interval - (now - last);
+        getEventsTimeoutRef.current = window.setTimeout(() => {
+          lastGetEventsRef.current = Date.now();
+          const ns = pendingNamespaceRef.current;
+          pendingNamespaceRef.current = null;
+          getEventsTimeoutRef.current = null;
+
+          if (ns && consoleStateRef.current) {
+            updateMasksFromPbjs(ns);
+          }
+        }, remaining);
+      }
+    },
+    [updateMasksFromPbjs]
+  );
 
   useEffect(() => {
     consoleStateRef.current = consoleState;
@@ -245,7 +248,7 @@ const InjectedApp = (): JSX.Element => {
         getEventsTimeoutRef.current = null;
       }
     };
-  }, []);
+  }, [handleNewMasks]);
 
   return (
     <React.Fragment>

@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Prebid, addEventListenersForPrebid } from './prebid';
-import { EVENTS, POPUP_LOADED } from '../Shared/constants';
+import { DOWNLOAD_FAILED, EVENTS, POPUP_LOADED } from '../Shared/constants';
 
 import { EventBus } from '../Shared/utils';
 
 vi.mock('../Shared/utils', () => ({
   EventBus: {
     emit: vi.fn(),
+    on: vi.fn(),
   },
 }));
 
@@ -66,6 +67,8 @@ describe('Prebid Injected Script', () => {
     expect(mockPbjs.onEvent).toHaveBeenCalledWith('bidResponse', expect.any(Function));
     expect(mockPbjs.onEvent).toHaveBeenCalledWith('noBid', expect.any(Function));
     expect(mockPbjs.onEvent).toHaveBeenCalledWith('bidWon', expect.any(Function));
+    expect(EventBus.on).toHaveBeenCalledWith(POPUP_LOADED, expect.any(Function));
+    expect(EventBus.on).toHaveBeenCalledWith(DOWNLOAD_FAILED, expect.any(Function));
   });
 
   it('handles initialization when onEvent is not a function', () => {
@@ -134,6 +137,15 @@ describe('Prebid Injected Script', () => {
 
     listener({
       source: window,
+      origin: window.origin,
+      data: { profPrebid: true, type: DOWNLOAD_FAILED },
+    });
+    expect(sendSpy).toHaveBeenCalled();
+
+    sendSpy.mockClear();
+
+    listener({
+      source: window,
       origin: 'https://attacker.com',
       data: { profPrebid: true, type: POPUP_LOADED },
     });
@@ -161,10 +173,12 @@ describe('Prebid Injected Script', () => {
     expect(instance.getDebugConfig()).toEqual({ enabled: true });
 
     (window.sessionStorage.getItem as any).mockReturnValue('invalid-json');
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(instance.getDebugConfig()).toBeUndefined();
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+
+    (window.sessionStorage.getItem as any).mockImplementationOnce(() => {
+      throw new DOMException('Access denied', 'SecurityError');
+    });
+    expect(instance.getDebugConfig()).toBeUndefined();
   });
 
   describe('getEventsObjUrl', () => {

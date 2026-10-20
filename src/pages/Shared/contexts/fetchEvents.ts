@@ -41,7 +41,7 @@ export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Di
       setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
       setDownloading('true');
       try {
-        if (prebid && prebid.eventsUrl in downloadingUrls) {
+        if (prebid && (downloadingUrls.includes(prebid.eventsUrl) || prebid.eventsUrl in downloadingUrls)) {
           // skip download if already downloading or from another domain or prebid is undefined
         } else {
           setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);

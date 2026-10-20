@@ -21,10 +21,10 @@ interface AdUnitsHeaderProps {
   ADUNIT_FIELD_MAP: any;
   setPbjsVersionPopUpOpen: (open: boolean) => void;
   pbjsVersionPopUpOpen: boolean;
-  adUnits: any[];
+  filteredAdUnits: any[];
 }
 
-const AdUnitsHeader = ({ prebid, allAdUnitCodes, allBidderEvents, query, setQuery, suggestions, ADUNIT_FIELD_MAP, setPbjsVersionPopUpOpen, pbjsVersionPopUpOpen, adUnits }: AdUnitsHeaderProps): JSX.Element => {
+const AdUnitsHeader = ({ prebid, allAdUnitCodes, allBidderEvents, query, setQuery, suggestions, ADUNIT_FIELD_MAP, setPbjsVersionPopUpOpen, pbjsVersionPopUpOpen, filteredAdUnits }: AdUnitsHeaderProps): JSX.Element => {
   return (
     <React.Fragment>
       <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setPbjsVersionPopUpOpen(true)}>
@@ -44,8 +44,8 @@ const AdUnitsHeader = ({ prebid, allAdUnitCodes, allBidderEvents, query, setQuer
       </Grid>
 
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title="Download filtered bids as JSON" arrow>
-          <IconButton size="small" onClick={() => download(adUnits, 'filtered adunits')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
+        <Tooltip title="Download filtered ad units as JSON" arrow>
+          <IconButton size="small" onClick={() => download(filteredAdUnits, 'filtered adunits')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
             <DownloadIcon fontSize="inherit" />
           </IconButton>
         </Tooltip>

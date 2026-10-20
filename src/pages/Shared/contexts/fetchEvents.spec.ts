@@ -108,7 +108,7 @@ describe('fetchEvents', () => {
       },
     };
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
     expect(setDownloading).not.toHaveBeenCalled();
   });
 
@@ -127,7 +127,7 @@ describe('fetchEvents', () => {
     const downloadingUrls: any = [eventsUrl];
     downloadingUrls[eventsUrl] = true;
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, downloadingUrls);
+    await fetchEvents(tabInfo, setDownloading, setSyncInfo, downloadingUrls);
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -194,7 +194,7 @@ describe('fetchEvents', () => {
 
     global.fetch = vi.fn().mockRejectedValue(new Error('Invalid URL'));
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
     expect(setDownloading).toHaveBeenCalledWith('true');
     expect(setDownloading).toHaveBeenCalledWith('error');
   });

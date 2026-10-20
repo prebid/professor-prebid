@@ -22,7 +22,7 @@ const userIdModuleQueryEngine = createQueryEngine<any>(USER_ID_MODULE_FIELD_MAP)
 const ConfigTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element => {
   const { prebid } = useContext(AppStateContext);
 
-  const modules = prebid?.config?.userSync?.userIds || [];
+  const modules = useMemo(() => prebid?.config?.userSync?.userIds || [], [prebid?.config?.userSync?.userIds]);
   const filterFn = useMemo(() => userIdModuleQueryEngine.runQuery(searchQuery), [searchQuery]);
   const filteredModules = useMemo(() => modules.filter((m) => m && filterFn(m)), [modules, filterFn]);
 

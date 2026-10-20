@@ -61,10 +61,10 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
           const subkeys = replaceRuleTargets.map((x) => x.subkey).filter((x) => x);
           const newKey = replaceRuleTargets.find((keyOption) => keyOption.value === e.target.value);
           const newPath = [...path.slice(0, path.length - 1), e.target.value];
-          if (newKey.subkey && newPath[3] !== newKey.subkey) {
+          if (newKey?.subkey && newPath[3] !== newKey.subkey) {
             newPath.splice(3, 0, newKey.subkey);
           }
-          if (!newKey.subkey && subkeys.includes(newPath[2])) {
+          if (!newKey?.subkey && subkeys.includes(newPath[3])) {
             newPath.splice(3, 1);
           }
           handleRulesFormChange('update', '', newPath, [...path.slice(0, path.length - 1), ruleKey]);
@@ -88,12 +88,12 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
       <IconButton size="small" color="primary" children={<DoubleArrowIcon />} />
 
       <TextField
-        error={(path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || '') === ''}
+        error={(path[3] === 'native' ? rule.then?.native?.[ruleKey as keyof INativeRules] || '' : rule.then?.[ruleKey] || '') === ''}
         sx={{ m: 0.25, width: '17ch' }}
         size="small"
         select={ruleKey === 'mediaType'}
         label="Replace-Rule Value"
-        value={path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || ''}
+        value={path[3] === 'native' ? rule.then?.native?.[ruleKey as keyof INativeRules] || '' : rule.then?.[ruleKey] || ''}
         type={ruleKey === 'mediaType' ? 'text' : replaceRuleTargets.find((x) => x.value === ruleKey)?.type}
         onChange={(event) => {
           const type = replaceRuleTargets.find((x) => x.value === ruleKey)?.type;

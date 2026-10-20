@@ -65,7 +65,11 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     // Subscribe to changes in local storage
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
       if (areaName === 'local' && changes.initReqChain && changes.initReqChain.newValue) {
-        setInitReqChainData(JSON.parse(changes.initReqChain.newValue));
+        try {
+          setInitReqChainData(JSON.parse(changes.initReqChain.newValue));
+        } catch {
+          setInitReqChainData({});
+        }
       }
     };
     chrome.storage.onChanged.addListener(handler);

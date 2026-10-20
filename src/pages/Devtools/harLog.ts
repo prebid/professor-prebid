@@ -221,6 +221,10 @@ const record = (harEntry: any) => {
 };
 
 export const reset = () => {
+  if (flushTimeout) {
+    clearTimeout(flushTimeout);
+    flushTimeout = null;
+  }
   entries = [];
   idCounter = 1;
   write(entries).catch(() => {});
@@ -237,6 +241,12 @@ export const collectHarLog = () => {
   chrome.storage?.onChanged?.addListener((changes, areaName) => {
     const tabId = inspectedTabId();
     if (areaName !== 'session' || tabId === undefined) return;
-    if (changes[preAuctionHarKey(tabId)]?.newValue === '[]') entries = [];
+    if (changes[preAuctionHarKey(tabId)]?.newValue === '[]') {
+      if (flushTimeout) {
+        clearTimeout(flushTimeout);
+        flushTimeout = null;
+      }
+      entries = [];
+    }
   });
 };

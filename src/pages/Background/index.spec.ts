@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
-let onMessageCallback: any;
-let onBeforeNavigateCallback: any;
+let onCommittedCallback: any;
 let onTabRemovedCallback: any;
 let onTabActivatedCallback: any;
 let onAlarmCallback: any;
@@ -31,6 +30,14 @@ const mockRemove = vi.fn(async (keys: string[]) => {
   }
 });
 
+const mockSessionStorage: Record<string, any> = {};
+const mockSessionGet = vi.fn(async () => ({ ...mockSessionStorage }));
+const mockSessionRemove = vi.fn(async (keys: string | string[]) => {
+  for (const k of Array.isArray(keys) ? keys : [keys]) {
+    delete mockSessionStorage[k];
+  }
+});
+
 const mockQuery = vi.fn(async () => [{ id: 1 }, { id: 2 }]);
 const mockCreateAlarm = vi.fn();
 const mockGetAlarm = vi.fn((name: string, cb: Function) => {
@@ -48,6 +55,10 @@ vi.stubGlobal('chrome', {
       set: mockSet,
       remove: mockRemove,
     },
+    session: {
+      get: mockSessionGet,
+      remove: mockSessionRemove,
+    },
   },
   action: {
     setBadgeBackgroundColor: mockSetBadgeBackgroundColor,
@@ -55,15 +66,13 @@ vi.stubGlobal('chrome', {
   },
   runtime: {
     onMessage: {
-      addListener: vi.fn((cb) => {
-        onMessageCallback = cb;
-      }),
+      addListener: vi.fn(),
     },
   },
   webNavigation: {
-    onBeforeNavigate: {
+    onCommitted: {
       addListener: vi.fn((cb) => {
-        onBeforeNavigateCallback = cb;
+        onCommittedCallback = cb;
       }),
     },
   },
@@ -116,11 +125,15 @@ describe('Background Index Module', () => {
     for (const key of Object.keys(mockStorage)) {
       delete mockStorage[key];
     }
+    for (const key of Object.keys(mockSessionStorage)) {
+      delete mockSessionStorage[key];
+    }
+    mockSessionRemove.mockClear();
   });
 
   it('initializes Background and registers all event listeners', () => {
     expect(chrome.runtime.onMessage.addListener).toHaveBeenCalled();
-    expect(chrome.webNavigation.onBeforeNavigate.addListener).toHaveBeenCalled();
+    expect(chrome.webNavigation.onCommitted.addListener).toHaveBeenCalled();
     expect(chrome.tabs.onRemoved.addListener).toHaveBeenCalled();
     expect(chrome.tabs.onActivated.addListener).toHaveBeenCalled();
     expect(chrome.alarms.onAlarm.addListener).toHaveBeenCalled();
@@ -138,8 +151,8 @@ describe('Background Index Module', () => {
     expect(mockCreateAlarm).not.toHaveBeenCalled();
   });
 
-  it('handles webNavigation onBeforeNavigate for frameId 0', async () => {
-    await onBeforeNavigateCallback({ frameId: 0, tabId: 1, url: 'https://example.com' });
+  it('handles webNavigation onCommitted for frameId 0', async () => {
+    await onCommittedCallback({ frameId: 0, tabId: 1, url: 'https://example.com' });
     await flushPromises();
 
     expect(mockStorage['tab_info_1']).toEqual({
@@ -148,8 +161,17 @@ describe('Background Index Module', () => {
     expect(mockSetBadgeText).toHaveBeenCalledWith({ text: '', tabId: 1 });
   });
 
-  it('ignores webNavigation onBeforeNavigate for non-zero frameId', async () => {
-    await onBeforeNavigateCallback({ frameId: 1, tabId: 1, url: 'https://example.com/iframe' });
+  it('ignores webNavigation onCommitted for prerendered documents', async () => {
+    mockStorage['tab_info_1'] = { 'top-window': { url: 'https://current.example' } };
+    await onCommittedCallback({ frameId: 0, tabId: 1, url: 'https://prerender.example', documentLifecycle: 'prerender' });
+    await flushPromises();
+
+    expect(mockStorage['tab_info_1']).toEqual({ 'top-window': { url: 'https://current.example' } });
+    expect(mockSetBadgeText).not.toHaveBeenCalled();
+  });
+
+  it('ignores webNavigation onCommitted for non-zero frameId', async () => {
+    await onCommittedCallback({ frameId: 1, tabId: 1, url: 'https://example.com/iframe' });
     await flushPromises();
 
     expect(mockSetBadgeText).not.toHaveBeenCalled();
@@ -213,5 +235,19 @@ describe('Background Index Module', () => {
     await flushPromises();
 
     expect(mockRemove).not.toHaveBeenCalled();
+  });
+
+  it('removes pre-auction HAR session entries for closed tabs only', async () => {
+    mockQuery.mockResolvedValue([{ id: 1 }]);
+    mockSessionStorage['preAuctionHar_1'] = { entries: [] };
+    mockSessionStorage['preAuctionHar_42'] = { entries: [] };
+    mockSessionStorage['unrelated'] = 'keep';
+
+    await onAlarmCallback({ name: 'cleanUpTabInfo' });
+    await flushPromises();
+
+    expect(mockSessionStorage['preAuctionHar_1']).toBeDefined();
+    expect(mockSessionStorage['preAuctionHar_42']).toBeUndefined();
+    expect(mockSessionStorage['unrelated']).toEqual('keep');
   });
 });

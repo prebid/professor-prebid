@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import { alpha } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
 import { theme } from '../../../theme/theme';
 import { ThemeProvider } from '@mui/material';
@@ -36,12 +35,6 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
   }, [containerNode]);
 
   const openInPopOver = () => {
-    let bodyContainer = window.document.body;
-    try {
-      if (window.top && window.top.document) {
-        bodyContainer = window.top.document.body;
-      }
-    } catch (e) {}
     setIsOpen(true);
   };
 
