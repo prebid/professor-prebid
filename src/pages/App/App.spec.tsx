@@ -1,1 +1,0 @@
-import './InjectedApp.spec';
