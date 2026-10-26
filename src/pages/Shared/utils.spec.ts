@@ -20,6 +20,29 @@ describe('Shared Utils', () => {
       expect(result.self).toBeUndefined();
     });
 
+    it('keeps an object that is shared but not circular every time it appears', () => {
+      const storage = { type: 'html5', name: 'id', expires: 30 };
+      const obj = {
+        userIds: [
+          { name: 'a', storage },
+          { name: 'b', storage },
+        ],
+        ortb2: { site: storage },
+      };
+      const result = JSON.parse(decycle(obj));
+      expect(result.userIds[0].storage).toEqual(storage);
+      expect(result.userIds[1].storage).toEqual(storage);
+      expect(result.ortb2.site).toEqual(storage);
+    });
+
+    it('drops a circular reference that goes through an array', () => {
+      const obj: any = { a: 1, list: [] };
+      obj.list.push(obj);
+      const result = JSON.parse(decycle(obj));
+      expect(result.a).toBe(1);
+      expect(result.list).toEqual([null]);
+    });
+
     it('removes DOM elements (location/document)', () => {
       const obj = { a: 1, dom: { location: 'some-location' } };
       const result = JSON.parse(decycle(obj));
