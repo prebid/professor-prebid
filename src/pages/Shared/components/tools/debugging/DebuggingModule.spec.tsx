@@ -203,13 +203,14 @@ describe('DebuggingModule', () => {
       expect(global.chrome.scripting.executeScript).toHaveBeenCalled();
     });
 
-    it('toggles Verbose Console Logs switch', async () => {
+    it('toggles Verbose Console Logs switch in the page world, where pbjs is visible', async () => {
       renderWithContext();
       const loggingSwitch = screen.getByLabelText(/Verbose Console Logs/i);
+      (global.chrome.scripting.executeScript as any).mockClear();
       await act(async () => {
         fireEvent.click(loggingSwitch);
       });
-      expect(global.chrome.scripting.executeScript).toHaveBeenCalled();
+      expect(global.chrome.scripting.executeScript).toHaveBeenCalledWith(expect.objectContaining({ world: 'MAIN', args: ['pbjs', true] }));
     });
 
     it('toggles Persist Rules in Local Storage switch', async () => {

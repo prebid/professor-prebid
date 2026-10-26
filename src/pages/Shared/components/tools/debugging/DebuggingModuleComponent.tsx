@@ -105,6 +105,8 @@ const DebuggingModuleComponent = (): JSX.Element => {
     const tabId = await getTabId();
     await chrome.scripting.executeScript({
       target: { tabId },
+      // pbjs lives on the page's window, which only the MAIN world can see.
+      world: 'MAIN',
       func: (namespace: string, debugState: boolean) => {
         const globalPbjs = (window as any)[namespace || 'pbjs'];
         if (globalPbjs && typeof globalPbjs.setConfig === 'function') {
