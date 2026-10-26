@@ -187,6 +187,14 @@ export const toLogEntry = (harEntry: any): IHarLogEntry => {
 
 const inspectedTabId = (): number | undefined => chrome.devtools?.inspectedWindow?.tabId;
 
+// Removing the key (rather than writing '[]') keeps a navigation reset distinguishable from the panel's "Clear log",
+// so the onChanged echo of our own reset cannot wipe requests recorded after it. Readers treat a missing key as an empty log.
+const clearStored = async (): Promise<void> => {
+  const tabId = inspectedTabId();
+  if (tabId === undefined || !chrome.storage?.session) return;
+  await chrome.storage.session.remove(preAuctionHarKey(tabId));
+};
+
 const write = async (list: IHarLogEntry[]): Promise<void> => {
   const tabId = inspectedTabId();
   if (tabId === undefined || !chrome.storage?.session) return;
@@ -227,7 +235,7 @@ export const reset = () => {
   }
   entries = [];
   idCounter = 1;
-  write(entries).catch(() => {});
+  clearStored().catch(() => {});
 };
 
 export const collectHarLog = () => {

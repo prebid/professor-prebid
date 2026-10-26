@@ -99,8 +99,9 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     });
 
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'session' && key && changes[key] && changes[key].newValue) {
-        read(changes[key].newValue);
+      if (areaName === 'session' && key && changes[key]) {
+        // A removed key means the log was reset for a new page.
+        read(changes[key].newValue || '[]');
       }
     };
     chrome.storage.onChanged.addListener(handler);

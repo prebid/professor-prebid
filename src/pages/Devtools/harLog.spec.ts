@@ -13,6 +13,7 @@ describe('harLog', () => {
       storage: {
         session: {
           set: vi.fn().mockResolvedValue(undefined),
+          remove: vi.fn().mockResolvedValue(undefined),
           get: vi.fn(),
         },
         local: {
@@ -168,6 +169,7 @@ describe('harLog', () => {
       return listeners;
     };
     const sessionSet = () => global.chrome.storage.session.set as any;
+    const sessionRemove = () => global.chrome.storage.session.remove as any;
     const lastSaved = () => JSON.parse(sessionSet().mock.calls.slice(-1)[0][0][HAR_KEY]);
     const request = (url: string) => ({ request: { url, method: 'GET' }, response: { status: 200 }, startedDateTime: '2026-08-17T10:00:00.000Z', time: 10 });
 
@@ -179,18 +181,18 @@ describe('harLog', () => {
 
     it('stores the log per inspected tab in session storage, never in local storage', async () => {
       const listeners = setup();
-      expect(sessionSet()).toHaveBeenCalledWith({ [HAR_KEY]: JSON.stringify([]) });
+      expect(sessionRemove()).toHaveBeenCalledWith(HAR_KEY);
 
       listeners.network(request('https://example.com/test'));
-      expect(sessionSet()).toHaveBeenCalledTimes(1);
+      expect(sessionSet()).toHaveBeenCalledTimes(0);
 
       await vi.advanceTimersByTimeAsync(300);
-      expect(sessionSet()).toHaveBeenCalledTimes(2);
+      expect(sessionSet()).toHaveBeenCalledTimes(1);
       expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/test']);
 
       listeners.network({ request: { url: 'chrome-extension://123/script.js' } });
       await vi.advanceTimersByTimeAsync(300);
-      expect(sessionSet()).toHaveBeenCalledTimes(2);
+      expect(sessionSet()).toHaveBeenCalledTimes(1);
       expect(global.chrome.storage.local.set).not.toHaveBeenCalled();
     });
 
@@ -199,14 +201,32 @@ describe('harLog', () => {
       listeners.network(request('https://example.com/a'));
       await vi.advanceTimersByTimeAsync(300);
 
-      listeners.tabs(TAB_ID + 1, { status: 'loading' });
-      expect(lastSaved()).toHaveLength(1);
+      sessionRemove().mockClear();
 
+      listeners.tabs(TAB_ID + 1, { status: 'loading' });
       listeners.tabs(TAB_ID, { status: 'complete' });
-      expect(lastSaved()).toHaveLength(1);
+      expect(sessionRemove()).not.toHaveBeenCalled();
 
       listeners.tabs(TAB_ID, { status: 'loading' });
-      expect(lastSaved()).toEqual([]);
+      expect(sessionRemove()).toHaveBeenCalledWith(HAR_KEY);
+
+      listeners.network(request('https://example.com/b'));
+      await vi.advanceTimersByTimeAsync(300);
+      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/b']);
+    });
+
+    it('keeps requests recorded right after a navigation reset when the reset itself is echoed back', async () => {
+      const listeners = setup();
+      listeners.network(request('https://example.com/old'));
+      await vi.advanceTimersByTimeAsync(300);
+
+      listeners.tabs(TAB_ID, { status: 'loading' });
+      listeners.network(request('https://example.com/prebid.js'));
+      // storage.onChanged for the reset arrives after the new page's first request finished.
+      listeners.storage({ [HAR_KEY]: { oldValue: lastSaved(), newValue: undefined } }, 'session');
+      await vi.advanceTimersByTimeAsync(300);
+
+      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/prebid.js']);
     });
 
     it('drops the in-memory log when the panel clears the stored log', async () => {

@@ -96,6 +96,26 @@ describe('InspectedPageContextProvider', () => {
     expect(screen.getByTestId('harLog').textContent).not.toContain('wrong-area');
   });
 
+  it('empties the network log when the stored log is removed for a new page', async () => {
+    await act(async () => {
+      render(
+        <InspectedPageContextProvider>
+          <TestComponent />
+        </InspectedPageContextProvider>
+      );
+    });
+
+    await act(async () => {
+      listeners.forEach((listener) => listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://old-page.com' }]) } }, 'session'));
+    });
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('old-page'), { timeout: 2000 });
+
+    await act(async () => {
+      listeners.forEach((listener) => listener({ [HAR_KEY]: { oldValue: '[]', newValue: undefined } }, 'session'));
+    });
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toBe('[]'), { timeout: 2000 });
+  });
+
   it('handles initial mount when tabInfo does not exist in local storage', async () => {
     global.chrome.storage.local.get = vi.fn((keys, cb) => cb({}));
 
