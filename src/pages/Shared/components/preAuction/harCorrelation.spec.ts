@@ -81,6 +81,18 @@ describe('correlateHar', () => {
     expect(timings.permutive.totalDuration).toBe(40);
   });
 
+  it("lets a later provider keep its known endpoint even when an earlier provider's name guess would match it", () => {
+    const providers = [
+      { name: 'lotame', type: 'rtd', awaited: true, awaitedReason: '', matchTokens: ['lotame'], hosts: [], auctions: [], landedCount: 0, config: {} },
+      { name: 'lotamePanoramaId', type: 'identity', awaited: true, awaitedReason: '', matchTokens: [], hosts: ['id.crwdcntrl.lotame.com'], auctions: [], landedCount: 0, config: {} },
+    ];
+    const { timings } = correlateHar(diagnostics(providers), [entry('https://id.crwdcntrl.lotame.com/id', AUCTION_START, 40)]);
+    expect(timings.lotamePanoramaId.requests).toHaveLength(1);
+    expect(timings.lotamePanoramaId.via).toBe('endpoint');
+    expect(timings.lotamePanoramaId.races[0].hasRequest).toBe(true);
+    expect(timings.lotame).toBeUndefined();
+  });
+
   it('attributes by documented endpoint, ranking it above a name guess', () => {
     const providers = [{ name: 'optable', type: 'rtd', awaited: true, awaitedReason: '', matchTokens: ['optable'], hosts: ['acme-dmp.com'], auctions: [], landedCount: 0, config: {} }];
     const { timings } = correlateHar(diagnostics(providers), [entry('https://edge.acme-dmp.com/v1/targeting', AUCTION_START, 60)]);

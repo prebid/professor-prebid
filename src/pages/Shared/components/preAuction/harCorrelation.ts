@@ -110,16 +110,24 @@ export const correlateHar = (diagnostics: IProviderDiagnostics, harEntries: IHar
     return { url: entry.url, host: entry.host, start: entry.startedDateTime, end: entry.startedDateTime + entry.time, duration: entry.time, status: entry.status, via };
   };
 
+  // Known endpoints are claimed for every provider before any hostname guessing, so an earlier provider's guess cannot take a later provider's endpoint.
+  const byEndpoint = new Map<IProviderDiagnostic, IProviderRequest[]>();
   diagnostics.providers.forEach((provider) => {
-    // Endpoints from prebid's source.
     const domains = knownDomains(provider);
-    const byEndpoint = domains.length > 0 ? entries.filter((entry) => !claimed.has(entry) && matchesDomain(entry.host, domains)).map((entry) => toRequest(entry, 'endpoint')) : [];
+    byEndpoint.set(provider, domains.length > 0 ? entries.filter((entry) => !claimed.has(entry) && matchesDomain(entry.host, domains)).map((entry) => toRequest(entry, 'endpoint')) : []);
+  });
 
-    // Last resort: module name as a hostname fragment.
+  // Last resort: module name as a hostname fragment.
+  const guessedBy = new Map<IProviderDiagnostic, IProviderRequest[]>();
+  diagnostics.providers.forEach((provider) => {
     const tokens = candidateTokens(provider);
-    const guessed = tokens.length > 0 ? entries.filter((entry) => !claimed.has(entry) && matches(entry.host, tokens)).map((entry) => toRequest(entry, 'host')) : [];
+    guessedBy.set(provider, tokens.length > 0 ? entries.filter((entry) => !claimed.has(entry) && matches(entry.host, tokens)).map((entry) => toRequest(entry, 'host')) : []);
+  });
 
-    const requests = [...byEndpoint, ...guessed].sort((a, b) => a.start - b.start);
+  diagnostics.providers.forEach((provider) => {
+    const endpointRequests = byEndpoint.get(provider) || [];
+    const guessed = guessedBy.get(provider) || [];
+    const requests = [...endpointRequests, ...guessed].sort((a, b) => a.start - b.start);
     if (requests.length === 0) return;
 
     timings[provider.name] = {
@@ -129,7 +137,7 @@ export const correlateHar = (diagnostics: IProviderDiagnostics, harEntries: IHar
       totalDuration: requests.reduce((acc, { duration }) => acc + duration, 0),
       firstStart: Math.min(...requests.map(({ start }) => start)),
       lastEnd: Math.max(...requests.map(({ end }) => end)),
-      via: byEndpoint.length > 0 ? 'endpoint' : 'host',
+      via: endpointRequests.length > 0 ? 'endpoint' : 'host',
       // Judge each auction only against requests that had started when it began bidding; anything
       // fired afterwards says nothing about whether this auction got its data.
       races: diagnostics.auctions.map((auction: IDiagnosedAuction) => {
