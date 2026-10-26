@@ -48,20 +48,24 @@ const listenToChromeRuntimeMessages = () => {
   chrome.runtime?.onMessage.addListener(processChromeRuntimeMessages);
 };
 
-type ChromeMessage = { type: typeof CONSOLE_TOGGLE; consoleState: boolean } | { type: typeof PBJS_NAMESPACE_CHANGE; pbjsNamespace: string } | { type: typeof POPUP_LOADED; payload: object } | { type: typeof DOWNLOAD_FAILED; payload: object };
+// Shape produced by sendChromeTabsMessage: every message carries its value under `payload`.
+type ChromeMessage = { type: typeof CONSOLE_TOGGLE; payload: { consoleState: boolean } } | { type: typeof PBJS_NAMESPACE_CHANGE; payload: string } | { type: typeof POPUP_LOADED; payload: object } | { type: typeof DOWNLOAD_FAILED; payload: object };
 
 const processChromeRuntimeMessages = (request: ChromeMessage) => {
   switch (request.type) {
-    case CONSOLE_TOGGLE:
-      document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: request.consoleState }));
-      EventBus.emit(request.type, { detail: request.consoleState });
-      if (request.consoleState) {
+    case CONSOLE_TOGGLE: {
+      const consoleState = !!request.payload?.consoleState;
+      document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: consoleState }));
+      EventBus.emit(request.type, { detail: consoleState });
+      if (consoleState) {
         updateOverlays(NamespaceStore.get() || 'pbjs');
       }
       break;
+    }
     case PBJS_NAMESPACE_CHANGE:
-      NamespaceStore.set(request.pbjsNamespace);
-      EventBus.emit(request.type, { detail: request.pbjsNamespace });
+      if (typeof request.payload !== 'string' || !request.payload) break;
+      NamespaceStore.set(request.payload);
+      EventBus.emit(request.type, { detail: request.payload });
       break;
     case POPUP_LOADED:
     case DOWNLOAD_FAILED:

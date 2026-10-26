@@ -228,30 +228,54 @@ describe('Content Script', () => {
   });
 
   describe('processChromeRuntimeMessages', () => {
-    it('emits event on CONSOLE_TOGGLE message', () => {
-      const emitSpy = vi.spyOn(EventBus, 'emit');
-      if (capturedRuntimeListener) {
-        capturedRuntimeListener({ type: CONSOLE_TOGGLE, consoleState: true });
-        expect(emitSpy).toHaveBeenCalledWith(CONSOLE_TOGGLE, { detail: true });
-      }
-    });
-
-    it('updates NamespaceStore and emits event on PBJS_NAMESPACE_CHANGE message', () => {
+    // Messages below use the exact shape sendChromeTabsMessage produces: { type, payload }.
+    it('forwards the overlay switch state from a CONSOLE_TOGGLE message', () => {
+      expect(capturedRuntimeListener).toBeTruthy();
       const emitSpy = vi.spyOn(EventBus, 'emit');
       const dispatchSpy = vi.spyOn(document, 'dispatchEvent');
 
-      if (capturedRuntimeListener) {
-        capturedRuntimeListener({ type: PBJS_NAMESPACE_CHANGE, pbjsNamespace: 'myPbjs' });
-        expect(emitSpy).toHaveBeenCalledWith(PBJS_NAMESPACE_CHANGE, { detail: 'myPbjs' });
+      capturedRuntimeListener!({ type: CONSOLE_TOGGLE, payload: { consoleState: true } });
 
-        contentScript.updateOverlays('myPbjs');
-        expect(dispatchSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: SAVE_MASKS,
-            detail: 'myPbjs',
-          })
-        );
-      }
+      expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: CONSOLE_TOGGLE, detail: true }));
+      expect(emitSpy).toHaveBeenCalledWith(CONSOLE_TOGGLE, { detail: true });
+    });
+
+    it('forwards false when the overlay switch is turned off', () => {
+      const dispatchSpy = vi.spyOn(document, 'dispatchEvent');
+
+      capturedRuntimeListener!({ type: CONSOLE_TOGGLE, payload: { consoleState: false } });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: CONSOLE_TOGGLE, detail: false }));
+    });
+
+    it('refreshes overlays for the current namespace when the overlay switch is turned on', () => {
+      const dispatchSpy = vi.spyOn(document, 'dispatchEvent');
+
+      capturedRuntimeListener!({ type: PBJS_NAMESPACE_CHANGE, payload: 'myPbjs' });
+      capturedRuntimeListener!({ type: CONSOLE_TOGGLE, payload: { consoleState: true } });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: SAVE_MASKS, detail: 'myPbjs' }));
+    });
+
+    it('stores the namespace from a PBJS_NAMESPACE_CHANGE message', async () => {
+      expect(capturedRuntimeListener).toBeTruthy();
+      const emitSpy = vi.spyOn(EventBus, 'emit');
+      const dispatchSpy = vi.spyOn(document, 'dispatchEvent');
+
+      capturedRuntimeListener!({ type: PBJS_NAMESPACE_CHANGE, payload: 'myPbjs' });
+      expect(emitSpy).toHaveBeenCalledWith(PBJS_NAMESPACE_CHANGE, { detail: 'myPbjs' });
+
+      // Any later update re-saves overlays for the stored namespace.
+      await contentScript.processEventBusMessages(EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, { slots: [] });
+      expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: SAVE_MASKS, detail: 'myPbjs' }));
+    });
+
+    it('ignores a PBJS_NAMESPACE_CHANGE message without a namespace', () => {
+      const emitSpy = vi.spyOn(EventBus, 'emit');
+
+      capturedRuntimeListener!({ type: PBJS_NAMESPACE_CHANGE, payload: '' });
+
+      expect(emitSpy).not.toHaveBeenCalled();
     });
 
     it('emits event on POPUP_LOADED message', () => {
