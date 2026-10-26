@@ -12,20 +12,19 @@ export class MessageHandler {
     const tabId = sender.tab?.id;
     if (!tabId || !type || !payload || Object.keys(payload).length === 0) return;
 
-    const tabInfo = await this.tabContextService.getTabInfo(tabId);
-
-    if (type === EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND && this.isGoogleAdManagerDetails(payload)) {
-      tabInfo['top-window'] = tabInfo['top-window'] || {};
-      tabInfo['top-window']['googleAdManager'] = payload;
-    } else if (type === EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND && this.isPrebidDetails(payload)) {
-      const { frameId, namespace } = payload;
-      tabInfo[frameId] = tabInfo[frameId] || {};
-      tabInfo[frameId]['prebids'] = tabInfo[frameId]['prebids'] || {};
-      (tabInfo[frameId]['prebids'] as Record<string, IPrebidDetails>)[namespace] = payload;
-    } else if (type === EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND && this.isTcfDetails(payload)) {
-      tabInfo['tcf'] = payload;
-    }
-    await this.tabContextService.saveTabInfo(tabId, tabInfo);
+    await this.tabContextService.updateTabInfo(tabId, (tabInfo) => {
+      if (type === EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND && this.isGoogleAdManagerDetails(payload)) {
+        tabInfo['top-window'] = tabInfo['top-window'] || {};
+        tabInfo['top-window']['googleAdManager'] = payload;
+      } else if (type === EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND && this.isPrebidDetails(payload)) {
+        const { frameId, namespace } = payload;
+        tabInfo[frameId] = tabInfo[frameId] || {};
+        tabInfo[frameId]['prebids'] = tabInfo[frameId]['prebids'] || {};
+        (tabInfo[frameId]['prebids'] as Record<string, IPrebidDetails>)[namespace] = payload;
+      } else if (type === EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND && this.isTcfDetails(payload)) {
+        tabInfo['tcf'] = payload;
+      }
+    });
 
     this.updateBadge(tabId);
   };

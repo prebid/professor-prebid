@@ -16,6 +16,11 @@ describe('MessageHandler', () => {
       getTabInfo: vi.fn().mockResolvedValue({}),
       saveTabInfo: vi.fn().mockResolvedValue(undefined),
     };
+    mockTabContextService.updateTabInfo = vi.fn(async (tabId: number, mutate: (tabInfo: any) => void) => {
+      const tabInfo = await mockTabContextService.getTabInfo(tabId);
+      mutate(tabInfo);
+      await mockTabContextService.saveTabInfo(tabId, tabInfo);
+    });
     mockUpdateBadge = vi.fn();
     handler = new MessageHandler(mockTabContextService, mockUpdateBadge);
   });

@@ -63,6 +63,67 @@ describe('TabContextService', () => {
     });
   });
 
+  describe('updateTabInfo', () => {
+    beforeEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    // Async fake of chrome.storage.local so concurrent read-modify-writes actually interleave.
+    const useAsyncStorage = () => {
+      const store: Record<string, any> = {};
+      global.chrome.storage.local.get = vi.fn(async (keys: string[]) => {
+        await new Promise((r) => setTimeout(r, 0));
+        return Object.fromEntries(keys.filter((k) => k in store).map((k) => [k, structuredClone(store[k])]));
+      }) as any;
+      global.chrome.storage.local.set = vi.fn(async (items: Record<string, any>) => {
+        await new Promise((r) => setTimeout(r, 0));
+        Object.assign(store, structuredClone(items));
+      }) as any;
+      return store;
+    };
+
+    it('keeps every change when updates for the same tab run concurrently', async () => {
+      const store = useAsyncStorage();
+      await Promise.all([
+        service.updateTabInfo(1, (info) => {
+          info['top-window'] = { ...info['top-window'], prebids: { pbjs: {} } } as any;
+        }),
+        service.updateTabInfo(1, (info) => {
+          info['top-window'] = { ...info['top-window'], googleAdManager: { slots: [] } } as any;
+        }),
+        service.updateTabInfo(1, (info) => {
+          info['tcf'] = { tcf: {} } as any;
+        }),
+      ]);
+      expect(store['tab_info_1']).toEqual({ 'top-window': { prebids: { pbjs: {} }, googleAdManager: { slots: [] } }, tcf: { tcf: {} } });
+    });
+
+    it('applies an update queued after a reset on top of the reset', async () => {
+      const store = useAsyncStorage();
+      store['tab_info_1'] = { 'top-window': { url: 'https://old.example' }, tcf: { tcf: {} } };
+      await Promise.all([
+        service.saveTabInfo(1, { 'top-window': { url: 'https://new.example' } } as any),
+        service.updateTabInfo(1, (info) => {
+          info['top-window'] = { ...info['top-window'], googleAdManager: { slots: [] } } as any;
+        }),
+      ]);
+      expect(store['tab_info_1']).toEqual({ 'top-window': { url: 'https://new.example', googleAdManager: { slots: [] } } });
+    });
+
+    it('keeps processing after a failed update', async () => {
+      const store = useAsyncStorage();
+      await expect(
+        service.updateTabInfo(1, () => {
+          throw new Error('boom');
+        })
+      ).rejects.toThrow('boom');
+      await service.updateTabInfo(1, (info) => {
+        info['tcf'] = { tcf: {} } as any;
+      });
+      expect(store['tab_info_1']).toEqual({ tcf: { tcf: {} } });
+    });
+  });
+
   describe('load', () => {
     it('is a no-op that resolves', async () => {
       await expect(service.load()).resolves.toBeUndefined();
