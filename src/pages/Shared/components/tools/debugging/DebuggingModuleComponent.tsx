@@ -72,32 +72,28 @@ const DebuggingModuleComponent = (): JSX.Element => {
     });
   }, []);
 
+  // Prebid's debugging module reads its rules from sessionStorage; localStorage is only the persisted copy.
+  const writeToPageStorage = async (tabId: number, storageName: 'sessionStorage' | 'localStorage', input: IPrebidDebugModuleConfig) => {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (namespace: string, input: object, storageName: 'sessionStorage' | 'localStorage') => {
+        try {
+          const storage = window[storageName];
+          if (storage) {
+            storage.setItem(`__${namespace}_debugging__`, `${JSON.stringify(input)}`);
+          }
+        } catch (_) {}
+      },
+      args: [pbjsNamespace || 'pbjs', input, storageName],
+    });
+  };
+
   const writeConfigToStorage = async (input: IPrebidDebugModuleConfig) => {
     setDebuggingModuleConfig(input);
     const tabId = await getTabId();
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      func: (namespace: string, input: object) => {
-        try {
-          if (typeof sessionStorage !== 'undefined') {
-            sessionStorage.setItem(`__${namespace}_debugging__`, `${JSON.stringify(input)}`);
-          }
-        } catch (_) {}
-      },
-      args: [pbjsNamespace || 'pbjs', input],
-    });
+    await writeToPageStorage(tabId, 'sessionStorage', input);
     if (!storeRules) return;
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      func: (namespace: string, input: object) => {
-        try {
-          if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(`__${namespace}_debugging__`, `${JSON.stringify(input)}`);
-          }
-        } catch (_) {}
-      },
-      args: [pbjsNamespace || 'pbjs', input],
-    });
+    await writeToPageStorage(tabId, 'localStorage', input);
   };
 
   const toggleGlobalLogging = async (enabled: boolean) => {
@@ -197,16 +193,20 @@ const DebuggingModuleComponent = (): JSX.Element => {
           func: (namespace: string) => (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(`__${namespace}_debugging__`) : null),
           args: [pbjsNamespace || 'pbjs'],
         });
+        let fromLocalStorage = false;
         if (!first || !first.result) {
           [first] = await chrome.scripting.executeScript({
             target: { tabId },
             func: (namespace: string) => (typeof localStorage !== 'undefined' ? localStorage.getItem(`__${namespace}_debugging__`) : null),
             args: [pbjsNamespace || 'pbjs'],
           });
+          fromLocalStorage = true;
         }
         if (first && first.result) {
           const savedConfig: IPrebidDebugModuleConfig = JSON.parse(first.result);
           setDebuggingModuleConfig(savedConfig);
+          // A new session starts with empty sessionStorage: copy the persisted rules over so Prebid applies what the UI shows.
+          if (fromLocalStorage) await writeToPageStorage(tabId, 'sessionStorage', savedConfig);
         }
       } catch (e) {
         console.warn('Could not read debugging module state', e);

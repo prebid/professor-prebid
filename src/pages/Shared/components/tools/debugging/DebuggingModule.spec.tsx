@@ -348,5 +348,35 @@ describe('DebuggingModule', () => {
         expect(screen.getByText('Rule #1')).toBeTruthy();
       });
     });
+
+    it('copies rules persisted in localStorage into sessionStorage, where Prebid reads them', async () => {
+      const savedConfig = { enabled: true, intercept: [{ when: { adUnitCode: 'slot-1' }, then: { cpm: 25 } }] };
+      const pageSession: Record<string, string> = {};
+      const pageLocal: Record<string, string> = { __pbjs_debugging__: JSON.stringify(savedConfig) };
+      (global as any).sessionStorage = { getItem: (k: string) => pageSession[k] ?? null, setItem: (k: string, v: string) => (pageSession[k] = v) };
+      (global as any).localStorage = { getItem: (k: string) => pageLocal[k] ?? null, setItem: (k: string, v: string) => (pageLocal[k] = v) };
+      global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('Rule #1')).toBeTruthy();
+      });
+      expect(JSON.parse(pageSession.__pbjs_debugging__)).toEqual(savedConfig);
+    });
+
+    it('does not rewrite sessionStorage when the rules already come from it', async () => {
+      const savedConfig = { enabled: true, intercept: [] };
+      const setItem = vi.fn();
+      (global as any).sessionStorage = { getItem: () => JSON.stringify(savedConfig), setItem };
+      global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('MODULE ENABLED')).toBeTruthy();
+      });
+      expect(setItem).not.toHaveBeenCalled();
+    });
   });
 });
