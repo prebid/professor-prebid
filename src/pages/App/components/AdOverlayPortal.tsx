@@ -10,6 +10,8 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
   const element = useRef<HTMLDivElement>(document.createElement('div'));
   const [shadowRoot, setShadowRoot] = useState<ShadowRoot | null>(null);
   const [attachVersion, setAttachVersion] = useState<number>(0);
+  // Set by the close button; stays closed until overlays are switched off and on again, so the periodic re-sync cannot reopen it.
+  const closed = useRef<boolean>(false);
 
   useEffect(() => {
     const el = element.current;
@@ -26,6 +28,7 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
   }, []);
 
   const closePortal = () => {
+    closed.current = true;
     const el = document.getElementById(`prpb-mask--container-${mask.elementId}`);
     if (el) {
       el.style.display = 'none';
@@ -34,6 +37,7 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
 
   useEffect(() => {
     if (!consoleState) {
+      closed.current = false;
       if (element.current.parentNode) {
         element.current.parentNode.removeChild(element.current);
       }
@@ -62,6 +66,10 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
     };
 
     const attachAndSync = () => {
+      if (closed.current) {
+        element.current.style.display = 'none';
+        return;
+      }
       const activeTarget = getValidTarget();
       if (!activeTarget || !isContainerVisible(activeTarget)) {
         return;

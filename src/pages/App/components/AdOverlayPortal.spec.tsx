@@ -90,6 +90,32 @@ describe('AdOverlayPortal', () => {
       }
     });
 
+    it('keeps a closed mask hidden through the periodic re-sync until overlays are switched off and on', () => {
+      vi.useFakeTimers();
+      try {
+        const { rerender } = render(<AdOverlayPortal container={container} mask={mockMask} consoleState={true} pbjsNameSpace="pbjs" />);
+        const maskElement = document.getElementById(`prpb-mask--container-${mockMask.elementId}`);
+        const closeBtn = maskElement?.shadowRoot?.querySelector('[data-testid="close-portal-btn"]') as HTMLButtonElement;
+        expect(closeBtn).toBeTruthy();
+
+        act(() => closeBtn.click());
+        act(() => {
+          vi.advanceTimersByTime(3000);
+        });
+        expect(maskElement?.style.display).toBe('none');
+
+        // A new auction result for the same slot does not reopen it either.
+        rerender(<AdOverlayPortal container={container} mask={{ ...mockMask, winningCPM: 3 }} consoleState={true} pbjsNameSpace="pbjs" />);
+        expect(maskElement?.style.display).toBe('none');
+
+        rerender(<AdOverlayPortal container={container} mask={mockMask} consoleState={false} pbjsNameSpace="pbjs" />);
+        rerender(<AdOverlayPortal container={container} mask={mockMask} consoleState={true} pbjsNameSpace="pbjs" />);
+        expect(document.getElementById(`prpb-mask--container-${mockMask.elementId}`)?.style.display).toBe('block');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('attaches to parentElement when container prop is an IFRAME', () => {
       const iframe = document.createElement('iframe');
       container.appendChild(iframe);
