@@ -192,6 +192,43 @@ describe('McpToolsComponent', () => {
     capturedFunc(...capturedArgs);
   });
 
+  it('records each event once when pbjs is also listed in _pbjsGlobals, and leaves installedModules untouched', async () => {
+    let capturedFunc: Function = () => {};
+    let capturedArgs: any[] = [];
+    global.chrome.scripting.executeScript = vi.fn().mockImplementation((opts) => {
+      capturedFunc = opts.func;
+      capturedArgs = opts.args || [];
+      return Promise.resolve([{ result: true }]);
+    });
+    await injectDevtoolsMcpScript();
+
+    // Like Prebid, keep every registered handler and call all of them.
+    const handlers: { [k: string]: Function[] } = {};
+    const mockPbjs: any = {
+      installedModules: ['dfp'],
+      onEvent: vi.fn((evt, cb) => (handlers[evt] = [...(handlers[evt] || []), cb])),
+    };
+    const fire = (evt: string, args: any) => (handlers[evt] || []).forEach((cb) => cb(args));
+    delete (window as any).__PREBID_DEVTOOLS_MCP_INITIALIZED__;
+    (window as any).pbjs = mockPbjs;
+    (window as any)._pbjsGlobals = ['pbjs'];
+
+    capturedFunc(...capturedArgs);
+    fire('bidResponse', { auctionId: 'auc-1', cpm: 2.0 });
+    fire('bidWon', { auctionId: 'auc-1' });
+
+    const mcp = (window as any).__PREBID_DEVTOOLS_MCP__;
+    expect(mcp.getEvents()).toHaveLength(2);
+    expect(mcp.getAuctions()[0].bidsReceived).toHaveLength(1);
+    expect(mcp.getAuctions()[0].winningBids).toHaveLength(1);
+    expect(mockPbjs.installedModules).toEqual(['dfp']);
+  });
+
+  it('generateMcpAiPrompt reports MCP as active after injection even without the devtoolsMcp module', () => {
+    expect(generateMcpAiPrompt({ installedModules: [] }, undefined, true)).toContain('**DevTools MCP Active:** `Yes`');
+    expect(generateMcpAiPrompt({ installedModules: [] }, undefined)).toContain('**DevTools MCP Active:** `No`');
+  });
+
   it('triggers export MCP JSON download', () => {
     const mockState: any = {
       prebid: { version: '11.29.0', installedModules: ['devtoolsMcp'] },

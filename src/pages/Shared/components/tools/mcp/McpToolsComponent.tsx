@@ -75,15 +75,11 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
               // Ignored
             }
           });
-          if (Array.isArray(instance.installedModules) && !instance.installedModules.includes('devtoolsMcp')) {
-            instance.installedModules.push('devtoolsMcp');
-          }
         };
 
-        if (pbjs) attachPbjs(pbjs);
-        if (win._pbjsGlobals && Array.isArray(win._pbjsGlobals)) {
-          win._pbjsGlobals.forEach((g: string) => attachPbjs(win[g]));
-        }
+        // window.pbjs is usually also listed in _pbjsGlobals; attach to each instance once so events are not recorded twice.
+        const instances = new Set<any>([pbjs, ...(Array.isArray(win._pbjsGlobals) ? win._pbjsGlobals.map((g: string) => win[g]) : [])]);
+        instances.forEach(attachPbjs);
 
         win.__PREBID_DEVTOOLS_MCP__ = {
           version: '1.0.0',
@@ -101,12 +97,12 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
   }
 };
 
-export const generateMcpAiPrompt = (prebid: any, prebids: any): string => {
+export const generateMcpAiPrompt = (prebid: any, prebids: any, mcpInjected = false): string => {
   const version = prebid?.version || 'unknown';
   const modules = prebid?.installedModules || [];
   const eventsUrl = prebid?.eventsUrl || '';
   const domain = eventsUrl ? eventsUrl.split('//')[1]?.split('/')[0] : 'inspected-page';
-  const hasDevtoolsMcp = modules.includes('devtoolsMcp');
+  const hasDevtoolsMcp = modules.includes('devtoolsMcp') || mcpInjected;
 
   let prompt = `## Prebid.js & AdTech Diagnostic Snapshot\n`;
   prompt += `**Domain:** \`${domain}\` | **Prebid Version:** \`${version}\` | **DevTools MCP Active:** \`${hasDevtoolsMcp ? 'Yes' : 'No'}\`\n`;
@@ -155,7 +151,7 @@ export const McpToolsComponent: React.FC = () => {
   };
 
   const handleCopySnapshot = async () => {
-    const promptText = generateMcpAiPrompt(prebid, prebids);
+    const promptText = generateMcpAiPrompt(prebid, prebids, injected);
     try {
       await navigator.clipboard.writeText(promptText);
       setSnackbarMessage('AI Diagnostic Snapshot copied to clipboard!');
