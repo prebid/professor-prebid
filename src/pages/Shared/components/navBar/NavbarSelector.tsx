@@ -101,7 +101,7 @@ export const NavbarSelector = (): JSX.Element => {
           >
             {pageContext &&
               Object.keys(pageContext.frames || {})
-                .filter((key) => !['downloading', 'syncState', 'initReqChainResult'].includes(key))
+                .filter((key) => !['downloading', 'syncState'].includes(key))
                 .map((frameId) => (
                   <MenuItem value={frameId} key={frameId} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
                     <em>{frameId}</em>

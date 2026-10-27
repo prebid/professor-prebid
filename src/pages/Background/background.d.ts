@@ -7,7 +7,6 @@ interface IFrameInfo {
   namespace?: string;
   updateNamespace?: (namespace: string) => void;
   syncState?: string;
-  initReqChainResult?: initReqChainResult;
 }
 
 interface IFrameInfos {
@@ -15,10 +14,6 @@ interface IFrameInfos {
 }
 interface ITabInfos {
   [key: number]: IFrameInfos;
-}
-
-interface initReqChainResult {
-  [key: string]: any;
 }
 
 interface IPrebids {

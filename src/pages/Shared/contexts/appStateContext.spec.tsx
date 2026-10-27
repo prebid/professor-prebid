@@ -70,7 +70,6 @@ describe('StateContextProvider', () => {
       },
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(

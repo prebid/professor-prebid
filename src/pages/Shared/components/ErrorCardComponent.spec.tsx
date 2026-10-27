@@ -27,7 +27,7 @@ global.chrome = { tabs: { create: vi.fn() } } as any;
 describe('ErrorCardComponent', () => {
   const renderWithContext = (error?: any, syncState = '') => {
     render(
-      <InspectedPageContext.Provider value={{ syncState, frames: {}, downloading: 'false', initReqChainResult: {} }}>
+      <InspectedPageContext.Provider value={{ syncState, frames: {}, downloading: 'false' }}>
         <ErrorCardComponent error={error} />
       </InspectedPageContext.Provider>
     );

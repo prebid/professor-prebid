@@ -14,8 +14,6 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const [frames, setFrames] = useState<{ [key: string]: IFrameInfo }>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
   const [syncInfo, setSyncInfo] = useState<string>('');
-  const [initReqChainData, setInitReqChainData] = useState<initReqChainResult>({});
-  const initReqChainResult = useDebounce(initReqChainData, 2000);
   const [downloadingUrls, setDownloadingUrls] = useState<string[]>([]);
 
   const [harLogData, setHarLogData] = useState<IHarEntry[]>([]);
@@ -62,25 +60,6 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   }, [downloadingUrls]);
 
   useEffect(() => {
-    // Subscribe to changes in local storage
-    const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'local' && changes.initReqChain && changes.initReqChain.newValue) {
-        try {
-          setInitReqChainData(JSON.parse(changes.initReqChain.newValue));
-        } catch {
-          setInitReqChainData({});
-        }
-      }
-    };
-    chrome.storage.onChanged.addListener(handler);
-
-    // Unsubscribe when component unmounts
-    return () => {
-      chrome.storage.onChanged.removeListener(handler);
-    };
-  }, []);
-
-  useEffect(() => {
     const read = (raw: string) => {
       try {
         setHarLogData(JSON.parse(raw) || []);
@@ -115,7 +94,6 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     frames,
     downloading,
     syncState: syncInfo,
-    initReqChainResult,
     harLog,
   };
 
@@ -128,6 +106,5 @@ export interface IPageContext {
   frames: { [key: string]: IFrameInfo };
   downloading: string;
   syncState: string;
-  initReqChainResult: any;
   harLog: IHarEntry[];
 }

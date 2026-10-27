@@ -22,7 +22,6 @@ const TestComponent = () => {
       <div data-testid="frames">{JSON.stringify(ctx.frames)}</div>
       <div data-testid="downloading">{ctx.downloading}</div>
       <div data-testid="syncState">{ctx.syncState}</div>
-      <div data-testid="initReqChain">{JSON.stringify(ctx.initReqChainResult)}</div>
       <div data-testid="harLog">{JSON.stringify(ctx.harLog)}</div>
     </div>
   );
@@ -130,7 +129,7 @@ describe('InspectedPageContextProvider', () => {
     expect(screen.getByTestId('frames').textContent).toBe('{}');
   });
 
-  it('reacts to local storage changes and updates frames, initReqChain, and harLog', async () => {
+  it('reacts to local storage changes and updates frames and harLog', async () => {
     let unmount: any;
     await act(async () => {
       const res = render(
@@ -148,9 +147,6 @@ describe('InspectedPageContextProvider', () => {
             tab_info_123: {
               oldValue: {},
               newValue: { 'top-window': { prebids: {} } },
-            },
-            initReqChain: {
-              newValue: JSON.stringify({ chain: true }),
             },
             [HAR_KEY]: {
               newValue: JSON.stringify([{ url: 'https://test.com/new' }]),

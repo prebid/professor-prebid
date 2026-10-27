@@ -85,7 +85,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
@@ -106,7 +105,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
@@ -130,7 +128,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
@@ -152,7 +149,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
@@ -174,7 +170,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
@@ -198,7 +193,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
@@ -227,7 +221,6 @@ describe('InitiatorComponent', () => {
       frames: {},
       downloading: 'false',
       syncState: '',
-      initReqChainResult: {},
     };
 
     render(
