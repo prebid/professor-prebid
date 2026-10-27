@@ -54,6 +54,13 @@ export interface McpSnapshot {
 export class ProfessorPrebidMcpBridge {
   readonly bridgeVersion: string = '1.0.0';
 
+  constructor() {
+    // Subscribe right away so consent is usually cached before the first call.
+    try {
+      this.listenForConsent(typeof window !== 'undefined' ? (window as any) : {});
+    } catch (e) {}
+  }
+
   private get pbjs(): any {
     const win = typeof window !== 'undefined' ? (window as any) : {};
     return win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]);
@@ -245,31 +252,48 @@ export class ProfessorPrebidMcpBridge {
     return result;
   }
 
+  // Most CMPs answer asynchronously, so consent is cached from their event listeners and returned on the next call.
+  private consent: McpConsentStatus = {};
+  private listeningToTcf = false;
+  private listeningToGpp = false;
+
+  private applyTcData = (tcData: any, success: boolean) => {
+    if (!success || !tcData) return;
+    this.consent.gdprApplies = tcData.gdprApplies;
+    this.consent.tcString = tcData.tcString;
+    this.consent.tcfVersion = tcData.tcfPolicyVersion || 2;
+    this.consent.cmpLoaded = tcData.cmpLoaded;
+  };
+
+  private applyGppData = (gppData: any, success: boolean) => {
+    if (!success || !gppData) return;
+    // 'ping' returns the ping object; addEventListener passes an event that carries it as pingData.
+    const gppString = gppData.pingData?.gppString ?? gppData.gppString;
+    if (gppString !== undefined) this.consent.gppString = gppString;
+  };
+
+  private listenForConsent(win: any) {
+    if (!this.listeningToTcf && typeof win.__tcfapi === 'function') {
+      win.__tcfapi('addEventListener', 2, this.applyTcData);
+      this.listeningToTcf = true;
+    }
+    if (!this.listeningToGpp && typeof win.__gpp === 'function') {
+      win.__gpp('addEventListener', this.applyGppData);
+      this.listeningToGpp = true;
+    }
+  }
+
   getConsentStatus(): McpConsentStatus {
-    const status: McpConsentStatus = {};
     const win = typeof window !== 'undefined' ? (window as any) : {};
 
     try {
-      if (typeof win.__tcfapi === 'function') {
-        win.__tcfapi('getTCData', 2, (tcData: any, success: boolean) => {
-          if (success && tcData) {
-            status.gdprApplies = tcData.gdprApplies;
-            status.tcString = tcData.tcString;
-            status.tcfVersion = tcData.tcfPolicyVersion || 2;
-            status.cmpLoaded = tcData.cmpLoaded;
-          }
-        });
-      }
-      if (typeof win.__gpp === 'function') {
-        win.__gpp('ping', (gppData: any, success: boolean) => {
-          if (success && gppData) {
-            status.gppString = gppData.gppString;
-          }
-        });
-      }
+      this.listenForConsent(win);
+      // Also ask directly, so a CMP that answers synchronously is reflected in this call.
+      if (typeof win.__tcfapi === 'function') win.__tcfapi('getTCData', 2, this.applyTcData);
+      if (typeof win.__gpp === 'function') win.__gpp('ping', this.applyGppData);
     } catch (e) {}
 
-    return status;
+    return { ...this.consent };
   }
 
   getSnapshot(): McpSnapshot {

@@ -205,6 +205,50 @@ describe('ProfessorPrebidMcpBridge', () => {
     expect(consent.gppString).toBe('DBABMA~CP12345EXAMPLE');
   });
 
+  it('reports consent from a CMP that answers asynchronously', async () => {
+    // Like most CMPs: callbacks fire later, and listeners fire again whenever consent changes.
+    const tcfListeners: Function[] = [];
+    (window as any).__tcfapi = vi.fn((cmd, version, cb) => {
+      if (cmd === 'addEventListener') tcfListeners.push(cb);
+      setTimeout(() => cb({ gdprApplies: true, tcString: 'CPfirst', tcfPolicyVersion: 4, cmpLoaded: true }, true), 0);
+    });
+    const gppListeners: Function[] = [];
+    (window as any).__gpp = vi.fn((cmd, cb) => {
+      if (cmd === 'addEventListener') gppListeners.push(cb);
+      setTimeout(() => cb(cmd === 'ping' ? { gppString: 'DBABMA~CPfirst' } : { eventName: 'listenerRegistered', pingData: { gppString: 'DBABMA~CPfirst' } }, true), 0);
+    });
+
+    bridge.getConsentStatus();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(bridge.getSnapshot().consent).toMatchObject({ gdprApplies: true, tcString: 'CPfirst', tcfVersion: 4, cmpLoaded: true, gppString: 'DBABMA~CPfirst' });
+
+    tcfListeners.forEach((cb) => cb({ gdprApplies: true, tcString: 'CPupdated', tcfPolicyVersion: 4, cmpLoaded: true, eventStatus: 'useractioncomplete' }, true));
+    gppListeners.forEach((cb) => cb({ eventName: 'signalStatus', pingData: { gppString: 'DBABMA~CPupdated' } }, true));
+    expect(bridge.getConsentStatus()).toMatchObject({ tcString: 'CPupdated', gppString: 'DBABMA~CPupdated' });
+  });
+
+  it('subscribes to the CMP when the bridge is created', () => {
+    const listener = vi.fn();
+    (window as any).__tcfapi = vi.fn((cmd, version, cb) => cmd === 'addEventListener' && listener(cb));
+
+    const fresh = new ProfessorPrebidMcpBridge();
+    listener.mock.calls[0][0]({ gdprApplies: false, tcString: 'CPearly', cmpLoaded: true }, true);
+
+    expect(fresh.getSnapshot().consent).toMatchObject({ gdprApplies: false, tcString: 'CPearly' });
+  });
+
+  it('subscribes to each CMP only once', () => {
+    (window as any).__tcfapi = vi.fn();
+    (window as any).__gpp = vi.fn();
+
+    bridge.getConsentStatus();
+    bridge.getConsentStatus();
+
+    expect((window as any).__tcfapi.mock.calls.filter(([cmd]: any[]) => cmd === 'addEventListener')).toHaveLength(1);
+    expect((window as any).__gpp.mock.calls.filter(([cmd]: any[]) => cmd === 'addEventListener')).toHaveLength(1);
+  });
+
   it('handles errors gracefully in getWinningBids, getGamTargeting, and getConsentStatus', () => {
     (window as any).pbjs = {
       getAllWinningBids: () => {
