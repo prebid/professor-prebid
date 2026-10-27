@@ -19,18 +19,17 @@ import { MCP_BRIDGE_ENABLE } from '../../../constants';
 export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
   try {
     const tabId = await getTabId();
-    await chrome.scripting.executeScript({
+    const [injection] = await chrome.scripting.executeScript({
       target: { tabId },
       world: 'MAIN',
       args: [MCP_BRIDGE_ENABLE],
-      func: (bridgeEnableEvent: string) => {
+      func: (bridgeEnableEvent: string): boolean => {
         document.dispatchEvent(new CustomEvent(bridgeEnableEvent));
         const win = window as any;
         if (win.__PREBID_DEVTOOLS_MCP_INITIALIZED__) {
           console.info('[Professor Prebid] DevTools MCP is already active on this page.');
-          return;
+          return true;
         }
-        win.__PREBID_DEVTOOLS_MCP_INITIALIZED__ = true;
 
         const pbjs = win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]);
         const events: any[] = [];
@@ -66,7 +65,7 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
           }
         };
 
-        const attachPbjs = (instance: any) => {
+        const attachNow = (instance: any) => {
           if (!instance || typeof instance.onEvent !== 'function') return;
           ['auctionInit', 'auctionEnd', 'bidRequested', 'bidResponse', 'noBid', 'bidWon', 'bidTimeout', 'setTargeting'].forEach((evt) => {
             try {
@@ -77,9 +76,28 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
           });
         };
 
+        // Before Prebid.js loads, the global is only the publisher's { que: [] } stub: queue the attachment, Prebid runs it once loaded.
+        const attachPbjs = (instance: any): boolean => {
+          if (typeof instance?.onEvent === 'function') {
+            attachNow(instance);
+            return true;
+          }
+          if (typeof instance?.que?.push === 'function') {
+            instance.que.push(() => attachNow(instance));
+            return true;
+          }
+          return false;
+        };
+
         // window.pbjs is usually also listed in _pbjsGlobals; attach to each instance once so events are not recorded twice.
         const instances = new Set<any>([pbjs, ...(Array.isArray(win._pbjsGlobals) ? win._pbjsGlobals.map((g: string) => win[g]) : [])]);
-        instances.forEach(attachPbjs);
+        const attached = Array.from(instances).filter(attachPbjs).length > 0;
+        if (!attached) {
+          // Leave the flag unset so a later click, once Prebid.js is on the page, can still attach.
+          console.warn('[Professor Prebid] DevTools MCP found no Prebid.js instance on this page.');
+          return false;
+        }
+        win.__PREBID_DEVTOOLS_MCP_INITIALIZED__ = true;
 
         win.__PREBID_DEVTOOLS_MCP__ = {
           version: '1.0.0',
@@ -88,9 +106,10 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
         };
 
         console.info('[Professor Prebid] DevTools MCP Module successfully attached to Prebid.js.');
+        return true;
       },
     });
-    return true;
+    return injection?.result === true;
   } catch (error) {
     console.error('Failed to inject DevTools MCP standalone script:', error);
     return false;

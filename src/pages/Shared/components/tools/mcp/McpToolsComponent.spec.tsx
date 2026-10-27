@@ -192,6 +192,48 @@ describe('McpToolsComponent', () => {
     capturedFunc(...capturedArgs);
   });
 
+  it('reports failure and stays re-injectable when no Prebid.js instance is on the page', async () => {
+    let capturedFunc: Function = () => {};
+    let capturedArgs: any[] = [];
+    global.chrome.scripting.executeScript = vi.fn().mockImplementation((opts) => {
+      capturedFunc = opts.func;
+      capturedArgs = opts.args || [];
+      return Promise.resolve([{ result: false }]);
+    });
+    expect(await injectDevtoolsMcpScript()).toBe(false);
+
+    delete (window as any).__PREBID_DEVTOOLS_MCP_INITIALIZED__;
+    delete (window as any).pbjs;
+    (window as any)._pbjsGlobals = undefined;
+    expect(capturedFunc(...capturedArgs)).toBe(false);
+    expect((window as any).__PREBID_DEVTOOLS_MCP_INITIALIZED__).toBeUndefined();
+  });
+
+  it('queues the attachment on the que stub when Prebid.js has not loaded yet', async () => {
+    let capturedFunc: Function = () => {};
+    let capturedArgs: any[] = [];
+    global.chrome.scripting.executeScript = vi.fn().mockImplementation((opts) => {
+      capturedFunc = opts.func;
+      capturedArgs = opts.args || [];
+      return Promise.resolve([{ result: true }]);
+    });
+    await injectDevtoolsMcpScript();
+
+    const stub: any = { que: [] as Function[] };
+    delete (window as any).__PREBID_DEVTOOLS_MCP_INITIALIZED__;
+    (window as any).pbjs = stub;
+    (window as any)._pbjsGlobals = undefined;
+    expect(capturedFunc(...capturedArgs)).toBe(true);
+    expect(stub.que).toHaveLength(1);
+
+    // Prebid.js loads into the same object and drains the queue.
+    const handlers: { [k: string]: Function } = {};
+    stub.onEvent = vi.fn((evt: string, cb: Function) => (handlers[evt] = cb));
+    stub.que.forEach((fn: Function) => fn());
+    handlers['bidResponse']({ auctionId: 'auc-1', cpm: 1 });
+    expect((window as any).__PREBID_DEVTOOLS_MCP__.getEvents()).toHaveLength(1);
+  });
+
   it('records each event once when pbjs is also listed in _pbjsGlobals, and leaves installedModules untouched', async () => {
     let capturedFunc: Function = () => {};
     let capturedArgs: any[] = [];
