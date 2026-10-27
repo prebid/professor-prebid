@@ -1,62 +1,36 @@
-import { test, expect} from '@playwright/test';
-import { launchExtensionContext, getExtensionStorage, ExtensionContextInfo } from '../helpers/extensionTestUtils';
-import { LiveSitePage } from '../pom/LiveSitePage';
-import { attachAiDiagnosticOnFailure } from '../helpers/mcpTestHelpers';
-import { LIVE_SITES_CATALOG } from '../fixtures/liveSitesCatalog';
+import { test, expect, liveSiteNamed, PREBID_VERSION } from '../fixtures/extensionTest';
+import { waitForDetectedPrebid } from '../helpers/extensionTestUtils';
+
 test.describe('01 - Live Prebid Detection & Extension Lifecycle', () => {
-  let extInfo: ExtensionContextInfo;
-  test.beforeAll(async () => {
-    extInfo = await launchExtensionContext();
-  });
-  test.afterAll(async () => {
-    if (extInfo?.browserContext) {
-      await extInfo.browserContext.close();
-    }
-  });
-  test.afterEach(async () => {
-    await attachAiDiagnosticOnFailure(
-      test.info(),
-      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
-    );
-  });
-  test('detects Prebid.js and TCF v2 CMP on German tech publisher (heise.de)', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'heise.de')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    const mcpReady = await liveSite.waitForMcpBridge();
-    expect(mcpReady, 'MCP bridge should initialize on heise.de').toBe(true);
-    const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
-    // Verify storage has tab_info registered
-    const storage = await getExtensionStorage(extInfo.serviceWorker);
-    const tabKeys = Object.keys(storage).filter((k) => k.startsWith('tab_info_'));
-    expect(tabKeys.length).toBeGreaterThan(0);
-    await page.close();
-  });
-  test('detects Prebid.js and GAM slots on lifestyle site (eatpicks.com)', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'eatpicks.com')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    const mcpReady = await liveSite.waitForMcpBridge();
-    expect(mcpReady, 'MCP bridge should initialize on eatpicks.com').toBe(true);
-    const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
-    await page.close();
-  });
-  test('detects Prebid.js and custom wrapper on news publisher (theguardian.com)', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'theguardian.com')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    const mcpReady = await liveSite.waitForMcpBridge();
-    expect(mcpReady).toBe(true);
-    const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
-    await page.close();
-  });
+  test.describe.configure({ timeout: 90000 });
+
+  const sites = [
+    { name: 'heise.de', title: 'detects Prebid.js behind a TCF v2 CMP on a German tech publisher (heise.de)' },
+    { name: 'eatpicks.com', title: 'detects Prebid.js and GAM slots on a lifestyle site (eatpicks.com)' },
+    { name: 'theguardian.com', title: 'detects Prebid.js in a custom wrapper on a news publisher (theguardian.com)' },
+  ];
+
+  for (const { name, title } of sites) {
+    test(title, async ({ extension, liveSite }) => {
+      const extensionErrors: string[] = [];
+      liveSite.page.on('pageerror', (error) => {
+        if (/prof(essor)?[ _-]?prebid/i.test(`${error.message} ${error.stack}`)) extensionErrors.push(error.message);
+      });
+
+      await liveSite.open(liveSiteNamed(name).url);
+
+      const detected = await waitForDetectedPrebid(extension.serviceWorker, liveSite.page.url());
+      expect(detected, `Professor Prebid should store the Prebid instance found on ${name}`).not.toBeNull();
+      expect(detected!.details.namespace).toBe(detected!.namespace);
+      expect(detected!.details.version).toMatch(PREBID_VERSION);
+      expect(typeof detected!.details.config).toBe('object');
+
+      // Accepting consent reloads some pages, so start the bridge on the page Prebid now runs in.
+      expect(await liveSite.waitForMcpBridge(), 'MCP bridge should start, so the injected script runs').toBe(true);
+      const snapshot = await liveSite.getMcpSnapshot();
+      expect(snapshot.prebidVersion).toBe(detected!.details.version);
+
+      expect(extensionErrors, `no errors from Professor Prebid on ${name}`).toEqual([]);
+    });
+  }
 });

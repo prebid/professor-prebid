@@ -1,37 +1,19 @@
-import { test, expect } from '@playwright/test';
-import { launchExtensionContext, ExtensionContextInfo } from '../helpers/extensionTestUtils';
-import { LiveSitePage } from '../pom/LiveSitePage';
-import { attachAiDiagnosticOnFailure } from '../helpers/mcpTestHelpers';
-import { LIVE_SITES_CATALOG } from '../fixtures/liveSitesCatalog';
-test.describe('04 - Live Timeline & Network Initiator Tracking', () => {
-  let extInfo: ExtensionContextInfo;
-  test.beforeAll(async () => {
-    extInfo = await launchExtensionContext();
-  });
-  test.afterAll(async () => {
-    if (extInfo?.browserContext) {
-      await extInfo.browserContext.close();
+import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+
+test.describe('04 - Live Timeline & Bidder Latencies', () => {
+  test.describe.configure({ timeout: 90000 });
+
+  test('reports bidder latencies and their min/max on a live site (eatpicks.com)', async ({ liveSite }) => {
+    await liveSite.open(liveSiteNamed('eatpicks.com').url);
+    expect(await liveSite.waitForAuctionEnd(), 'an auction should finish').toBe(true);
+    expect(await liveSite.waitForMcpBridge()).toBe(true);
+
+    const latency = await liveSite.getMcpLatencySummary();
+    expect(latency.bidders.length).toBeGreaterThan(0);
+    for (const bidder of latency.bidders) {
+      expect(typeof bidder.bidder).toBe('string');
+      expect(typeof bidder.latencyMs).toBe('number');
     }
-  });
-  test.afterEach(async () => {
-    await attachAiDiagnosticOnFailure(
-      test.info(),
-      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
-    );
-  });
-  test('calculates accurate bidder waterfall latencies and min/max response times on live site (eatpicks.com)', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'eatpicks.com')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    await liveSite.waitForMcpBridge();
-    const latencySummary = await liveSite.getMcpLatencySummary();
-    expect(latencySummary).toBeDefined();
-    if (latencySummary.bidders.length > 0) {
-      expect(latencySummary.bidders[0]).toHaveProperty('bidder');
-      expect(latencySummary.bidders[0]).toHaveProperty('latencyMs');
-    }
-    await page.close();
+    expect(latency.minLatencyMs).toBeLessThanOrEqual(latency.maxLatencyMs);
   });
 });

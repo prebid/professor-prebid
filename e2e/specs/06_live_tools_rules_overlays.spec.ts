@@ -1,52 +1,39 @@
-import { test, expect } from '@playwright/test';
-import { launchExtensionContext, ExtensionContextInfo} from '../helpers/extensionTestUtils';
-import { LiveSitePage } from '../pom/LiveSitePage';
+import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+import { setExtensionStorage } from '../helpers/extensionTestUtils';
 
-import { attachAiDiagnosticOnFailure } from '../helpers/mcpTestHelpers';
-import { LIVE_SITES_CATALOG } from '../fixtures/liveSitesCatalog';
-test.describe('06 - Live Tools, Debugging Rules & DOM Overlays', () => {
-  let extInfo: ExtensionContextInfo;
-  test.beforeAll(async () => {
-    extInfo = await launchExtensionContext();
-  });
-  test.afterAll(async () => {
-    if (extInfo?.browserContext) {
-      await extInfo.browserContext.close();
+// The key the Tools tab's overlay toggle stores (CONSOLE_TOGGLE in src/pages/Shared/constants.ts).
+const CONSOLE_STATE_KEY = 'PP_CONSOLE_STATE';
+
+test.describe('06 - Live Ad Overlays & AI Diagnostic', () => {
+  test.describe.configure({ timeout: 90000 });
+
+  test('draws ad overlays on the page when overlays are switched on', async ({ extension, liveSite }) => {
+    // The injected app asks for the stored state on load, as it does after the Tools toggle.
+    await setExtensionStorage(extension.serviceWorker, { [CONSOLE_STATE_KEY]: true });
+    try {
+      await liveSite.open(liveSiteNamed('eatpicks.com').url);
+      expect(await liveSite.waitForAuctionEnd(), 'an auction should finish').toBe(true);
+
+      await expect.poll(() => liveSite.countOverlays(), { timeout: 20000 }).toBeGreaterThan(0);
+    } finally {
+      await setExtensionStorage(extension.serviceWorker, { [CONSOLE_STATE_KEY]: false });
     }
   });
-  test.afterEach(async () => {
-    await attachAiDiagnosticOnFailure(
-      test.info(),
-      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
-    );
+
+  test('draws no overlays while overlays are switched off', async ({ liveSite }) => {
+    await liveSite.open(liveSiteNamed('eatpicks.com').url);
+    expect(await liveSite.waitForAuctionEnd(), 'an auction should finish').toBe(true);
+
+    expect(await liveSite.countOverlays()).toBe(0);
   });
-  test('toggles and activates on-page ad overlays via Tools panel', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'eatpicks.com')!;
-    const livePage = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(livePage);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    await liveSite.waitForMcpBridge();
-    await extInfo.serviceWorker.evaluate(async () => {
-      await chrome.storage.local.set({ PP_CONSOLE_STATE: true });
-    });
-    const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
-    await livePage.close();
-  });
-  test('generates comprehensive AI diagnostic snapshot from live page auction data', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'eatpicks.com')!;
-    const livePage = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(livePage);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    await liveSite.waitForMcpBridge();
-    const prompt = await livePage.evaluate(() => {
-      const win = window as any;
-      return win.__PROFESSOR_PREBID_MCP__?.generateAiPrompt ? win.__PROFESSOR_PREBID_MCP__.generateAiPrompt() : '';
-    });
+
+  test('generates the AI diagnostic prompt from live auction data', async ({ liveSite }) => {
+    await liveSite.open(liveSiteNamed('eatpicks.com').url);
+    expect(await liveSite.waitForAuctionEnd(), 'an auction should finish').toBe(true);
+    expect(await liveSite.waitForMcpBridge()).toBe(true);
+
+    const prompt = await liveSite.generateAiPrompt();
     expect(prompt).toContain('Prebid.js & AdTech Diagnostic Snapshot');
     expect(prompt).toContain('Auction Summary');
-    await livePage.close();
   });
 });

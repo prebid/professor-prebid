@@ -1,50 +1,22 @@
-import { test, expect, chromium, BrowserContext, Page } from '@playwright/test';
+import { Page, Worker } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
-import { autoAcceptConsent } from '../fixtures/cmpConsentHandlers';
+import { test, expect } from '../fixtures/extensionTest';
+import { waitForDetectedPrebid } from '../helpers/extensionTestUtils';
 import { reconcilePrebidSurface, formatAuditReportMarkdown, PrebidGroundTruth, ExtensionCapturedState } from '../../utils/audit/surfaceReconciler';
+
+const REPORT_DIR = path.join(__dirname, '../../reports');
+
+const writeReport = (name: string, content: string) => {
+  fs.mkdirSync(REPORT_DIR, { recursive: true });
+  fs.writeFileSync(path.join(REPORT_DIR, name), content);
+};
+
 test.describe('Professor Prebid Data Surface Audit E2E', () => {
-  let browserContext: BrowserContext;
-  let serviceWorker: any;
-  test.beforeAll(async () => {
-    const pathToExtension = path.join(__dirname, '../../build');
-    const userDataDir = path.join(__dirname, '../../test-results/audit_user_data_dir_' + Date.now());
-    const isHeadless = process.env.HEADED !== 'true' && process.env.HEADLESS !== 'false';
-    const args = [`--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`, '--no-sandbox', '--disable-web-security'];
-    if (isHeadless) {
-      args.push('--headless=new');
-    }
-    browserContext = await chromium.launchPersistentContext(userDataDir, {
-      headless: false,
-      bypassCSP: true,
-      args,
-    });
-    let retries = 15;
-    while (retries > 0) {
-      const workers = browserContext.serviceWorkers();
-      if (workers.length > 0) {
-        serviceWorker = workers[0];
-        break;
-      }
-      await new Promise((r) => setTimeout(r, 400));
-      retries--;
-    }
-    if (!serviceWorker) {
-      serviceWorker = await browserContext.waitForEvent('serviceworker', { timeout: 8000 }).catch(() => null);
-    }
-    if (!serviceWorker) {
-      throw new Error('Service worker could not be loaded.');
-    }
-  });
-  test.afterAll(async () => {
-    if (browserContext) {
-      await browserContext.close();
-    }
-  });
   /**
    * Helper: Extracts Page Truth directly from the window scope.
    */
-  const extractPageTruth = async function(page: Page): Promise<PrebidGroundTruth> {
+  const extractPageTruth = async function (page: Page): Promise<PrebidGroundTruth> {
     return await page.evaluate(() => {
       const win = window as any;
       const pb = win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]);
@@ -71,36 +43,15 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
         timeoutSetting: win.PREBID_TIMEOUT || null,
       };
     });
-  }
+  };
   /**
    * Helper: Extracts Extension Captured State from chrome.storage.local & MCP bridge.
    */
-  const extractExtensionCapturedState = async function(page: Page): Promise<ExtensionCapturedState> {
-    // 1. Poll chrome.storage.local for tab_info to settle
-    let prebidData: any = null;
-    let foundNamespace = 'pbjs';
-    let retries = 15;
-    while (retries > 0 && !prebidData) {
-      await page.waitForTimeout(400);
-      const storageData = await serviceWorker.evaluate(async () => {
-        return await chrome.storage.local.get(null);
-      });
-      const tabKeys = Object.keys(storageData).filter((k) => k.startsWith('tab_info_'));
-      for (const key of tabKeys) {
-        const frames = storageData[key] || {};
-        for (const frameId of Object.keys(frames)) {
-          const frame = frames[frameId];
-          if (frame.prebids && Object.keys(frame.prebids).length > 0) {
-            foundNamespace = Object.keys(frame.prebids)[0];
-            prebidData = frame.prebids[foundNamespace];
-            break;
-          }
-        }
-        if (prebidData) break;
-      }
-      retries--;
-    }
-    // 4. Fetch events if stored as object URL blob
+  const extractExtensionCapturedState = async function (page: Page, serviceWorker: Worker): Promise<ExtensionCapturedState> {
+    const detected = await waitForDetectedPrebid(serviceWorker, page.url(), 10000);
+    const foundNamespace = detected?.namespace || 'pbjs';
+    const prebidData = detected?.details;
+    // Events are stored as an object URL to a blob in the page
     let parsedEvents: any[] = prebidData?.events || [];
     if (prebidData?.eventsUrl) {
       try {
@@ -112,14 +63,14 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
         console.warn('Could not fetch eventsUrl blob from page:', e);
       }
     }
-    // 5. Read MCP Snapshot if bridge is available
+    // The MCP bridge snapshot, when the bridge is available
     const mcpSnapshot = await page
       .evaluate(() => {
         document.dispatchEvent(new CustomEvent('PP_MCP_BRIDGE_ENABLE'));
         const win = window as any;
         return win.__PROFESSOR_PREBID_MCP__?.getSnapshot ? win.__PROFESSOR_PREBID_MCP__.getSnapshot() : null;
       })
-      .catch(() => null);
+      .catch((): null => null);
     return {
       namespace: foundNamespace,
       version: prebidData?.version,
@@ -132,9 +83,9 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
       eventsUrl: prebidData?.eventsUrl || null,
       mcpSnapshot,
     };
-  }
-  test('validates 100% surface capture on comprehensive Prebid scenario', async () => {
-    const page = await browserContext.newPage();
+  };
+  test('validates 100% surface capture on comprehensive Prebid scenario', async ({ extension, liveSite }) => {
+    const { page } = liveSite;
     // Serve rich synthetic Prebid page with complex config, EIDs, RTD, multiple bidders, GAM targeting
     await page.route('https://example.com/synthetic-prebid-audit', async (route) => {
       await route.fulfill({
@@ -261,18 +212,13 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     expect(groundTruth.installedModules.length).toBe(5);
     expect(groundTruth.events.length).toBe(5);
     // 2. Extract Extension Captured State
-    const capturedState = await extractExtensionCapturedState(page);
+    const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker);
     expect(capturedState.version).toBe('11.29.0');
     // 3. Reconcile & Audit
     const report = reconcilePrebidSurface(groundTruth, capturedState, 'https://example.com/synthetic-prebid-audit');
     const mdReport = formatAuditReportMarkdown(report);
-    // Write artifact report to reports/
-    const reportDir = path.join(__dirname, '../../reports');
-    if (!fs.existsSync(reportDir)) {
-      fs.mkdirSync(reportDir, { recursive: true });
-    }
-    fs.writeFileSync(path.join(reportDir, 'surface-audit-report.md'), mdReport);
-    fs.writeFileSync(path.join(reportDir, 'surface-audit-report.json'), JSON.stringify(report, null, 2));
+    writeReport('surface-audit-report.md', mdReport);
+    writeReport('surface-audit-report.json', JSON.stringify(report, null, 2));
     // 4. Assert 100% Surface Match
     expect(report.overallPassed, 'All Prebid data domains should match 100%').toBe(true);
     expect(report.domains.version.passed).toBe(true);
@@ -280,42 +226,22 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     expect(report.domains.config.passed).toBe(true);
     expect(report.domains.events.passed).toBe(true);
     expect(report.domains.userIds.passed).toBe(true);
-    await page.close();
   });
-  test('validates live site Prebid surface when URL env is provided', async () => {
+  test('validates live site Prebid surface when URL env is provided', async ({ extension, liveSite }) => {
     const targetUrl = process.env.AUDIT_URL || process.env.URL;
-    if (!targetUrl) {
-      test.skip();
-      return;
-    }
-    test.setTimeout(60000);
-    const page = await browserContext.newPage();
-    try {
-      await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
-    } catch {}
-    await page.waitForTimeout(2000);
-    await autoAcceptConsent(page);
-    await page.waitForTimeout(6000);
-    const hasPrebid = await page.evaluate(() => {
-      const win = window as any;
-      return !!(win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]));
-    });
-    if (!hasPrebid) {
-      await page.close();
-      return;
-    }
+    test.skip(!targetUrl, 'Set AUDIT_URL (or run npm run audit:surface -- --url <url>) to audit a live page.');
+    test.setTimeout(90000);
+    await liveSite.open(targetUrl!);
+    const { page } = liveSite;
+    expect(await liveSite.waitForAuctionEnd(), `Prebid.js should run an auction on ${targetUrl}`).toBe(true);
+
     const groundTruth = await extractPageTruth(page);
-    const capturedState = await extractExtensionCapturedState(page);
-    const report = reconcilePrebidSurface(groundTruth, capturedState, targetUrl);
-    const mdReport = formatAuditReportMarkdown(report);
-    const reportDir = path.join(__dirname, '../../reports');
-    if (!fs.existsSync(reportDir)) {
-      fs.mkdirSync(reportDir, { recursive: true });
-    }
-    fs.writeFileSync(path.join(reportDir, 'live-surface-audit.md'), mdReport);
+    const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker);
+    const report = reconcilePrebidSurface(groundTruth, capturedState, targetUrl!);
+    writeReport('live-surface-audit.md', formatAuditReportMarkdown(report));
+
     expect(report.domains.version.passed).toBe(true);
     expect(report.domains.modules.passed).toBe(true);
     expect(report.domains.config.passed).toBe(true);
-    await page.close();
   });
 });

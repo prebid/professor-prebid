@@ -1,36 +1,19 @@
-import { test, expect } from '@playwright/test';
-import { launchExtensionContext, ExtensionContextInfo } from '../helpers/extensionTestUtils';
-import { LiveSitePage } from '../pom/LiveSitePage';
-import { attachAiDiagnosticOnFailure } from '../helpers/mcpTestHelpers';
-import { LIVE_SITES_CATALOG } from '../fixtures/liveSitesCatalog';
-test.describe('05 - Live User IDs & Pre-Auction Module Diagnostics', () => {
-  let extInfo: ExtensionContextInfo;
-  test.beforeAll(async () => {
-    extInfo = await launchExtensionContext();
-  });
-  test.afterAll(async () => {
-    if (extInfo?.browserContext) {
-      await extInfo.browserContext.close();
-    }
-  });
-  test.afterEach(async () => {
-    await attachAiDiagnosticOnFailure(
-      test.info(),
-      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
-    );
-  });
-  test('extracts EID identity structures and userSync sub-modules on live publisher site', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'eatpicks.com')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    await liveSite.waitForMcpBridge();
+import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+
+test.describe('05 - Live User IDs', () => {
+  test.describe.configure({ timeout: 90000 });
+
+  test('reports the EIDs of the configured user ID modules on a live publisher (eatpicks.com)', async ({ liveSite }) => {
+    await liveSite.open(liveSiteNamed('eatpicks.com').url);
+    expect(await liveSite.waitForAuctionEnd(), 'an auction should finish').toBe(true);
+    expect(await liveSite.waitForMcpBridge()).toBe(true);
+
     const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
-    if (snapshot.userEids && snapshot.userEids.length > 0) {
-      expect(Array.isArray(snapshot.userEids)).toBe(true);
+    expect(snapshot.installedModules).toContain('userId');
+    expect(snapshot.userEids.length).toBeGreaterThan(0);
+    for (const eid of snapshot.userEids) {
+      expect(typeof eid.source).toBe('string');
+      expect(Array.isArray(eid.uids)).toBe(true);
     }
-    await page.close();
   });
 });

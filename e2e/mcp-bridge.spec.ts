@@ -1,60 +1,8 @@
-import { test, expect, chromium, BrowserContext, Page } from '@playwright/test';
-import path from 'path';
-import { waitForMcpBridge, simulatePrebidAuction, attachAiDiagnosticOnFailure } from './helpers/mcpTestHelpers';
+import { Page } from '@playwright/test';
+import { test, expect } from './fixtures/extensionTest';
+import { waitForMcpBridge, simulatePrebidAuction } from './helpers/mcpTestHelpers';
 
 test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
-  let browserContext: BrowserContext;
-
-  test.beforeAll(async () => {
-    const pathToExtension = path.join(__dirname, '../build');
-    const userDataDir = path.join(__dirname, '../test-results/test_mcp_user_data_dir_' + Date.now());
-
-    const isHeadless = process.env.HEADED !== 'true' && process.env.HEADLESS !== 'false';
-    const args = [`--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`, '--no-sandbox', '--disable-web-security'];
-    if (isHeadless) {
-      args.push('--headless=new');
-    }
-
-    browserContext = await chromium.launchPersistentContext(userDataDir, {
-      headless: false,
-      bypassCSP: true,
-      args,
-    });
-
-    let retries = 10;
-    let serviceWorker = null;
-    while (retries > 0) {
-      const workers = browserContext.serviceWorkers();
-      if (workers.length > 0) {
-        serviceWorker = workers[0];
-        break;
-      }
-      await new Promise((r) => setTimeout(r, 500));
-      retries--;
-    }
-
-    if (!serviceWorker) {
-      serviceWorker = await browserContext.waitForEvent('serviceworker', { timeout: 5000 }).catch(() => null);
-    }
-
-    if (!serviceWorker) {
-      throw new Error('Service worker not found');
-    }
-  });
-
-  test.afterAll(async () => {
-    if (browserContext) {
-      await browserContext.close();
-    }
-  });
-
-  test.afterEach(async () => {
-    await attachAiDiagnosticOnFailure(
-      test.info(),
-      browserContext?.pages().find((p) => p.url().startsWith('http'))
-    );
-  });
-
   const setupMockPage = async (page: Page) => {
     await page.route('https://example.com/mcp-test-page', async (route) => {
       await route.fulfill({
@@ -109,8 +57,8 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     await page.goto('https://example.com/mcp-test-page');
   };
 
-  test('initializes window.__PROFESSOR_PREBID_MCP__ and provides state getters', async () => {
-    const page = await browserContext.newPage();
+  test('initializes window.__PROFESSOR_PREBID_MCP__ and provides state getters', async ({ liveSite }) => {
+    const { page } = liveSite;
     await setupMockPage(page);
 
     await waitForMcpBridge(page);
@@ -129,11 +77,10 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     });
     expect(installedModules).toContain('appnexusBidAdapter');
     expect(installedModules).toContain('rubiconBidAdapter');
-    await page.close();
   });
 
-  test('captures auctions, calculates latencies, and detects timeouts', async () => {
-    const page = await browserContext.newPage();
+  test('captures auctions, calculates latencies, and detects timeouts', async ({ liveSite }) => {
+    const { page } = liveSite;
     await setupMockPage(page);
     await waitForMcpBridge(page);
 
@@ -183,49 +130,33 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     expect(gamTargeting['div-gpt-ad-leaderboard']).toBeDefined();
     expect(gamTargeting['div-gpt-ad-leaderboard']['hb_bidder']).toEqual(['appnexus']);
     expect(gamTargeting['div-gpt-ad-leaderboard']['hb_pb']).toEqual(['3.50']);
-
-    await page.close();
   });
 
-  test('verifies DevTools MCP standalone injection flow (PR #15356)', async () => {
-    const page = await browserContext.newPage();
+  test('reports DevTools MCP as active once the standalone module is on the page', async ({ liveSite }) => {
+    const { page } = liveSite;
+    await setupMockPage(page);
+    await waitForMcpBridge(page);
+    const hasDevtoolsMcp = () => page.evaluate(() => (window as any).__PROFESSOR_PREBID_MCP__.hasDevtoolsMcp());
+
+    expect(await hasDevtoolsMcp()).toBe(false);
+
+    // The Tools tab injects the standalone module with chrome.scripting, which Playwright cannot drive;
+    // the bridge only sees the global that module defines.
+    await page.evaluate(() => ((window as any).__PREBID_DEVTOOLS_MCP__ = { version: '1.0.0', getEvents: (): unknown[] => [], getAuctions: (): unknown[] => [] }));
+    expect(await hasDevtoolsMcp()).toBe(true);
+  });
+
+  test('reports DevTools MCP as active when Prebid.js is built with the devtoolsMcp module', async ({ liveSite }) => {
+    const { page } = liveSite;
     await setupMockPage(page);
     await waitForMcpBridge(page);
 
-    // Initial state: devtoolsMcp is not active
-    let isMcpActive = await page.evaluate(() => {
-      const win = window as any;
-      return win.__PROFESSOR_PREBID_MCP__.hasDevtoolsMcp();
-    });
-    expect(isMcpActive).toBe(false);
-
-    // The Tools tab injects the module via chrome.scripting, which Playwright cannot drive; simulate its result.
-    await page.evaluate(() => {
-      const win = window as any;
-      win.__PREBID_DEVTOOLS_MCP__ = { version: '1.0.0', getEvents: () => [], getAuctions: () => [] };
-    });
-
-    // Wait for standalone script attachment
-    await page.waitForFunction(
-      () => {
-        const win = window as any;
-        return win.__PREBID_DEVTOOLS_MCP__ && win.__PROFESSOR_PREBID_MCP__?.hasDevtoolsMcp();
-      },
-      null,
-      { timeout: 5000 }
-    );
-
-    isMcpActive = await page.evaluate(() => {
-      const win = window as any;
-      return win.__PROFESSOR_PREBID_MCP__.hasDevtoolsMcp();
-    });
-    expect(isMcpActive).toBe(true);
-
-    await page.close();
+    await page.evaluate(() => (window as any).pbjs.installedModules.push('devtoolsMcp'));
+    expect(await page.evaluate(() => (window as any).__PROFESSOR_PREBID_MCP__.hasDevtoolsMcp())).toBe(true);
   });
 
-  test('generates comprehensive diagnostic snapshot and AI prompt', async () => {
-    const page = await browserContext.newPage();
+  test('generates comprehensive diagnostic snapshot and AI prompt', async ({ liveSite }) => {
+    const { page } = liveSite;
     await setupMockPage(page);
     await waitForMcpBridge(page);
 
@@ -259,7 +190,5 @@ test.describe('Professor Prebid DevTools MCP Bridge E2E', () => {
     expect(prompt).toContain('11.29.0');
     expect(prompt).toContain('pubmatic');
     expect(prompt).toContain('hb_bidder=appnexus');
-
-    await page.close();
   });
 });

@@ -1,47 +1,25 @@
-import { test, expect } from '@playwright/test';
-import { launchExtensionContext, ExtensionContextInfo } from '../helpers/extensionTestUtils';
-import { LiveSitePage } from '../pom/LiveSitePage';
-import { attachAiDiagnosticOnFailure } from '../helpers/mcpTestHelpers';
-import { LIVE_SITES_CATALOG } from '../fixtures/liveSitesCatalog';
+import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+
 test.describe('02 - Live Ad Units & Bids Waterfall', () => {
-  let extInfo: ExtensionContextInfo;
-  test.beforeAll(async () => {
-    extInfo = await launchExtensionContext();
-  });
-  test.afterAll(async () => {
-    if (extInfo?.browserContext) {
-      await extInfo.browserContext.close();
-    }
-  });
-  test.afterEach(async () => {
-    await attachAiDiagnosticOnFailure(
-      test.info(),
-      extInfo?.browserContext?.pages().find((p) => p.url().startsWith('http'))
-    );
-  });
-  test('captures live ad units and multi-bidder responses on lifestyle publisher (eatpicks.com)', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'eatpicks.com')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    await liveSite.waitForMcpBridge();
+  test.describe.configure({ timeout: 90000 });
+
+  test('captures live ad units and multi-bidder responses on a lifestyle publisher (eatpicks.com)', async ({ liveSite }) => {
+    await liveSite.open(liveSiteNamed('eatpicks.com').url);
+    expect(await liveSite.waitForAuctionEnd(), 'an auction should finish').toBe(true);
+    expect(await liveSite.waitForMcpBridge()).toBe(true);
+
     const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
     expect(snapshot.adUnitsCount).toBeGreaterThan(0);
-    const latencySummary = await liveSite.getMcpLatencySummary();
-    expect(latencySummary).toBeDefined();
-    await page.close();
+    expect(snapshot.auctionCount).toBeGreaterThan(0);
+    expect(snapshot.latencySummary.totalBidsRequested).toBeGreaterThan(0);
   });
-  test('captures multi-bidder setup and installed adapters on news publisher (heise.de)', async () => {
-    test.setTimeout(60000);
-    const siteConfig = LIVE_SITES_CATALOG.find((s) => s.name === 'heise.de')!;
-    const page = await extInfo.browserContext.newPage();
-    const liveSite = new LiveSitePage(page);
-    await liveSite.navigateAndHandleConsent(siteConfig.url);
-    await liveSite.waitForMcpBridge();
+
+  test('reports the installed bid adapters on a news publisher (heise.de)', async ({ liveSite }) => {
+    await liveSite.open(liveSiteNamed('heise.de').url);
+    expect(await liveSite.waitForPrebid(), 'Prebid.js should load after consent').toBe(true);
+    expect(await liveSite.waitForMcpBridge()).toBe(true);
+
     const snapshot = await liveSite.getMcpSnapshot();
-    expect(snapshot).toBeDefined();
-    await page.close();
+    expect(snapshot.installedModules.some((module: string) => module.endsWith('BidAdapter'))).toBe(true);
   });
 });
