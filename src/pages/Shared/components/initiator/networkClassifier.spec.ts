@@ -84,11 +84,28 @@ describe('networkClassifier', () => {
       expect(['valid', 'warning']).toContain(audit.verdict);
     });
 
+    // A real TC string (CMP 31, vendor list 126).
+    const REAL_TC_STRING = 'CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA';
+
     it('auto-detects TCF string in arbitrary query parameter key without known name', () => {
-      const audit = auditPrivacy({ custom_vendor_consent_param: 'CP12345AP12345ABAAENA9CAAP_AAH_AAAAAGVwBgAAA' }, {});
-      expect(audit.gdprConsent).toBe('CP12345AP12345ABAAENA9CAAP_AAH_AAAAAGVwBgAAA');
+      const audit = auditPrivacy({ custom_vendor_consent_param: REAL_TC_STRING }, {});
+      expect(audit.gdprConsent).toBe(REAL_TC_STRING);
       expect(audit.hasGdpr).toBe(true);
-      expect(['valid', 'warning']).toContain(audit.verdict);
+      expect(audit.verdict).toBe('valid');
+    });
+
+    it('does not take unrelated ids starting with C for a consent string', () => {
+      const query = { gclid: 'Cj0KCQjw2a6wBhCVARIsABPeH1sAbcdEFGhijkl', sig: 'CAESEJx3kq0Bn2Vt8sY9LmH5aQo' };
+      const audit = auditPrivacy(query, {}, '{"id":"CABCDEFGHIJKLMNOPQRSTUVWXYZ012345"}');
+      expect(audit.gdprConsent).toBeUndefined();
+      expect(audit.hasGdpr).toBe(false);
+      expect(audit.verdict).toBe('none');
+    });
+
+    it('finds a real consent string in a body after an unrelated C token', () => {
+      const audit = auditPrivacy({}, {}, `token=CABCDEFGHIJKLMNOPQRSTUVWXYZ012345&tc=${REAL_TC_STRING}`);
+      expect(audit.gdprConsent).toBe(REAL_TC_STRING);
+      expect(audit.verdict).toBe('valid');
     });
 
     it('returns warning verdict when consent string cannot be decoded as TCF', () => {

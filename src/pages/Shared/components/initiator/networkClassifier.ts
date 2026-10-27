@@ -199,6 +199,12 @@ export const decodeTcfString = (consentString?: string): IDecodedTcf | undefined
   }
 };
 
+// A guessed value must decode with the fields every CMP-issued string carries.
+const decodeGuessedTcfString = (value: string): IDecodedTcf | undefined => {
+  const decoded = decodeTcfString(value);
+  return decoded && Number(decoded.cmpId) > 0 && Number(decoded.vendorListVersion) > 0 ? decoded : undefined;
+};
+
 const mapHeaders = (headers?: Array<{ name: string; value: string }>): { [key: string]: string } => {
   const map: { [key: string]: string } = {};
   if (Array.isArray(headers)) {
@@ -261,12 +267,15 @@ export const auditPrivacy = (queryParams: { [key: string]: string }, requestHead
     } catch {}
   }
 
+  // Values outside known consent fields are only taken as a consent string when they decode as one:
+  // plenty of unrelated ids (gclids, Google 'CAESE...' tokens) also start with 'C'.
   if (!gdprConsent) {
     for (const [, val] of Object.entries(queryParams)) {
-      if (val && typeof val === 'string' && val.length >= 15) {
-        if (/^C[A-Za-z0-9\-_]{15,}/.test(val)) {
+      if (val && typeof val === 'string' && /^C[A-Za-z0-9\-_]{15,}/.test(val)) {
+        const decoded = decodeGuessedTcfString(val);
+        if (decoded) {
           gdprConsent = val;
-          decodedTcf = decodeTcfString(val);
+          decodedTcf = decoded;
           break;
         }
       }
@@ -275,10 +284,13 @@ export const auditPrivacy = (queryParams: { [key: string]: string }, requestHead
 
   if (!gdprConsent && textToParse) {
     const tcfRegex = /\b(C[A-Za-z0-9\-_]{20,}(?:\.[A-Za-z0-9\-_]+)*)\b/g;
-    const matches = textToParse.match(tcfRegex);
-    if (matches && matches.length > 0) {
-      gdprConsent = matches[0];
-      decodedTcf = decodeTcfString(matches[0]);
+    for (const match of textToParse.match(tcfRegex) || []) {
+      const decoded = decodeGuessedTcfString(match);
+      if (decoded) {
+        gdprConsent = match;
+        decodedTcf = decoded;
+        break;
+      }
     }
   }
 
