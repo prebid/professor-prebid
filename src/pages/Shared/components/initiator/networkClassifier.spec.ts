@@ -176,6 +176,28 @@ describe('networkClassifier', () => {
       expect(classified.isPrebid).toBe(false);
     });
 
+    it('attributes a cookie sync to its own host, not to a Google host in its redirect parameter', () => {
+      const entry: IHarLogEntry = {
+        id: 'r1',
+        url: 'https://pixel.rubiconproject.com/exchange/sync.php?p=pbs&redir=https%3A%2F%2Fcm.g.doubleclick.net%2Fpixel%3Fgoogle_nid%3Drubicon',
+        host: 'pixel.rubiconproject.com',
+        pathname: '/exchange/sync.php',
+        method: 'GET',
+        status: 200,
+        startedDateTime: Date.now(),
+        time: 40,
+      };
+
+      const classified = classifyRequest(entry);
+      expect(classified.providerName).not.toBe('Google Ad Manager');
+      expect(classified.category).toBe('sync');
+    });
+
+    it('does not match hosts that only end in a provider domain name', () => {
+      const entry: IHarLogEntry = { id: 'r2', url: 'https://cdn.extra9.com/x.js', host: 'cdn.extra9.com', pathname: '/x.js', method: 'GET', status: 200, startedDateTime: Date.now(), time: 5 };
+      expect(classifyRequest(entry).providerName).not.toBe('Amazon TAM / A9');
+    });
+
     it('classifies User Sync request', () => {
       const entry: IHarLogEntry = {
         id: '2',

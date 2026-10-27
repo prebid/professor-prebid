@@ -147,8 +147,10 @@ export const EXTERNAL_PROVIDERS: Array<{
   hostPattern: RegExp;
   category: NetworkCategory;
 }> = [
-  { name: 'Google Ad Manager', hostPattern: /googlesyndication\.com|doubleclick\.net|googleadservices\.com/i, category: 'gam' },
-  { name: 'Amazon TAM / A9', hostPattern: /amazon-adsystem\.com|a9\.com/i, category: 'bid' },
+  // Anchored to a domain suffix and tested against the host only: sync chains carry other
+  // providers' hosts in their query string (e.g. redir=https%3A%2F%2Fcm.g.doubleclick.net...).
+  { name: 'Google Ad Manager', hostPattern: /(^|\.)(googlesyndication\.com|doubleclick\.net|googleadservices\.com)$/i, category: 'gam' },
+  { name: 'Amazon TAM / A9', hostPattern: /(^|\.)(amazon-adsystem\.com|a9\.com)$/i, category: 'bid' },
 ];
 
 export const KNOWN_PROVIDERS = EXTERNAL_PROVIDERS;
@@ -366,7 +368,7 @@ export const classifyRequest = (entry: IHarLogEntry, decompressedPostText?: stri
 
   // 1. Match Provider against curated KNOWN_PROVIDERS
   for (const provider of KNOWN_PROVIDERS) {
-    if (provider.hostPattern.test(host) || provider.hostPattern.test(url)) {
+    if (provider.hostPattern.test(host)) {
       providerName = provider.name;
       if (provider.category) matchedCategory = provider.category;
       break;
