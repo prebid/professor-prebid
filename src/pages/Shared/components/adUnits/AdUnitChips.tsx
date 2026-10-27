@@ -144,17 +144,17 @@ export const AdUnitChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element
             @keyframes pp-march-cycle {
               0% {
                 background-position:
-                  0 0,      
-                  100% 0,   
-                  0 100%,   
-                  0 0;      
+                  0 0,
+                  100% 0,
+                  0 100%,
+                  0 0;
               }
               100% {
                 background-position:
-                  80px 0,       
-                  100% 80px,    
-                  -80px 100%,   
-                  0 -80px;      
+                  80px 0,
+                  100% 80px,
+                  -80px 100%,
+                  0 -80px;
               }
             }
           `;
