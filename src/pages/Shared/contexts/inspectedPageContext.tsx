@@ -3,6 +3,7 @@ import { getTabId } from '../utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';
 import { preAuctionHarKey } from '../constants';
+import { harChunkIdFromKey, harChunkKey, parseStoredArray } from '../harLogStorage';
 import { IHarEntry } from '../components/preAuction/harCorrelation';
 
 const InspectedPageContext = createContext<IPageContext | undefined>(undefined);
@@ -54,28 +55,51 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   }, []);
 
   useEffect(() => {
-    const read = (raw: string) => {
-      try {
-        setHarLogData(JSON.parse(raw) || []);
-      } catch (error) {
-        setHarLogData([]);
-      }
-    };
+    // The log is stored in chunks (see harLogStorage); keep each parsed chunk and re-parse only those that change.
+    let tabId: number | undefined;
+    let chunkIds: number[] = [];
+    let indexChanged = false; // once a change arrived, the initial read is stale
+    const chunkEntries = new Map<number, IHarEntry[]>();
+    const publish = () => setHarLogData(chunkIds.flatMap((id) => chunkEntries.get(id) || []));
+    const readChunkIds = (raw: unknown) => parseStoredArray<number>(raw).filter(Number.isInteger);
 
-    let key: string | null = null;
-    getTabId().then((tabId) => {
-      if (tabId === undefined) return;
-      key = preAuctionHarKey(tabId);
-      chrome.storage?.session?.get(key, (result) => {
-        if (result?.[key]) read(result[key]);
+    getTabId().then((id) => {
+      if (id === undefined) return;
+      tabId = id;
+      const indexKey = preAuctionHarKey(id);
+      chrome.storage?.session?.get(indexKey, (index) => {
+        const ids = readChunkIds(index?.[indexKey]);
+        if (ids.length === 0) return;
+        chrome.storage.session.get(
+          ids.map((chunkId) => harChunkKey(id, chunkId)),
+          (stored) => {
+            if (indexChanged) return;
+            ids.forEach((chunkId) => chunkEntries.set(chunkId, parseStoredArray<IHarEntry>(stored?.[harChunkKey(id, chunkId)])));
+            chunkIds = ids;
+            publish();
+          }
+        );
       });
     });
 
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'session' && key && changes[key]) {
-        // A removed key means the log was reset for a new page.
-        read(changes[key].newValue || '[]');
-      }
+      if (areaName !== 'session' || tabId === undefined) return;
+      let changed = false;
+      Object.entries(changes).forEach(([key, change]) => {
+        if (key === preAuctionHarKey(tabId)) {
+          // A removed index means the log was reset for a new page, '[]' that the panel cleared it.
+          chunkIds = readChunkIds(change.newValue);
+          indexChanged = true;
+          changed = true;
+          return;
+        }
+        const chunkId = harChunkIdFromKey(tabId, key);
+        if (chunkId === null) return;
+        if (change.newValue === undefined) chunkEntries.delete(chunkId);
+        else chunkEntries.set(chunkId, parseStoredArray<IHarEntry>(change.newValue));
+        changed = true;
+      });
+      if (changed) publish();
     };
     chrome.storage.onChanged.addListener(handler);
 

@@ -237,18 +237,36 @@ describe('Background Index Module', () => {
     expect(mockRemove).not.toHaveBeenCalled();
   });
 
-  it('removes pre-auction HAR session entries for closed tabs only', async () => {
+  it('removes pre-auction HAR session entries, index and chunks, for closed tabs only', async () => {
     mockQuery.mockResolvedValue([{ id: 1 }]);
-    mockSessionStorage['preAuctionHar_1'] = { entries: [] };
-    mockSessionStorage['preAuctionHar_42'] = { entries: [] };
+    mockSessionStorage['preAuctionHar_1'] = '[0]';
+    mockSessionStorage['preAuctionHar_1_0'] = '[]';
+    mockSessionStorage['preAuctionHar_42'] = '[0]';
+    mockSessionStorage['preAuctionHar_42_0'] = '[]';
     mockSessionStorage['unrelated'] = 'keep';
 
     await onAlarmCallback({ name: 'cleanUpTabInfo' });
     await flushPromises();
 
     expect(mockSessionStorage['preAuctionHar_1']).toBeDefined();
+    expect(mockSessionStorage['preAuctionHar_1_0']).toBeDefined();
     expect(mockSessionStorage['preAuctionHar_42']).toBeUndefined();
+    expect(mockSessionStorage['preAuctionHar_42_0']).toBeUndefined();
     expect(mockSessionStorage['unrelated']).toEqual('keep');
+  });
+
+  it("removes a closed tab's whole network log", async () => {
+    mockSessionStorage['preAuctionHar_7'] = '[3]';
+    mockSessionStorage['preAuctionHar_7_3'] = '[]';
+    mockSessionStorage['preAuctionHar_77'] = '[0]';
+
+    await onTabRemovedCallback(7, {});
+    await flushPromises();
+
+    expect(mockSessionStorage['preAuctionHar_7']).toBeUndefined();
+    expect(mockSessionStorage['preAuctionHar_7_3']).toBeUndefined();
+    expect(mockSessionStorage['preAuctionHar_77']).toEqual('[0]');
+    delete mockSessionStorage['preAuctionHar_77'];
   });
 
   it('reads only the session key names when getKeys is available', async () => {

@@ -1,7 +1,8 @@
 import { BadgeService } from './BadgeService';
 import { MessageHandler } from './MessageHandler';
 import { TabContextService } from './TabContextService';
-import { PRE_AUCTION_HAR, preAuctionHarKey } from '../Shared/constants';
+import { PRE_AUCTION_HAR } from '../Shared/constants';
+import { removeStoredHarLog, sessionStorageKeys } from '../Shared/harLogStorage';
 
 class BackgroundService {
   constructor(private tabContextService: TabContextService, private updateBadge: (tabId: number | undefined) => void) {}
@@ -39,7 +40,7 @@ class BackgroundService {
 
   handleOnTabRemoved = async (tabId: number, _info: chrome.tabs.TabRemoveInfo) => {
     await this.tabContextService.deleteTabInfo(tabId);
-    await chrome.storage.session?.remove(preAuctionHarKey(tabId));
+    await removeStoredHarLog(tabId);
   };
 
   handleOnAlarm = async (_alarm: chrome.alarms.Alarm) => {
@@ -63,11 +64,9 @@ class BackgroundService {
       await chrome.storage.local.remove(keysToRemove);
     }
     if (chrome.storage.session?.get) {
-      // Only the key names are needed; getKeys (Chrome 130+) avoids loading every tab's multi-MB HAR log.
-      const session = chrome.storage.session as typeof chrome.storage.session & { getKeys?: () => Promise<string[]> };
-      const sessionKeys = typeof session.getKeys === 'function' ? await session.getKeys() : Object.keys(((await session.get(null)) as any) || {});
+      // Only the key names are needed, not every tab's HAR log. Chunk keys (preAuctionHar_<tabId>_<chunk>) parse to their tab id too.
       const sessionKeysToRemove: string[] = [];
-      for (const key of sessionKeys) {
+      for (const key of await sessionStorageKeys()) {
         if (key.startsWith(`${PRE_AUCTION_HAR}_`)) {
           const tabId = parseInt(key.slice(PRE_AUCTION_HAR.length + 1), 10);
           if (!activeTabIds.includes(tabId)) {

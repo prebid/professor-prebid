@@ -1,20 +1,25 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { isRecordableUrl, toLogEntry, collectHarLog, extractPrivacyFields } from './harLog';
 import { preAuctionHarKey } from '../Shared/constants';
+import { harChunkKey } from '../Shared/harLogStorage';
 
 const TAB_ID = 42;
 const HAR_KEY = preAuctionHarKey(TAB_ID);
+
+// chrome.storage.session, as a plain object the mocks read and write.
+let sessionStore: Record<string, string> = {};
 
 describe('harLog', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
+    sessionStore = {};
     global.chrome = {
       storage: {
         session: {
-          set: vi.fn().mockResolvedValue(undefined),
-          remove: vi.fn().mockResolvedValue(undefined),
-          get: vi.fn(),
+          set: vi.fn(async (items: Record<string, string>) => Object.assign(sessionStore, items)),
+          remove: vi.fn(async (keys: string | string[]) => [keys].flat().forEach((key) => delete sessionStore[key])),
+          get: vi.fn(async () => ({ ...sessionStore })),
         },
         local: {
           set: vi.fn(),
@@ -200,8 +205,9 @@ describe('harLog', () => {
       return listeners;
     };
     const sessionSet = () => global.chrome.storage.session.set as any;
-    const sessionRemove = () => global.chrome.storage.session.remove as any;
-    const lastSaved = () => JSON.parse(sessionSet().mock.calls.slice(-1)[0][0][HAR_KEY]);
+    // The log as a reader sees it: the chunks listed in the index, in order.
+    const storedLog = (): any[] => JSON.parse(sessionStore[HAR_KEY] ?? '[]').flatMap((id: number) => JSON.parse(sessionStore[harChunkKey(TAB_ID, id)] ?? '[]'));
+    const storedUrls = () => storedLog().map((e: any) => e.url);
     const request = (url: string) => ({ request: { url, method: 'GET' }, response: { status: 200 }, startedDateTime: '2026-08-17T10:00:00.000Z', time: 10 });
 
     it('does nothing if chrome.devtools.network is unavailable', () => {
@@ -212,14 +218,13 @@ describe('harLog', () => {
 
     it('stores the log per inspected tab in session storage, never in local storage', async () => {
       const listeners = setup();
-      expect(sessionRemove()).toHaveBeenCalledWith(HAR_KEY);
 
       listeners.network(request('https://example.com/test'));
       expect(sessionSet()).toHaveBeenCalledTimes(0);
 
       await vi.advanceTimersByTimeAsync(300);
       expect(sessionSet()).toHaveBeenCalledTimes(1);
-      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/test']);
+      expect(storedUrls()).toEqual(['https://example.com/test']);
 
       listeners.network({ request: { url: 'chrome-extension://123/script.js' } });
       await vi.advanceTimersByTimeAsync(300);
@@ -227,23 +232,39 @@ describe('harLog', () => {
       expect(global.chrome.storage.local.set).not.toHaveBeenCalled();
     });
 
+    it('writes only the chunk that changed, not the whole log', async () => {
+      const listeners = setup();
+      for (let i = 0; i < 120; i++) listeners.network(request(`https://example.com/req_${i}`));
+      await vi.advanceTimersByTimeAsync(300);
+
+      listeners.network(request('https://example.com/next'));
+      await vi.advanceTimersByTimeAsync(300);
+
+      // 121 entries fill two chunks and part of a third; the new entry lands in the third and the index is unchanged.
+      const chunkIds: number[] = JSON.parse(sessionStore[HAR_KEY]);
+      expect(chunkIds).toHaveLength(3);
+      expect(Object.keys(sessionSet().mock.calls.slice(-1)[0][0])).toEqual([harChunkKey(TAB_ID, chunkIds[2])]);
+      expect(storedLog()).toHaveLength(121);
+      expect(storedUrls().slice(-1)).toEqual(['https://example.com/next']);
+    });
+
     it('resets only when the inspected tab starts loading', async () => {
       const listeners = setup();
       listeners.network(request('https://example.com/a'));
       await vi.advanceTimersByTimeAsync(300);
 
-      sessionRemove().mockClear();
-
       listeners.tabs(TAB_ID + 1, { status: 'loading' });
       listeners.tabs(TAB_ID, { status: 'complete' });
-      expect(sessionRemove()).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(storedUrls()).toEqual(['https://example.com/a']);
 
       listeners.tabs(TAB_ID, { status: 'loading' });
-      expect(sessionRemove()).toHaveBeenCalledWith(HAR_KEY);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(sessionStore).toEqual({});
 
       listeners.network(request('https://example.com/b'));
       await vi.advanceTimersByTimeAsync(300);
-      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/b']);
+      expect(storedUrls()).toEqual(['https://example.com/b']);
     });
 
     it('keeps requests recorded right after a navigation reset when the reset itself is echoed back', async () => {
@@ -254,21 +275,26 @@ describe('harLog', () => {
       listeners.tabs(TAB_ID, { status: 'loading' });
       listeners.network(request('https://example.com/prebid.js'));
       // storage.onChanged for the reset arrives after the new page's first request finished.
-      listeners.storage({ [HAR_KEY]: { oldValue: lastSaved(), newValue: undefined } }, 'session');
+      listeners.storage({ [HAR_KEY]: { oldValue: '[0]', newValue: undefined } }, 'session');
       await vi.advanceTimersByTimeAsync(300);
 
-      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/prebid.js']);
+      expect(storedUrls()).toEqual(['https://example.com/prebid.js']);
     });
 
-    it('drops the in-memory log when the panel clears the stored log', async () => {
+    it('drops the in-memory log and its stored chunks when the panel clears the log', async () => {
       const listeners = setup();
       listeners.network(request('https://example.com/a'));
       await vi.advanceTimersByTimeAsync(300);
+      const firstChunk = Object.keys(sessionStore).find((key) => key !== HAR_KEY)!;
 
+      // The panel's "Clear log" writes an empty index.
+      sessionStore[HAR_KEY] = '[]';
       listeners.storage({ [HAR_KEY]: { newValue: '[]' } }, 'session');
       listeners.network(request('https://example.com/b'));
       await vi.advanceTimersByTimeAsync(300);
-      expect(lastSaved().map((e: any) => e.url)).toEqual(['https://example.com/b']);
+
+      expect(storedUrls()).toEqual(['https://example.com/b']);
+      expect(sessionStore[firstChunk]).toBeUndefined();
     });
 
     it('ignores clears for other tabs or storage areas', async () => {
@@ -280,7 +306,7 @@ describe('harLog', () => {
       listeners.storage({ [HAR_KEY]: { newValue: '[]' } }, 'local');
       listeners.network(request('https://example.com/b'));
       await vi.advanceTimersByTimeAsync(300);
-      expect(lastSaved()).toHaveLength(2);
+      expect(storedUrls()).toEqual(['https://example.com/a', 'https://example.com/b']);
     });
 
     it('keeps the newest half and retries once when the session quota is exceeded', async () => {
@@ -289,17 +315,19 @@ describe('harLog', () => {
       sessionSet().mockRejectedValueOnce(new Error('QUOTA_BYTES quota exceeded'));
 
       await vi.advanceTimersByTimeAsync(300);
-      expect(lastSaved().map((e: any) => e.url)).toEqual([5, 6, 7, 8, 9].map((i) => `https://example.com/req_${i}`));
+      expect(storedUrls()).toEqual([5, 6, 7, 8, 9].map((i) => `https://example.com/req_${i}`));
     });
 
-    it('caps entries at MAX_ENTRIES (1000)', async () => {
+    it('caps the log at MAX_ENTRIES (1000) by dropping the oldest chunks', async () => {
       const listeners = setup();
       for (let i = 0; i < 1050; i++) listeners.network(request(`https://example.com/req_${i}`));
 
       await vi.advanceTimersByTimeAsync(300);
-      const saved = lastSaved();
-      expect(saved.length).toBe(1000);
-      expect(saved[saved.length - 1].url).toBe('https://example.com/req_1049');
+      expect(storedLog()).toHaveLength(1000);
+      expect(storedUrls()[0]).toBe('https://example.com/req_50');
+      expect(storedUrls().slice(-1)).toEqual(['https://example.com/req_1049']);
+      // Dropped chunks are removed, not left behind.
+      expect(Object.keys(sessionStore)).toHaveLength(1 + 20);
     });
   });
 });

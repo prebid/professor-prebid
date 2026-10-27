@@ -3,8 +3,15 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import InspectedPageContext, { InspectedPageContextProvider } from './inspectedPageContext';
 import { preAuctionHarKey } from '../constants';
+import { harChunkKey } from '../harLogStorage';
 
 const HAR_KEY = preAuctionHarKey(123);
+
+// A storage change that stores `entries` as chunk `chunkId` of a tab's network log, and makes it the whole log.
+const logChange = (entries: object[], tabId = 123, chunkId = 0) => ({
+  [preAuctionHarKey(tabId)]: { newValue: JSON.stringify([chunkId]) },
+  [harChunkKey(tabId, chunkId)]: { newValue: JSON.stringify(entries) },
+});
 
 vi.mock('../utils', () => ({
   getTabId: vi.fn().mockResolvedValue(123),
@@ -45,8 +52,16 @@ describe('InspectedPageContextProvider', () => {
           }),
         },
         session: {
-          get: vi.fn((key, cb) => {
-            cb(key === HAR_KEY ? { [HAR_KEY]: JSON.stringify([{ url: 'https://example.com' }]) } : {});
+          get: vi.fn((keys, cb) => {
+            const stored: Record<string, string> = { [HAR_KEY]: '[0]', [harChunkKey(123, 0)]: JSON.stringify([{ url: 'https://example.com' }]) };
+            cb(
+              Object.fromEntries(
+                [keys]
+                  .flat()
+                  .filter((key: string) => key in stored)
+                  .map((key: string) => [key, stored[key]])
+              )
+            );
           }),
         },
         onChanged: {
@@ -83,21 +98,54 @@ describe('InspectedPageContextProvider', () => {
     });
 
     await act(async () => {
-      listeners.forEach((listener) => listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://inspected-tab.com' }]) } }, 'session'));
+      listeners.forEach((listener) => listener(logChange([{ url: 'https://inspected-tab.com' }]), 'session'));
     });
     await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://inspected-tab.com'), { timeout: 2000 });
 
     // Sent last, so any of them would replace the log if the filter let it through.
     await act(async () => {
       listeners.forEach((listener) => {
-        listener({ [preAuctionHarKey(999)]: { newValue: JSON.stringify([{ url: 'https://other-tab.com' }]) } }, 'session');
-        listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://wrong-area.com' }]) } }, 'local');
+        listener(logChange([{ url: 'https://other-tab.com' }], 999), 'session');
+        listener(logChange([{ url: 'https://wrong-area.com' }]), 'local');
       });
       await new Promise((resolve) => setTimeout(resolve, 1200)); // past the 1s debounce
     });
     expect(screen.getByTestId('harLog').textContent).toContain('https://inspected-tab.com');
     expect(screen.getByTestId('harLog').textContent).not.toContain('other-tab');
     expect(screen.getByTestId('harLog').textContent).not.toContain('wrong-area');
+  });
+
+  it('adds a new chunk to the log without re-reading the chunks it already has', async () => {
+    await act(async () => {
+      render(
+        <InspectedPageContextProvider>
+          <TestComponent />
+        </InspectedPageContextProvider>
+      );
+    });
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://example.com'), { timeout: 2000 });
+
+    await act(async () => {
+      listeners.forEach((listener) => listener({ [HAR_KEY]: { newValue: '[0,1]' }, [harChunkKey(123, 1)]: { newValue: JSON.stringify([{ url: 'https://next.com' }]) } }, 'session'));
+    });
+
+    await waitFor(() => expect(JSON.parse(screen.getByTestId('harLog').textContent!)).toEqual([{ url: 'https://example.com' }, { url: 'https://next.com' }]), { timeout: 2000 });
+  });
+
+  it('empties the network log when the panel clears it', async () => {
+    await act(async () => {
+      render(
+        <InspectedPageContextProvider>
+          <TestComponent />
+        </InspectedPageContextProvider>
+      );
+    });
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://example.com'), { timeout: 2000 });
+
+    await act(async () => {
+      listeners.forEach((listener) => listener({ [HAR_KEY]: { newValue: '[]' } }, 'session'));
+    });
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toBe('[]'), { timeout: 2000 });
   });
 
   it('empties the network log when the stored log is removed for a new page', async () => {
@@ -110,12 +158,12 @@ describe('InspectedPageContextProvider', () => {
     });
 
     await act(async () => {
-      listeners.forEach((listener) => listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://old-page.com' }]) } }, 'session'));
+      listeners.forEach((listener) => listener(logChange([{ url: 'https://old-page.com' }]), 'session'));
     });
     await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('old-page'), { timeout: 2000 });
 
     await act(async () => {
-      listeners.forEach((listener) => listener({ [HAR_KEY]: { oldValue: '[]', newValue: undefined } }, 'session'));
+      listeners.forEach((listener) => listener({ [HAR_KEY]: { oldValue: '[0]', newValue: undefined } }, 'session'));
     });
     await waitFor(() => expect(screen.getByTestId('harLog').textContent).toBe('[]'), { timeout: 2000 });
   });
@@ -153,9 +201,7 @@ describe('InspectedPageContextProvider', () => {
               oldValue: {},
               newValue: { 'top-window': { prebids: {} } },
             },
-            [HAR_KEY]: {
-              newValue: JSON.stringify([{ url: 'https://test.com/new' }]),
-            },
+            ...logChange([{ url: 'https://test.com/new' }]),
           },
           'local'
         );
@@ -182,9 +228,8 @@ describe('InspectedPageContextProvider', () => {
       listeners.forEach((listener) => {
         listener(
           {
-            [HAR_KEY]: {
-              newValue: 'not-valid-json',
-            },
+            [HAR_KEY]: { newValue: '[0]' },
+            [harChunkKey(123, 0)]: { newValue: 'not-valid-json' },
           },
           'session'
         );
