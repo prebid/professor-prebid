@@ -137,8 +137,7 @@ const extractInitiator = (initiator: any): IInitiatorInfo | undefined => {
   };
 };
 
-const redactHeaders = (arr?: any[]): Array<{ name: string; value: string }> | undefined =>
-  sanitizeNameValuePairs(arr)?.map((h) => (SENSITIVE_HEADERS.includes(h.name.toLowerCase()) ? { name: h.name, value: REDACTED } : h));
+const redactHeaders = (arr?: any[]): Array<{ name: string; value: string }> | undefined => sanitizeNameValuePairs(arr)?.map((h) => (SENSITIVE_HEADERS.includes(h.name.toLowerCase()) ? { name: h.name, value: REDACTED } : h));
 
 const redactCookies = (arr?: any[]): Array<{ name: string; value: string }> | undefined => sanitizeNameValuePairs(arr)?.map((c) => ({ name: c.name, value: REDACTED }));
 

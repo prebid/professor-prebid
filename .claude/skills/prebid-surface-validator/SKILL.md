@@ -43,12 +43,15 @@ Ensures that **every data point** in the live Prebid.js runtime (`pbjs.getConfig
 ## 1. Quick Audit Commands
 
 ### A. Run Synthetic Matrix Audit (Automated 100% Reconciliation)
+
 ```sh
 npm run audit:surface
 ```
-*Validates that all configurations, multi-bidder events, EID sources, modules, and winning bids are captured with zero discrepancies.*
+
+_Validates that all configurations, multi-bidder events, EID sources, modules, and winning bids are captured with zero discrepancies._
 
 ### B. Run Audit Against a Live Publisher Website
+
 ```sh
 npm run audit:surface -- --url https://www.eatpicks.com/
 # or
@@ -56,6 +59,7 @@ URL="https://www.heise.de/" npx playwright test e2e/specs/09_prebid_surface_audi
 ```
 
 ### C. Check Generated Audit Report
+
 ```sh
 cat reports/surface-audit-report.md
 ```
@@ -67,6 +71,7 @@ cat reports/surface-audit-report.md
 When debugging in DevTools or browser console, compare **Page Truth** vs **Extension State**:
 
 ### Extract Page Truth (Page Console)
+
 ```js
 (() => {
   const pb = window.pbjs || (window._pbjsGlobals && window[window._pbjsGlobals[0]]);
@@ -83,16 +88,18 @@ When debugging in DevTools or browser console, compare **Page Truth** vs **Exten
 ```
 
 ### Extract Extension Captured State (Extension Service Worker Console / Storage)
+
 ```js
 chrome.storage.local.get(null, (data) => {
-  const tabKeys = Object.keys(data).filter(k => k.startsWith('tab_info_'));
-  tabKeys.forEach(k => {
+  const tabKeys = Object.keys(data).filter((k) => k.startsWith('tab_info_'));
+  tabKeys.forEach((k) => {
     console.log(`[${k}] Prebid data:`, data[k]);
   });
 });
 ```
 
 ### Read via MCP DevTools Bridge (Page Console)
+
 ```js
 (() => {
   if (!window.__PROFESSOR_PREBID_MCP__) {
@@ -108,13 +115,13 @@ chrome.storage.local.get(null, (data) => {
 
 ## 3. Failure Modes & Root-Cause Triage
 
-| Symptom | Probable Cause | Fix Location |
-|---|---|---|
-| **Events missing or count lower than page** | Throttle window (`updateRateInterval = 2500ms`) or circular reference stringify error | Check `Injected/prebid.ts` `safeStringify()` and event listener bindings. |
-| **Config keys missing** | Config modified after auction init without firing update | Check `sendDetailsToBackground` trigger on `window.addEventListener('message')`. |
-| **Pre-Auction shows `unknown` or `never`** | Provider attribution maps drifted | Run `prebid-metadata` skill to regenerate `providerSignals.ts`. |
-| **No Prebid data captured on live URL** | CMP / GDPR consent banner blocked ad stack initialization | Check `e2e/fixtures/cmpConsentHandlers.ts` selector coverage. |
-| **Object URL blob fetch failure (`eventsUrl`)** | Blob revoked before panel consumption | Ensure `URL.revokeObjectURL` timing allows extension panel load. |
+| Symptom                                         | Probable Cause                                                                        | Fix Location                                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Events missing or count lower than page**     | Throttle window (`updateRateInterval = 2500ms`) or circular reference stringify error | Check `Injected/prebid.ts` `safeStringify()` and event listener bindings.        |
+| **Config keys missing**                         | Config modified after auction init without firing update                              | Check `sendDetailsToBackground` trigger on `window.addEventListener('message')`. |
+| **Pre-Auction shows `unknown` or `never`**      | Provider attribution maps drifted                                                     | Run `prebid-metadata` skill to regenerate `providerSignals.ts`.                  |
+| **No Prebid data captured on live URL**         | CMP / GDPR consent banner blocked ad stack initialization                             | Check `e2e/fixtures/cmpConsentHandlers.ts` selector coverage.                    |
+| **Object URL blob fetch failure (`eventsUrl`)** | Blob revoked before panel consumption                                                 | Ensure `URL.revokeObjectURL` timing allows extension panel load.                 |
 
 ---
 

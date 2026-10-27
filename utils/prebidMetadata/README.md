@@ -23,7 +23,7 @@ carries the authoritative `componentName` for each `userId` and `rtd` module —
   libraries they import. One module can own many sources.
 - **extractProviderHosts** joins it with every URL literal in the module source plus the vendor's
   `disclosureURL`, reduced to registrable domains.
-- **extractProviderSignals** records where each RTD module *writes* its contribution, from three
+- **extractProviderSignals** records where each RTD module _writes_ its contribution, from three
   sources: the module source, the module's `.md` (for shim modules that contain no path themselves),
   and a small curated map for vendors whose key exists only in their payload. RTD providers
   load a vendor payload script, but the enrichment is written by prebid's own module at a fixed path
@@ -51,7 +51,7 @@ downloads.
   scan sees a variable name and no quoted string. Their values live in
   the `MANUAL` map at the top of `extractEidSources.mjs`, and the script prints which modules it
   filled in. When bumping prebid.js, grep each of those modules for `source:` and follow the constant
-  to confirm the value is still right — and check whether any *other* module has started doing the
+  to confirm the value is still right — and check whether any _other_ module has started doing the
   same, in which case it will silently go missing.
 - Documentation links and shared infrastructure (`amazonaws.com`, `gstatic.com`, `doubleclick.net`,
   …) are excluded from the host map. A missing attribution is better than a wrong one.

@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import BidsComponent, { BidRowComponent,  GridCell } from './BidsComponent';
+import BidsComponent, { BidRowComponent, GridCell } from './BidsComponent';
 import { BID_FIELD_MAP, getBidKey } from './BidsComponentState';
 import AppStateContext from '../../contexts/appStateContext';
 

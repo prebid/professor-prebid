@@ -24,7 +24,6 @@ import { theme } from '../../../theme/theme';
 import { getSlotTargeting } from '../../Shared/gptTargeting';
 import { equivalentAdUnitCodes } from '../InjectedApp';
 
-
 const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
   const [expanded, setExpanded] = React.useState(true);
   return (
@@ -32,7 +31,9 @@ const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element
       <Box sx={{ backgroundColor: '#fff', border: '1px solid', borderColor: 'primary.light', borderRadius: 2, overflow: 'hidden' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 1.5, cursor: 'pointer', '&:hover': { backgroundColor: 'info.main' } }} onClick={() => setExpanded(!expanded)}>
           <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>{avatar}</Avatar>
-          <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 'bold', ml: 1, flexGrow: 1, display: 'flex', alignItems: 'center' }}>{title}</Typography>
+          <Typography variant="subtitle1" sx={{ color: 'text.primary', fontWeight: 'bold', ml: 1, flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+            {title}
+          </Typography>
           <ExpandMoreIcon
             sx={{
               color: 'text.secondary',
@@ -55,18 +56,20 @@ const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element
 const MetricCard = ({ title, value, highlightColor = '#438ED9', icon = null }: any): JSX.Element => {
   return (
     <Grid size={{ xs: 12, sm: 4, md: 4 }}>
-      <Box sx={{
-        p: 1.5,
-        backgroundColor: '#fff',
-        borderRadius: 2,
-        border: '1px solid',
-        borderColor: `${highlightColor}80`,
-        boxShadow: `0 2px 8px ${highlightColor}20`,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        height: '100%',
-      }}>
+      <Box
+        sx={{
+          p: 1.5,
+          backgroundColor: '#fff',
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: `${highlightColor}80`,
+          boxShadow: `0 2px 8px ${highlightColor}20`,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          height: '100%',
+        }}
+      >
         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {title} {icon}
         </Typography>
@@ -84,18 +87,20 @@ const InfoCard = ({ title, value, linkUrl = null }: any): JSX.Element => {
   };
   return (
     <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-      <Box sx={{
-        p: 1.5,
-        backgroundColor: '#fff',
-        borderRadius: 2,
-        border: '1px solid',
-        borderColor: 'primary.light',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        height: '100%',
-        position: 'relative'
-      }}>
+      <Box
+        sx={{
+          p: 1.5,
+          backgroundColor: '#fff',
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'primary.light',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          height: '100%',
+          position: 'relative',
+        }}
+      >
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {title}
         </Typography>
@@ -305,7 +310,9 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
 
             {/* JSON Trees */}
             <Box sx={{ mt: 1 }}>
-              <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1, textTransform: 'uppercase', fontSize: 10, letterSpacing: 1 }}>Details</Typography>
+              <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1, textTransform: 'uppercase', fontSize: 10, letterSpacing: 1 }}>
+                Details
+              </Typography>
               <Box sx={{ columnCount: { xs: 1, sm: 2, md: 3, lg: 3 }, columnGap: '16px', width: '100%' }}>
                 {adUnit && <ExpandableItem title="AdUnit Info" avatar={<SettingsOutlinedIcon />} json={adUnit} />}
                 {winningBid && <ExpandableItem title="Winning Bid" avatar={<GavelIcon />} json={winningBid} />}
@@ -318,15 +325,7 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
                     children={
                       winningBid.ad && (
                         <Box sx={{ backgroundColor: '#fff', p: 1, borderRadius: 1 }}>
-                          <iframe
-                            title="Creative Preview"
-                            data-testid="creative-preview-frame"
-                            sandbox="allow-scripts"
-                            srcDoc={winningBid.ad}
-                            width={winningBid.width || 300}
-                            height={winningBid.height || 250}
-                            style={{ border: 0, maxWidth: '100%' }}
-                          />
+                          <iframe title="Creative Preview" data-testid="creative-preview-frame" sandbox="allow-scripts" srcDoc={winningBid.ad} width={winningBid.width || 300} height={winningBid.height || 250} style={{ border: 0, maxWidth: '100%' }} />
                         </Box>
                       )
                     }
@@ -337,8 +336,12 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                       {slotTargeting.map((st) => (
                         <Box key={st.key} sx={{ display: 'flex', backgroundColor: 'primary.info', p: 0.75, borderRadius: 1 }}>
-                          <Typography variant="body2" sx={{ color: 'text.secondary', width: '30%', fontWeight: 'bold' }}>{st.key}</Typography>
-                          <Typography variant="body2" sx={{ color: 'text.primary', width: '70%', wordBreak: 'break-all' }}>{st.value.join(', ')}</Typography>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', width: '30%', fontWeight: 'bold' }}>
+                            {st.key}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'text.primary', width: '70%', wordBreak: 'break-all' }}>
+                            {st.value.join(', ')}
+                          </Typography>
                         </Box>
                       ))}
                     </Box>
@@ -347,7 +350,6 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
                 {slotResponseInfo && <ExpandableItem title="Response Info" avatar={<HelpIcon />} json={slotResponseInfo} />}
               </Box>
             </Box>
-
           </Box>
         </Dialog>
       </ThemeProvider>

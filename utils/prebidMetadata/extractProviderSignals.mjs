@@ -15,10 +15,7 @@ const CONTAINERS = new Set(['', 'ext', 'ext.data', 'ext.gpid', 'ext.tid']);
 
 // Written by prebid itself on every page, so never evidence for a provider.
 // Kept in step with CORE_IMP_PATHS / CORE_ORTB2_PATHS in providerDiagnostics.ts.
-const CORE_PATHS = new Set([
-  'ext.gpid', 'ext.tid', 'ext.ae', 'ext.data.adserver', 'ext.data.pbadslot',
-  'site.ext.data.documentLang', 'device.ext.vpw', 'device.ext.vph', 'user.ext.eids',
-]);
+const CORE_PATHS = new Set(['ext.gpid', 'ext.tid', 'ext.ae', 'ext.data.adserver', 'ext.data.pbadslot', 'site.ext.data.documentLang', 'device.ext.vpw', 'device.ext.vph', 'user.ext.eids']);
 
 /** Drops paths already covered by a shorter one. */
 const collapse = (paths) => paths.filter((p) => !paths.some((other) => other !== p && p.startsWith(`${other}.`)));
@@ -36,7 +33,13 @@ const MANUAL_ORTB2 = {
   'rtd:adagio': ['site.ext.data.adg_rtd'],
 };
 
-const readSafe = (f) => { try { return fs.readFileSync(f, 'utf8'); } catch { return ''; } };
+const readSafe = (f) => {
+  try {
+    return fs.readFileSync(f, 'utf8');
+  } catch {
+    return '';
+  }
+};
 
 /** Comments carry stale and aspirational paths; only executable code is evidence. `//` after `:` is left so urls survive. */
 const stripComments = (code) => code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
@@ -67,11 +70,28 @@ const literalKeys = (code, open) => {
   let expectKey = false;
   for (let i = open; i < code.length; i++) {
     const char = code[i];
-    if (char === '{') { depth++; if (depth === 1) expectKey = true; continue; }
-    if (char === '}') { depth--; if (depth === 0) break; continue; }
-    if (char === '[') { brackets++; continue; }
-    if (char === ']') { brackets--; continue; }
-    if (depth === 1 && brackets === 0 && char === ',') { expectKey = true; continue; }
+    if (char === '{') {
+      depth++;
+      if (depth === 1) expectKey = true;
+      continue;
+    }
+    if (char === '}') {
+      depth--;
+      if (depth === 0) break;
+      continue;
+    }
+    if (char === '[') {
+      brackets++;
+      continue;
+    }
+    if (char === ']') {
+      brackets--;
+      continue;
+    }
+    if (depth === 1 && brackets === 0 && char === ',') {
+      expectKey = true;
+      continue;
+    }
     if (/\s/.test(char)) continue;
     if (depth === 1 && brackets === 0 && expectKey) {
       const key = /^['"]?([A-Za-z_$][\w$]*)['"]?\s*:/.exec(code.slice(i, i + 80));
@@ -158,10 +178,7 @@ const FILENAME = /\.(json|jsonp|js|ts|html?|css|xml|txt|svg|png|jpe?g|gif|md|map
  */
 const segmentNames = (code) => {
   const consts = stringConsts(code);
-  const candidates = [
-    ...Array.from(code.matchAll(/name:\s*['"]([^'"]+)['"]/g)).map((m) => m[1]),
-    ...Array.from(code.matchAll(/name:\s*([A-Za-z_$][\w$]*)/g)).map((m) => consts[m[1]]),
-  ];
+  const candidates = [...Array.from(code.matchAll(/name:\s*['"]([^'"]+)['"]/g)).map((m) => m[1]), ...Array.from(code.matchAll(/name:\s*([A-Za-z_$][\w$]*)/g)).map((m) => consts[m[1]])];
   return candidates
     .filter(Boolean)
     .map((name) => name.toLowerCase())
@@ -171,11 +188,11 @@ const segmentNames = (code) => {
 /** EID sources an RTD module publishes; without these they read as an unconfigured identity module. */
 const eidSources = (code) => {
   const consts = stringConsts(code);
-  const found = [
-    ...Array.from(code.matchAll(/source:\s*['"]([^'"]+)['"]/g)).map((m) => m[1]),
-    ...Array.from(code.matchAll(/source:\s*([A-Za-z_$][\w$]*)/g)).map((m) => consts[m[1]]),
-  ];
-  return found.filter(Boolean).map((s) => s.toLowerCase()).filter((s) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s) && !FILENAME.test(s));
+  const found = [...Array.from(code.matchAll(/source:\s*['"]([^'"]+)['"]/g)).map((m) => m[1]), ...Array.from(code.matchAll(/source:\s*([A-Za-z_$][\w$]*)/g)).map((m) => consts[m[1]])];
+  return found
+    .filter(Boolean)
+    .map((s) => s.toLowerCase())
+    .filter((s) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s) && !FILENAME.test(s));
 };
 
 /**

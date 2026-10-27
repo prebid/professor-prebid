@@ -16,17 +16,54 @@ const WANTED = new Set(['rtd', 'userId', 'bidder', 'analytics']);
 // attribution is better than a wrong one, so anything ambiguous is dropped.
 const IGNORED = [
   // docs / comments
-  'prebid.org', 'github.com', 'githubusercontent.com', 'w3.org', 'schema.org', 'iabtechlab.com',
-  'iabeurope.eu', 'example.com', 'localhost', 'npmjs.com', 'unpkg.com', 'creativecommons.org',
-  'mozilla.org', 'microsoft.com', 'mathiasbynens.be', 'stackoverflow.com', 'wikipedia.org',
-  'developer.mozilla.org', 'medium.com', 'json.org', 'ietf.org', 'rfc-editor.org',
+  'prebid.org',
+  'github.com',
+  'githubusercontent.com',
+  'w3.org',
+  'schema.org',
+  'iabtechlab.com',
+  'iabeurope.eu',
+  'example.com',
+  'localhost',
+  'npmjs.com',
+  'unpkg.com',
+  'creativecommons.org',
+  'mozilla.org',
+  'microsoft.com',
+  'mathiasbynens.be',
+  'stackoverflow.com',
+  'wikipedia.org',
+  'developer.mozilla.org',
+  'medium.com',
+  'json.org',
+  'ietf.org',
+  'rfc-editor.org',
   // shared infrastructure - too generic to attribute
-  'amazonaws.com', 'cloudfront.net', 'googleapis.com', 'gstatic.com', 'google.com', 'doubleclick.net',
-  'googletagservices.com', 'googlesyndication.com', 'akamaihd.net', 'azureedge.net', 'cloudflare.com',
-  'jsdelivr.net', 'herokuapp.com', 'vercel.app', 'netlify.app', 'blob.core.windows.net',
+  'amazonaws.com',
+  'cloudfront.net',
+  'googleapis.com',
+  'gstatic.com',
+  'google.com',
+  'doubleclick.net',
+  'googletagservices.com',
+  'googlesyndication.com',
+  'akamaihd.net',
+  'azureedge.net',
+  'cloudflare.com',
+  'jsdelivr.net',
+  'herokuapp.com',
+  'vercel.app',
+  'netlify.app',
+  'blob.core.windows.net',
 ];
 
-const readSafe = (f) => { try { return fs.readFileSync(f, 'utf8'); } catch { return ''; } };
+const readSafe = (f) => {
+  try {
+    return fs.readFileSync(f, 'utf8');
+  } catch {
+    return '';
+  }
+};
 
 const hostsIn = (code) => {
   const out = [];

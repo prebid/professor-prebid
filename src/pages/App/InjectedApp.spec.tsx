@@ -9,7 +9,9 @@ vi.mock('./components/AdOverlayPortal', () => ({
   default: ({ mask, consoleState, container, pbjsNameSpace, onOpenPopover }: any) => (
     <div data-testid={`overlay-portal-${mask.elementId}`} data-console-state={consoleState} data-pbjs-namespace={pbjsNameSpace}>
       AdOverlayPortal: {mask.elementId} | CPM: {mask.winningCPM ?? 'none'} | Bidder: {mask.winningBidder ?? 'none'}
-      <button data-testid={`open-popover-${mask.elementId}`} onClick={onOpenPopover}>Open</button>
+      <button data-testid={`open-popover-${mask.elementId}`} onClick={onOpenPopover}>
+        Open
+      </button>
     </div>
   ),
 }));
@@ -19,7 +21,9 @@ vi.mock('./components/PopOverComponent', () => ({
     open ? (
       <div data-testid="injected-popover-dialog" data-element-id={elementId} data-cpm={winningCPM}>
         Popover: {elementId} | CPM: {winningCPM}
-        <button data-testid="close-popover-btn" onClick={onClose}>Close</button>
+        <button data-testid="close-popover-btn" onClick={onClose}>
+          Close
+        </button>
       </div>
     ) : null,
 }));

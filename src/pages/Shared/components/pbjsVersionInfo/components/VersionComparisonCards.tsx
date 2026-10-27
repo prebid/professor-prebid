@@ -19,13 +19,7 @@ export interface VersionComparisonCardsProps {
   formatDate: (date: string) => string;
 }
 
-export const VersionComparisonCards: React.FC<VersionComparisonCardsProps> = ({
-  installedVersion,
-  installedPublishedAt,
-  latestVersion,
-  latestPublishedAt,
-  formatDate,
-}) => {
+export const VersionComparisonCards: React.FC<VersionComparisonCardsProps> = ({ installedVersion, installedPublishedAt, latestVersion, latestPublishedAt, formatDate }) => {
   const cleanInstalled = installedVersion?.startsWith('v') ? installedVersion : `v${installedVersion || ''}`;
   const cleanLatest = latestVersion?.startsWith('v') ? latestVersion : `v${latestVersion || ''}`;
   const isLatest = cleanInstalled === cleanLatest;
@@ -62,13 +56,7 @@ export const VersionComparisonCards: React.FC<VersionComparisonCardsProps> = ({
                   Installed Version
                 </Typography>
               </Box>
-              <Chip
-                size="small"
-                label={cleanInstalled}
-                variant="outlined"
-                color={isLatest ? 'success' : 'default'}
-                sx={{ fontWeight: 700, fontSize: '0.75rem', height: 22 }}
-              />
+              <Chip size="small" label={cleanInstalled} variant="outlined" color={isLatest ? 'success' : 'default'} sx={{ fontWeight: 700, fontSize: '0.75rem', height: 22 }} />
             </Box>
 
             <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>
@@ -109,12 +97,7 @@ export const VersionComparisonCards: React.FC<VersionComparisonCardsProps> = ({
                   Latest Available
                 </Typography>
               </Box>
-              <Chip
-                size="small"
-                label={cleanLatest}
-                color={isLatest ? 'success' : 'primary'}
-                sx={{ fontWeight: 700, fontSize: '0.75rem', height: 22 }}
-              />
+              <Chip size="small" label={cleanLatest} color={isLatest ? 'success' : 'primary'} sx={{ fontWeight: 700, fontSize: '0.75rem', height: 22 }} />
             </Box>
 
             <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>

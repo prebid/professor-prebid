@@ -1,4 +1,4 @@
-import React, {  useState, useCallback, useEffect} from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import { replaceLastToken } from '../autocomplete/utils';

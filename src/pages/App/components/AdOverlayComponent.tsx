@@ -67,7 +67,9 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
   return (
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
-        {!onOpenPopover && <PopOverComponent elementId={elementId} winningCPM={winningCPM} winningBidder={winningBidder} currency={currency} timeToRespond={timeToRespond} closePortal={closePortal} open={isOpen} onClose={() => setIsOpen(false)} pbjsNameSpace={pbjsNameSpace} />}
+        {!onOpenPopover && (
+          <PopOverComponent elementId={elementId} winningCPM={winningCPM} winningBidder={winningBidder} currency={currency} timeToRespond={timeToRespond} closePortal={closePortal} open={isOpen} onClose={() => setIsOpen(false)} pbjsNameSpace={pbjsNameSpace} />
+        )}
         <style>{`
           :host {
             margin: 0;

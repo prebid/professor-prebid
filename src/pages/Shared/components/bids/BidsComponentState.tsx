@@ -2,7 +2,6 @@ import { useState, useContext, useMemo, useCallback } from 'react';
 import AppStateContext from '../../contexts/appStateContext';
 import { createQueryEngine, distinct, getSortValue, getWidthXHeightStringFromBid, NUMERIC_FIELD_KEYS } from '../autocomplete/utils';
 
-
 export const BID_FIELD_MAP = {
   bidder: (b: any) => b?.bidder,
   currency: (b: any) => b?.currency,

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { verdictLabel, formatMs,  VERDICT_COLOR, VERDICT_HELP, ATTRIBUTION_LABEL, ATTRIBUTION_HELP } from './labels';
+import { verdictLabel, formatMs, VERDICT_COLOR, VERDICT_HELP, ATTRIBUTION_LABEL, ATTRIBUTION_HELP } from './labels';
 
 describe('preAuction labels', () => {
   it('formats verdict labels with and without provider type', () => {

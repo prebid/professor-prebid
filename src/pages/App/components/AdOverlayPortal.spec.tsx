@@ -48,7 +48,7 @@ describe('AdOverlayPortal', () => {
 
       // ShadowRoot should be created
       expect(maskElement?.shadowRoot).not.toBeNull();
-      
+
       const component = maskElement?.shadowRoot?.querySelector('[data-testid="mock-ad-overlay-component"]');
       expect(component).not.toBeNull();
     });

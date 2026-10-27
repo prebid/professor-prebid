@@ -17,7 +17,13 @@ const MODULES = path.resolve(process.cwd(), 'node_modules/prebid.js/modules');
 /** ortb2 structure rather than a vendor namespace. */
 const STRUCTURAL = new Set(['ext', 'data', 'user', 'site', 'device', 'app', 'imp', 'id', 'name', 'segment', 'keywords', 'content', 'ortb2', 'global', 'bidder']);
 
-const readSafe = (f) => { try { return fs.readFileSync(f, 'utf8'); } catch { return ''; } };
+const readSafe = (f) => {
+  try {
+    return fs.readFileSync(f, 'utf8');
+  } catch {
+    return '';
+  }
+};
 
 /** Modules that load an external script from a hardcoded url. */
 const payloadUrls = () => {

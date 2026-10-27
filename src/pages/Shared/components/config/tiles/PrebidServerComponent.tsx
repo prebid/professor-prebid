@@ -32,21 +32,10 @@ const RenderPrebidServerComponent = ({ s2sConfig, index }: RenderPrebidServerCom
   const biddersList: string[] = Array.isArray(bidders) ? bidders : bidders ? [String(bidders)] : [];
   const otherEntries = Object.entries(otherProps).filter(([, val]) => val !== undefined && val !== null);
 
-  const subtitle = accountId
-    ? `Account: ${accountId}`
-    : endpoint
-    ? `Endpoint: ${typeof endpoint === 'string' ? endpoint.replace(/^https?:\/\//, '') : 'Configured'}`
-    : 'Server Config';
+  const subtitle = accountId ? `Account: ${accountId}` : endpoint ? `Endpoint: ${typeof endpoint === 'string' ? endpoint.replace(/^https?:\/\//, '') : 'Configured'}` : 'Server Config';
 
   return (
-    <ExpandableTile
-      icon={<DnsIcon />}
-      title={index !== undefined ? `Prebid Server #${index + 1}` : 'Prebid Server'}
-      subtitle={subtitle}
-      defaultMaxWidth={4}
-      expandedMaxWidth={8}
-      headerAction={jsonToggleAction}
-    >
+    <ExpandableTile icon={<DnsIcon />} title={index !== undefined ? `Prebid Server #${index + 1}` : 'Prebid Server'} subtitle={subtitle} defaultMaxWidth={4} expandedMaxWidth={8} headerAction={jsonToggleAction}>
       {showJson ? (
         <Grid size={{ xs: 12 }}>
           <JSONViewerComponent src={s2sConfig} name="" collapsed={1} />
@@ -57,57 +46,12 @@ const RenderPrebidServerComponent = ({ s2sConfig, index }: RenderPrebidServerCom
             Connection & Account
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.25 }}>
-            {accountId && (
-              <Chip
-                label={`Account ID: ${accountId}`}
-                size="small"
-                color="primary"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
-              />
-            )}
-            {endpoint && (
-              <Chip
-                label={`Endpoint: ${typeof endpoint === 'string' ? endpoint : JSON.stringify(endpoint)}`}
-                size="small"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500, maxWidth: '100%' }}
-              />
-            )}
-            {timeout !== undefined && (
-              <Chip
-                label={`Timeout: ${timeout}ms`}
-                size="small"
-                color="info"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }}
-              />
-            )}
-            {adapter && (
-              <Chip
-                label={`Adapter: ${adapter}`}
-                size="small"
-                color="secondary"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }}
-              />
-            )}
-            {defaultVendor && (
-              <Chip
-                label={`Vendor: ${defaultVendor}`}
-                size="small"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }}
-              />
-            )}
-            {syncUrl && (
-              <Chip
-                label={`Sync URL: ${typeof syncUrl === 'string' ? syncUrl : 'Custom'}`}
-                size="small"
-                variant="outlined"
-                sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }}
-              />
-            )}
+            {accountId && <Chip label={`Account ID: ${accountId}`} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />}
+            {endpoint && <Chip label={`Endpoint: ${typeof endpoint === 'string' ? endpoint : JSON.stringify(endpoint)}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500, maxWidth: '100%' }} />}
+            {timeout !== undefined && <Chip label={`Timeout: ${timeout}ms`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+            {adapter && <Chip label={`Adapter: ${adapter}`} size="small" color="secondary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+            {defaultVendor && <Chip label={`Vendor: ${defaultVendor}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+            {syncUrl && <Chip label={`Sync URL: ${typeof syncUrl === 'string' ? syncUrl : 'Custom'}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
           </Box>
 
           {biddersList.length > 0 && (
@@ -117,14 +61,7 @@ const RenderPrebidServerComponent = ({ s2sConfig, index }: RenderPrebidServerCom
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {biddersList.map((bidder) => (
-                  <Chip
-                    key={bidder}
-                    label={bidder}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }}
-                  />
+                  <Chip key={bidder} label={bidder} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
                 ))}
               </Box>
             </Box>
@@ -137,13 +74,7 @@ const RenderPrebidServerComponent = ({ s2sConfig, index }: RenderPrebidServerCom
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {otherEntries.map(([key, val]) => (
-                  <Chip
-                    key={key}
-                    label={`${key}: ${typeof val === 'object' ? JSON.stringify(val) : String(val)}`}
-                    size="small"
-                    variant="outlined"
-                    sx={{ height: 22, fontSize: '0.7rem' }}
-                  />
+                  <Chip key={key} label={`${key}: ${typeof val === 'object' ? JSON.stringify(val) : String(val)}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
                 ))}
               </Box>
             </Box>
@@ -162,13 +93,7 @@ const PrebidServerComponent = (): JSX.Element | null => {
   return (
     <>
       {Array.isArray(s2sConfig) ? (
-        s2sConfig.map((config, i) => (
-          <RenderPrebidServerComponent
-            s2sConfig={config}
-            index={s2sConfig.length > 1 ? i : undefined}
-            key={(config as any).accountId || (config as any).endpoint || i}
-          />
-        ))
+        s2sConfig.map((config, i) => <RenderPrebidServerComponent s2sConfig={config} index={s2sConfig.length > 1 ? i : undefined} key={(config as any).accountId || (config as any).endpoint || i} />)
       ) : (
         <RenderPrebidServerComponent s2sConfig={s2sConfig as any} />
       )}

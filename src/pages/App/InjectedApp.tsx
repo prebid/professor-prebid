@@ -298,16 +298,7 @@ const InjectedApp = (): JSX.Element => {
   return (
     <React.Fragment>
       {masks.map((mask) => {
-        return (
-          <AdOverlayPortal
-            key={mask.elementId}
-            mask={mask}
-            consoleState={consoleState}
-            container={undefined as any}
-            pbjsNameSpace={pbjsNameSpace}
-            onOpenPopover={() => setActiveModalUnit(mask)}
-          />
-        );
+        return <AdOverlayPortal key={mask.elementId} mask={mask} consoleState={consoleState} container={undefined as any} pbjsNameSpace={pbjsNameSpace} onOpenPopover={() => setActiveModalUnit(mask)} />;
       })}
       {activeModalUnit && (
         <PopOverComponent

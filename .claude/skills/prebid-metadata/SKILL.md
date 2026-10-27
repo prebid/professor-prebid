@@ -9,10 +9,10 @@ Three generated maps let the Pre-Auction tab attribute data to the module that p
 written by scripts in `utils/prebidMetadata/`, all read `node_modules/prebid.js`, and none of them
 throws when prebid moves — a lost entry just downgrades a finding to a shrug.
 
-| Map | Answers |
-|---|---|
-| `eidSources.ts` | which EID sources an identity module emits |
-| `providerHosts.ts` | which endpoints a module calls, for attributing network requests |
+| Map                  | Answers                                                            |
+| -------------------- | ------------------------------------------------------------------ |
+| `eidSources.ts`      | which EID sources an identity module emits                         |
+| `providerHosts.ts`   | which endpoints a module calls, for attributing network requests   |
 | `providerSignals.ts` | **where a module writes**, for proving its data reached an auction |
 
 ```sh
@@ -123,15 +123,27 @@ To dump what landed independently of the extension:
 
 ```js
 (() => {
-  const CORE = ['gpid', 'tid', 'ae'], seen = new Set();
-  pbjs.getEvents().filter((e) => e.eventType === 'auctionEnd').forEach((e) =>
-    (e.args.bidderRequests || []).forEach((br) => (br.bids || []).forEach((bid) => {
-      const ext = bid.ortb2Imp?.ext || {};
-      Object.keys(ext).filter((k) => k !== 'data' && !CORE.includes(k)).forEach((k) => seen.add(`ext.${k}`));
-      Object.keys(ext.data || {}).forEach((k) => seen.add(`ext.data.${k}`));
-    })));
+  const CORE = ['gpid', 'tid', 'ae'],
+    seen = new Set();
+  pbjs
+    .getEvents()
+    .filter((e) => e.eventType === 'auctionEnd')
+    .forEach((e) =>
+      (e.args.bidderRequests || []).forEach((br) =>
+        (br.bids || []).forEach((bid) => {
+          const ext = bid.ortb2Imp?.ext || {};
+          Object.keys(ext)
+            .filter((k) => k !== 'data' && !CORE.includes(k))
+            .forEach((k) => seen.add(`ext.${k}`));
+          Object.keys(ext.data || {}).forEach((k) => seen.add(`ext.data.${k}`));
+        })
+      )
+    );
   console.log('observed:', [...seen].sort());
-  console.log('configured rtd:', (pbjs.getConfig('realTimeData')?.dataProviders || []).map((p) => p.name));
+  console.log(
+    'configured rtd:',
+    (pbjs.getConfig('realTimeData')?.dataProviders || []).map((p) => p.name)
+  );
 })();
 ```
 

@@ -17,9 +17,9 @@ config.plugins = (config.plugins || []).concat(
 );
 webpack(config, (err, stats) => {
   if (err) {
-    console.error("Webpack Error:", err.stack || err);
+    console.error('Webpack Error:', err.stack || err);
     if (err.details) {
-      console.error("Webpack Error Details:", err.details);
+      console.error('Webpack Error Details:', err.details);
     }
     process.exit(1);
   }

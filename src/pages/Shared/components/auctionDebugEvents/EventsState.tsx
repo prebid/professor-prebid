@@ -1,7 +1,7 @@
 import { useContext, useDeferredValue, useMemo, useState } from 'react';
 import StateContext from '../../contexts/appStateContext';
 import { IPrebidEvent } from '../../../Injected/prebid';
-import { createQueryEngine} from '../autocomplete/utils';
+import { createQueryEngine } from '../autocomplete/utils';
 
 export const EVENT_FIELD_MAP = {
   eventtype: (e: any) => e?.eventType,

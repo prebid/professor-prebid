@@ -138,16 +138,16 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
     const timeouts: number[] = [];
     const pubads = getParentGamPubAds();
     if (pubads) {
-        gamHandler = (event: any) => {
-          const slotElementId = event?.slot?.getSlotElementId ? event.slot.getSlotElementId() : null;
-          const slotAdUnitPath = event?.slot?.getAdUnitPath ? event.slot.getAdUnitPath() : null;
-          if (slotElementId === mask.elementId || slotAdUnitPath === mask.elementId || mask.elementId.includes(slotElementId) || (slotElementId && slotElementId.includes(mask.elementId))) {
-            timeouts.push(window.setTimeout(attachAndSync, 50));
-            timeouts.push(window.setTimeout(attachAndSync, 300));
-          }
-        };
-        pubads.addEventListener('slotRenderEnded', gamHandler);
-        pubads.addEventListener('slotResponseReceived', gamHandler);
+      gamHandler = (event: any) => {
+        const slotElementId = event?.slot?.getSlotElementId ? event.slot.getSlotElementId() : null;
+        const slotAdUnitPath = event?.slot?.getAdUnitPath ? event.slot.getAdUnitPath() : null;
+        if (slotElementId === mask.elementId || slotAdUnitPath === mask.elementId || mask.elementId.includes(slotElementId) || (slotElementId && slotElementId.includes(mask.elementId))) {
+          timeouts.push(window.setTimeout(attachAndSync, 50));
+          timeouts.push(window.setTimeout(attachAndSync, 300));
+        }
+      };
+      pubads.addEventListener('slotRenderEnded', gamHandler);
+      pubads.addEventListener('slotResponseReceived', gamHandler);
     }
 
     // 3. Periodic safeguard sync

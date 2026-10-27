@@ -53,7 +53,7 @@ export interface SurfaceAuditReport {
   };
 }
 
-export const sanitizeForComparison = function(val: any): any {
+export const sanitizeForComparison = function (val: any): any {
   if (val === null || val === undefined) return val;
   if (typeof val === 'function') return '[Function]';
   if (typeof val !== 'object') return val;
@@ -67,9 +67,9 @@ export const sanitizeForComparison = function(val: any): any {
     clean[k] = sanitizeForComparison(val[k]);
   }
   return clean;
-}
+};
 
-export const reconcilePrebidSurface = function(truth: PrebidGroundTruth, captured: ExtensionCapturedState, targetUrl: string = 'synthetic'): SurfaceAuditReport {
+export const reconcilePrebidSurface = function (truth: PrebidGroundTruth, captured: ExtensionCapturedState, targetUrl: string = 'synthetic'): SurfaceAuditReport {
   const versionPassed = truth.version ? truth.version === captured.version : true;
   const versionResult: DomainAuditResult = {
     domain: 'Version',
@@ -233,12 +233,12 @@ export const reconcilePrebidSurface = function(truth: PrebidGroundTruth, capture
       adUnits: adUnitsResult,
     },
   };
-}
+};
 
 /**
  * Formats a SurfaceAuditReport into a clean Markdown table.
  */
-export const formatAuditReportMarkdown = function(report: SurfaceAuditReport): string {
+export const formatAuditReportMarkdown = function (report: SurfaceAuditReport): string {
   const statusBadge = report.overallPassed ? '✅ **PASS (100% Surface Match)**' : '❌ **FAIL (Discrepancies Found)**';
 
   let md = `# Professor Prebid Data Surface Audit Report\n\n`;
@@ -272,4 +272,4 @@ export const formatAuditReportMarkdown = function(report: SurfaceAuditReport): s
   }
 
   return md;
-}
+};

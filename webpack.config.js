@@ -17,18 +17,7 @@ const alias = {};
 // load the secrets
 const secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
 
-const fileExtensions = [
-  'jpg',
-  'jpeg',
-  'png',
-  'gif',
-  'eot',
-  'otf',
-  'svg',
-  'ttf',
-  'woff',
-  'woff2',
-];
+const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2'];
 
 if (fileSystem.existsSync(secretsPath)) {
   alias['secrets'] = secretsPath;
@@ -81,9 +70,7 @@ const options = {
             loader: require.resolve('ts-loader'),
             options: {
               getCustomTransformers: () => ({
-                before: [isDevelopment && ReactRefreshTypeScript()].filter(
-                  Boolean
-                ),
+                before: [isDevelopment && ReactRefreshTypeScript()].filter(Boolean),
               }),
               transpileOnly: true,
             },
@@ -99,9 +86,7 @@ const options = {
           {
             loader: require.resolve('babel-loader'),
             options: {
-              plugins: [
-                isDevelopment && require.resolve('react-refresh/babel'),
-              ].filter(Boolean),
+              plugins: [isDevelopment && require.resolve('react-refresh/babel')].filter(Boolean),
             },
           },
         ],
@@ -111,9 +96,7 @@ const options = {
   },
   resolve: {
     alias: alias,
-    extensions: fileExtensions
-      .map((extension) => '.' + extension)
-      .concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
+    extensions: fileExtensions.map((extension) => '.' + extension).concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
   },
   plugins: [
     isDevelopment && new ReactRefreshWebpackPlugin(),
@@ -135,33 +118,38 @@ const options = {
             const manifest = JSON.parse(content.toString());
 
             return Buffer.from(
-              JSON.stringify({
-                ...manifest,
-                description: process.env.npm_package_description || packageJson.description,
-                version: process.env.npm_package_version || packageJson.version,
-                action: {
-                  ...manifest.action,
-                  default_icon: 'assets/img/icon-34.png',
+              JSON.stringify(
+                {
+                  ...manifest,
+                  description: process.env.npm_package_description || packageJson.description,
+                  version: process.env.npm_package_version || packageJson.version,
+                  action: {
+                    ...manifest.action,
+                    default_icon: 'assets/img/icon-34.png',
+                  },
+                  icons: {
+                    ...manifest.icons,
+                    128: 'assets/img/icon-128.png',
+                  },
                 },
-                icons: {
-                  ...manifest.icons,
-                  128: 'assets/img/icon-128.png',
-                }
-              }, null, 2)
+                null,
+                2
+              )
             );
-          }
+          },
         },
         {
           from: 'src/assets/img/icon-128.png',
           to: 'assets/img/icon-128.png',
           force: true,
           noErrorOnMissing: false,
-        }, {
+        },
+        {
           from: 'src/assets/img/icon-34.png',
           to: 'assets/img/icon-34.png',
           force: true,
           noErrorOnMissing: false,
-        }
+        },
       ],
     }),
     new HtmlWebpackPlugin({

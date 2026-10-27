@@ -34,14 +34,14 @@ Establish the type-error baseline before the bump (`git stash` → `npx tsc --no
 
 Each of these underpins a feature. Check all of them; report any that moved.
 
-| Assumption | Check | Breaks |
-|---|---|---|
-| RTD awaited only if `waitForIt` **and** `auctionDelay > 0` | `grep -n "waitForIt\|shouldDelayAuction" node_modules/prebid.js/modules/rtdModule/index.ts` | "NOT awaited" verdict |
-| `userSync.auctionDelay` default | `grep -n "auctionDelay:" node_modules/prebid.js/src/userSync.ts` | identity awaited verdict |
-| metric names `requestBids.total` / `.callBids` / `.makeRequests` / `.validate` | `grep -rn "requestBids\." node_modules/prebid.js/src/auction.ts node_modules/prebid.js/src/prebid.ts` | whole waterfall |
-| `Metrics.toJSON()` still flattens, and `getProperties()` still returns `metrics` | `grep -n "toJSON()" .../src/utils/perfMetrics.ts; grep -n "metrics: metrics" .../src/auction.ts` | whole waterfall |
-| RTD enrichment still lands on `bid.ortb2Imp` | `grep -n "ortb2Imp: mergeDeep" node_modules/prebid.js/src/adapterManager.ts` | every ortb2Imp verdict |
-| `deepSetValue` / `mergeDeep` are still how modules write | `grep -c "deepSetValue" node_modules/prebid.js/modules/*RtdProvider.*` | signal extraction |
+| Assumption                                                                       | Check                                                                                                 | Breaks                   |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------ |
+| RTD awaited only if `waitForIt` **and** `auctionDelay > 0`                       | `grep -n "waitForIt\|shouldDelayAuction" node_modules/prebid.js/modules/rtdModule/index.ts`           | "NOT awaited" verdict    |
+| `userSync.auctionDelay` default                                                  | `grep -n "auctionDelay:" node_modules/prebid.js/src/userSync.ts`                                      | identity awaited verdict |
+| metric names `requestBids.total` / `.callBids` / `.makeRequests` / `.validate`   | `grep -rn "requestBids\." node_modules/prebid.js/src/auction.ts node_modules/prebid.js/src/prebid.ts` | whole waterfall          |
+| `Metrics.toJSON()` still flattens, and `getProperties()` still returns `metrics` | `grep -n "toJSON()" .../src/utils/perfMetrics.ts; grep -n "metrics: metrics" .../src/auction.ts`      | whole waterfall          |
+| RTD enrichment still lands on `bid.ortb2Imp`                                     | `grep -n "ortb2Imp: mergeDeep" node_modules/prebid.js/src/adapterManager.ts`                          | every ortb2Imp verdict   |
+| `deepSetValue` / `mergeDeep` are still how modules write                         | `grep -c "deepSetValue" node_modules/prebid.js/modules/*RtdProvider.*`                                | signal extraction        |
 
 Prebid moves files between releases (v10 `src/utils.js` → v11 `src/utils/logging.ts`). If a grep
 finds nothing, the file moved — locate it before concluding the behaviour is gone.

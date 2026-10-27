@@ -51,4 +51,4 @@ export const debounce = function <T extends (...args: any[]) => void>(fn: T, del
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   }) as T;
-}
+};

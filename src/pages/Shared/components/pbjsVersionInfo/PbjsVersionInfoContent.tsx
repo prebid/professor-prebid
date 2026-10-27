@@ -238,10 +238,7 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
 
   const hasReleaseInfo = prebidReleaseInfo && Object.keys(prebidReleaseInfo).length > 0;
   const isLatest =
-    hasReleaseInfo &&
-    (prebidReleaseInfo.latestVersion === prebidReleaseInfo.installedVersion ||
-      `v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion ||
-      prebidReleaseInfo.latestVersion === `v${prebidReleaseInfo.installedVersion}`);
+    hasReleaseInfo && (prebidReleaseInfo.latestVersion === prebidReleaseInfo.installedVersion || `v${prebidReleaseInfo.latestVersion}` === prebidReleaseInfo.installedVersion || prebidReleaseInfo.latestVersion === `v${prebidReleaseInfo.installedVersion}`);
 
   const releasesList = prebidReleaseInfo?.releasesSinceInstalledVersion || [];
 
@@ -331,11 +328,7 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
 
               {releasesList.length > 0 && (
                 <Grid size={{ xs: 12 }}>
-                  <VersionReleaseList
-                    releases={releasesList}
-                    installedVersion={prebidReleaseInfo.installedVersion || prebid?.version || ''}
-                    formatDate={formatDate}
-                  />
+                  <VersionReleaseList releases={releasesList} installedVersion={prebidReleaseInfo.installedVersion || prebid?.version || ''} formatDate={formatDate} />
                 </Grid>
               )}
             </>
@@ -352,34 +345,13 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
                   Stay up to date with the latest Prebid.js documentation, releases, and discussions:
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    href="https://docs.prebid.org"
-                    target="_blank"
-                    rel="noreferrer"
-                    sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}
-                  >
+                  <Button size="small" variant="outlined" href="https://docs.prebid.org" target="_blank" rel="noreferrer" sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
                     Prebid.org Docs
                   </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    href="https://github.com/prebid/Prebid.js/releases"
-                    target="_blank"
-                    rel="noreferrer"
-                    sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}
-                  >
+                  <Button size="small" variant="outlined" href="https://github.com/prebid/Prebid.js/releases" target="_blank" rel="noreferrer" sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
                     GitHub Releases
                   </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    href="https://github.com/prebid/Prebid.js/issues"
-                    target="_blank"
-                    rel="noreferrer"
-                    sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}
-                  >
+                  <Button size="small" variant="outlined" href="https://github.com/prebid/Prebid.js/issues" target="_blank" rel="noreferrer" sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
                     Issue Tracker
                   </Button>
                 </Box>

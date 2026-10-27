@@ -1,4 +1,4 @@
-import {  sendChromeTabsMessage } from '../../Shared/utils';
+import { sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
 
 const safelyConstructURL = (url: string) => {

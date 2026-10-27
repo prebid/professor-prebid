@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classifyRequest, decodeTcfString, auditPrivacy} from './networkClassifier';
+import { classifyRequest, decodeTcfString, auditPrivacy } from './networkClassifier';
 import { IHarLogEntry, toLogEntry } from '../../../Devtools/harLog';
 
 describe('networkClassifier', () => {
