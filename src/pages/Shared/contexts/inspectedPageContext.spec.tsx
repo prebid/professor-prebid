@@ -83,14 +83,19 @@ describe('InspectedPageContextProvider', () => {
     });
 
     await act(async () => {
+      listeners.forEach((listener) => listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://inspected-tab.com' }]) } }, 'session'));
+    });
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://inspected-tab.com'), { timeout: 2000 });
+
+    // Sent last, so any of them would replace the log if the filter let it through.
+    await act(async () => {
       listeners.forEach((listener) => {
         listener({ [preAuctionHarKey(999)]: { newValue: JSON.stringify([{ url: 'https://other-tab.com' }]) } }, 'session');
         listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://wrong-area.com' }]) } }, 'local');
-        listener({ [HAR_KEY]: { newValue: JSON.stringify([{ url: 'https://inspected-tab.com' }]) } }, 'session');
       });
+      await new Promise((resolve) => setTimeout(resolve, 1200)); // past the 1s debounce
     });
-
-    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toContain('https://inspected-tab.com'), { timeout: 2000 });
+    expect(screen.getByTestId('harLog').textContent).toContain('https://inspected-tab.com');
     expect(screen.getByTestId('harLog').textContent).not.toContain('other-tab');
     expect(screen.getByTestId('harLog').textContent).not.toContain('wrong-area');
   });
@@ -186,10 +191,12 @@ describe('InspectedPageContextProvider', () => {
       });
     });
 
-    expect(screen.getByTestId('syncState')).toBeDefined();
+    // The initial log (example.com) is replaced by an empty one rather than kept or crashing.
+    await waitFor(() => expect(screen.getByTestId('harLog').textContent).toBe('[]'), { timeout: 2000 });
   });
 
   it('ignores storage changes for non-local area or unchanged tabInfo values', async () => {
+    const { fetchEvents } = await import('./fetchEvents');
     await act(async () => {
       render(
         <InspectedPageContextProvider>
@@ -232,7 +239,9 @@ describe('InspectedPageContextProvider', () => {
       });
     });
 
-    expect(screen.getByTestId('syncState')).toBeDefined();
+    // Only the initial load fetched events.
+    expect(fetchEvents).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('frames').textContent).toBe(JSON.stringify({ 'top-window': {} }));
   });
 
   it('handles tab_info change where newValue is undefined', async () => {
@@ -258,40 +267,7 @@ describe('InspectedPageContextProvider', () => {
       });
     });
 
-    expect(screen.getByTestId('syncState')).toBeDefined();
-  });
-
-  it('trims downloadingUrls when length exceeds 100', async () => {
-    const { fetchEvents } = await import('./fetchEvents');
-    (fetchEvents as any).mockImplementationOnce((tabInfo, setDownloading, setSyncInfo, downloadingUrls) => {
-      for (let i = 0; i <= 105; i++) {
-        downloadingUrls.push(`https://url-${i}.com`);
-      }
-      return Promise.resolve(tabInfo);
-    });
-
-    await act(async () => {
-      render(
-        <InspectedPageContextProvider>
-          <TestComponent />
-        </InspectedPageContextProvider>
-      );
-    });
-
-    await act(async () => {
-      listeners.forEach((listener) => {
-        listener(
-          {
-            tab_info_123: {
-              oldValue: {},
-              newValue: { 'top-window': { prebids: {} } },
-            },
-          },
-          'local'
-        );
-      });
-    });
-
-    expect(screen.getByTestId('syncState')).toBeDefined();
+    // A removed tab info clears the frames.
+    await waitFor(() => expect(screen.getByTestId('frames').textContent).toBe('{}'));
   });
 });
