@@ -356,6 +356,7 @@ describe('DebuggingModule', () => {
       (global as any).sessionStorage = { getItem: (k: string) => pageSession[k] ?? null, setItem: (k: string, v: string) => (pageSession[k] = v) };
       (global as any).localStorage = { getItem: (k: string) => pageLocal[k] ?? null, setItem: (k: string, v: string) => (pageLocal[k] = v) };
       global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
+      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true }));
 
       renderWithContext();
 
@@ -363,6 +364,38 @@ describe('DebuggingModule', () => {
         expect(screen.getByText('Rule #1')).toBeTruthy();
       });
       expect(JSON.parse(pageSession.__pbjs_debugging__)).toEqual(savedConfig);
+    });
+
+    it('ignores rules left in localStorage while "store rules" is off', async () => {
+      const savedConfig = { enabled: true, intercept: [{ when: { adUnitCode: 'slot-1' }, then: { cpm: 25 } }] };
+      const pageSession: Record<string, string> = {};
+      const pageLocal: Record<string, string> = { __pbjs_debugging__: JSON.stringify(savedConfig) };
+      (global as any).sessionStorage = { getItem: (k: string) => pageSession[k] ?? null, setItem: (k: string, v: string) => (pageSession[k] = v) };
+      (global as any).localStorage = { getItem: (k: string) => pageLocal[k] ?? null, setItem: (k: string, v: string) => (pageLocal[k] = v) };
+      global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
+
+      renderWithContext();
+
+      await waitFor(() => expect(global.chrome.storage.local.get).toHaveBeenCalled());
+      await act(async () => {});
+      expect(pageSession.__pbjs_debugging__).toBeUndefined();
+      expect(screen.queryByText('Rule #1')).toBeNull();
+    });
+
+    it('removes the persisted rules when "store rules" is turned off', async () => {
+      const pageLocal: Record<string, string> = { __pbjs_debugging__: '{"enabled":true,"intercept":[]}' };
+      (global as any).localStorage = { getItem: (k: string) => pageLocal[k] ?? null, removeItem: (k: string) => delete pageLocal[k] };
+      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true }));
+      renderWithContext();
+      global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
+
+      const persistSwitch = screen.getByLabelText(/Persist Rules in Local Storage/i);
+      await waitFor(() => expect((persistSwitch as HTMLInputElement).checked).toBe(true));
+      await act(async () => {
+        fireEvent.click(persistSwitch);
+      });
+
+      expect(pageLocal.__pbjs_debugging__).toBeUndefined();
     });
 
     it('does not rewrite sessionStorage when the rules already come from it', async () => {

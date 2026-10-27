@@ -65,11 +65,14 @@ const DebuggingModuleComponent = (): JSX.Element => {
   const [snackbarMsg, setSnackbarMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    chrome.storage?.local.get(STORE_RULES_TOGGLE, (result) => {
-      const checked = result ? !!result[STORE_RULES_TOGGLE] : false;
-      setStoreRules(checked);
+  const readStoreRulesToggle = () =>
+    new Promise<boolean>((resolve) => {
+      if (!chrome.storage?.local) return resolve(false);
+      chrome.storage.local.get(STORE_RULES_TOGGLE, (result) => resolve(result ? !!result[STORE_RULES_TOGGLE] : false));
     });
+
+  useEffect(() => {
+    readStoreRulesToggle().then(setStoreRules);
   }, []);
 
   // Prebid's debugging module reads its rules from sessionStorage; localStorage is only the persisted copy.
@@ -85,6 +88,18 @@ const DebuggingModuleComponent = (): JSX.Element => {
         } catch (_) {}
       },
       args: [pbjsNamespace || 'pbjs', input, storageName],
+    });
+  };
+
+  const removePersistedRules = async (tabId: number) => {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (namespace: string) => {
+        try {
+          localStorage.removeItem(`__${namespace}_debugging__`);
+        } catch (_) {}
+      },
+      args: [pbjsNamespace || 'pbjs'],
     });
   };
 
@@ -128,12 +143,20 @@ const DebuggingModuleComponent = (): JSX.Element => {
     await writeConfigToStorage(newFormValues);
   };
 
-  const handleStoreRulesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStoreRulesChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     setStoreRules(checked);
     chrome.storage?.local.set({ [STORE_RULES_TOGGLE]: checked }, () => {
       sendChromeTabsMessage(STORE_RULES_TOGGLE, { consoleState: checked });
     });
+    // Drop the persisted copy, or a later session would load the old rules again.
+    if (!checked) {
+      try {
+        await removePersistedRules(await getTabId());
+      } catch (e) {
+        console.warn('Could not remove persisted debugging rules', e);
+      }
+    }
   };
 
   // Export rules to JSON file
@@ -194,7 +217,8 @@ const DebuggingModuleComponent = (): JSX.Element => {
           args: [pbjsNamespace || 'pbjs'],
         });
         let fromLocalStorage = false;
-        if (!first || !first.result) {
+        // The localStorage copy only counts while "store rules" is on.
+        if ((!first || !first.result) && (await readStoreRulesToggle())) {
           [first] = await chrome.scripting.executeScript({
             target: { tabId },
             func: (namespace: string) => (typeof localStorage !== 'undefined' ? localStorage.getItem(`__${namespace}_debugging__`) : null),
