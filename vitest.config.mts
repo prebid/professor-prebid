@@ -6,16 +6,6 @@ export default defineConfig({
         environment: 'happy-dom',
         setupFiles: './src/setupTests.ts',
         css: true,
-        testTimeout: 30000,
-        fileParallelism: false,
-        maxWorkers: 1,
-        pool: 'forks',
-        poolOptions: {
-            forks: {
-                maxForks: 1,
-                minForks: 1,
-            },
-        },
         exclude: ['e2e/**', 'node_modules/**'],
         coverage: {
             provider: 'v8',
