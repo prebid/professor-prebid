@@ -26,7 +26,7 @@ const getCurrentTabURL = async (): Promise<URL> => {
   });
 };
 
-export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Dispatch<React.SetStateAction<'true' | 'false' | 'error'>>, setSyncInfo: React.Dispatch<React.SetStateAction<string | null>>, downloadingUrls: string[]) => {
+export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Dispatch<React.SetStateAction<'true' | 'false' | 'error'>>, setSyncInfo: React.Dispatch<React.SetStateAction<string | null>>) => {
   if (!tabInfo) return {};
 
   for (const frameId of Object.keys(tabInfo)) {
@@ -41,17 +41,12 @@ export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Di
       setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
       setDownloading('true');
       try {
-        if (prebid && (downloadingUrls.includes(prebid.eventsUrl) || prebid.eventsUrl in downloadingUrls)) {
-          // skip download if already downloading or from another domain or prebid is undefined
-        } else {
-          setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);
-          const response = await fetch(prebid.eventsUrl);
-          setSyncInfo(`${namespace}: get JSON from response stream`);
-          prebid.events = prebid.events || [];
-          prebid.events = await response.json();
-          setDownloading('false');
-          setSyncInfo(null);
-        }
+        setSyncInfo(`${namespace}: downloading ${prebid.eventsUrl}`);
+        const response = await fetch(prebid.eventsUrl);
+        setSyncInfo(`${namespace}: get JSON from response stream`);
+        prebid.events = await response.json();
+        setDownloading('false');
+        setSyncInfo(null);
       } catch (error) {
         sendChromeTabsMessage(DOWNLOAD_FAILED, { eventsUrl: prebid.eventsUrl });
         setSyncInfo(`${namespace}: error during download of ${prebid.eventsUrl}`);

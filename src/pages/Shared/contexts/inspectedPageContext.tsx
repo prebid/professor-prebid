@@ -14,7 +14,6 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const [frames, setFrames] = useState<{ [key: string]: IFrameInfo }>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
   const [syncInfo, setSyncInfo] = useState<string>('');
-  const [downloadingUrls, setDownloadingUrls] = useState<string[]>([]);
 
   const [harLogData, setHarLogData] = useState<IHarEntry[]>([]);
   const harLog = useDebounce(harLogData, 1000);
@@ -25,7 +24,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
       chrome.storage.local.get([key], async (res) => {
         const tabInfo = res[key];
         if (tabInfo) {
-          const tabInfoWithEvents = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+          const tabInfoWithEvents = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
           setFrames(tabInfoWithEvents);
         }
       });
@@ -40,7 +39,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
           const key = `tab_info_${tabId}`;
           if (changes[key]) {
             if (JSON.stringify(changes[key].newValue) !== JSON.stringify(changes[key].oldValue)) {
-              fetchEvents(changes[key].newValue || {}, setDownloading, setSyncInfo, downloadingUrls).then(setFrames);
+              fetchEvents(changes[key].newValue || {}, setDownloading, setSyncInfo).then(setFrames);
             }
           }
         });
@@ -48,16 +47,11 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     };
     chrome.storage.onChanged.addListener(handler);
 
-    // keep only the last 100 urls
-    if (downloadingUrls.length > 100) {
-      setDownloadingUrls(downloadingUrls.slice(1));
-    }
-
     // Unsubscribe when component unmounts
     return () => {
       chrome.storage.onChanged.removeListener(handler);
     };
-  }, [downloadingUrls]);
+  }, []);
 
   useEffect(() => {
     const read = (raw: string) => {

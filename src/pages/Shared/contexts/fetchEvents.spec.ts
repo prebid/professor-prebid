@@ -25,15 +25,15 @@ describe('fetchEvents', () => {
   });
 
   it('returns empty object when tabInfo is null or undefined', async () => {
-    expect(await fetchEvents(null as any, setDownloading, setSyncInfo, [])).toEqual({});
-    expect(await fetchEvents(undefined as any, setDownloading, setSyncInfo, [])).toEqual({});
+    expect(await fetchEvents(null as any, setDownloading, setSyncInfo)).toEqual({});
+    expect(await fetchEvents(undefined as any, setDownloading, setSyncInfo)).toEqual({});
   });
 
   it('skips frame if frame has no prebids', async () => {
     const tabInfo: any = {
       'top-window': {},
     };
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(result).toEqual({ 'top-window': {} });
     expect(setDownloading).not.toHaveBeenCalled();
   });
@@ -49,7 +49,7 @@ describe('fetchEvents', () => {
       },
     };
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(global.fetch).not.toHaveBeenCalled();
     expect(result['top-window'].prebids.pbjs).toEqual({ eventsUrl: '', events: [], version: '11.29.0' });
   });
@@ -70,7 +70,7 @@ describe('fetchEvents', () => {
       json: vi.fn().mockResolvedValue(mockEvents),
     });
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(result['top-window'].prebids.pbjs.events).toEqual(mockEvents);
     expect(setDownloading).toHaveBeenCalledWith('true');
     expect(setDownloading).toHaveBeenCalledWith('false');
@@ -93,7 +93,7 @@ describe('fetchEvents', () => {
       json: vi.fn().mockResolvedValue(mockEvents),
     });
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(result['https://sub.example.com/iframe.html'].prebids.pbjs.events).toEqual(mockEvents);
   });
 
@@ -108,27 +108,8 @@ describe('fetchEvents', () => {
       },
     };
 
-    await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(setDownloading).not.toHaveBeenCalled();
-  });
-
-  it('skips download if url is already in downloadingUrls array', async () => {
-    const eventsUrl = 'https://example.com/events.json';
-    const tabInfo: any = {
-      'top-window': {
-        prebids: {
-          pbjs: {
-            eventsUrl,
-          },
-        },
-      },
-    };
-
-    const downloadingUrls: any = [eventsUrl];
-    downloadingUrls[eventsUrl] = true;
-
-    await fetchEvents(tabInfo, setDownloading, setSyncInfo, downloadingUrls);
-    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('handles download failure gracefully and removes frame when no prebids remain', async () => {
@@ -144,7 +125,7 @@ describe('fetchEvents', () => {
 
     global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(sendChromeTabsMessage).toHaveBeenCalledWith(DOWNLOAD_FAILED, { eventsUrl: 'https://example.com/events.json' });
     expect(setDownloading).toHaveBeenCalledWith('error');
     expect(result['top-window']).toBeUndefined();
@@ -166,7 +147,7 @@ describe('fetchEvents', () => {
 
     global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(result['top-window']).toBeDefined();
     expect(result['top-window'].prebids.failingPbjs).toBeUndefined();
     expect(result['top-window'].prebids.workingPbjs).toBeDefined();
@@ -194,7 +175,7 @@ describe('fetchEvents', () => {
 
     global.fetch = vi.fn().mockRejectedValue(new Error('Invalid URL'));
 
-    await fetchEvents(tabInfo, setDownloading, setSyncInfo, []);
+    await fetchEvents(tabInfo, setDownloading, setSyncInfo);
     expect(setDownloading).toHaveBeenCalledWith('true');
     expect(setDownloading).toHaveBeenCalledWith('error');
   });
