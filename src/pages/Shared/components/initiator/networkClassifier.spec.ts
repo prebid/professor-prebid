@@ -114,6 +114,20 @@ describe('networkClassifier', () => {
       expect(audit.verdict).toBe('warning');
       expect(audit.verdictReason).toContain('could not be parsed');
     });
+
+    it('still flags a malformed consent string when the page has a CMP', () => {
+      const cmp = 'CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA';
+      const audit = auditPrivacy({ gdpr: '1', gdpr_consent: 'CiQwMTlmZGMxMi0wNjY5LTcxNDEtOWU1Ny02ZWY5M2M3MzVjZDYQBBocCTkEgPA' }, {}, undefined, undefined, cmp);
+      expect(audit.verdict).toBe('warning');
+    });
+
+    it('uses the CMP decode when the request carries a segment of the CMP string', () => {
+      const core = 'CPXxRfAPXxRfAAfKABENB-CgAAAAAAAAAAYgAAAAAAAA';
+      const segment = 'IFoEUQQgAIQwgIwQABAEAAAAOIAACAIAAAAQAIAgEAACEAAAAAgAQBAAAAAAAGBAAgAAAAAAAFAAECAAAgAAQARAEQAAAAAJAAIAAgAAAYQEAAAQmAgBC3ZAYzUw';
+      const audit = auditPrivacy({ gdpr: '1', gdprstring: segment }, {}, undefined, undefined, `${core}.${segment}`);
+      expect(audit.gdprConsent).toBe(segment);
+      expect(audit.verdict).toBe('valid');
+    });
   });
 
   describe('classifyRequest', () => {

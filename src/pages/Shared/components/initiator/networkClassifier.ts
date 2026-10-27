@@ -301,8 +301,9 @@ export const auditPrivacy = (queryParams: { [key: string]: string }, requestHead
     if (fullTarget.includes(cmpConsentString) || (cmpCore.length > 15 && fullTarget.includes(cmpCore))) {
       if (!gdprConsent) gdprConsent = cmpConsentString;
       if (!decodedTcf) decodedTcf = decodeTcfString(cmpConsentString) || decodeTcfString(cmpCore);
-    } else if (gdprConsent && !decodedTcf) {
-      // If request has a consent param (e.g. Criteo vendor segment gdprString) and CMP is known, use CMP decode
+    } else if (gdprConsent && !decodedTcf && cmpConsentString.includes(gdprConsent)) {
+      // The request carries only a segment of the CMP string (e.g. Criteo's vendor segment gdprString): use the CMP decode.
+      // A different string that does not decode stays unparsed, so the audit still flags it.
       decodedTcf = decodeTcfString(cmpConsentString);
     }
   }
