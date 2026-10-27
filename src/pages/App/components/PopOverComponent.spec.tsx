@@ -107,6 +107,20 @@ describe('PopOverComponent', () => {
     expect(screen.queryByText('Ad Creative Banner')).toBeNull();
   });
 
+  it('shows the Prebid data stored under the GAM path for a popover keyed by the slot div id', () => {
+    const path = '/12345,67890/homepage';
+    (window as any).pbjs = {
+      ...mockPbjs,
+      getBidResponsesForAdUnitCode: vi.fn((code: string) => ({ bids: code === path ? [{ bidder: 'appnexus', cpm: 2.5 }] : [] })),
+      getAllWinningBids: vi.fn().mockReturnValue([{ adUnitCode: path, bidder: 'appnexus', cpm: 2.5, ad: '<div>Path Creative</div>' }]),
+      adUnits: [{ code: path, mediaTypes: { banner: { sizes: [[300, 250]] } } }],
+    };
+    render(<PopOverComponent {...defaultProps} />);
+
+    expect((window as any).pbjs.getBidResponsesForAdUnitCode).toHaveBeenCalledWith(path);
+    expect(screen.getByTestId('creative-preview-frame').getAttribute('srcdoc')).toBe('<div>Path Creative</div>');
+  });
+
   it('does not render content when isOpen is false', () => {
     render(<PopOverComponent {...defaultProps} open={false} />);
     expect(screen.queryByText('div-gpt-ad-1234567-0')).toBeNull();

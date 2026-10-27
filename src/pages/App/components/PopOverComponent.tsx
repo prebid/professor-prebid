@@ -22,6 +22,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ThemeProvider } from '@mui/material';
 import { theme } from '../../../theme/theme';
 import { getSlotTargeting } from '../../Shared/gptTargeting';
+import { equivalentAdUnitCodes } from '../InjectedApp';
 
 
 const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
@@ -145,11 +146,12 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
 
   useEffect(() => {
     if (!pbjs || !pbjs.getBidResponsesForAdUnitCode) return;
-    const bidResponses = pbjs.getBidResponsesForAdUnitCode?.(elementId);
-    const bids = [...(bidResponses?.bids || [])].sort((a: any, b: any) => b.cpm - a.cpm);
+    // The mask may be keyed by the slot's div id while Prebid uses its GAM path (or the reverse), as for the overlay's CPM.
+    const codes = Array.from(equivalentAdUnitCodes(elementId));
+    const bids = codes.flatMap((code) => pbjs.getBidResponsesForAdUnitCode?.(code)?.bids || []).sort((a: any, b: any) => b.cpm - a.cpm);
     const allWinningBids = pbjs.getAllWinningBids?.() || [];
-    const { 0: winningBid } = allWinningBids.filter(({ adUnitCode }) => adUnitCode === elementId);
-    setAdunit(pbjs.adUnits?.find((el) => el.code === elementId) || null);
+    const { 0: winningBid } = allWinningBids.filter(({ adUnitCode }) => codes.includes(adUnitCode));
+    setAdunit(pbjs.adUnits?.find((el) => codes.includes(el.code)) || null);
     setBidsSorted(bids);
     setWinningBid(winningBid || null);
   }, [elementId, pbjs]);
