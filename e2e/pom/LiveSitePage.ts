@@ -39,21 +39,36 @@ export class LiveSitePage {
       .catch(() => false);
   }
 
-  /** Whether Prebid.js finished an auction on the page within `timeoutMs`. */
-  async waitForAuctionEnd(timeoutMs = 30000): Promise<boolean> {
+  /** Whether Prebid.js emitted `eventType` on the page within `timeoutMs`. */
+  async waitForPrebidEvent(eventType: string, timeoutMs = 30000): Promise<boolean> {
     return this.page
       .waitForFunction(
-        () => {
+        (type) => {
           const win = window as any;
           const pbjs = win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]);
           const events: any[] = typeof pbjs?.getEvents === 'function' ? pbjs.getEvents() : [];
-          return events.some((event) => event?.eventType === 'auctionEnd');
+          return events.some((event) => event?.eventType === type);
         },
-        null,
+        eventType,
         { timeout: timeoutMs, polling: 500 }
       )
       .then(() => true)
       .catch(() => false);
+  }
+
+  /** Whether Prebid.js finished an auction on the page within `timeoutMs`. */
+  async waitForAuctionEnd(timeoutMs = 30000): Promise<boolean> {
+    return this.waitForPrebidEvent('auctionEnd', timeoutMs);
+  }
+
+  /** How many events of `eventType` are in Prebid's own event log. */
+  async countPrebidEvents(eventType: string): Promise<number> {
+    return this.page.evaluate((type) => {
+      const win = window as any;
+      const pbjs = win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]);
+      const events: any[] = typeof pbjs?.getEvents === 'function' ? pbjs.getEvents() : [];
+      return events.filter((event) => event?.eventType === type).length;
+    }, eventType);
   }
 
   /** The bridge's snapshot, or null when the bridge is not on the page. */
