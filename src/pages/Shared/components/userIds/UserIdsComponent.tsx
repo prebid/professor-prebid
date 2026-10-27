@@ -25,7 +25,7 @@ const UserIdsComponent = (): JSX.Element => {
 
   const options = useMemo(() => {
     const setOptions = new Set<string>();
-    ['source:', 'id:', 'name:'].forEach((k) => setOptions.add(k));
+    ['source:', 'id:', 'name:', 'storage:'].forEach((k) => setOptions.add(k));
     (prebid?.eids || []).forEach((e: any) => {
       if (e?.source) setOptions.add(`source:${e.source}`);
       (e?.uids || []).forEach((u: any) => {
@@ -34,7 +34,8 @@ const UserIdsComponent = (): JSX.Element => {
     });
     ((prebid?.config?.userSync as any)?.userIds || []).forEach((m: any) => {
       if (m?.name) setOptions.add(`name:${m.name}`);
-      if (m?.storage?.name) setOptions.add(`name:${m.storage.name}`);
+      // The Modules tab matches storage names under `storage:`, not `name:` (USER_ID_MODULE_FIELD_MAP).
+      if (m?.storage?.name) setOptions.add(`storage:${m.storage.name}`);
     });
     return Array.from(setOptions).sort();
   }, [prebid]);
@@ -85,7 +86,7 @@ const UserIdsComponent = (): JSX.Element => {
       </GridCell>
 
       <Grid size={{ xs: 7 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-        <AutoComplete query={query} onQueryChange={setQuery} options={options} fieldKeys={['source', 'id', 'name']} placeholder="Filter by source, ID or module name..." />
+        <AutoComplete query={query} onQueryChange={setQuery} options={options} fieldKeys={['source', 'id', 'name', 'storage']} placeholder="Filter by source, ID or module name..." />
       </Grid>
 
       <GridCell cols={1} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', border: 0 }}>

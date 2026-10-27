@@ -57,6 +57,23 @@ describe('UserIdsComponent', () => {
     expect(screen.getByText('criteo.com')).toBeTruthy();
   });
 
+  it('suggests storage names under storage:, which keeps the module in the Modules tab', async () => {
+    render(
+      <AppStateContext.Provider value={mockContext}>
+        <UserIdsComponent />
+      </AppStateContext.Provider>
+    );
+    fireEvent.click(screen.getByText('Modules: 1'));
+
+    const input = screen.getByPlaceholderText('Filter by source, ID or module name...');
+    fireEvent.change(input, { target: { value: 'storage:c' } });
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.click(await screen.findByRole('option', { name: 'ct' }));
+
+    expect((input as HTMLInputElement).value).toBe('storage:ct');
+    expect(screen.getByText('criteo')).toBeTruthy();
+  });
+
   it('handles empty prebid and config gracefully', () => {
     render(
       <AppStateContext.Provider value={{ prebid: {} }}>
