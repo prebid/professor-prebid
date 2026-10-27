@@ -135,7 +135,7 @@ describe('InjectedApp Component', () => {
     expect(screen.getByTestId('overlay-portal-div-gpt-ad-12').textContent).toContain('Bidder: appnexus');
   });
 
-  it('shows a bid placed under the GAM ad unit path on the GAM slot overlay', () => {
+  it('draws one overlay, under the Prebid code, for a slot whose Prebid code is its GAM ad unit path', () => {
     const div = document.createElement('div');
     div.id = 'div-gpt-top';
     document.body.appendChild(div);
@@ -154,7 +154,8 @@ describe('InjectedApp Component', () => {
         document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: 'pbjs' }));
       });
 
-      expect(screen.getByTestId('overlay-portal-div-gpt-top').textContent).toContain('Bidder: ix');
+      expect(screen.getAllByTestId(/^overlay-portal-/)).toHaveLength(1);
+      expect(screen.getByTestId('overlay-portal-/1234/site/top').textContent).toContain('Bidder: ix');
     } finally {
       delete (window as any).googletag;
     }

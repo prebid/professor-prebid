@@ -205,10 +205,15 @@ const InjectedApp = (): JSX.Element => {
     }
 
     const allAdunitCodes = Array.from(adUnitCodesSet);
+    // One mask per container: a Prebid code that is a GAM path and the slot's div id (step 5) resolve to the same element.
+    // Prebid codes are added first, so they win over the div id.
+    const maskedContainers = new Set<HTMLElement>();
     const masks = allAdunitCodes
       .filter((adUnitCode) => {
         const container = findAdContainer(adUnitCode);
-        return isContainerVisible(container);
+        if (!isContainerVisible(container) || maskedContainers.has(container)) return false;
+        maskedContainers.add(container);
+        return true;
       })
       .map((adUnitCode) => {
         const codes = equivalentAdUnitCodes(adUnitCode);
