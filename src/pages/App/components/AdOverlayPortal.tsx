@@ -47,7 +47,8 @@ const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, m
     const expectedId = `prpb-mask--container-${mask.elementId}`;
     element.current.id = expectedId;
 
-    const existingElements = document.querySelectorAll(`[id="${expectedId}"]`);
+    // Compared in JS rather than via [id="..."] so ad unit codes with quotes or backslashes cannot break the selector.
+    const existingElements = Array.from(document.querySelectorAll('[id^="prpb-mask--container-"]')).filter((el) => el.id === expectedId);
     existingElements.forEach((el) => {
       if (el !== element.current && el.parentNode) {
         el.parentNode.removeChild(el);

@@ -116,6 +116,19 @@ describe('AdOverlayPortal', () => {
       }
     });
 
+    it('handles ad unit codes with quotes and backslashes, replacing a stale mask with the same id', () => {
+      const code = 'slot"top\\1';
+      const stale = document.createElement('div');
+      stale.id = `prpb-mask--container-${code}`;
+      container.appendChild(stale);
+
+      expect(() => render(<AdOverlayPortal container={container} mask={{ ...mockMask, elementId: code }} consoleState={true} pbjsNameSpace="pbjs" />)).not.toThrow();
+
+      const masks = Array.from(document.querySelectorAll('[id^="prpb-mask--container-"]')).filter((el) => el.id === `prpb-mask--container-${code}`);
+      expect(masks).toHaveLength(1);
+      expect(masks[0]).not.toBe(stale);
+    });
+
     it('attaches to parentElement when container prop is an IFRAME', () => {
       const iframe = document.createElement('iframe');
       container.appendChild(iframe);
