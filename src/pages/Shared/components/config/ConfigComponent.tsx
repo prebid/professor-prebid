@@ -63,13 +63,15 @@ const ConfigComponent = (): JSX.Element => {
     const colonIndex = q.indexOf(':');
     const targetKey = colonIndex >= 0 ? q.slice(0, colonIndex).trim() : '';
     const targetVal = colonIndex >= 0 ? q.slice(colonIndex + 1).trim() : '';
+    // Only `key:value` when the part before the colon names a config key: values such as URLs contain colons too.
+    const isKeyValue = colonIndex >= 0 && Object.keys(fullConfig).some((key) => key.toLowerCase().includes(targetKey));
 
     Object.keys(fullConfig).forEach((key) => {
       const lowerKey = key.toLowerCase();
       const val = fullConfig[key];
       const valStr = typeof val === 'object' ? JSON.stringify(val).toLowerCase() : String(val).toLowerCase();
 
-      if (colonIndex >= 0) {
+      if (isKeyValue) {
         const keyMatch = lowerKey.includes(targetKey);
         if (keyMatch && (!targetVal || valStr.includes(targetVal))) {
           result[key] = val;

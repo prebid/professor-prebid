@@ -74,6 +74,23 @@ describe('ConfigComponent & ExpandableTile', () => {
     expect(screen.getByText('No matching configuration parameters')).toBeTruthy();
   });
 
+  it('finds a config value that contains a colon, such as a URL', () => {
+    const mockContext: any = { prebid: { config: { bidderTimeout: 3000, s2sConfig: { endpoint: 'https://prebid-server.example.com/openrtb2/auction' } } } };
+    render(
+      <AppStateContext.Provider value={mockContext}>
+        <ConfigComponent />
+      </AppStateContext.Provider>
+    );
+    const input = screen.getByPlaceholderText('Filter config...');
+
+    fireEvent.change(input, { target: { value: 'https://prebid-server.example.com' } });
+    expect(screen.queryByText('No matching configuration parameters')).toBeNull();
+    expect(screen.getByText(/s2sConfig/)).toBeTruthy();
+
+    fireEvent.change(input, { target: { value: 'bidderTimeout:9999' } });
+    expect(screen.getByText('No matching configuration parameters')).toBeTruthy();
+  });
+
   it('triggers download config JSON button click', () => {
     const mockContext: any = {
       prebid: {
