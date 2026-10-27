@@ -118,6 +118,19 @@ describe('autocomplete/utils', () => {
       expect(engine.runQuery('cpm=invalid')({ name: 'a', cpm: 1.5 })).toBe(false);
     });
 
+    it('does not match rows with no numeric value against a numeric filter', () => {
+      const noCpm = { name: 'a' } as any;
+      expect(engine.runQuery('cpm<1')(noCpm)).toBe(false);
+      expect(engine.runQuery('cpm=0')(noCpm)).toBe(false);
+      expect(engine.runQuery('cpm<1')({ name: 'a', cpm: 'n/a' } as any)).toBe(false);
+      expect(engine.runQuery('cpm=0')({ name: 'a', cpm: 0 })).toBe(true);
+    });
+
+    it('matches nothing when the numeric filter value has no digits', () => {
+      expect(engine.runQuery('cpm=abc')({ name: 'a', cpm: 0 })).toBe(false);
+      expect(engine.runQuery('cpm<abc')({ name: 'a', cpm: -1 })).toBe(false);
+    });
+
     it('supports string comparison operators', () => {
       expect(engine.runQuery('name:app')({ name: 'appnexus', cpm: 1 })).toBe(true);
       expect(engine.runQuery('name~=app')({ name: 'appnexus', cpm: 1 })).toBe(true);

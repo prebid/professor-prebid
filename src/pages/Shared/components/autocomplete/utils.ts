@@ -74,6 +74,8 @@ const normalize = (v: unknown): string => (v == null ? '' : String(v)).toLowerCa
 const parseNumber = (raw: string): number => {
   const normalized = raw.includes(',') && !raw.includes('.') ? raw.replace(',', '.') : raw;
   const cleaned = normalized.replace(/[^0-9.-]/g, '');
+  // Number('') is 0, so text with no digits must be caught before converting.
+  if (!/[0-9]/.test(cleaned)) return Number.NEGATIVE_INFINITY;
   const n = Number(cleaned);
   return Number.isFinite(n) ? n : Number.NEGATIVE_INFINITY; // sentinel for missing/invalid
 };
