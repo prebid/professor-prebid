@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import AdOverlayPortal, { getMaxZIndex } from './AdOverlayPortal';
+import AdOverlayPortal, { OVERLAY_Z_INDEX } from './AdOverlayPortal';
 
 vi.mock('./AdOverlayComponent', () => {
   return {
@@ -32,9 +32,9 @@ describe('AdOverlayPortal', () => {
     document.body.appendChild(container);
   });
 
-  describe('getMaxZIndex', () => {
-    it('returns maximum z-index value', () => {
-      expect(getMaxZIndex()).toBe(999999);
+  describe('OVERLAY_Z_INDEX', () => {
+    it('is the largest z-index browsers accept, so page elements using it cannot cover the overlay', () => {
+      expect(OVERLAY_Z_INDEX).toBe(2147483647);
     });
   });
 
