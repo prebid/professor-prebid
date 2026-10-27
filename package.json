@@ -15,7 +15,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:perf": "playwright test e2e/performance.spec.ts",
+    "test:perf": "playwright test -c playwright.perf.config.ts",
     "audit:surface": "playwright test e2e/specs/09_prebid_surface_audit.spec.ts"
   },
   "dependencies": {
