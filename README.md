@@ -85,14 +85,16 @@ npm run build  # build production extension into ./build
 npm run typecheck    # TypeScript, including the unit and e2e tests
 npm test             # unit and component tests (Vitest)
 npm run build        # the end-to-end tests load the extension from ./build
-npm run test:e2e     # end-to-end tests (Playwright)
+npm run test:e2e     # end-to-end tests against mock pages (Playwright)
+npm run test:e2e:live  # end-to-end tests against live publisher sites
 npm run test:perf    # performance benchmark against live sites, with and without the extension
 ```
 
-The end-to-end suite runs the extension against mock pages and a set of live
-publisher sites (see `e2e/fixtures/liveSitesCatalog.ts`), so it needs network
-access. Set `HEADED=true` to watch the browser. The performance benchmark
-takes over an hour and is not part of `test:e2e`.
+`test:e2e` only uses mock pages, so it gives the same result on every run.
+`test:e2e:live` loads the publisher sites in `e2e/fixtures/liveSitesCatalog.ts`,
+needs network access, and depends on those sites' consent banners and ad
+setups. Set `HEADED=true` to watch the browser. The performance benchmark takes
+over an hour.
 
 ## Contributing
 

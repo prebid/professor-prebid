@@ -1,7 +1,7 @@
-import { test, expect } from '../fixtures/extensionTest';
+import { test, expect, LIVE } from '../fixtures/extensionTest';
 import { LIVE_SITES_CATALOG } from '../fixtures/liveSitesCatalog';
 
-test.describe('08 - Real Sites Multi-Publisher Stress Matrix', () => {
+test.describe('08 - Real Sites Multi-Publisher Stress Matrix', { tag: LIVE }, () => {
   test('starts on every catalog site in turn and keeps the service worker alive', async ({ extension, liveSite }) => {
     test.setTimeout(LIVE_SITES_CATALOG.length * 45000);
 

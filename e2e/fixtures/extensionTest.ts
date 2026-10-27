@@ -35,6 +35,12 @@ export const test = base.extend<{ liveSite: LiveSitePage }, { extension: Extensi
 
 export { expect };
 
+/**
+ * Tag for tests that load real publisher sites. They need network access and depend on those sites' ad setups,
+ * so npm run test:e2e leaves them out; npm run test:e2e:live runs them.
+ */
+export const LIVE = '@live';
+
 /** Prebid's version string, e.g. "v9.53.0" or "11.29.0". */
 export const PREBID_VERSION = /^v?\d+\.\d+/;
 

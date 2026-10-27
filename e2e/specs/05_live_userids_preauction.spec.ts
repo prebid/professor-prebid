@@ -1,6 +1,6 @@
-import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+import { test, expect, liveSiteNamed, LIVE } from '../fixtures/extensionTest';
 
-test.describe('05 - Live User IDs', () => {
+test.describe('05 - Live User IDs', { tag: LIVE }, () => {
   test.describe.configure({ timeout: 90000 });
 
   test('reports the EIDs of the configured user ID modules on a live publisher (eatpicks.com)', async ({ liveSite }) => {

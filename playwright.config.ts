@@ -4,6 +4,8 @@ export default defineConfig({
   testDir: './e2e',
   // The live A/B benchmark takes over an hour; run it on its own with npm run test:perf.
   testIgnore: '**/performance.spec.ts',
+  // Tests against real publisher sites (tagged @live) run with npm run test:e2e:live.
+  grepInvert: /@live/,
   timeout: 60 * 1000,
   expect: {
     timeout: 15000,

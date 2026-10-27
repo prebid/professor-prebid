@@ -1,10 +1,10 @@
-import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+import { test, expect, liveSiteNamed, LIVE } from '../fixtures/extensionTest';
 import { setExtensionStorage } from '../helpers/extensionTestUtils';
 
 // The key the Tools tab's overlay toggle stores (CONSOLE_TOGGLE in src/pages/Shared/constants.ts).
 const CONSOLE_STATE_KEY = 'PP_CONSOLE_STATE';
 
-test.describe('06 - Live Ad Overlays & AI Diagnostic', () => {
+test.describe('06 - Live Ad Overlays & AI Diagnostic', { tag: LIVE }, () => {
   test.describe.configure({ timeout: 90000 });
 
   test('draws ad overlays on the page when overlays are switched on', async ({ extension, liveSite }) => {

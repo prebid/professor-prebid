@@ -1,6 +1,6 @@
-import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+import { test, expect, liveSiteNamed, LIVE } from '../fixtures/extensionTest';
 
-test.describe('04 - Live Timeline & Bidder Latencies', () => {
+test.describe('04 - Live Timeline & Bidder Latencies', { tag: LIVE }, () => {
   test.describe.configure({ timeout: 90000 });
 
   test('reports bidder latencies and their min/max on a live site (eatpicks.com)', async ({ liveSite }) => {

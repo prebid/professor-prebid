@@ -1,6 +1,6 @@
-import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+import { test, expect, liveSiteNamed, LIVE } from '../fixtures/extensionTest';
 
-test.describe('03 - Live Prebid Config & Auction Events Feed', () => {
+test.describe('03 - Live Prebid Config & Auction Events Feed', { tag: LIVE }, () => {
   test.describe.configure({ timeout: 90000 });
 
   test('reads the live Prebid config on a real publisher (eatpicks.com)', async ({ liveSite }) => {

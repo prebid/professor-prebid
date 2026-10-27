@@ -1,7 +1,7 @@
-import { test, expect, liveSiteNamed, PREBID_VERSION } from '../fixtures/extensionTest';
+import { test, expect, liveSiteNamed, PREBID_VERSION, LIVE } from '../fixtures/extensionTest';
 import { waitForDetectedPrebid } from '../helpers/extensionTestUtils';
 
-test.describe('01 - Live Prebid Detection & Extension Lifecycle', () => {
+test.describe('01 - Live Prebid Detection & Extension Lifecycle', { tag: LIVE }, () => {
   test.describe.configure({ timeout: 90000 });
 
   const sites = [

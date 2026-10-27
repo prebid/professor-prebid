@@ -5,6 +5,6 @@
     "target": "es2020",
     "types": ["vitest/globals", "@testing-library/jest-dom", "chrome", "googletag", "node"]
   },
-  "include": ["src", "e2e", "utils/audit", "playwright.config.ts", "playwright.perf.config.ts"],
+  "include": ["src", "e2e", "utils/audit", "playwright.config.ts", "playwright.perf.config.ts", "playwright.live.config.ts"],
   "exclude": ["build", "node_modules", "**/dist"]
 }

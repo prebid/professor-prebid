@@ -1,6 +1,6 @@
-import { test, expect, liveSiteNamed } from '../fixtures/extensionTest';
+import { test, expect, liveSiteNamed, LIVE } from '../fixtures/extensionTest';
 
-test.describe('02 - Live Ad Units & Bids Waterfall', () => {
+test.describe('02 - Live Ad Units & Bids Waterfall', { tag: LIVE }, () => {
   test.describe.configure({ timeout: 90000 });
 
   test('captures live ad units and multi-bidder responses on a lifestyle publisher (eatpicks.com)', async ({ liveSite }) => {
