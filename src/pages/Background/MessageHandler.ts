@@ -11,6 +11,10 @@ export class MessageHandler {
     const { type, payload } = message;
     const tabId = sender.tab?.id;
     if (!tabId || !type || !payload || Object.keys(payload).length === 0) return;
+    // GAM and TCF details carry no frame id and are stored on the top window, so a subframe's
+    // (e.g. a cross-origin widget running its own GPT or CMP) must not overwrite the page's.
+    const fromSubframe = (sender.frameId ?? 0) !== 0;
+    if (fromSubframe && (type === EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND || type === EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND)) return;
 
     await this.tabContextService.updateTabInfo(tabId, (tabInfo) => {
       if (type === EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND && this.isGoogleAdManagerDetails(payload)) {
