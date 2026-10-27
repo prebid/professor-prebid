@@ -17,6 +17,8 @@ export class Prebid {
   hasQueuedListenerHook: boolean = false;
   lastEventsUrl: string | null = null;
   staleUrlRevokeDelay: number = 30000;
+  downloadFailedResends: number = 0;
+  maxDownloadFailedResends: number = 3;
 
   constructor(namespace: string, iframeId: string | null) {
     this.namespace = namespace;
@@ -95,24 +97,35 @@ export class Prebid {
     });
 
     EventBus.on(POPUP_LOADED, () => {
+      this.downloadFailedResends = 0;
       this.sendDetailsToBackground();
     });
 
-    EventBus.on(DOWNLOAD_FAILED, () => {
-      this.sendDetailsToBackground();
-    });
+    EventBus.on(DOWNLOAD_FAILED, (payload) => this.handleDownloadFailed(payload?.eventsUrl));
 
     window.addEventListener(
       'message',
       (event) => {
         if (event.source !== window || event.origin !== window.origin) return;
         if (!event.data?.profPrebid) return;
-        if (event.data.type === POPUP_LOADED || event.data.type === DOWNLOAD_FAILED) {
+        if (event.data.type === POPUP_LOADED) {
+          this.downloadFailedResends = 0;
           this.sendDetailsToBackground();
+        } else if (event.data.type === DOWNLOAD_FAILED) {
+          this.handleDownloadFailed(event.data.payload?.eventsUrl);
         }
       },
       false
     );
+  };
+
+  // Each resend creates a new events URL, which the panel downloads again, so a download that keeps
+  // failing would otherwise loop. Resend only for this instance's latest URL, a few times per popup open.
+  handleDownloadFailed = (eventsUrl?: string): void => {
+    if (eventsUrl && eventsUrl !== this.lastEventsUrl) return;
+    if (this.downloadFailedResends >= this.maxDownloadFailedResends) return;
+    this.downloadFailedResends++;
+    this.sendDetailsToBackground();
   };
 
   getDebugConfig = () => {

@@ -166,6 +166,25 @@ describe('Prebid Injected Script', () => {
     expect(sendSpy).not.toHaveBeenCalled();
   });
 
+  it('bounds resends after failed downloads and ignores failures for stale URLs', () => {
+    const instance = new Prebid('pbjs', 'frame1') as any;
+    const sendSpy = vi.spyOn(instance, 'sendDetailsToBackground').mockImplementation(() => {});
+    instance.lastEventsUrl = 'blob:current';
+
+    instance.handleDownloadFailed('blob:stale');
+    expect(sendSpy).not.toHaveBeenCalled();
+
+    for (let i = 0; i < 10; i++) instance.handleDownloadFailed('blob:current');
+    expect(sendSpy).toHaveBeenCalledTimes(instance.maxDownloadFailedResends);
+
+    // Opening the popup again allows new retries.
+    const popupLoaded = (EventBus.on as any).mock.calls.filter((c: any[]) => c[0] === POPUP_LOADED).pop()[1];
+    popupLoaded();
+    sendSpy.mockClear();
+    instance.handleDownloadFailed('blob:current');
+    expect(sendSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('getDebugConfig parses valid sessionStorage JSON and handles errors', () => {
     const instance = new Prebid('pbjs', 'frame1');
 
