@@ -141,7 +141,9 @@ const InjectedApp = (): JSX.Element => {
   const pendingNamespaceRef = useRef<string | null>(null);
 
   const handleConsoleStateChange = (event: Event) => {
-    const checked = (event as CustomEvent).detail;
+    const checked = !!(event as CustomEvent).detail;
+    // Update the ref now, not after the next render: the content script sends SAVE_MASKS right after this event, in the same tick.
+    consoleStateRef.current = checked;
     setConsoleState(checked);
   };
 

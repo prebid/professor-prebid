@@ -160,6 +160,22 @@ describe('InjectedApp Component', () => {
     }
   });
 
+  it('draws overlays when SAVE_MASKS follows CONSOLE_TOGGLE in the same tick', () => {
+    const div = document.createElement('div');
+    div.id = 'div-gpt-ad-1';
+    document.body.appendChild(div);
+    (window as any).pbjs = { getEvents: () => [{ eventType: 'auctionEnd', args: { adUnitCodes: ['div-gpt-ad-1'] } }] };
+
+    render(<InjectedApp />);
+    // The content script dispatches both events back to back, with no render in between.
+    act(() => {
+      document.dispatchEvent(new CustomEvent(CONSOLE_TOGGLE, { detail: true }));
+      document.dispatchEvent(new CustomEvent(SAVE_MASKS, { detail: 'pbjs' }));
+    });
+
+    expect(screen.getByTestId('overlay-portal-div-gpt-ad-1')).toBeTruthy();
+  });
+
   it('ignores SAVE_MASKS event if detail is missing or consoleState is false', () => {
     render(<InjectedApp />);
 
