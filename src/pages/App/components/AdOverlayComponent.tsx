@@ -15,7 +15,7 @@ import Refresh from '@mui/icons-material/Refresh';
 import MinimizeIcon from '@mui/icons-material/Minimize';
 import MaximizeIcon from '@mui/icons-material/Maximize';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import { getParentGamPubAds } from '../InjectedApp';
+import { getParentGamPubAds, isSameGamSlot } from '../InjectedApp';
 
 const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal, shadowRoot, contentRef, pbjsNameSpace, attachVersion, onOpenPopover }: AdOverlayComponentProps): JSX.Element => {
   const gridRef = React.useRef<HTMLDivElement>(null);
@@ -50,7 +50,8 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
     const pubads = getParentGamPubAds();
     if (pubads) {
       const slots = pubads.getSlots();
-      const slot = slots.find((slot: any) => slot.getSlotElementId() === elementId);
+      // The overlay's code may be the slot's div id, its ad unit path, or the path's last segment.
+      const slot = slots.find((slot: any) => slot.getSlotElementId() === elementId) || slots.find((slot: any) => isSameGamSlot(slot, elementId));
       if (slot) {
         setSlot(slot);
       }
@@ -129,7 +130,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                 <OpenInFullIcon sx={{ fontSize: 12 }} />
               </IconButton>
 
-              {getParentGamPubAds() && (
+              {getParentGamPubAds() && slot && (
                 <IconButton
                   sx={{ p: 0.25, width: 20, height: 20, borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.85)', border: '1px solid rgba(67, 142, 217, 0.3)', color: 'primary.main', '&:hover': { backgroundColor: '#ffffff' } }}
                   onClick={() => {

@@ -38,7 +38,7 @@ const slotPath = (slot: any): string => (slot?.getAdUnitPath ? slot.getAdUnitPat
 const slotElementId = (slot: any): string => (slot?.getSlotElementId ? slot.getSlotElementId() : '') || '';
 
 // A GAM slot stands for an ad unit code when the code is its element id, its full ad unit path, or the last segment of that path.
-const isSameGamSlot = (slot: any, adUnitCode: string): boolean => {
+export const isSameGamSlot = (slot: any, adUnitCode: string): boolean => {
   const path = slotPath(slot);
   return slotElementId(slot) === adUnitCode || path === adUnitCode || (!!path && path.split('/').pop() === adUnitCode);
 };

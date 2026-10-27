@@ -62,6 +62,18 @@ describe('AdOverlayComponent', () => {
     expect((window.parent as any).googletag.pubads().refresh).toHaveBeenCalled();
   });
 
+  it('refreshes the GAM slot when the overlay is keyed by the ad unit path', () => {
+    render(<AdOverlayComponent elementId="/12345/ad-unit" winningBidder="rubicon" winningCPM={1.5} currency="USD" timeToRespond={250} />);
+    fireEvent.click(screen.getByTitle('Refresh Slot'));
+    const pubads = (window.parent as any).googletag.pubads();
+    expect(pubads.refresh).toHaveBeenCalledWith([expect.objectContaining({ getAdUnitPath: expect.any(Function) })]);
+  });
+
+  it('hides the refresh button when no GAM slot matches the overlay', () => {
+    render(<AdOverlayComponent elementId="no-such-slot" winningBidder="rubicon" winningCPM={1.5} currency="USD" timeToRespond={250} />);
+    expect(screen.queryByTitle('Refresh Slot')).toBeNull();
+  });
+
   it('calls openInPopOver when popover button is clicked', () => {
     const { container } = render(<AdOverlayComponent elementId="div-gpt-ad-1234567-0" winningBidder="rubicon" winningCPM={1.5} currency="USD" timeToRespond={250} />);
     const buttons = container.querySelectorAll('button');
