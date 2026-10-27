@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Ortb2ImpExtChipComponent, MediaTypeChipComponent, AdUnitChipComponent, BidChipComponent, InterstitialChipComponent } from './AdUnitChips';
 import AppStateContext from '../../contexts/appStateContext';
+import { AdUnit } from '../../../Injected/prebid';
 
 vi.mock('../../../Shared/utils', () => ({
   getTabId: vi.fn().mockResolvedValue(1),
@@ -82,7 +83,7 @@ describe('AdUnitChips components', () => {
     });
     expect(screen.getByText('slot-1')).toBeTruthy();
 
-    rerender(<AdUnitChipComponent adUnit={{ code: 'slot-2' }} />);
+    rerender(<AdUnitChipComponent adUnit={{ code: 'slot-2' } as AdUnit} />);
     expect(screen.getByText('slot-2')).toBeTruthy();
   });
 

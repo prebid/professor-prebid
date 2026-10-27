@@ -12,8 +12,8 @@ describe('AdOverlayComponent', () => {
           {
             getSlotElementId: () => 'div-gpt-ad-1234567-0',
             getAdUnitPath: () => '/12345/ad-unit',
-            getTargetingKeys: () => [],
-            getResponseInformation: () => null,
+            getTargetingKeys: (): string[] => [],
+            getResponseInformation: (): null => null,
           },
         ]),
         refresh: vi.fn(),

@@ -1,10 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import AppStateContext from '../../../Shared/contexts/appStateContext';
+import AppStateContext, { AppState } from '../../../Shared/contexts/appStateContext';
 import PrebidConfigComponent from './PrebidConfigComponent';
 
-const makeContext = (config: any) => ({
+const makeContext = (config: any): AppState => ({
   prebid: { config, events: [] } as any,
   tcf: {} as any,
   googleAdManager: {} as any,

@@ -169,7 +169,7 @@ describe('InspectedPageContextProvider', () => {
   });
 
   it('handles initial mount when tabInfo does not exist in local storage', async () => {
-    global.chrome.storage.local.get = vi.fn((keys, cb) => cb({}));
+    global.chrome.storage.local.get = vi.fn((keys, cb) => cb({})) as any;
 
     await act(async () => {
       render(

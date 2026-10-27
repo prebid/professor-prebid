@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ConfigComponent from './ConfigComponent';
 import { ExpandableTile } from './tiles/ExpandableTile';
-import AppStateContext from '../../contexts/appStateContext';
+import AppStateContext, { AppState } from '../../contexts/appStateContext';
 import CodeIcon from '@mui/icons-material/Code';
 
 import * as utils from '../../utils';
@@ -114,7 +114,7 @@ describe('ConfigComponent & ExpandableTile', () => {
 
   it('handles empty prebid and config gracefully', () => {
     render(
-      <AppStateContext.Provider value={{ prebid: {} }}>
+      <AppStateContext.Provider value={{ prebid: {} } as AppState}>
         <ConfigComponent />
       </AppStateContext.Provider>
     );

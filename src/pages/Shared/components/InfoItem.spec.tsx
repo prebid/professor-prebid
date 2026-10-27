@@ -24,7 +24,8 @@ describe('InfoItem', () => {
   });
 
   it('returns null when content is empty object', () => {
-    const { container } = render(<InfoItem label="Test" content={{}} />);
+    // Callers pass parsed config values, which can be an empty object.
+    const { container } = render(<InfoItem label="Test" content={{} as React.ReactNode} />);
     expect(container.innerHTML).toBe('');
   });
 

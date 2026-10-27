@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Popup } from './Popup';
-import AppStateContext from '../Shared/contexts/appStateContext';
+import AppStateContext, { AppState } from '../Shared/contexts/appStateContext';
 import { PBJS_NAMESPACE_CHANGE, POPUP_LOADED } from '../Shared/constants';
 import * as utils from '../Shared/utils';
 
@@ -92,7 +92,7 @@ describe('Popup Component', () => {
     expect(utils.sendChromeTabsMessage).toHaveBeenCalledWith(PBJS_NAMESPACE_CHANGE, 'pbjs');
 
     rerender(
-      <AppStateContext.Provider value={{ pbjsNamespace: 'customPbjs', prebids: {} }}>
+      <AppStateContext.Provider value={{ pbjsNamespace: 'customPbjs', prebids: {} } as AppState}>
         <Popup />
       </AppStateContext.Provider>
     );

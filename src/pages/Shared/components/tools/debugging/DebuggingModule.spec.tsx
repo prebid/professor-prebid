@@ -6,6 +6,7 @@ import ReplaceRule from './ReplaceRule';
 import RuleComponent from './RuleComponent';
 import DebuggingModuleComponent from './DebuggingModuleComponent';
 import AppStateContext from '../../../contexts/appStateContext';
+import { IPrebidDetails } from '../../../../Injected/prebid';
 import { STORE_RULES_TOGGLE } from '../../../constants';
 
 vi.mock('../../../../Shared/utils', async () => {
@@ -74,7 +75,7 @@ describe('DebuggingModule', () => {
       const mockRule: any = { when: { adUnitCode: 'slot-1' }, then: { cpm: 10 } };
       const handleRulesFormChange = vi.fn();
 
-      const { container } = render(<MatchRule groupIndex={0} rule={mockRule} ruleKey="adUnitCode" prebid={{ events: [] }} handleRulesFormChange={handleRulesFormChange} path={['intercept', '0', 'when', 'adUnitCode']} />);
+      const { container } = render(<MatchRule groupIndex={0} rule={mockRule} ruleKey="adUnitCode" prebid={{ events: [] } as IPrebidDetails} handleRulesFormChange={handleRulesFormChange} path={['intercept', '0', 'when', 'adUnitCode']} />);
 
       const addBtn = container.querySelector('[data-testid="AddIcon"]');
       if (addBtn) {
@@ -139,7 +140,7 @@ describe('DebuggingModule', () => {
       const handleRulesFormChange = vi.fn();
       const removeRule = vi.fn();
 
-      render(<RuleComponent rule={mockRuleGroup} ruleIndex={0} prebid={{ events: [] }} handleRulesFormChange={handleRulesFormChange} removeRule={removeRule} />);
+      render(<RuleComponent rule={mockRuleGroup} ruleIndex={0} prebid={{ events: [] } as IPrebidDetails} handleRulesFormChange={handleRulesFormChange} removeRule={removeRule} />);
 
       expect(screen.getByText('Rule #1')).toBeTruthy();
       expect(screen.getByText('WHEN (Match Request)')).toBeTruthy();
@@ -158,7 +159,7 @@ describe('DebuggingModule', () => {
       const handleRulesFormChange = vi.fn();
       const removeRule = vi.fn();
 
-      render(<RuleComponent rule={mockRuleGroup} ruleIndex={0} prebid={{ events: [] }} handleRulesFormChange={handleRulesFormChange} removeRule={removeRule} />);
+      render(<RuleComponent rule={mockRuleGroup} ruleIndex={0} prebid={{ events: [] } as IPrebidDetails} handleRulesFormChange={handleRulesFormChange} removeRule={removeRule} />);
 
       expect(screen.getByText('Rule #1')).toBeTruthy();
       expect(screen.getByDisplayValue('Test Title')).toBeTruthy();
@@ -315,7 +316,7 @@ describe('DebuggingModule', () => {
     });
 
     it('persists rules to localStorage when storeRules is enabled', async () => {
-      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true }));
+      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true })) as any;
 
       renderWithContext();
 
@@ -351,7 +352,7 @@ describe('DebuggingModule', () => {
       (global as any).sessionStorage = { getItem: (k: string) => pageSession[k] ?? null, setItem: (k: string, v: string) => (pageSession[k] = v) };
       (global as any).localStorage = { getItem: (k: string) => pageLocal[k] ?? null, setItem: (k: string, v: string) => (pageLocal[k] = v) };
       global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
-      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true }));
+      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true })) as any;
 
       renderWithContext();
 
@@ -380,7 +381,7 @@ describe('DebuggingModule', () => {
     it('removes the persisted rules when "store rules" is turned off', async () => {
       const pageLocal: Record<string, string> = { __pbjs_debugging__: '{"enabled":true,"intercept":[]}' };
       (global as any).localStorage = { getItem: (k: string) => pageLocal[k] ?? null, removeItem: (k: string) => delete pageLocal[k] };
-      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true }));
+      global.chrome.storage.local.get = vi.fn((key, cb) => cb({ [STORE_RULES_TOGGLE]: true })) as any;
       renderWithContext();
       global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;
 
@@ -394,7 +395,7 @@ describe('DebuggingModule', () => {
     });
 
     it('does not rewrite sessionStorage when the rules already come from it', async () => {
-      const savedConfig = { enabled: true, intercept: [] };
+      const savedConfig = { enabled: true, intercept: [] as unknown[] };
       const setItem = vi.fn();
       (global as any).sessionStorage = { getItem: () => JSON.stringify(savedConfig), setItem };
       global.chrome.scripting.executeScript = vi.fn(async (opts: any) => [{ result: opts.func(...opts.args) ?? null }]) as any;

@@ -33,8 +33,8 @@ describe('GamDetailsComponent', () => {
           {
             getSlotElementId: () => 'div-secondary',
             getAdUnitPath: () => '/55555/path-match',
-            getTargetingKeys: () => [],
-            getTargeting: () => [],
+            getTargetingKeys: (): string[] => [],
+            getTargeting: (): string[] => [],
             getResponseInformation: () => ({
               sourceAgnosticCreativeId: 11111,
               sourceAgnosticLineItemId: 22222,

@@ -210,7 +210,7 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
 
 export default AppStateContext;
 
-interface AppState {
+export interface AppState {
   tcf: Config['consentManagement'];
   googleAdManager: IGoogleAdManagerDetails;
   pbjsNamespace?: string;

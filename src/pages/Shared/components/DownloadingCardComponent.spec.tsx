@@ -23,7 +23,7 @@ vi.mock('@mui/material/Typography', () => ({ default: ({ children }: any) => <sp
 describe('DownloadingCardComponent', () => {
   it('renders downloading title', () => {
     render(
-      <InspectedPageContext.Provider value={{ syncState: '', frames: {}, downloading: 'true' }}>
+      <InspectedPageContext.Provider value={{ syncState: '', frames: {}, downloading: 'true', harLog: [] }}>
         <DownloadingCardComponent />
       </InspectedPageContext.Provider>
     );
@@ -32,7 +32,7 @@ describe('DownloadingCardComponent', () => {
 
   it('renders syncState text', () => {
     render(
-      <InspectedPageContext.Provider value={{ syncState: 'syncing 5/10', frames: {}, downloading: 'true' }}>
+      <InspectedPageContext.Provider value={{ syncState: 'syncing 5/10', frames: {}, downloading: 'true', harLog: [] }}>
         <DownloadingCardComponent />
       </InspectedPageContext.Provider>
     );

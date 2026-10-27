@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import McpToolsComponent, { generateMcpAiPrompt, injectDevtoolsMcpScript } from './McpToolsComponent';
-import AppStateContext from '../../../../Shared/contexts/appStateContext';
+import AppStateContext, { AppState } from '../../../../Shared/contexts/appStateContext';
 import { MCP_BRIDGE_ENABLE } from '../../../constants';
 
 vi.mock('../../../../Shared/utils', () => ({
@@ -119,7 +119,7 @@ describe('McpToolsComponent', () => {
     global.chrome.scripting.executeScript = vi.fn().mockRejectedValue(new Error('Script injection blocked'));
 
     render(
-      <AppStateContext.Provider value={{ prebid: { version: '8.0.0', installedModules: [] } }}>
+      <AppStateContext.Provider value={{ prebid: { version: '8.0.0', installedModules: [] } } as AppState}>
         <McpToolsComponent />
       </AppStateContext.Provider>
     );
@@ -142,7 +142,7 @@ describe('McpToolsComponent', () => {
     });
 
     render(
-      <AppStateContext.Provider value={{ prebid: { version: '8.0.0' } }}>
+      <AppStateContext.Provider value={{ prebid: { version: '8.0.0' } } as AppState}>
         <McpToolsComponent />
       </AppStateContext.Provider>
     );

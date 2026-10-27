@@ -15,6 +15,7 @@ This document defines conventions and operational guidelines for AI agents worki
 - **Build**:
   - Development / Fast build: `npm run build:fast`
   - Production build: `npm run build`
+- **Type checking**: `npm run typecheck` (the extension, and separately the unit specs and e2e code via `tsconfig.spec.json`)
 - **Testing**:
   - Unit / Component tests: `npm test` (or `npx vitest run`)
   - Watch mode: `npm run test:watch`

@@ -11,6 +11,7 @@
     "build": "node utils/build.js && npx rimraf \"src/**/dist\"",
     "build:fast": "NO_MINIFY=true node utils/build.js",
     "start": "node utils/webserver.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc -p tsconfig.spec.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

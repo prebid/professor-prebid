@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import Panel from './Panel';
-import StateContext from '../Shared/contexts/appStateContext';
+import StateContext, { AppState } from '../Shared/contexts/appStateContext';
 import InspectedPageContext from '../Shared/contexts/inspectedPageContext';
 import { PBJS_NAMESPACE_CHANGE } from '../Shared/constants';
 import * as utils from '../Shared/utils';
@@ -60,8 +60,8 @@ describe('Panel Component', () => {
     expect(utils.sendChromeTabsMessage).toHaveBeenCalledWith(PBJS_NAMESPACE_CHANGE, 'pbjs');
 
     rerender(
-      <InspectedPageContext.Provider value={{ downloading: 'false' }}>
-        <StateContext.Provider value={{ pbjsNamespace: 'custom_pbjs', prebids: null }}>
+      <InspectedPageContext.Provider value={{ frames: {}, downloading: 'false', syncState: '', harLog: [] }}>
+        <StateContext.Provider value={{ pbjsNamespace: 'custom_pbjs', prebids: null } as AppState}>
           <Panel />
         </StateContext.Provider>
       </InspectedPageContext.Provider>
@@ -141,8 +141,8 @@ describe('Panel Component', () => {
     expect(screen.getByTestId('downloading-card')).toBeTruthy();
 
     rerender(
-      <InspectedPageContext.Provider value={{ downloading: 'false' }}>
-        <StateContext.Provider value={{ pbjsNamespace: 'pbjs', prebids: null }}>
+      <InspectedPageContext.Provider value={{ frames: {}, downloading: 'false', syncState: '', harLog: [] }}>
+        <StateContext.Provider value={{ pbjsNamespace: 'pbjs', prebids: null } as AppState}>
           <Panel />
         </StateContext.Provider>
       </InspectedPageContext.Provider>

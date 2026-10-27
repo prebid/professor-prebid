@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
-import AppStateContext from '../../../contexts/appStateContext';
+import AppStateContext, { AppState } from '../../../contexts/appStateContext';
 import AnalyticsComponent from './AnalyticsComponent';
 import BidderSettingsComponent from './BidderSettingsComponent';
 import CurrencyComponent from './CurrencyComponent';
@@ -82,7 +82,7 @@ describe('Config Tiles components', () => {
 
   const renderWithContext = (Component: React.ComponentType, prebidObj: any = mockPrebid, tcfObj: any = undefined) => {
     return render(
-      <AppStateContext.Provider value={{ prebid: prebidObj, tcf: tcfObj }}>
+      <AppStateContext.Provider value={{ prebid: prebidObj, tcf: tcfObj } as AppState}>
         <Component />
       </AppStateContext.Provider>
     );

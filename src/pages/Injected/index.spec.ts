@@ -5,7 +5,7 @@ import { MCP_BRIDGE_ENABLE } from '../Shared/constants';
 vi.mock('./googleAdManager', () => ({ googleAdManager: { init: vi.fn() } }));
 vi.mock('./prebid', () => ({ addEventListenersForPrebid: vi.fn() }));
 vi.mock('./tcf', () => ({ iabTcf: { init: vi.fn() } }));
-vi.mock('../App/InjectedApp', () => ({ default: () => null }));
+vi.mock('../App/InjectedApp', () => ({ default: (): null => null }));
 
 describe('Injected entry point', () => {
   beforeEach(() => {

@@ -287,7 +287,7 @@ describe('PbjsVersionInfo components', () => {
       },
     ];
 
-    global.chrome.storage.local.get = vi.fn((key, cb) => cb({ pbjsReleasesData: JSON.stringify(cachedData) }));
+    global.chrome.storage.local.get = vi.fn((key, cb) => cb({ pbjsReleasesData: JSON.stringify(cachedData) })) as any;
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -330,7 +330,7 @@ describe('PbjsVersionInfo components', () => {
       },
     ];
 
-    global.chrome.storage.local.get = vi.fn((key, cb) => cb({ pbjsReleasesData: JSON.stringify(expiredData) }));
+    global.chrome.storage.local.get = vi.fn((key, cb) => cb({ pbjsReleasesData: JSON.stringify(expiredData) })) as any;
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () =>
@@ -362,7 +362,7 @@ describe('PbjsVersionInfo components', () => {
   });
 
   it('handles fetch API errors gracefully and provides retry button', async () => {
-    global.chrome.storage.local.get = vi.fn((key, cb) => cb({}));
+    global.chrome.storage.local.get = vi.fn((key, cb) => cb({})) as any;
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 500,
@@ -387,7 +387,7 @@ describe('PbjsVersionInfo components', () => {
   });
 
   it('handles network throw error during fetch', async () => {
-    global.chrome.storage.local.get = vi.fn((key, cb) => cb({}));
+    global.chrome.storage.local.get = vi.fn((key, cb) => cb({})) as any;
     global.fetch = vi.fn().mockRejectedValue(new Error('Network offline'));
 
     const mockContext: any = {
@@ -408,7 +408,7 @@ describe('PbjsVersionInfo components', () => {
   });
 
   it('handles version not found in GitHub release list', async () => {
-    global.chrome.storage.local.get = vi.fn((key, cb) => cb({}));
+    global.chrome.storage.local.get = vi.fn((key, cb) => cb({})) as any;
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([{ tag_name: 'v9.9.9', published_at: '2026-01-01T00:00:00Z', body: '' }]),

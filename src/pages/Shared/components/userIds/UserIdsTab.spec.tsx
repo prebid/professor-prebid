@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import UserIdsTab from './UserIdsTab';
-import AppStateContext from '../../contexts/appStateContext';
+import AppStateContext, { AppState } from '../../contexts/appStateContext';
 
 describe('UserIdsTab', () => {
   beforeEach(() => {
@@ -88,7 +88,7 @@ describe('UserIdsTab', () => {
 
   it('renders message when no EIDs are detected', () => {
     render(
-      <AppStateContext.Provider value={{ prebid: { eids: [] } }}>
+      <AppStateContext.Provider value={{ prebid: { eids: [] } } as AppState}>
         <UserIdsTab searchQuery="" />
       </AppStateContext.Provider>
     );

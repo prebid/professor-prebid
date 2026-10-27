@@ -63,7 +63,7 @@ describe('Shared Utils', () => {
     });
 
     it('handles null and non-object values', () => {
-      const obj = { a: null, b: 1, c: 'str', d: true };
+      const obj = { a: null as unknown, b: 1, c: 'str', d: true };
       const result = JSON.parse(decycle(obj));
       expect(result.a).toBeNull();
       expect(result.b).toBe(1);

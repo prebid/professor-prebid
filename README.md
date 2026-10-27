@@ -82,6 +82,7 @@ npm run build  # build production extension into ./build
 ## Testing
 
 ```bash
+npm run typecheck    # TypeScript, including the unit and e2e tests
 npm test             # unit and component tests (Vitest)
 npm run build        # the end-to-end tests load the extension from ./build
 npm run test:e2e     # end-to-end tests (Playwright)

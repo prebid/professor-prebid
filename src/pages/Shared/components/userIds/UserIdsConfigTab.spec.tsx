@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import ConfigTab from './UserIdsConfigTab';
-import AppStateContext from '../../contexts/appStateContext';
+import AppStateContext, { AppState } from '../../contexts/appStateContext';
 
 describe('UserIdsConfigTab (ConfigTab)', () => {
   const mockModules = [
@@ -79,7 +79,7 @@ describe('UserIdsConfigTab (ConfigTab)', () => {
 
   it('renders fallback message when no userSync userIds configuration exists', () => {
     render(
-      <AppStateContext.Provider value={{ prebid: { config: {} } }}>
+      <AppStateContext.Provider value={{ prebid: { config: {} } } as AppState}>
         <ConfigTab searchQuery="" />
       </AppStateContext.Provider>
     );
