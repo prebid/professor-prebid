@@ -140,4 +140,15 @@ describe('initiatorTree', () => {
     expect(filteredTree.length).toBe(1);
     expect(filteredTree[0].id).toBe('1');
   });
+
+  it('keeps every request when same-millisecond requests initiate each other', () => {
+    const url = 'https://cdn.example.com/loader.js';
+    const entries: IHarLogEntry[] = ['1', '2', '3'].map((id) => ({ id, url, host: 'cdn.example.com', pathname: '/loader.js', method: 'GET', status: 200, startedDateTime: 1000, time: 5, initiator: { type: 'script', url } }));
+
+    const tree = buildNetworkTree(entries.map((e) => classifyRequest(e)));
+
+    const count = (nodes: any[]): number => nodes.reduce((n, node) => n + 1 + count(node.children), 0);
+    expect(tree.length).toBeGreaterThan(0);
+    expect(count(tree)).toBe(3);
+  });
 });

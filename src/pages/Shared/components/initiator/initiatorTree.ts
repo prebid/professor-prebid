@@ -23,10 +23,21 @@ export const buildNetworkTree = (classifiedEntries: IClassifiedNetworkEntry[], r
 
   const parentMap = new Map<string, { parentId: string; relation: 'redirect' | 'initiator' }>();
 
+  // True when `childId` is already `parentId` or one of its ancestors, so the link would close a cycle and drop
+  // every request in it from the tree (none would be a root).
+  const createsCycle = (parentId: string, childId: string): boolean => {
+    const seen = new Set<string>();
+    for (let id: string | undefined = parentId; id && !seen.has(id); id = parentMap.get(id)?.parentId) {
+      if (id === childId) return true;
+      seen.add(id);
+    }
+    return false;
+  };
+
   classifiedEntries.forEach((current) => {
     if (current.entry.redirectURL) {
       const candidates = urlToEntries.get(current.entry.redirectURL) || [];
-      const match = candidates.find((c) => c.entry.startedDateTime >= current.entry.startedDateTime && c.entry.id !== current.entry.id && parentMap.get(current.entry.id)?.parentId !== c.entry.id);
+      const match = candidates.find((c) => c.entry.startedDateTime >= current.entry.startedDateTime && c.entry.id !== current.entry.id && !createsCycle(current.entry.id, c.entry.id));
       if (match && !parentMap.has(match.entry.id)) {
         parentMap.set(match.entry.id, { parentId: current.entry.id, relation: 'redirect' });
       }
@@ -39,7 +50,7 @@ export const buildNetworkTree = (classifiedEntries: IClassifiedNetworkEntry[], r
     const initiatorUrl = current.entry.initiator?.url;
     if (initiatorUrl) {
       const candidates = urlToEntries.get(initiatorUrl) || [];
-      const match = candidates.find((c) => c.entry.startedDateTime <= current.entry.startedDateTime && c.entry.id !== current.entry.id && parentMap.get(c.entry.id)?.parentId !== current.entry.id);
+      const match = candidates.find((c) => c.entry.startedDateTime <= current.entry.startedDateTime && c.entry.id !== current.entry.id && !createsCycle(c.entry.id, current.entry.id));
       if (match) {
         parentMap.set(current.entry.id, { parentId: match.entry.id, relation: 'initiator' });
         return;
@@ -51,7 +62,7 @@ export const buildNetworkTree = (classifiedEntries: IClassifiedNetworkEntry[], r
       for (const frame of stackFrames) {
         if (frame.url) {
           const candidates = urlToEntries.get(frame.url) || [];
-          const match = candidates.find((c) => c.entry.startedDateTime <= current.entry.startedDateTime && c.entry.id !== current.entry.id && parentMap.get(c.entry.id)?.parentId !== current.entry.id);
+          const match = candidates.find((c) => c.entry.startedDateTime <= current.entry.startedDateTime && c.entry.id !== current.entry.id && !createsCycle(c.entry.id, current.entry.id));
           if (match) {
             parentMap.set(current.entry.id, { parentId: match.entry.id, relation: 'initiator' });
             break;
