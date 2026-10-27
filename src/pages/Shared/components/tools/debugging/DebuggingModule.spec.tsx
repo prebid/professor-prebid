@@ -92,27 +92,22 @@ describe('DebuggingModule', () => {
       expect(screen.getByText('and')).toBeTruthy();
       expect(screen.getByLabelText('Replace-Rule Value')).toBeTruthy();
 
-      const valInput = screen.getByDisplayValue('10');
-      fireEvent.change(valInput, { target: { value: '15' } });
-      expect(handleRulesFormChange).toHaveBeenCalled();
+      const path = ['intercept', '0', 'then', 'cpm'];
 
-      const select = container.querySelector('select');
-      if (select) {
-        fireEvent.change(select, { target: { value: 'dealId' } });
-        expect(handleRulesFormChange).toHaveBeenCalled();
-      }
+      // cpm is a number target, so the typed value is stored as a number.
+      fireEvent.change(screen.getByDisplayValue('10'), { target: { value: '15' } });
+      expect(handleRulesFormChange).toHaveBeenLastCalledWith('update', 15, path);
 
-      const addBtn = container.querySelector('[data-testid="AddIcon"]');
-      if (addBtn) {
-        fireEvent.click(addBtn);
-        expect(handleRulesFormChange).toHaveBeenCalled();
-      }
+      // Switching the target moves the value from the old key to the new one.
+      fireEvent.change(container.querySelector('select')!, { target: { value: 'dealId' } });
+      expect(handleRulesFormChange).toHaveBeenLastCalledWith('update', '', ['intercept', '0', 'then', 'dealId'], path);
 
-      const deleteForeverBtn = container.querySelector('[data-testid="DeleteForeverIcon"]');
-      if (deleteForeverBtn) {
-        fireEvent.click(deleteForeverBtn);
-        expect(handleRulesFormChange).toHaveBeenCalled();
-      }
+      // Adding a target picks the first one the rule does not set yet (cpm and mediaType are taken).
+      fireEvent.click(screen.getByTestId('AddIcon'));
+      expect(handleRulesFormChange).toHaveBeenLastCalledWith('update', '', ['intercept', '0', 'then', 'bidderCode']);
+
+      fireEvent.click(screen.getByTestId('DeleteForeverIcon'));
+      expect(handleRulesFormChange).toHaveBeenLastCalledWith('update', null, path, path);
     });
 
     it('renders ReplaceRule with mediaType select', () => {
