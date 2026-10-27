@@ -22,7 +22,9 @@ export class MessageHandler {
         tabInfo[frameId]['prebids'] = tabInfo[frameId]['prebids'] || {};
         (tabInfo[frameId]['prebids'] as Record<string, IPrebidDetails>)[namespace] = payload;
       } else if (type === EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND && this.isTcfDetails(payload)) {
-        tabInfo['tcf'] = payload;
+        // Like GAM details, TCF details carry no frame id; the panel reads them from the frame's info.
+        tabInfo['top-window'] = tabInfo['top-window'] || {};
+        tabInfo['top-window']['tcf'] = payload;
       }
     });
 
@@ -38,6 +40,7 @@ export class MessageHandler {
   }
 
   private isTcfDetails(payload: any): payload is ITcfDetails {
-    return payload && typeof payload === 'object' && 'tcf' in payload;
+    // tcf.ts sends { v1: {...} } or { v2: {...} }.
+    return payload && typeof payload === 'object' && ('v1' in payload || 'v2' in payload);
   }
 }
