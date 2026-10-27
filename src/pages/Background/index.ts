@@ -63,9 +63,11 @@ class BackgroundService {
       await chrome.storage.local.remove(keysToRemove);
     }
     if (chrome.storage.session?.get) {
-      const allSession = (await chrome.storage.session.get(null)) as any;
+      // Only the key names are needed; getKeys (Chrome 130+) avoids loading every tab's multi-MB HAR log.
+      const session = chrome.storage.session as typeof chrome.storage.session & { getKeys?: () => Promise<string[]> };
+      const sessionKeys = typeof session.getKeys === 'function' ? await session.getKeys() : Object.keys(((await session.get(null)) as any) || {});
       const sessionKeysToRemove: string[] = [];
-      for (const key of Object.keys(allSession || {})) {
+      for (const key of sessionKeys) {
         if (key.startsWith(`${PRE_AUCTION_HAR}_`)) {
           const tabId = parseInt(key.slice(PRE_AUCTION_HAR.length + 1), 10);
           if (!activeTabIds.includes(tabId)) {

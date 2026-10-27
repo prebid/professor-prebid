@@ -250,4 +250,23 @@ describe('Background Index Module', () => {
     expect(mockSessionStorage['preAuctionHar_42']).toBeUndefined();
     expect(mockSessionStorage['unrelated']).toEqual('keep');
   });
+
+  it('reads only the session key names when getKeys is available', async () => {
+    const session = chrome.storage.session as any;
+    session.getKeys = vi.fn(async () => Object.keys(mockSessionStorage));
+    try {
+      mockQuery.mockResolvedValue([{ id: 1 }]);
+      mockSessionStorage['preAuctionHar_42'] = { entries: [] };
+      mockSessionGet.mockClear();
+
+      await onAlarmCallback({ name: 'cleanUpTabInfo' });
+      await flushPromises();
+
+      expect(session.getKeys).toHaveBeenCalled();
+      expect(mockSessionGet).not.toHaveBeenCalled();
+      expect(mockSessionStorage['preAuctionHar_42']).toBeUndefined();
+    } finally {
+      delete session.getKeys;
+    }
+  });
 });
