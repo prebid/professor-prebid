@@ -47,6 +47,13 @@ describe('GoogleAdManager', () => {
       expect(Array.isArray(gam.googletag.cmd)).toBe(true);
     });
 
+    it('queues the listener hook on the shared window.googletag so GPT runs it when it loads', () => {
+      delete (window as any).googletag;
+      gam.init();
+      expect((window as any).googletag).toBe(gam.googletag);
+      expect((window as any).googletag.cmd).toHaveLength(1);
+    });
+
     it('initializes cmd array if googletag exists but cmd is not an array', () => {
       (window as any).googletag = { cmd: 'not-an-array' };
       gam.init();

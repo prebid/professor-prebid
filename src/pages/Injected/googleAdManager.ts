@@ -14,7 +14,10 @@ class GoogleAdManager {
   postAuctionEndTimestamp: number = null;
   googletag: typeof googletag;
   init() {
-    this.googletag = window.googletag || ({} as typeof googletag);
+    // At document_start GPT usually has not loaded yet: create the shared stub on window
+    // so GPT finds the queued hook and runs it once it loads.
+    window.googletag = window.googletag || ({} as typeof googletag);
+    this.googletag = window.googletag;
     if (!Array.isArray(this.googletag.cmd)) {
       (this.googletag as any).cmd = [];
     }
