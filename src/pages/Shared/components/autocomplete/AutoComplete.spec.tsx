@@ -85,6 +85,28 @@ describe('AutoComplete component', () => {
     expect(onQueryChange).toHaveBeenCalledWith('cpm>1 OR bidder:');
   });
 
+  const pick = async (query: string, optionName: string, props: any = {}) => {
+    const onQueryChange = vi.fn();
+    render(<AutoComplete query={query} onQueryChange={onQueryChange} placeholder="Search..." fieldKeys={['bidder', 'category']} options={['bidder:rubicon', 'bidder:appnexus']} {...props} />);
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.focus(input);
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    fireEvent.click(await screen.findByRole('option', { name: optionName }));
+    return onQueryChange;
+  };
+
+  it('keeps earlier space-separated terms when picking a value', async () => {
+    expect(await pick('category:sync bidder:rub', 'rubicon')).toHaveBeenCalledWith('category:sync bidder:rubicon');
+  });
+
+  it('keeps earlier space-separated terms when picking a key', async () => {
+    expect(await pick('category:sync bid', 'bidder')).toHaveBeenCalledWith('category:sync bidder:');
+  });
+
+  it('appends the picked key after a trailing operator', async () => {
+    expect(await pick('category:sync AND ', 'bidder')).toHaveBeenCalledWith('category:sync AND bidder:');
+  });
+
   it('renders suggestions when query ends in OR or AND operator', () => {
     render(<AutoComplete query="cpm>1 AND" onQueryChange={vi.fn()} placeholder="Search..." fieldKeys={['bidder', 'cpm']} />);
     expect(screen.getByPlaceholderText('Search...')).toBeTruthy();

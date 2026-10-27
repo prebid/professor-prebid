@@ -73,44 +73,22 @@ export const AutoComplete = ({ query = '', onQueryChange, options = [], onPick, 
   const onChange = (_event: React.SyntheticEvent<Element, Event>, val: string, reason: AutocompleteChangeReason) => {
     if (reason === 'selectOption' && val != null) {
       const input = query || '';
+      // Suggestions come from the last whitespace-separated term (getAutocompleteOptions), so a pick replaces only that term.
+      const tokens = input.trim().split(/\s+/);
+      const lastToken = tokens[tokens.length - 1] || '';
+      const colonIndex = lastToken.indexOf(':');
 
-      // Find the last occurrence of AND or OR
-      const lastAndIndex = input.toLowerCase().lastIndexOf(' and ');
-      const lastOrIndex = input.toLowerCase().lastIndexOf(' or ');
-      const lastOperatorIndex = Math.max(lastAndIndex, lastOrIndex);
-
-      if (lastOperatorIndex > -1) {
-        // We have an AND or OR operator
-        const beforeOperator = input.substring(0, lastOperatorIndex);
-        const operator = lastAndIndex > lastOrIndex ? ' AND ' : ' OR ';
-        const afterOperator = input.substring(lastOperatorIndex + operator.length).trim();
-
-        // Check if we're completing a key or value
-        if (afterOperator.includes(':')) {
-          // Completing a value
-          const colonIndex = afterOperator.indexOf(':');
-          const key = afterOperator.slice(0, colonIndex);
-          onQueryChange?.(`${beforeOperator}${operator}${key}:${val}`);
-        } else {
-          // Completing a key
-          onQueryChange?.(`${beforeOperator}${operator}${val}:`);
-        }
+      if (['and', 'or'].includes(lastToken.toLowerCase())) {
+        // The query ends with an operator: start a new term with the picked key
+        onQueryChange?.(`${input.trimEnd()} ${val}:`);
+      } else if (colonIndex > -1) {
+        // Completing a value: keep the last term's key
+        onQueryChange?.(replaceLastToken(input, `${lastToken.slice(0, colonIndex)}:${val}`));
+      } else if (onPick) {
+        // Completing a key
+        onPick(`${val}:`);
       } else {
-        // No operator, handle single token
-        const hasColon = input.includes(':');
-        if (hasColon) {
-          // Completing a value
-          const colonIndex = input.indexOf(':');
-          const key = input.slice(0, colonIndex);
-          onQueryChange?.(`${key}:${val}`);
-        } else {
-          // Completing a key
-          if (onPick) {
-            onPick(`${val}:`);
-          } else {
-            onQueryChange?.(replaceLastToken(input, `${val}:`));
-          }
-        }
+        onQueryChange?.(replaceLastToken(input, `${val}:`));
       }
       setSelectedValue(null);
     } else {
