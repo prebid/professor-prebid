@@ -78,6 +78,40 @@ const PrivacyComponent = (): JSX.Element | null => {
   );
 };
 
+// TCModel keeps consents as bit vectors; list the ids that are set so they read as plain JSON.
+const vectorIds = (vector: any): number[] => {
+  const ids: number[] = [];
+  vector?.forEach?.((isSet: boolean, id: number) => {
+    if (isSet) ids.push(id);
+  });
+  return ids;
+};
+
+export const readableTcModel = (tcModel: any) => ({
+  version: tcModel.version,
+  cmpId: tcModel.cmpId,
+  cmpVersion: tcModel.cmpVersion,
+  consentScreen: tcModel.consentScreen,
+  consentLanguage: tcModel.consentLanguage,
+  vendorListVersion: tcModel.vendorListVersion,
+  policyVersion: tcModel.policyVersion,
+  isServiceSpecific: tcModel.isServiceSpecific,
+  useNonStandardStacks: tcModel.useNonStandardStacks,
+  publisherCountryCode: tcModel.publisherCountryCode,
+  purposeOneTreatment: tcModel.purposeOneTreatment,
+  created: tcModel.created?.toISOString?.() ?? tcModel.created,
+  lastUpdated: tcModel.lastUpdated?.toISOString?.() ?? tcModel.lastUpdated,
+  specialFeatureOptins: vectorIds(tcModel.specialFeatureOptins),
+  purposeConsents: vectorIds(tcModel.purposeConsents),
+  purposeLegitimateInterests: vectorIds(tcModel.purposeLegitimateInterests),
+  vendorConsents: vectorIds(tcModel.vendorConsents),
+  vendorLegitimateInterests: vectorIds(tcModel.vendorLegitimateInterests),
+  vendorsDisclosed: vectorIds(tcModel.vendorsDisclosed),
+  vendorsAllowed: vectorIds(tcModel.vendorsAllowed),
+  publisherConsents: vectorIds(tcModel.publisherConsents),
+  publisherLegitimateInterests: vectorIds(tcModel.publisherLegitimateInterests),
+});
+
 const TcfComponent = ({ tcf, tcfKey }: { tcf: any; tcfKey: string }): JSX.Element => {
   const [decoded, setDecoded] = React.useState<any>({});
   useEffect(() => {
@@ -111,6 +145,9 @@ const TcfComponent = ({ tcf, tcfKey }: { tcf: any; tcfKey: string }): JSX.Elemen
             {decoded.cmpVersion !== undefined && <Chip label={`CMP Ver: ${decoded.cmpVersion}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
             {decoded.consentScreen !== undefined && <Chip label={`Screen: ${decoded.consentScreen}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
             {decoded.consentLanguage && <Chip label={`Lang: ${decoded.consentLanguage}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
+          </Box>
+          <Box sx={{ mt: 0.5 }}>
+            <JSONViewerComponent src={readableTcModel(decoded)} name="decoded" collapsed={1} />
           </Box>
         </Box>
       )}

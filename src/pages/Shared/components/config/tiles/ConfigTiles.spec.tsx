@@ -13,7 +13,7 @@ import InstalledModulesComponent from './InstalledModules';
 import OtherConfigsComponent from './OtherConfigsComponent';
 import PrebidServerComponent from './PrebidServerComponent';
 import PriceGranularityComponent from './PriceGranularityComponent';
-import PrivacyComponent from './PrivacyComponent';
+import PrivacyComponent, { readableTcModel } from './PrivacyComponent';
 import RtdComponent from './RtdComponent';
 import UserIdModule from './UserIdModule';
 import UserSyncComponent from './UserSyncComponent';
@@ -341,6 +341,16 @@ describe('Config Tiles components', () => {
     const { unmount: unmountCustom } = renderWithContext(PriceGranularityComponent, customPrebid);
     expect(screen.getByText('Price Granularity')).toBeTruthy();
     unmountCustom();
+  });
+
+  it('lists the ids set in the decoded TCF bit vectors', () => {
+    const bits = (set: number[], max: number) => ({ forEach: (cb: (isSet: boolean, id: number) => void) => Array.from({ length: max }, (_, i) => cb(set.includes(i + 1), i + 1)) });
+    const readable = readableTcModel({ cmpId: 7, purposeConsents: bits([1, 3], 10), vendorConsents: bits([755], 800), vendorLegitimateInterests: bits([], 5) });
+    expect(readable.cmpId).toBe(7);
+    expect(readable.purposeConsents).toEqual([1, 3]);
+    expect(readable.vendorConsents).toEqual([755]);
+    expect(readable.vendorLegitimateInterests).toEqual([]);
+    expect(readable.publisherConsents).toEqual([]);
   });
 
   it('renders PrivacyComponent with GDPR rules, TCF data, and toggles JSON view', () => {
