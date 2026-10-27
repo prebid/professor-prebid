@@ -343,7 +343,9 @@ export const classifyRequest = (entry: IHarLogEntry, decompressedPostText?: stri
   const queryParamsMap = mapQueryParams(entry.queryString);
   const requestHeadersMap = mapHeaders(entry.requestHeaders);
   const responseHeadersMap = mapHeaders(entry.responseHeaders);
-  const privacy = auditPrivacy(queryParamsMap, requestHeadersMap, entry.postData?.text, decompressedPostText, cmpConsentString, url);
+  // A truncated body no longer parses; audit the privacy fields saved from the full body instead.
+  const postText = entry.postData?.privacyFields ? JSON.stringify(entry.postData.privacyFields) : entry.postData?.text;
+  const privacy = auditPrivacy(queryParamsMap, requestHeadersMap, postText, decompressedPostText, cmpConsentString, url);
 
   // Match Provider
   let providerName = '';

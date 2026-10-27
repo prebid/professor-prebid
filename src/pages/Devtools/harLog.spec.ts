@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { isRecordableUrl, toLogEntry, collectHarLog} from './harLog';
+import { isRecordableUrl, toLogEntry, collectHarLog, extractPrivacyFields } from './harLog';
 import { preAuctionHarKey } from '../Shared/constants';
 
 const TAB_ID = 42;
@@ -99,6 +99,18 @@ describe('harLog', () => {
       expect(entry.requestHeaders).toEqual([{ name: 'Content-Type', value: 'application/json' }]);
       expect(entry.postData?.text).toBe('{"bids":[]}');
       expect(entry.timings?.wait).toBe(50.2);
+    });
+
+    it('keeps only the privacy fields of a body too long to store whole', () => {
+      const body = { imp: 'x'.repeat(20000), regs: { ext: { gdpr: 1 } }, user: { id: 'u1', eids: [{ source: 'id5' }], ext: { consent: 'CPabc' } } };
+      expect(extractPrivacyFields(JSON.stringify(body))).toEqual({ regs: { ext: { gdpr: 1 } }, user: { consent: undefined, ext: { consent: 'CPabc' } } });
+    });
+
+    it('saves no privacy fields for short, non-JSON or privacy-free bodies', () => {
+      expect(extractPrivacyFields('{"regs":{"ext":{"gdpr":1}}}')).toBeUndefined();
+      expect(extractPrivacyFields('a='.repeat(10000))).toBeUndefined();
+      expect(extractPrivacyFields(JSON.stringify({ imp: 'x'.repeat(20000) }))).toBeUndefined();
+      expect(extractPrivacyFields(undefined)).toBeUndefined();
     });
 
     it('redacts credential headers and cookie values', () => {

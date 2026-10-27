@@ -66,10 +66,17 @@ export interface IHarLogEntry {
     mimeType?: string;
     text?: string;
     params?: Array<{ name: string; value: string }>;
+    /** OpenRTB privacy fields from the full body, kept only when `text` was truncated (truncated JSON no longer parses). */
+    privacyFields?: IPostDataPrivacyFields;
   };
   timings?: IHarTimingBreakdown;
   contentSize?: number;
   bodySize?: number;
+}
+
+export interface IPostDataPrivacyFields {
+  regs?: any;
+  user?: { consent?: any; ext?: { consent?: any } };
 }
 
 export const hostOf = (url: string): string => {
@@ -132,12 +139,30 @@ const extractQueryParams = (harEntry: any, url: string): Array<{ name: string; v
   return undefined;
 };
 
+export const extractPrivacyFields = (text?: string): IPostDataPrivacyFields | undefined => {
+  if (typeof text !== 'string' || text.length <= MAX_POST_TEXT_LENGTH) return undefined;
+  try {
+    const parsed = JSON.parse(text);
+    if (!parsed || typeof parsed !== 'object') return undefined;
+    const { regs, user } = parsed;
+    const fields: IPostDataPrivacyFields = {};
+    if (regs !== undefined) fields.regs = regs;
+    if (user && (user.consent !== undefined || user.ext?.consent !== undefined)) {
+      fields.user = { consent: user.consent, ext: user.ext?.consent !== undefined ? { consent: user.ext.consent } : undefined };
+    }
+    return Object.keys(fields).length > 0 ? fields : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const extractPostData = (postData: any): IHarLogEntry['postData'] => {
   if (!postData) return undefined;
   return {
     mimeType: postData.mimeType,
     text: truncate(postData.text),
     params: sanitizeNameValuePairs(postData.params),
+    privacyFields: extractPrivacyFields(postData.text),
   };
 };
 

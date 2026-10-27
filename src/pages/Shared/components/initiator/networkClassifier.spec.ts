@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { classifyRequest, decodeTcfString, auditPrivacy} from './networkClassifier';
-import { IHarLogEntry } from '../../../Devtools/harLog';
+import { IHarLogEntry, toLogEntry } from '../../../Devtools/harLog';
 
 describe('networkClassifier', () => {
   describe('decodeTcfString', () => {
@@ -100,6 +100,33 @@ describe('networkClassifier', () => {
   });
 
   describe('classifyRequest', () => {
+    // A Prebid Server auction body well over the 10,000 character storage limit, with the privacy fields at the end.
+    const largePbsRequest = (privacy: { regs?: any; user?: any }) =>
+      toLogEntry({
+        request: {
+          url: 'https://prebid-server.example.com/openrtb2/auction',
+          method: 'POST',
+          postData: { mimeType: 'application/json', text: JSON.stringify({ id: 'a1', imp: Array.from({ length: 200 }, (_, i) => ({ id: `imp-${i}`, banner: { format: [{ w: 300, h: 250 }] } })), ...privacy }) },
+        },
+        response: { status: 200 },
+      });
+
+    it('flags missing consent in a large, truncated OpenRTB body', () => {
+      const entry = largePbsRequest({ regs: { ext: { gdpr: 1 } } });
+      expect(entry.postData?.text?.length).toBeLessThan(10100);
+
+      const { privacy } = classifyRequest(entry);
+      expect(privacy.gdpr).toBe('1');
+      expect(privacy.verdict).toBe('missing');
+    });
+
+    it('reads the consent string from a large, truncated OpenRTB body', () => {
+      const consent = 'CP12345AP12345ABAAENA9CAAP_AAH_AAAAAGVwBgAAA';
+      const { privacy } = classifyRequest(largePbsRequest({ regs: { ext: { gdpr: 1 } }, user: { ext: { consent } } }));
+      expect(privacy.gdprConsent).toBe(consent);
+      expect(privacy.verdict).not.toBe('missing');
+    });
+
     it('classifies Google Ad Manager request', () => {
       const entry: IHarLogEntry = {
         id: '1',
