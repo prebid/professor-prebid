@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import InitiatorComponent from './InitiatorComponent';
+import InitiatorComponent, { NETWORK_FIELD_MAP } from './InitiatorComponent';
+import { createQueryEngine } from '../autocomplete/utils';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
 import { preAuctionHarKey } from '../../constants';
 
@@ -242,5 +243,11 @@ describe('InitiatorComponent', () => {
     fireEvent.click(clearBtn);
 
     await waitFor(() => expect(chrome.storage.session.set).toHaveBeenCalledWith({ [preAuctionHarKey(7)]: JSON.stringify([]) }));
+  });
+
+  it('matches a multi-word provider by the bidder: suggestion it offers', () => {
+    const engine = createQueryEngine(NETWORK_FIELD_MAP);
+    const entry: any = { providerName: 'Magnite / Rubicon', category: 'bid', privacy: { verdict: 'none' }, entry: { status: 200, method: 'POST', host: 'fastlane.rubiconproject.com', url: 'https://fastlane.rubiconproject.com/a' } };
+    expect(engine.runQuery('bidder:magnite/rubicon')(entry)).toBe(true);
   });
 });

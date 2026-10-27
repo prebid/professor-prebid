@@ -33,9 +33,12 @@ import { NetworkPrivacyAuditView } from './NetworkPrivacyAuditView';
 import { NetworkDetailDrawer } from './NetworkDetailDrawer';
 import { decompressPayload } from './payloadDecompressor';
 
+// Query terms are split on whitespace, so provider names are matched without it ('Magnite / Rubicon' -> 'magnite/rubicon').
+const providerKey = (providerName: string) => providerName.toLowerCase().replace(/\s+/g, '');
+
 export const NETWORK_FIELD_MAP = {
   category: (entry: IClassifiedNetworkEntry) => entry.category,
-  bidder: (entry: IClassifiedNetworkEntry) => entry.providerName.toLowerCase(),
+  bidder: (entry: IClassifiedNetworkEntry) => providerKey(entry.providerName),
   status: (entry: IClassifiedNetworkEntry) => String(entry.entry.status),
   method: (entry: IClassifiedNetworkEntry) => entry.entry.method.toLowerCase(),
   domain: (entry: IClassifiedNetworkEntry) => entry.entry.host.toLowerCase(),
@@ -63,7 +66,7 @@ const buildSearchSuggestions = (entries: IClassifiedNetworkEntry[]): string[] =>
     'privacy:warning',
     'status:200',
     'status:302',
-    ...entries.map((e) => `bidder:${e.providerName.toLowerCase().replace(/\s+/g, '')}`),
+    ...entries.map((e) => `bidder:${providerKey(e.providerName)}`),
     ...entries.map((e) => `domain:${e.entry.host}`),
   ]).sort();
 };
