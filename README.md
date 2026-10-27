@@ -18,6 +18,7 @@ bidder, but a tool to inspect and optimise your header-bidding integration.
 - [Running the Extension Locally](#running-the-extension-locally)
 - [Features](#features)
 - [Project Structure](#project-structure)
+- [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
 - [Credits](#credits)
@@ -77,6 +78,20 @@ npm run build  # build production extension into ./build
 - `src/pages/Injected` – Main-world script inspecting `pbjs`, `googletag`, and `__tcfapi` instances, and rendering in-page ad overlays.
 - `src/pages/Popup` & `src/pages/Panel` – Chrome action popup and DevTools panel UI.
 - `src/pages/Shared` – Shared React components, contexts, hooks, and utilities.
+
+## Testing
+
+```bash
+npm test             # unit and component tests (Vitest)
+npm run build        # the end-to-end tests load the extension from ./build
+npm run test:e2e     # end-to-end tests (Playwright)
+npm run test:perf    # performance benchmark against live sites, with and without the extension
+```
+
+The end-to-end suite runs the extension against mock pages and a set of live
+publisher sites (see `e2e/fixtures/liveSitesCatalog.ts`), so it needs network
+access. Set `HEADED=true` to watch the browser. The performance benchmark
+takes over an hour and is not part of `test:e2e`.
 
 ## Contributing
 
