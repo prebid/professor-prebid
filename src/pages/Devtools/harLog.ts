@@ -18,6 +18,8 @@ import { preAuctionHarKey } from '../Shared/constants';
 const MAX_ENTRIES = 1000;
 const MAX_POST_TEXT_LENGTH = 10000;
 const MAX_ARRAY_ITEMS = 50;
+const MAX_CALL_FRAMES = 20;
+const MAX_URL_LENGTH = 2000;
 const REDACTED = '[redacted]';
 const SENSITIVE_HEADERS = ['cookie', 'set-cookie', 'authorization', 'proxy-authorization'];
 
@@ -113,6 +115,28 @@ const sanitizeNameValuePairs = (arr?: any[]): Array<{ name: string; value: strin
   }));
 };
 
+/**
+ * Chrome's initiator carries the full JS stack, with every call frame and a chain of async parent stacks, which can
+ * be several KB per request. Keep only what the panel reads: type, url, line and the top call frames.
+ */
+const extractInitiator = (initiator: any): IInitiatorInfo | undefined => {
+  if (!initiator || typeof initiator !== 'object') return undefined;
+  const callFrames = Array.isArray(initiator.stack?.callFrames)
+    ? initiator.stack.callFrames.slice(0, MAX_CALL_FRAMES).map((frame: any) => ({
+        functionName: String(frame?.functionName ?? '').slice(0, 150),
+        url: String(frame?.url ?? '').slice(0, MAX_URL_LENGTH),
+        lineNumber: frame?.lineNumber,
+        columnNumber: frame?.columnNumber,
+      }))
+    : undefined;
+  return {
+    type: String(initiator.type ?? ''),
+    url: typeof initiator.url === 'string' ? initiator.url.slice(0, MAX_URL_LENGTH) : undefined,
+    lineNumber: initiator.lineNumber,
+    stack: callFrames ? { callFrames } : undefined,
+  };
+};
+
 const redactHeaders = (arr?: any[]): Array<{ name: string; value: string }> | undefined =>
   sanitizeNameValuePairs(arr)?.map((h) => (SENSITIVE_HEADERS.includes(h.name.toLowerCase()) ? { name: h.name, value: REDACTED } : h));
 
@@ -202,7 +226,7 @@ export const toLogEntry = (harEntry: any): IHarLogEntry => {
     requestCookies: redactCookies(harEntry?.request?.cookies),
     responseCookies: redactCookies(harEntry?.response?.cookies),
     redirectURL: harEntry?.response?.redirectURL || undefined,
-    initiator: harEntry?._initiator || undefined,
+    initiator: extractInitiator(harEntry?._initiator),
     postData: extractPostData(harEntry?.request?.postData),
     timings: extractTimings(harEntry?.timings),
     contentSize: harEntry?.response?.content?.size,

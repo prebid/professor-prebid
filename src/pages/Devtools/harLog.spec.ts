@@ -101,6 +101,25 @@ describe('harLog', () => {
       expect(entry.timings?.wait).toBe(50.2);
     });
 
+    it('keeps only the initiator fields the panel reads, with capped call frames', () => {
+      const frame = (i: number) => ({ functionName: `fn${i}`, url: `https://cdn.example.com/prebid.js`, lineNumber: i, columnNumber: 1, scriptId: '42' });
+      const entry = toLogEntry({
+        request: { url: 'https://bidder.example.com/bid' },
+        _initiator: {
+          type: 'script',
+          url: 'https://publisher.example.com/',
+          lineNumber: 3,
+          stack: { callFrames: Array.from({ length: 50 }, (_, i) => frame(i)), parent: { description: 'Promise.then', callFrames: [frame(99)], parent: { callFrames: [frame(100)] } } },
+        },
+      });
+
+      expect(entry.initiator?.type).toBe('script');
+      expect(entry.initiator?.url).toBe('https://publisher.example.com/');
+      expect(entry.initiator?.stack.callFrames).toHaveLength(20);
+      expect(entry.initiator?.stack.callFrames[0]).toEqual({ functionName: 'fn0', url: 'https://cdn.example.com/prebid.js', lineNumber: 0, columnNumber: 1 });
+      expect(entry.initiator?.stack.parent).toBeUndefined();
+    });
+
     it('keeps only the privacy fields of a body too long to store whole', () => {
       const body = { imp: 'x'.repeat(20000), regs: { ext: { gdpr: 1 } }, user: { id: 'u1', eids: [{ source: 'id5' }], ext: { consent: 'CPabc' } } };
       expect(extractPrivacyFields(JSON.stringify(body))).toEqual({ regs: { ext: { gdpr: 1 } }, user: { consent: undefined, ext: { consent: 'CPabc' } } });
