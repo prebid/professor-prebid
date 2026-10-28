@@ -37,8 +37,8 @@ const PreAuctionHelp = (): JSX.Element => {
   const [open, setOpen] = useState(false);
 
   return (
-    <Grid size={{ xs: 12 }} sx={{ mb: 0.5 }}>
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+    <Grid size={{ xs: 12 }}>
+      <Paper>
         <Box onClick={() => setOpen(!open)} sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 0.75, cursor: 'pointer', userSelect: 'none' }}>
           <HelpOutlineIcon fontSize="small" color="primary" />
           <Typography variant="body1" sx={{ fontWeight: 700, flexGrow: 1 }}>

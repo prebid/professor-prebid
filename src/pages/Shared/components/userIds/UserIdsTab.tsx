@@ -16,6 +16,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import AppStateContext from '../../contexts/appStateContext';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { createQueryEngine } from '../autocomplete/utils';
+import { TabEmptyState } from '../TabToolbar';
 
 export const EID_FIELD_MAP = {
   source: (eid: any) => eid?.source,
@@ -45,18 +46,16 @@ const UserIdsTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element
 
   if (!filteredEids || filteredEids.length === 0) {
     return (
-      <Grid size={{ xs: 12 }}>
-        <Box sx={{ p: 3, textAlign: 'center', backgroundColor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="body1" color="text.secondary">
-            {searchQuery ? `No User IDs match "${searchQuery}"` : 'No User IDs (EIDs) detected on this page.'}
-          </Typography>
-        </Box>
-      </Grid>
+      <TabEmptyState>
+        <Typography variant="body1" color="text.secondary">
+          {searchQuery ? `No User IDs match "${searchQuery}"` : 'No User IDs (EIDs) detected on this page.'}
+        </Typography>
+      </TabEmptyState>
     );
   }
 
   return (
-    <Grid container spacing={0.75} sx={{ width: '100%' }}>
+    <Grid container sx={{ width: '100%', p: 0 }}>
       {filteredEids.map((eid, i) => {
         const key = `${eid?.source || 'eid'}-${eid?.uids?.map((u: any) => u.id).join('-') || i}`;
         const isExpanded = !!expandedEids[key];
@@ -64,7 +63,7 @@ const UserIdsTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element
 
         return (
           <Grid key={key} size={{ xs: 12 }}>
-            <Card elevation={1} sx={{ border: '1px solid', borderColor: 'divider', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 2 } }}>
+            <Card elevation={1} sx={{ transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 2 } }}>
               <CardContent sx={{ p: 1.25, '&:last-child': { pb: 1.25 } }}>
                 {/* EID Header */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>

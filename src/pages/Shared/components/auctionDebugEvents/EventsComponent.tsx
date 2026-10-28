@@ -66,10 +66,10 @@ const EventRowComponent = ({ event, index }: { event: IPrebidEvent; index: numbe
 
   return (
     <Card
-      elevation={0}
+      elevation={1}
       sx={{
         border: '1px solid',
-        borderColor: expanded ? 'primary.main' : 'divider',
+        borderColor: expanded ? 'primary.main' : 'transparent',
         borderRadius: 1,
         mb: 0.5,
         transition: 'border-color 0.2s',
@@ -164,7 +164,7 @@ const EventsComponent = (): JSX.Element => {
       ) : !sortedEvents || sortedEvents.length === 0 ? (
         <TabEmptyState>No matching events</TabEmptyState>
       ) : showJson ? (
-        <GridCell variant="body2" cols={12} sx={{ '& .MuiTypography-root': { width: '100%', textAlign: 'left' }, mt: 0.5 }}>
+        <GridCell variant="body2" cols={12} sx={{ '& .MuiTypography-root': { width: '100%', textAlign: 'left' } }}>
           <JSONViewerComponent
             name={`${sortedEvents.length} Event${cP(sortedEvents)} `}
             src={sortedEvents}
@@ -179,7 +179,7 @@ const EventsComponent = (): JSX.Element => {
           />
         </GridCell>
       ) : (
-        <Grid size={{ xs: 12 }} sx={{ mt: 0.5 }}>
+        <Grid size={{ xs: 12 }}>
           {sortedEvents.map((event, index) => (
             <EventRowComponent key={`${event.eventType}-${event.elapsedTime}-${index}`} event={event} index={index} />
           ))}

@@ -261,8 +261,6 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
             elevation={1}
             sx={{
               p: 4,
-              border: '1px solid',
-              borderColor: 'divider',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',

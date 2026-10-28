@@ -23,14 +23,14 @@ interface ISectionCardProps {
   description?: ReactNode;
   /** Shown on the right of the header, e.g. a switch, a status chip or buttons. */
   actions?: ReactNode;
-  /** Draws the border in the primary colour, e.g. while the feature is on. */
+  /** Outlines the card in the primary colour, e.g. while the feature is on. */
   highlighted?: boolean;
   children?: ReactNode;
 }
 
 /** A titled card on the dashboard-style tabs (Tools, Version). */
 export const SectionCard = ({ title, icon, badge, description, actions, highlighted = false, children }: ISectionCardProps): JSX.Element => (
-  <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: highlighted ? 'primary.main' : 'divider', height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+  <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: highlighted ? 'primary.main' : 'transparent', height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mb: children ? 1 : 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
         {icon}
@@ -54,9 +54,9 @@ export const SectionCard = ({ title, icon, badge, description, actions, highligh
   </Paper>
 );
 
-/** The grid of SectionCards on a dashboard-style tab. */
+/** The grid of SectionCards on a dashboard-style tab, spaced like the other tabs by the theme's Grid defaults. */
 export const SectionGrid = ({ children }: { children: ReactNode }): JSX.Element => (
-  <Grid container spacing={0.75} sx={{ width: '100%', p: 0.5 }}>
+  <Grid container sx={{ width: '100%' }}>
     {children}
   </Grid>
 );

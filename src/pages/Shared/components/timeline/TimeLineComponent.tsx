@@ -69,7 +69,7 @@ const TimeLineComponent = (): JSX.Element => {
   return (
     <Grid container sx={{ width: '100%', height: '100%', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       {/* Header Bar */}
-      <Grid container size={{ xs: 12 }} sx={{ mb: 0.5 }}>
+      <Box sx={{ width: '100%' }}>
         <TabToolbar
           stats={[{ label: `Auction${cP(auctionEndEvents)}: ${totalAuctions}` }, { label: `${isAllAuctions ? 'Max Duration:' : 'Duration:'} ${activeDuration}ms` }, { label: `Timeout: ${timeoutMs}ms` }]}
           search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: ['bidder'], placeholder: 'Filter bidder timeline...' }}
@@ -91,13 +91,13 @@ const TimeLineComponent = (): JSX.Element => {
         />
 
         {/* Auction switcher: scrolls sideways when there are many auctions */}
-        <Box sx={{ width: '100%', display: 'flex', gap: 0.5, overflowX: 'auto', mb: 0.5, pb: 0.25 }}>
+        <Box sx={{ width: '100%', display: 'flex', gap: 0.5, overflowX: 'auto', mb: 0.25, pb: 0.25 }}>
           <TabStat label={`All Auctions (${totalAuctions})`} selected={selectedTab === 0} onClick={() => setSelectedTab(0)} />
           {auctionEndEvents.map((ae, idx) => (
             <TabStat key={idx} label={`Auction #${idx + 1} (${ae.args?.auctionId?.slice(0, 8) || 'ID'})`} selected={selectedTab === idx + 1} onClick={() => setSelectedTab(idx + 1)} />
           ))}
         </Box>
-      </Grid>
+      </Box>
 
       {/* Content View: JSON or SVG Gantt Chart */}
       {showJson ? (

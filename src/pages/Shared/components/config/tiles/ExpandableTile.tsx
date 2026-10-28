@@ -49,7 +49,7 @@ export const ExpandableTile = ({ icon, title, subtitle = '', defaultMaxWidth = 4
         transition: 'all 0.3s ease-in-out',
         breakInside: 'avoid',
         columnSpan: expanded ? 'all' : 'none',
-        py: 0.25,
+        pb: 0.5,
       }}
     >
       <Card

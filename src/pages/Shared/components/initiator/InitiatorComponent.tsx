@@ -185,11 +185,11 @@ const InitiatorComponent = (): JSX.Element => {
     <Box
       sx={{
         width: '100%',
-        p: 1,
+        p: 0.5,
         display: 'flex',
         flexDirection: 'column',
-        gap: 1,
-        height: 'calc(100vh - 48px)',
+        gap: 0.5,
+        height: 'calc(100vh - 42px)', // below the 42px navbar
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
@@ -222,11 +222,11 @@ const InitiatorComponent = (): JSX.Element => {
       {/* Main View Area */}
       <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {showRawJson ? (
-          <Paper variant="outlined" sx={{ flex: 1, minHeight: 0, p: 1.5, overflowY: 'auto' }}>
+          <Paper sx={{ flex: 1, minHeight: 0, p: 1.5, overflowY: 'auto' }}>
             <JSONViewerComponent src={filteredEntries.map((c) => c.entry)} collapsed={2} />
           </Paper>
         ) : classifiedEntries.length === 0 ? (
-          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', my: 2 }}>
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
               No Network Activity Recorded Yet
             </Typography>

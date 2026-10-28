@@ -140,7 +140,7 @@ const ProviderRow = ({ provider, timing, harAvailable, findAuctionEvent }: { pro
 
   return (
     <Grid size={{ xs: 12 }}>
-      <Paper sx={{ p: 0.75, mb: 0.5, border: '1px solid', borderColor: 'divider' }} elevation={0}>
+      <Paper sx={{ p: 0.75 }}>
         <Box sx={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
           {/* Who it is, and whether its data reached the auction */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
@@ -310,7 +310,7 @@ const PreAuctionComponent = (): JSX.Element => {
       ) : (
         <React.Fragment>
           {!harSupported && (
-            <Grid size={{ xs: 12 }} sx={{ mb: 0.5 }}>
+            <Grid size={{ xs: 12 }}>
               <Alert severity="info" sx={{ py: 0 }}>
                 Verdicts below come from config and auction data and are complete. Per-provider network timings need the DevTools panel — open DevTools before loading the page.
               </Alert>
@@ -318,7 +318,7 @@ const PreAuctionComponent = (): JSX.Element => {
           )}
 
           {harSupported && !correlation.available && (
-            <Grid size={{ xs: 12 }} sx={{ mb: 0.5 }}>
+            <Grid size={{ xs: 12 }}>
               <Alert severity="info" sx={{ py: 0 }}>
                 No requests captured yet. DevTools only sees traffic while it is open — reload the page with the panel open to get network timings.
               </Alert>
@@ -331,7 +331,7 @@ const PreAuctionComponent = (): JSX.Element => {
 
           {unattributedHosts.length > 0 && (
             <Grid size={{ xs: 12 }}>
-              <Paper sx={{ p: 1, mt: 0.5 }} elevation={0}>
+              <Paper sx={{ p: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   Requests not attributed to any configured provider ({correlation.unmatched.length} total, busiest hosts): {unattributedHosts.map(([host, count]) => `${host} (${count})`).join(', ')}
                 </Typography>
@@ -341,7 +341,7 @@ const PreAuctionComponent = (): JSX.Element => {
 
           {diagnostics.unmatchedEidSources.length > 0 && (
             <Grid size={{ xs: 12 }}>
-              <Paper sx={{ p: 1, mt: 0.5 }} elevation={0}>
+              <Paper sx={{ p: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   EID sources not attributable to a configured module: {diagnostics.unmatchedEidSources.join(', ')}
                 </Typography>
@@ -352,7 +352,7 @@ const PreAuctionComponent = (): JSX.Element => {
           {/* A write nobody claims means the generated map is out of date */}
           {diagnostics.unmatchedImpPaths.length > 0 && (
             <Grid size={{ xs: 12 }}>
-              <Paper sx={{ p: 1, mt: 0.5 }} elevation={0}>
+              <Paper sx={{ p: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   ortb2Imp writes not attributable to a configured provider: {diagnostics.unmatchedImpPaths.join(', ')}
                 </Typography>
@@ -363,7 +363,7 @@ const PreAuctionComponent = (): JSX.Element => {
           {/* Vendor-determined paths are discovered here */}
           {diagnostics.unmatchedOrtb2Paths.length > 0 && (
             <Grid size={{ xs: 12 }}>
-              <Paper sx={{ p: 1, mt: 0.5 }} elevation={0}>
+              <Paper sx={{ p: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   ortb2 writes not attributable to a configured provider: {diagnostics.unmatchedOrtb2Paths.join(', ')}
                 </Typography>
@@ -373,7 +373,7 @@ const PreAuctionComponent = (): JSX.Element => {
 
           {diagnostics.segmentNames.length > 0 && (
             <Grid size={{ xs: 12 }}>
-              <Paper sx={{ p: 1, mt: 0.5 }} elevation={0}>
+              <Paper sx={{ p: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   ortb2 data segments seen: {diagnostics.segmentNames.join(', ')}
                 </Typography>

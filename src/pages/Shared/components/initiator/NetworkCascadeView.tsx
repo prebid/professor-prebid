@@ -125,7 +125,7 @@ export const NetworkCascadeView = ({ entries, selectedEntry, onSelectEntry }: Ne
   const treeNodes = buildNetworkTree(entries, rootFilter);
 
   return (
-    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 1, overflow: 'hidden' }}>
+    <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 0.5, overflow: 'hidden' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
         <TextField size="small" placeholder="Filter tree cascade by Root URL, Domain or Provider (e.g. adnxs.com or /getuid)..." value={rootFilter} onChange={(e) => setRootFilter(e.target.value)} sx={{ flex: 1 }} />
         {rootFilter && <Chip label="Clear Filter" size="small" onClick={() => setRootFilter('')} sx={{ cursor: 'pointer' }} />}
@@ -134,7 +134,7 @@ export const NetworkCascadeView = ({ entries, selectedEntry, onSelectEntry }: Ne
       {treeNodes.length === 0 ? (
         <EmptyNetworkView>No initiator or redirect chains match the filter.</EmptyNetworkView>
       ) : (
-        <Paper variant="outlined" sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+        <Paper sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
           {treeNodes.map((node) => (
             <TreeNodeRow key={node.id} node={node} selectedEntry={selectedEntry} onSelectEntry={onSelectEntry} />
           ))}

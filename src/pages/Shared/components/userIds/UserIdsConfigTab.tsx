@@ -10,6 +10,7 @@ import StorageIcon from '@mui/icons-material/Storage';
 import AppStateContext from '../../contexts/appStateContext';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { createQueryEngine } from '../autocomplete/utils';
+import { TabEmptyState } from '../TabToolbar';
 
 export const USER_ID_MODULE_FIELD_MAP = {
   name: (m: any) => m?.name,
@@ -28,25 +29,23 @@ const ConfigTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element 
 
   if (!filteredModules || filteredModules.length === 0) {
     return (
-      <Grid size={{ xs: 12 }}>
-        <Box sx={{ p: 3, textAlign: 'center', backgroundColor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="body1" color="text.secondary">
-            {searchQuery ? `No User ID modules match "${searchQuery}"` : 'No User ID module configuration found in pbjs.setConfig({ userSync })'}
-          </Typography>
-        </Box>
-      </Grid>
+      <TabEmptyState>
+        <Typography variant="body1" color="text.secondary">
+          {searchQuery ? `No User ID modules match "${searchQuery}"` : 'No User ID module configuration found in pbjs.setConfig({ userSync })'}
+        </Typography>
+      </TabEmptyState>
     );
   }
 
   return (
-    <Grid container spacing={0.75} sx={{ width: '100%' }}>
+    <Grid container sx={{ width: '100%', p: 0 }}>
       {filteredModules.map((userId, index) => {
         const bidders = userId?.bidders || [];
         const params = userId?.params;
 
         return (
           <Grid key={userId?.name || index} size={{ xs: 12 }}>
-            <Card elevation={1} sx={{ border: '1px solid', borderColor: 'divider', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 2 } }}>
+            <Card elevation={1} sx={{ transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 2 } }}>
               <CardContent sx={{ p: 1.25, '&:last-child': { pb: 1.25 } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

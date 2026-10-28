@@ -55,7 +55,7 @@ const UserIdsComponent = (): JSX.Element => {
       {/* Raw JSON Overlay */}
       {showRawJson && (
         <Grid size={{ xs: 12 }}>
-          <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: 'primary.main' }}>
+          <Paper sx={{ p: 1.25 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
               Raw User ID Data Object:
             </Typography>

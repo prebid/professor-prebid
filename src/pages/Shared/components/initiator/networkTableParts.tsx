@@ -29,7 +29,7 @@ export const statusColor = (status: number): 'success' | 'info' | 'error' | 'def
 
 /** Takes the place of a network view that has nothing to show. */
 export const EmptyNetworkView = ({ children }: { children: ReactNode }): JSX.Element => (
-  <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', mt: 1 }}>
+  <Paper sx={{ p: 4, textAlign: 'center' }}>
     <Typography variant="body1" color="text.secondary">
       {children}
     </Typography>
@@ -44,7 +44,7 @@ export interface INetworkColumn {
 
 /** A scrolling table of requests with a sticky header. */
 export const NetworkTable = ({ columns, children }: { columns: INetworkColumn[]; children: ReactNode }): JSX.Element => (
-  <TableContainer component={Paper} variant="outlined" sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+  <TableContainer component={Paper} sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
     <Table size="small" stickyHeader>
       <TableHead>
         <TableRow>
