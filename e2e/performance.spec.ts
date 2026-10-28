@@ -191,21 +191,16 @@ test.describe('Real-World Performance Benchmark', () => {
     test.setTimeout(targetSites.length * ITERATIONS * 2 * 50000 + 60000);
     const summaries: SiteBenchmarkSummary[] = [];
     for (const site of targetSites) {
-      // 1. Baseline Runs (No Extension)
+      // 1. Baseline (no extension) and Professor Prebid runs, alternating so that a site or network that
+      // gets slower during the benchmark affects both sides alike.
       const baselineRuns: PerformanceRunResult[] = [];
-      for (let i = 1; i <= ITERATIONS; i++) {
-        process.stdout.write(`    - Iteration ${i}/${ITERATIONS}... `);
-        const res = await measurePagePerformance(site.url, false, pathToExtension);
-        baselineRuns.push(res);
-      }
-      const baselineMedian = aggregateRuns(baselineRuns);
-      // 2. Extension Runs (With Professor Prebid)
       const extRuns: PerformanceRunResult[] = [];
       for (let i = 1; i <= ITERATIONS; i++) {
-        process.stdout.write(`    - Iteration ${i}/${ITERATIONS}... `);
-        const res = await measurePagePerformance(site.url, true, pathToExtension);
-        extRuns.push(res);
+        console.log(`    ${site.name}: iteration ${i}/${ITERATIONS}`);
+        baselineRuns.push(await measurePagePerformance(site.url, false, pathToExtension));
+        extRuns.push(await measurePagePerformance(site.url, true, pathToExtension));
       }
+      const baselineMedian = aggregateRuns(baselineRuns);
       const extMedian = aggregateRuns(extRuns);
       // 3. Compute Deltas
       const summary: SiteBenchmarkSummary = {
@@ -237,13 +232,8 @@ test.describe('Real-World Performance Benchmark', () => {
         { Metric: 'JS Heap Used (MB)', Baseline: baselineMedian.jsHeapUsedMB, 'With Extension': extMedian.jsHeapUsedMB, 'Delta (%)': `${summary.delta.jsHeapUsedMB.pct > 0 ? '+' : ''}${summary.delta.jsHeapUsedMB.pct}%` },
       ]);
     }
-    // Save detailed report
-    const reportDir = path.join(__dirname, '../reports/performance');
-    fs.mkdirSync(reportDir, { recursive: true });
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const jsonPath = path.join(reportDir, `perf-report-${timestamp}.json`);
-    const mdPath = path.join(reportDir, `perf-report-${timestamp}.md`);
-    fs.writeFileSync(jsonPath, JSON.stringify(summaries, null, 2));
+    // The report is attached to the test result (test-results/, outside the source tree) and printed.
+    await test.info().attach('perf-report.json', { body: JSON.stringify(summaries, null, 2), contentType: 'application/json' });
     // Generate Markdown Report
     let mdReport = `# Professor Prebid - Performance Impact Benchmark Report (InjectedApp Overlays ACTIVE)\n\n`;
     mdReport += `**Date:** ${new Date().toUTCString()}  \n`;
@@ -268,6 +258,7 @@ test.describe('Real-World Performance Benchmark', () => {
         s.delta.jsHeapUsedMB.pct
       }% |\n\n`;
     }
-    fs.writeFileSync(mdPath, mdReport);
+    await test.info().attach('perf-report.md', { body: mdReport, contentType: 'text/markdown' });
+    console.log(mdReport);
   });
 });

@@ -1,15 +1,14 @@
-import { Page, Worker } from '@playwright/test';
-import path from 'path';
-import fs from 'fs';
+import { Page, TestInfo, Worker } from '@playwright/test';
 import { test, expect } from '../fixtures/extensionTest';
 import { waitForDetectedPrebid } from '../helpers/extensionTestUtils';
-import { reconcilePrebidSurface, formatAuditReportMarkdown, PrebidGroundTruth, ExtensionCapturedState } from '../../utils/audit/surfaceReconciler';
+import { reconcilePrebidSurface, formatAuditReportMarkdown, PrebidGroundTruth, ExtensionCapturedState, SurfaceAuditReport } from '../../utils/audit/surfaceReconciler';
 
-const REPORT_DIR = path.join(__dirname, '../../reports');
-
-const writeReport = (name: string, content: string) => {
-  fs.mkdirSync(REPORT_DIR, { recursive: true });
-  fs.writeFileSync(path.join(REPORT_DIR, name), content);
+/** Attaches the report to the test result (test-results/, outside the source tree) and prints the Markdown version. */
+const attachReport = async (testInfo: TestInfo, report: SurfaceAuditReport): Promise<void> => {
+  const markdown = formatAuditReportMarkdown(report);
+  await testInfo.attach('surface-audit-report.md', { body: markdown, contentType: 'text/markdown' });
+  await testInfo.attach('surface-audit-report.json', { body: JSON.stringify(report, null, 2), contentType: 'application/json' });
+  console.log(markdown);
 };
 
 test.describe('Professor Prebid Data Surface Audit E2E', () => {
@@ -48,6 +47,24 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
    * Helper: Extracts Extension Captured State from chrome.storage.local & MCP bridge.
    */
   const extractExtensionCapturedState = async function (page: Page, serviceWorker: Worker): Promise<ExtensionCapturedState> {
+    // Updates are throttled and only follow some Prebid events, so storage can lag behind the page. Opening the
+    // popup or panel asks the page for a fresh update; do the same, and wait for it to replace the stored one.
+    // Every update with events has a new events URL. Both audits run after Prebid logged events, so wait for one
+    // that is neither missing nor the URL stored before the request.
+    const before = await waitForDetectedPrebid(serviceWorker, page.url(), 10000);
+    if (before) {
+      const tabId = Number(before.tabKey.replace('tab_info_', ''));
+      await serviceWorker.evaluate((id) => chrome.tabs.sendMessage(id, { type: 'PP_POPUP_LOADED', payload: {} }).catch((): void => undefined), tabId);
+      await expect
+        .poll(
+          async () => {
+            const eventsUrl = (await waitForDetectedPrebid(serviceWorker, page.url(), 1000))?.details.eventsUrl;
+            return !!eventsUrl && eventsUrl !== before.details.eventsUrl;
+          },
+          { timeout: 10000, message: 'the extension should store a fresh update after the popup-loaded request' }
+        )
+        .toBe(true);
+    }
     const detected = await waitForDetectedPrebid(serviceWorker, page.url(), 10000);
     const foundNamespace = detected?.namespace || 'pbjs';
     const prebidData = detected?.details;
@@ -84,7 +101,7 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
       mcpSnapshot,
     };
   };
-  test('validates 100% surface capture on comprehensive Prebid scenario', async ({ extension, liveSite }) => {
+  test('validates 100% surface capture on comprehensive Prebid scenario', async ({ extension, liveSite }, testInfo) => {
     const { page } = liveSite;
     // Serve rich synthetic Prebid page with complex config, EIDs, RTD, multiple bidders, GAM targeting
     await page.route('https://example.com/synthetic-prebid-audit', async (route) => {
@@ -216,9 +233,7 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     expect(capturedState.version).toBe('11.29.0');
     // 3. Reconcile & Audit
     const report = reconcilePrebidSurface(groundTruth, capturedState, 'https://example.com/synthetic-prebid-audit');
-    const mdReport = formatAuditReportMarkdown(report);
-    writeReport('surface-audit-report.md', mdReport);
-    writeReport('surface-audit-report.json', JSON.stringify(report, null, 2));
+    await attachReport(testInfo, report);
     // 4. Assert 100% Surface Match
     expect(report.overallPassed, 'All Prebid data domains should match 100%').toBe(true);
     expect(report.domains.version.passed).toBe(true);
@@ -227,9 +242,9 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     expect(report.domains.events.passed).toBe(true);
     expect(report.domains.userIds.passed).toBe(true);
   });
-  test('validates live site Prebid surface when URL env is provided', async ({ extension, liveSite }) => {
-    const targetUrl = process.env.AUDIT_URL || process.env.URL;
-    test.skip(!targetUrl, 'Set AUDIT_URL (or run npm run audit:surface -- --url <url>) to audit a live page.');
+  test('validates live site Prebid surface when AUDIT_URL is set', async ({ extension, liveSite }, testInfo) => {
+    const targetUrl = process.env.AUDIT_URL;
+    test.skip(!targetUrl, 'Set AUDIT_URL to audit a live page: AUDIT_URL=https://... npm run audit:surface');
     test.setTimeout(90000);
     await liveSite.open(targetUrl!);
     const { page } = liveSite;
@@ -238,7 +253,7 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     const groundTruth = await extractPageTruth(page);
     const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker);
     const report = reconcilePrebidSurface(groundTruth, capturedState, targetUrl!);
-    writeReport('live-surface-audit.md', formatAuditReportMarkdown(report));
+    await attachReport(testInfo, report);
 
     expect(report.domains.version.passed).toBe(true);
     expect(report.domains.modules.passed).toBe(true);

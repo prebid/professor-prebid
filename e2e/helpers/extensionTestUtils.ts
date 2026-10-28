@@ -30,12 +30,11 @@ export const launchExtensionContext = async (): Promise<ExtensionContextInfo> =>
     throw new Error(`No extension build in ${PATH_TO_EXTENSION}. Run npm run build first.`);
   }
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'professor-prebid-e2e-'));
-  const args = [`--disable-extensions-except=${PATH_TO_EXTENSION}`, `--load-extension=${PATH_TO_EXTENSION}`, '--no-sandbox', '--disable-web-security'];
+  const args = [`--disable-extensions-except=${PATH_TO_EXTENSION}`, `--load-extension=${PATH_TO_EXTENSION}`, '--no-sandbox'];
   if (isHeadless()) args.push('--headless=new');
 
   const browserContext = await chromium.launchPersistentContext(userDataDir, {
     headless: false, // Extensions need a persistent, headed context; headless mode is set through --headless=new above.
-    bypassCSP: true,
     args,
   });
 

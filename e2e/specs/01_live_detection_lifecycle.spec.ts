@@ -13,8 +13,9 @@ test.describe('01 - Live Prebid Detection & Extension Lifecycle', { tag: LIVE },
   for (const { name, title } of sites) {
     test(title, async ({ extension, liveSite }) => {
       const extensionErrors: string[] = [];
+      // Errors thrown by the injected script have the extension's URL in their stack.
       liveSite.page.on('pageerror', (error) => {
-        if (/prof(essor)?[ _-]?prebid/i.test(`${error.message} ${error.stack}`)) extensionErrors.push(error.message);
+        if (`${error.stack}`.includes(`chrome-extension://${extension.extensionId}/`)) extensionErrors.push(error.message);
       });
 
       await liveSite.open(liveSiteNamed(name).url);

@@ -100,7 +100,8 @@ export const reconcilePrebidSurface = function (truth: PrebidGroundTruth, captur
   // 3. Config Reconcile
   const truthConfig = truth.config || {};
   const capturedConfig = captured.config || {};
-  const truthConfigKeys = Object.keys(truthConfig);
+  // Undefined values and functions do not survive the JSON message to the background, so they cannot be captured.
+  const truthConfigKeys = Object.keys(truthConfig).filter((k) => truthConfig[k] !== undefined && typeof truthConfig[k] !== 'function');
   const missingConfigKeys = truthConfigKeys.filter((k) => !(k in capturedConfig));
   const valueMismatches: string[] = [];
 

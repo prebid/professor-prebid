@@ -63,6 +63,17 @@ describe('surfaceReconciler', () => {
     expect(md).toContain('11.29.0');
   });
 
+  it('does not report config keys that cannot be messaged to the background as missing', () => {
+    const config = { bidderTimeout: 1500, enableSendAllBids: undefined as unknown, customFn: () => 1 };
+    const truth: PrebidGroundTruth = { namespace: 'pbjs', version: '11.42.0', installedModules: [], config, eids: [], adUnits: [], events: [], winningBids: [] };
+    const captured: ExtensionCapturedState = { namespace: 'pbjs', version: '11.42.0', config: JSON.parse(JSON.stringify(config)) };
+
+    const report = reconcilePrebidSurface(truth, captured);
+
+    expect(report.domains.config.passed).toBe(true);
+    expect(report.domains.config.summary).toContain('All 1 config sections');
+  });
+
   it('detects missing config keys, missing modules, and dropped events', () => {
     const truth: PrebidGroundTruth = {
       namespace: 'pbjs',
