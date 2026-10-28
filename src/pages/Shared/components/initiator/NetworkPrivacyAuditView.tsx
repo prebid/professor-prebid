@@ -7,20 +7,13 @@ import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { IClassifiedNetworkEntry } from './networkClassifier';
-import { EmptyNetworkView, INetworkColumn, NetworkRow, NetworkTable, RequestSummary } from './networkTableParts';
+import { copyToClipboard, EmptyNetworkView, INetworkColumn, NetworkRow, NetworkTable, RequestSummary } from './networkTableParts';
 
 export interface NetworkPrivacyAuditViewProps {
   entries: IClassifiedNetworkEntry[];
   selectedEntry: IClassifiedNetworkEntry | null;
   onSelectEntry: (entry: IClassifiedNetworkEntry) => void;
 }
-
-const copyToClipboard = (text: string, e: React.MouseEvent) => {
-  e.stopPropagation();
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text);
-  }
-};
 
 const PRIVACY_AUDIT_COLUMNS: INetworkColumn[] = [
   { label: 'Verdict', width: 120 },
@@ -99,7 +92,14 @@ export const NetworkPrivacyAuditView = ({ entries, selectedEntry, onSelectEntry 
                       {privacy.gdprConsent}
                     </Typography>
                   </Box>
-                  <IconButton size="small" onClick={(e) => copyToClipboard(privacy.gdprConsent!, e)} sx={{ p: 0.25 }}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(privacy.gdprConsent!);
+                    }}
+                    sx={{ p: 0.25 }}
+                  >
                     <ContentCopyIcon sx={{ fontSize: '0.8rem' }} />
                   </IconButton>
                 </Box>

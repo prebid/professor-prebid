@@ -23,6 +23,7 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import { decompressPayload } from './payloadDecompressor';
 import Button from '@mui/material/Button';
 import { ChipRow } from '../Section';
+import { copyToClipboard } from './networkTableParts';
 
 export interface NetworkDetailDrawerProps {
   selectedEntry: IClassifiedNetworkEntry | null;
@@ -41,11 +42,56 @@ const formatBytes = (bytes?: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
-const copyToClipboard = (text: string) => {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text);
-  }
-};
+interface IDetailRowProps {
+  label: string;
+  children: React.ReactNode;
+  /** Set on a table's first row to size its label column. */
+  labelWidth?: number;
+  /** Break long values such as URLs anywhere. */
+  wrap?: boolean;
+  color?: string;
+}
+
+/** A label and value row in one of the drawer's detail tables. */
+const DetailRow = ({ label, children, labelWidth, wrap = false, color }: IDetailRowProps): JSX.Element => (
+  <TableRow>
+    <TableCell sx={{ fontWeight: 600, width: labelWidth, color }}>{label}</TableCell>
+    <TableCell sx={{ wordBreak: wrap ? 'break-all' : undefined, color }}>{children}</TableCell>
+  </TableRow>
+);
+
+interface IPairsPanelProps {
+  title: string;
+  pairs?: Array<{ name: string; value: string }>;
+  nameWidth: number;
+  /** Shown instead of an empty table. */
+  emptyText?: string;
+}
+
+/** A titled table of name/value pairs, such as headers or cookies. */
+const PairsPanel = ({ title, pairs = [], nameWidth, emptyText }: IPairsPanelProps): JSX.Element => (
+  <Paper variant="outlined" sx={{ p: 1.5 }}>
+    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+      {title} ({pairs.length})
+    </Typography>
+    {pairs.length === 0 && emptyText ? (
+      <Typography variant="caption" color="text.secondary">
+        {emptyText}
+      </Typography>
+    ) : (
+      <Table size="small">
+        <TableBody>
+          {pairs.map((pair, i) => (
+            <TableRow key={i}>
+              <TableCell sx={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.75rem', width: nameWidth }}>{pair.name}</TableCell>
+              <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{pair.value}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    )}
+  </Paper>
+);
 
 export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDrawerProps): JSX.Element => {
   const [tabIndex, setTabIndex] = useState<number>(0);
@@ -210,41 +256,23 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
               </Typography>
               <Table size="small">
                 <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600, width: 140 }}>Host</TableCell>
-                    <TableCell>{entry.host || 'N/A'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Pathname</TableCell>
-                    <TableCell sx={{ wordBreak: 'break-all' }}>{entry.pathname || '/'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                    <TableCell>
-                      {entry.status} {entry.statusText}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Duration</TableCell>
-                    <TableCell>{formatMs(entry.time)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Resource Type</TableCell>
-                    <TableCell>{entry.resourceType || 'fetch'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>MIME Type</TableCell>
-                    <TableCell>{entry.mimeType || 'N/A'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Response Size</TableCell>
-                    <TableCell>{formatBytes(entry.contentSize)}</TableCell>
-                  </TableRow>
+                  <DetailRow label="Host" labelWidth={140}>
+                    {entry.host || 'N/A'}
+                  </DetailRow>
+                  <DetailRow label="Pathname" wrap>
+                    {entry.pathname || '/'}
+                  </DetailRow>
+                  <DetailRow label="Status">
+                    {entry.status} {entry.statusText}
+                  </DetailRow>
+                  <DetailRow label="Duration">{formatMs(entry.time)}</DetailRow>
+                  <DetailRow label="Resource Type">{entry.resourceType || 'fetch'}</DetailRow>
+                  <DetailRow label="MIME Type">{entry.mimeType || 'N/A'}</DetailRow>
+                  <DetailRow label="Response Size">{formatBytes(entry.contentSize)}</DetailRow>
                   {entry.redirectURL && (
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 600, color: 'info.main' }}>Redirects To</TableCell>
-                      <TableCell sx={{ wordBreak: 'break-all', color: 'info.main' }}>{entry.redirectURL}</TableCell>
-                    </TableRow>
+                    <DetailRow label="Redirects To" wrap color="info.main">
+                      {entry.redirectURL}
+                    </DetailRow>
                   )}
                 </TableBody>
               </Table>
@@ -326,54 +354,39 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
                 {privacy.decodedTcf ? (
                   <Table size="small">
                     <TableBody>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600, width: 160 }}>TCF Version</TableCell>
-                        <TableCell>v{privacy.decodedTcf.version}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>CMP ID</TableCell>
-                        <TableCell>{privacy.decodedTcf.cmpId}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>CMP Version</TableCell>
-                        <TableCell>{privacy.decodedTcf.cmpVersion}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Consent Language</TableCell>
-                        <TableCell>{privacy.decodedTcf.consentLanguage || 'N/A'}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Purpose Consents</TableCell>
-                        <TableCell>
-                          <ChipRow>
-                            {privacy.decodedTcf.purposeConsents && privacy.decodedTcf.purposeConsents.length > 0 ? (
-                              privacy.decodedTcf.purposeConsents.map((p) => <Chip key={p} label={`P${p}`} size="small" color="primary" variant="outlined" />)
-                            ) : (
-                              <Typography variant="caption" color="text.secondary">
-                                None granted
-                              </Typography>
-                            )}
-                          </ChipRow>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Special Features</TableCell>
-                        <TableCell>
-                          <ChipRow>
-                            {privacy.decodedTcf.specialFeatureOptins && privacy.decodedTcf.specialFeatureOptins.length > 0 ? (
-                              privacy.decodedTcf.specialFeatureOptins.map((f) => <Chip key={f} label={`SF${f}`} size="small" color="secondary" variant="outlined" />)
-                            ) : (
-                              <Typography variant="caption" color="text.secondary">
-                                None
-                              </Typography>
-                            )}
-                          </ChipRow>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600 }}>Vendor Consents</TableCell>
-                        <TableCell>{privacy.decodedTcf.vendorConsents?.length || 0} Vendors Granted</TableCell>
-                      </TableRow>
+                      <DetailRow label="TCF Version" labelWidth={160}>
+                        v{privacy.decodedTcf.version}
+                      </DetailRow>
+                      <DetailRow label="CMP ID">{privacy.decodedTcf.cmpId}</DetailRow>
+                      <DetailRow label="CMP Version">{privacy.decodedTcf.cmpVersion}</DetailRow>
+                      <DetailRow label="Consent Language">{privacy.decodedTcf.consentLanguage || 'N/A'}</DetailRow>
+                      <DetailRow label="Purpose Consents">
+                        <ChipRow>
+                          {' '}
+                          {privacy.decodedTcf.purposeConsents && privacy.decodedTcf.purposeConsents.length > 0 ? (
+                            privacy.decodedTcf.purposeConsents.map((p) => <Chip key={p} label={`P${p}`} size="small" color="primary" variant="outlined" />)
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">
+                              {' '}
+                              None granted{' '}
+                            </Typography>
+                          )}{' '}
+                        </ChipRow>
+                      </DetailRow>
+                      <DetailRow label="Special Features">
+                        <ChipRow>
+                          {' '}
+                          {privacy.decodedTcf.specialFeatureOptins && privacy.decodedTcf.specialFeatureOptins.length > 0 ? (
+                            privacy.decodedTcf.specialFeatureOptins.map((f) => <Chip key={f} label={`SF${f}`} size="small" color="secondary" variant="outlined" />)
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">
+                              {' '}
+                              None{' '}
+                            </Typography>
+                          )}{' '}
+                        </ChipRow>
+                      </DetailRow>
+                      <DetailRow label="Vendor Consents">{privacy.decodedTcf.vendorConsents?.length || 0} Vendors Granted</DetailRow>
                     </TableBody>
                   </Table>
                 ) : (
@@ -391,30 +404,16 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
               </Typography>
               <Table size="small">
                 <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600, width: 160 }}>GDPR Applies (gdpr)</TableCell>
-                    <TableCell>{privacy.gdpr !== undefined ? privacy.gdpr : 'Not Specified'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>US Privacy String</TableCell>
-                    <TableCell>{privacy.usPrivacy || 'None'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Global Privacy Platform (GPP)</TableCell>
-                    <TableCell sx={{ wordBreak: 'break-all' }}>{privacy.gpp || 'None'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>GPP Section IDs (gpp_sid)</TableCell>
-                    <TableCell>{privacy.gppSid || 'None'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Global Privacy Control (GPC)</TableCell>
-                    <TableCell>{privacy.gpc === '1' ? 'Enabled (Sec-GPC: 1)' : 'Not Set'}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>COPPA / Child Directed</TableCell>
-                    <TableCell>{privacy.coppa === '1' ? 'Yes (coppa=1)' : 'No'}</TableCell>
-                  </TableRow>
+                  <DetailRow label="GDPR Applies (gdpr)" labelWidth={160}>
+                    {privacy.gdpr !== undefined ? privacy.gdpr : 'Not Specified'}
+                  </DetailRow>
+                  <DetailRow label="US Privacy String">{privacy.usPrivacy || 'None'}</DetailRow>
+                  <DetailRow label="Global Privacy Platform (GPP)" wrap>
+                    {privacy.gpp || 'None'}
+                  </DetailRow>
+                  <DetailRow label="GPP Section IDs (gpp_sid)">{privacy.gppSid || 'None'}</DetailRow>
+                  <DetailRow label="Global Privacy Control (GPC)">{privacy.gpc === '1' ? 'Enabled (Sec-GPC: 1)' : 'Not Set'}</DetailRow>
+                  <DetailRow label="COPPA / Child Directed">{privacy.coppa === '1' ? 'Yes (coppa=1)' : 'No'}</DetailRow>
                 </TableBody>
               </Table>
             </Paper>
@@ -483,37 +482,9 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
         {tabIndex === 3 && (
           <>
             <TextField size="small" placeholder="Search headers..." value={headerFilter} onChange={(e) => setHeaderFilter(e.target.value)} />
-            <Paper variant="outlined" sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Request Headers ({filteredReqHeaders.length})
-              </Typography>
-              <Table size="small">
-                <TableBody>
-                  {filteredReqHeaders.map((h, i) => (
-                    <TableRow key={i}>
-                      <TableCell sx={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.75rem', width: 180 }}>{h.name}</TableCell>
-                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{h.value}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Paper>
+            <PairsPanel title="Request Headers" pairs={filteredReqHeaders} nameWidth={180} />
 
-            <Paper variant="outlined" sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Response Headers ({filteredResHeaders.length})
-              </Typography>
-              <Table size="small">
-                <TableBody>
-                  {filteredResHeaders.map((h, i) => (
-                    <TableRow key={i}>
-                      <TableCell sx={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.75rem', width: 180 }}>{h.name}</TableCell>
-                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{h.value}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Paper>
+            <PairsPanel title="Response Headers" pairs={filteredResHeaders} nameWidth={180} />
           </>
         )}
 
@@ -572,49 +543,9 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
         {/* Tab 5: Cookies */}
         {tabIndex === 5 && (
           <>
-            <Paper variant="outlined" sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Request Cookies ({entry.requestCookies?.length || 0})
-              </Typography>
-              {entry.requestCookies && entry.requestCookies.length > 0 ? (
-                <Table size="small">
-                  <TableBody>
-                    {entry.requestCookies.map((c, i) => (
-                      <TableRow key={i}>
-                        <TableCell sx={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.75rem', width: 140 }}>{c.name}</TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{c.value}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Typography variant="caption" color="text.secondary">
-                  No request cookies
-                </Typography>
-              )}
-            </Paper>
+            <PairsPanel title="Request Cookies" pairs={entry.requestCookies} nameWidth={140} emptyText="No request cookies" />
 
-            <Paper variant="outlined" sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                Response Cookies / Set-Cookie ({entry.responseCookies?.length || 0})
-              </Typography>
-              {entry.responseCookies && entry.responseCookies.length > 0 ? (
-                <Table size="small">
-                  <TableBody>
-                    {entry.responseCookies.map((c, i) => (
-                      <TableRow key={i}>
-                        <TableCell sx={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.75rem', width: 140 }}>{c.name}</TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>{c.value}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Typography variant="caption" color="text.secondary">
-                  No response cookies set
-                </Typography>
-              )}
-            </Paper>
+            <PairsPanel title="Response Cookies / Set-Cookie" pairs={entry.responseCookies} nameWidth={140} emptyText="No response cookies set" />
           </>
         )}
 

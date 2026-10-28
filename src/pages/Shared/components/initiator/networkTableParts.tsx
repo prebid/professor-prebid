@@ -10,6 +10,15 @@ import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
+/** Copies text to the clipboard when the browser allows it (DevTools panels may not). */
+export const copyToClipboard = async (text: string): Promise<void> => {
+  try {
+    await navigator.clipboard?.writeText(text);
+  } catch {
+    // Not allowed here; nothing to copy to.
+  }
+};
+
 /** Chip colour for an HTTP status. */
 export const statusColor = (status: number): 'success' | 'info' | 'error' | 'default' => {
   if (status >= 200 && status < 300) return 'success';
