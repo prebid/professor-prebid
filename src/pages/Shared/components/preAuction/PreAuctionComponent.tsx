@@ -285,8 +285,6 @@ const PreAuctionComponent = (): JSX.Element => {
 
   return (
     <Grid container sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
-      <PreAuctionHelp />
-
       <TabToolbar
         stats={[
           { label: `Provider${cP(diagnostics.providers)}: ${diagnostics.providers.length}` },
@@ -302,6 +300,8 @@ const PreAuctionComponent = (): JSX.Element => {
           </>
         }
       />
+
+      <PreAuctionHelp />
 
       {showJson ? (
         <Grid size={{ xs: 12 }}>

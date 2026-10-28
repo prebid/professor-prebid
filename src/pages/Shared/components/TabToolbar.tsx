@@ -89,19 +89,24 @@ interface ITabToolbarProps {
   actions?: ReactNode;
 }
 
-/** The header row of a data tab: its counts, then the filter, which takes the remaining width, then its actions. */
+/**
+ * The header row of a data tab: its counts, then the filter, which takes the remaining width, then its actions.
+ * The filter, extra and actions wrap as one group, so on a narrow screen they move to a second line together.
+ */
 export const TabToolbar = ({ stats = [], search, extra, actions }: ITabToolbarProps): JSX.Element => (
   <Box sx={{ width: '100%', flexShrink: 0, display: 'flex', alignItems: 'stretch', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
     {stats.map((stat, i) => (
       <TabStat key={i} {...stat} />
     ))}
-    <Box sx={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-      <Box sx={{ width: '100%' }}>
-        <AutoComplete {...search} />
+    <Box sx={{ flex: '1 1 320px', display: 'flex', alignItems: 'stretch', gap: 0.5, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 180, display: 'flex', alignItems: 'center', '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
+        <Box sx={{ width: '100%' }}>
+          <AutoComplete {...search} />
+        </Box>
       </Box>
+      {extra}
+      {actions && <Paper sx={{ display: 'flex', alignItems: 'center', px: 0.25, flexShrink: 0 }}>{actions}</Paper>}
     </Box>
-    {extra}
-    {actions && <Paper sx={{ display: 'flex', alignItems: 'center', px: 0.25 }}>{actions}</Paper>}
   </Box>
 );
 

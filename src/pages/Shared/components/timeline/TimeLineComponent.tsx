@@ -1,10 +1,8 @@
 import React, { useContext, useState, useMemo } from 'react';
+import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Button from '@mui/material/Button';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
 import GanttChartComponent, { TimelineViewMode } from '../../../Popup/components/timeline/GanttChartComponent';
@@ -14,7 +12,7 @@ import { conditionalPluralization as cP } from '../../utils';
 import { getPreAuctionTimeline } from './preAuctionTimeline';
 import { JsonViewToggle } from '../JsonViewToggle';
 import { DownloadButton } from '../DownloadButton';
-import { TabToolbar, ToolbarButton } from '../TabToolbar';
+import { TabStat, TabToolbar, ToolbarButton } from '../TabToolbar';
 
 const TimeLineComponent = (): JSX.Element => {
   const { prebid, auctionEndEvents } = useContext(AppStateContext);
@@ -92,64 +90,13 @@ const TimeLineComponent = (): JSX.Element => {
           }
         />
 
-        {/* Auction Sub-Tabs Header - Removes disabled left scroll button gap */}
-        <Grid size={{ xs: 12 }} sx={{ mb: 0.5 }}>
-          <Tabs
-            value={selectedTab}
-            onChange={(_, val) => setSelectedTab(val)}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              minHeight: 32,
-              '& .MuiTabs-indicator': { display: 'none' },
-              '& .MuiTabScrollButton-root': {
-                width: '16px',
-                '&.Mui-disabled': {
-                  width: 0,
-                  minWidth: 0,
-                  display: 'none',
-                },
-              },
-              'svg[data-testid="KeyboardArrowRightIcon"],svg[data-testid="KeyboardArrowLeftIcon"]': {
-                fill: 'rgba(0, 0, 0, 0.6)',
-              },
-            }}
-          >
-            <Tab
-              sx={{ padding: '0px 3px 0px 0px', minWidth: 'initial', minHeight: 32 }}
-              label={
-                <Button
-                  size="small"
-                  variant={selectedTab === 0 ? 'contained' : 'outlined'}
-                  onClick={() => setSelectedTab(0)}
-                  sx={{ py: 0.25, px: 1, textTransform: 'none', fontSize: '0.75rem', fontWeight: 600, backgroundColor: selectedTab === 0 ? undefined : 'background.paper' }}
-                >
-                  ALL AUCTIONS ({totalAuctions})
-                </Button>
-              }
-            />
-            {auctionEndEvents.map((ae, idx) => {
-              const tabIdx = idx + 1;
-              const isSelected = selectedTab === tabIdx;
-              return (
-                <Tab
-                  key={idx}
-                  sx={{ padding: '0px 3px', minWidth: 'initial', minHeight: 32 }}
-                  label={
-                    <Button
-                      size="small"
-                      variant={isSelected ? 'contained' : 'outlined'}
-                      onClick={() => setSelectedTab(tabIdx)}
-                      sx={{ py: 0.25, px: 1, textTransform: 'none', fontSize: '0.75rem', fontWeight: 600, backgroundColor: isSelected ? undefined : 'background.paper' }}
-                    >
-                      Auction #{idx + 1} ({ae.args?.auctionId?.slice(0, 8) || 'ID'})
-                    </Button>
-                  }
-                />
-              );
-            })}
-          </Tabs>
-        </Grid>
+        {/* Auction switcher: scrolls sideways when there are many auctions */}
+        <Box sx={{ width: '100%', display: 'flex', gap: 0.5, overflowX: 'auto', mb: 0.5, pb: 0.25 }}>
+          <TabStat label={`All Auctions (${totalAuctions})`} selected={selectedTab === 0} onClick={() => setSelectedTab(0)} />
+          {auctionEndEvents.map((ae, idx) => (
+            <TabStat key={idx} label={`Auction #${idx + 1} (${ae.args?.auctionId?.slice(0, 8) || 'ID'})`} selected={selectedTab === idx + 1} onClick={() => setSelectedTab(idx + 1)} />
+          ))}
+        </Box>
       </Grid>
 
       {/* Content View: JSON or SVG Gantt Chart */}
