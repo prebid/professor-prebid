@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { IPrebidAuctionEndEventData, IPrebidDebugConfig, IPrebidDebugConfigBid } from '../../../../Injected/prebid';
 import AppStateContext from '../../../contexts/appStateContext';
+import { ChipRow } from '../../Section';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -109,14 +110,14 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
     const auctionInitEndEvent = events.filter((event) => ['auctionInit', 'auctionEnd'].includes(event.eventType)) || [];
     const bidderNamesSet = auctionInitEndEvent.reduce((previousValue, currentValue) => {
       const adUnitsArray = (currentValue as IPrebidAuctionEndEventData).args.adUnits || [];
-      adUnitsArray.forEach((adUnit) => adUnit.bids.forEach((bid) => previousValue.add(bid.bidder)));
+      adUnitsArray.forEach((adUnit: any) => adUnit?.bids?.forEach((bid: any) => bid?.bidder && previousValue.add(bid.bidder)));
       return previousValue;
     }, new Set<string>());
     setDetectedBidderNames(Array.from(bidderNamesSet));
 
     const adUnitCodesSet = auctionInitEndEvent.reduce((previousValue, currentValue) => {
       const adUnitsCodesArray = (currentValue as IPrebidAuctionEndEventData).args.adUnitCodes || [];
-      adUnitsCodesArray.forEach((adUnitCode) => previousValue.add(adUnitCode));
+      adUnitsCodesArray.forEach((adUnitCode: string) => previousValue.add(adUnitCode));
       return previousValue;
     }, new Set<string>());
     setDetectedAdUnitCodes(Array.from(adUnitCodesSet));
@@ -158,11 +159,11 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
             onChange={handleBidderSelectionChange}
             input={<OutlinedInput label="Detected Bidders" />}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value, index) => (
+              <ChipRow>
+                {selected.map((value) => (
                   <Chip
                     size="small"
-                    key={index}
+                    key={value}
                     label={value}
                     onDelete={handleBidderDelete(value)}
                     onMouseDown={(event) => {
@@ -170,13 +171,13 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
                     }}
                   />
                 ))}
-              </Box>
+              </ChipRow>
             )}
             MenuProps={MenuProps}
             disabled={!bidsOverwriteEnabled}
           >
-            {detectedBidderNames.map((name, index) => (
-              <MenuItem key={index} value={name} style={getStyles(name, selectedBidders, theme)}>
+            {detectedBidderNames.map((name) => (
+              <MenuItem key={name} value={name} style={getStyles(name, selectedBidders, theme)}>
                 {name}
               </MenuItem>
             ))}
@@ -193,11 +194,11 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
             onChange={handleAdunitSelectionChange}
             input={<OutlinedInput label="Detected AdUnit(s)" />}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value, index) => (
+              <ChipRow>
+                {selected.map((value) => (
                   <Chip
                     size="small"
-                    key={index}
+                    key={value}
                     label={value.length > 26 ? `...${value.substring(value.length - 26)}` : value}
                     onDelete={handleAdUnitDelete(value)}
                     onMouseDown={(event) => {
@@ -205,13 +206,13 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
                     }}
                   />
                 ))}
-              </Box>
+              </ChipRow>
             )}
             MenuProps={MenuProps}
             disabled={!bidsOverwriteEnabled || selectedBidders.length === 0}
           >
-            {detectedAdUnitCodes.map((name, index) => (
-              <MenuItem key={index} value={name} style={getStyles(name, selectedAdUnitCodes, theme)}>
+            {detectedAdUnitCodes.map((name) => (
+              <MenuItem key={name} value={name} style={getStyles(name, selectedAdUnitCodes, theme)}>
                 {name.length > 40 ? `...${name.substring(name.length - 40)}` : name}
               </MenuItem>
             ))}

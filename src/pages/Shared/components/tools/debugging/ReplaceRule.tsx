@@ -13,11 +13,9 @@ import { INativeRules, IPrebidDebugModuleConfigRule } from '../../../../Injected
 
 const sanityCheck = (rule: IPrebidDebugModuleConfigRule, mediaType: string) => {
   if (mediaType === 'native') {
-    // if (Object.keys(rule.when).includes('mediaType') && Object.values(rule.when).includes('native')) return true; // matching on mediaType not working
     if (Object.keys(rule.then).includes('mediaType') && Object.values(rule.then).includes('native')) return true;
   }
   if (mediaType === 'video') {
-    // if (Object.keys(rule.when).includes('mediaType') && Object.values(rule.when).includes('video')) return true; // matching on mediaType not working
     if (Object.keys(rule.then).includes('mediaType') && Object.values(rule.then).includes('video')) return true;
   }
   if (['allMediaTypes', 'banner'].includes(mediaType)) return true;
@@ -63,10 +61,10 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
           const subkeys = replaceRuleTargets.map((x) => x.subkey).filter((x) => x);
           const newKey = replaceRuleTargets.find((keyOption) => keyOption.value === e.target.value);
           const newPath = [...path.slice(0, path.length - 1), e.target.value];
-          if (newKey.subkey && newPath[3] !== newKey.subkey) {
+          if (newKey?.subkey && newPath[3] !== newKey.subkey) {
             newPath.splice(3, 0, newKey.subkey);
           }
-          if (!newKey.subkey && subkeys.includes(newPath[2])) {
+          if (!newKey?.subkey && subkeys.includes(newPath[3])) {
             newPath.splice(3, 1);
           }
           handleRulesFormChange('update', '', newPath, [...path.slice(0, path.length - 1), ruleKey]);
@@ -74,12 +72,12 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
       >
         {mediaTypes
           .filter((mediaType) => sanityCheck(rule, mediaType))
-          ?.map((group, index) => (
-            <optgroup key={index} label={group !== 'allMediaTypes' ? `mediaType: ${group}` : 'all mediaTypes'}>
+          ?.map((group) => (
+            <optgroup key={group} label={group !== 'allMediaTypes' ? `mediaType: ${group}` : 'all mediaTypes'}>
               {replaceRuleTargets
                 ?.filter((replaceRuleTarget) => replaceRuleTarget.mediaType === group)
-                .map((option, index) => (
-                  <option key={index} value={option.value}>
+                .map((option) => (
+                  <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
@@ -90,12 +88,12 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
       <IconButton size="small" color="primary" children={<DoubleArrowIcon />} />
 
       <TextField
-        error={(path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || '') === ''}
+        error={(path[3] === 'native' ? rule.then?.native?.[ruleKey as keyof INativeRules] || '' : rule.then?.[ruleKey] || '') === ''}
         sx={{ m: 0.25, width: '17ch' }}
         size="small"
         select={ruleKey === 'mediaType'}
         label="Replace-Rule Value"
-        value={path[3] === 'native' ? rule.then.native[ruleKey as keyof INativeRules] || '' : rule.then[ruleKey] || ''}
+        value={path[3] === 'native' ? rule.then?.native?.[ruleKey as keyof INativeRules] || '' : rule.then?.[ruleKey] || ''}
         type={ruleKey === 'mediaType' ? 'text' : replaceRuleTargets.find((x) => x.value === ruleKey)?.type}
         onChange={(event) => {
           const type = replaceRuleTargets.find((x) => x.value === ruleKey)?.type;
@@ -105,8 +103,8 @@ const ReplaceRule = ({ rule, groupIndex, ruleKey, handleRulesFormChange, path }:
           ruleKey === 'mediaType' &&
           replaceRuleTargets
             .find((target) => target.value === ruleKey)
-            ?.options.map((option, index) => (
-              <MenuItem key={index} value={option} dense>
+            ?.options.map((option) => (
+              <MenuItem key={option} value={option} dense>
                 {option}
               </MenuItem>
             ))

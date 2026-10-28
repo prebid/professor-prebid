@@ -19,7 +19,7 @@ export const NavBarTabs = (): JSX.Element => {
     } else {
       setFilteredPages(PAGES.filter((page) => selectedPopUpNavItems.includes(page.path)));
     }
-  }, [isPanel, selectedPanelNavItems, selectedPopUpNavItems]);
+  }, [isPanel, selectedPanelNavItems, selectedPopUpNavItems, setFilteredPages]);
 
   return (
     <Tabs
@@ -35,11 +35,20 @@ export const NavBarTabs = (): JSX.Element => {
         justifyContent: 'top',
         alignContent: 'top',
         '& .MuiTabs-indicator': { display: 'none' },
+        // When the tabs overflow, the arrow on the side with more tabs shows in the primary colour, and the labels fade out under it.
         '& .MuiTabScrollButton-root': {
-          width: '10px',
-        },
-        'svg[data-testid="KeyboardArrowRightIcon"],svg[data-testid="KeyboardArrowLeftIcon"]': {
-          fill: 'rgba(0, 0, 0, 0.5)',
+          width: 24,
+          position: 'relative',
+          zIndex: 1,
+          opacity: 1,
+          color: 'primary.main',
+          borderRadius: 1,
+          '&:hover': { backgroundColor: 'action.hover' },
+          '& svg': { fontSize: '1.4rem' },
+          '&::before': { content: '""', position: 'absolute', top: 0, bottom: 0, width: 32, pointerEvents: 'none' },
+          '&:first-of-type::before': { left: '100%', background: (theme) => `linear-gradient(to left, transparent, ${theme.palette.background.paper})` },
+          '&:last-of-type::before': { right: '100%', background: (theme) => `linear-gradient(to right, transparent, ${theme.palette.background.paper})` },
+          '&.Mui-disabled': { opacity: 0 },
         },
       }}
     >

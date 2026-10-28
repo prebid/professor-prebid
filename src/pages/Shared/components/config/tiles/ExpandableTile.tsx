@@ -6,9 +6,11 @@ import Avatar from '@mui/material/Avatar';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Collapse from '@mui/material/Collapse';
+
 import IconButton from '@mui/material/IconButton';
-import { tileHeight } from '../ConfigComponent';
+import Box from '@mui/material/Box';
+import JSONViewerComponent from '../../JSONViewerComponent';
+import { JsonViewToggle } from '../../JsonViewToggle';
 
 interface ExpandableTileProps {
   icon: ReactNode;
@@ -18,10 +20,14 @@ interface ExpandableTileProps {
   expandedMaxWidth?: 4 | 6 | 8 | 12;
   children: ReactNode;
   collapsedSize?: number;
+  headerAction?: ReactNode;
+  /** The config behind the tile; when given, the header gets a toggle that shows it as raw JSON instead of the children. */
+  json?: unknown;
 }
 
-export const ExpandableTile = ({ icon, title, subtitle = '', defaultMaxWidth = 4, expandedMaxWidth = 8, children, collapsedSize = 180 }: ExpandableTileProps): JSX.Element => {
+export const ExpandableTile = ({ icon, title, subtitle = '', defaultMaxWidth = 4, expandedMaxWidth = 8, children, collapsedSize = 180, headerAction, json }: ExpandableTileProps): JSX.Element => {
   const [expanded, setExpanded] = useState(false);
+  const [showJson, setShowJson] = useState(false);
   const [maxWidth, setMaxWidth] = useState<typeof defaultMaxWidth | typeof expandedMaxWidth>(defaultMaxWidth);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -31,36 +37,47 @@ export const ExpandableTile = ({ icon, title, subtitle = '', defaultMaxWidth = 4
     setMaxWidth(newExpanded ? expandedMaxWidth : defaultMaxWidth);
 
     if (newExpanded) {
-      // Delay to allow layout shift to start, then scroll
       setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300);
     }
   }, [expanded, defaultMaxWidth, expandedMaxWidth]);
 
   return (
-    <Grid size={{ xs: 12, sm: maxWidth }} ref={ref} sx={{ transition: 'all 0.3s ease-in-out' }}>
+    <Grid
+      size={{ xs: 12, sm: maxWidth }}
+      ref={ref}
+      sx={{
+        transition: 'all 0.3s ease-in-out',
+        breakInside: 'avoid',
+        columnSpan: expanded ? 'all' : 'none',
+        pb: 0.5,
+      }}
+    >
       <Card
+        elevation={expanded ? 4 : 1}
         sx={{
           width: 1,
-          minHeight: tileHeight,
-          height: '100%',
+          height: 'auto',
           display: 'flex',
           flexDirection: 'column',
         }}
-        elevation={expanded ? 4 : 1}
       >
         <CardHeader
           avatar={<Avatar sx={{ bgcolor: 'primary.main' }}>{icon}</Avatar>}
           title={<Typography variant="h3">{title}</Typography>}
           subheader={typeof subtitle === 'string' ? subtitle && <Typography variant="subtitle1">{subtitle}</Typography> : subtitle}
           action={
-            <IconButton onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
-              <ExpandMoreIcon
-                sx={{
-                  transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
-                  transition: 'transform 0.3s ease',
-                }}
-              />
-            </IconButton>
+            <Box sx={{ display: 'flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+              {json !== undefined && <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} />}
+              {headerAction}
+              <IconButton onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more">
+                <ExpandMoreIcon
+                  sx={{
+                    transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
+                    transition: 'transform 0.3s ease',
+                  }}
+                />
+              </IconButton>
+            </Box>
           }
           sx={{
             cursor: 'pointer',
@@ -68,12 +85,24 @@ export const ExpandableTile = ({ icon, title, subtitle = '', defaultMaxWidth = 4
           }}
           onClick={handleExpandClick}
         />
-        <CardContent sx={{ flexGrow: 1, paddingTop: 0 }}>
-          <Collapse in={expanded} collapsedSize={collapsedSize} timeout="auto">
-            <Grid container spacing={2}>
-              {children}
+        <CardContent sx={{ paddingTop: 0, pb: '12px !important' }}>
+          <Box
+            sx={{
+              maxHeight: expanded ? 'none' : `${collapsedSize}px`,
+              overflow: 'hidden',
+              transition: 'max-height 0.3s ease-in-out',
+            }}
+          >
+            <Grid container spacing={1}>
+              {showJson ? (
+                <Grid size={{ xs: 12 }}>
+                  <JSONViewerComponent src={json} name="" collapsed={1} />
+                </Grid>
+              ) : (
+                children
+              )}
             </Grid>
-          </Collapse>
+          </Box>
         </CardContent>
       </Card>
     </Grid>
