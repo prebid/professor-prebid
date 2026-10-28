@@ -5,13 +5,6 @@ import { IGoogleAdManagerDetails } from '../../Injected/googleAdManager';
 import { IPrebidDetails } from '../../Injected/prebid';
 import type { EventRecord, Config } from 'prebid.js';
 
-declare global {
-  interface Document {
-    featurePolicy: { [key: string]: any };
-    browsingTopics: () => Promise<string[]>;
-  }
-}
-
 const AppStateContext = React.createContext<AppState>({
   tcf: {} as Config['consentManagement'],
   googleAdManager: {} as IGoogleAdManagerDetails,
@@ -42,8 +35,6 @@ const AppStateContext = React.createContext<AppState>({
   setInitDataLoaded: () => {},
   prebidReleaseInfo: {},
   setPrebidReleaseInfo: () => {},
-  topics: [],
-  setTopics: () => {},
 });
 
 export const StateContextProvider = ({ children }: StateContextProviderProps) => {
@@ -72,7 +63,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   const [isRefresh, setIsRefresh] = useState<boolean>(false);
   const [initDataLoaded, setInitDataLoaded] = useState<boolean>(false);
   const [prebidReleaseInfo, setPrebidReleaseInfo] = useState<any>({});
-  const [topics, setTopics] = useState<string[]>([]);
 
   useEffect(() => {
     setPbjsNamespaces(Object.keys(prebids).filter((key) => key !== 'tcf'));
@@ -111,20 +101,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
       setPbjsNamespace(newValue || '');
     }
   }, [pbjsNamespace, pbjsNamespaces, setPbjsNamespace, frameId]);
-
-  useEffect(() => {
-    const fetchTopics = async () => {
-      if ('browsingTopics' in document && document.featurePolicy?.allowsFeature?.('browsing-topics')) {
-        try {
-          const topics = await document.browsingTopics();
-          setTopics(topics);
-        } catch (error) {
-          console.error('Error fetching topics', error);
-        }
-      }
-    };
-    fetchTopics();
-  }, [prebids]);
 
   useEffect(() => {
     const prebid = prebids?.[pbjsNamespace] || ({} as IPrebidDetails);
@@ -201,8 +177,6 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
     setInitDataLoaded,
     prebidReleaseInfo,
     setPrebidReleaseInfo,
-    topics,
-    setTopics,
   };
 
   return <AppStateContext.Provider value={contextValue}>{children}</AppStateContext.Provider>;
@@ -252,8 +226,6 @@ export interface AppState {
     releasesSinceInstalledVersion?: any[];
   };
   setPrebidReleaseInfo: React.Dispatch<React.SetStateAction<any>>;
-  topics: string[];
-  setTopics: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 interface StateContextProviderProps {

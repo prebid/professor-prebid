@@ -115,7 +115,7 @@ describe('AdUnitChips components', () => {
 
   it('renders BidChipComponent with combinations of winner, rendered, and received status', () => {
     const mockBid: any = { bidder: 'rubicon', cpm: 2.5, currency: 'USD', adUnitCode: 'slot-1' };
-    const mockAppState: any = { topics: ['topic-1'] };
+    const mockAppState: any = {};
 
     const { rerender } = render(
       <AppStateContext.Provider value={mockAppState}>

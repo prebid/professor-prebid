@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AdUnit, AdUnitBid, EventRecord } from 'prebid.js';
 import Popover from '@mui/material/Popover';
 import Chip from '@mui/material/Chip';
@@ -9,7 +9,6 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import ScreenshotMonitorIcon from '@mui/icons-material/ScreenshotMonitor';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
 import JSONViewerComponent from '../JSONViewerComponent';
-import StateContext from '../../contexts/appStateContext';
 import { getTabId } from '../../../Shared/utils';
 
 const commonChipStyle = {
@@ -79,8 +78,6 @@ export const BidChipComponent = ({
   bidReceived: EventRecord<'bidResponse'> | undefined;
   isRendered: boolean;
 }): JSX.Element => {
-  const { topics } = useContext(StateContext);
-
   const color = isWinner ? 'secondary' : bidReceived ? 'primary' : 'default';
   const icon = (
     <Stack direction="row" spacing={1}>
@@ -89,7 +86,7 @@ export const BidChipComponent = ({
     </Stack>
   );
 
-  return <DataPreviewChip label={label} data={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid', topics }} color={color} icon={icon} />;
+  return <DataPreviewChip label={label} data={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid' }} color={color} icon={icon} />;
 };
 
 export const AdUnitChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element => {

@@ -72,7 +72,6 @@ const PRE_AUCTION_COLOR: { [variant in IPreAuctionRow['variant']]: string } = {
 };
 
 const BidJsonDialog = ({ open, onClose, rowData }: { open: boolean; onClose: () => void; rowData: IBidderRowData | null }) => {
-  const { topics } = useContext(AppStateContext);
   if (!rowData || rowData.isSectionHeader) return null;
 
   if (rowData.preAuctionRow) {
@@ -109,7 +108,6 @@ const BidJsonDialog = ({ open, onClose, rowData }: { open: boolean; onClose: () 
     bidResponse: rowData.bidResponseEvent?.args || null,
     noBid: rowData.noBidEvent?.args || null,
     bidderRequest: rowData.bidderRequest || null,
-    topics,
   };
 
   return (

@@ -34,8 +34,6 @@ const makeStateContext = (overrides: any = {}) => ({
   setInitDataLoaded: vi.fn(),
   prebidReleaseInfo: {},
   setPrebidReleaseInfo: vi.fn(),
-  topics: [{ topic: 1 }],
-  setTopics: vi.fn(),
   ...overrides,
 });
 

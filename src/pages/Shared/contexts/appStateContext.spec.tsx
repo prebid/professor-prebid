@@ -22,14 +22,12 @@ const TestChild = () => {
       <div data-testid="adsRendered">{ctx.adsRendered.length}</div>
       <div data-testid="isRefresh">{String(ctx.isRefresh)}</div>
       <div data-testid="initDataLoaded">{String(ctx.initDataLoaded)}</div>
-      <div data-testid="topics">{ctx.topics.join(',')}</div>
       <button onClick={() => ctx.setIframeId('frame-2')}>Change Frame</button>
       <button onClick={() => ctx.setPbjsNamespace && ctx.setPbjsNamespace('customPbjs')}>Change Namespace</button>
       <button onClick={() => ctx.setInitiatorOutput({ key: 'val' })}>Set Initiator</button>
       <button onClick={() => ctx.setIsRefresh(true)}>Set Refresh</button>
       <button onClick={() => ctx.setInitDataLoaded(true)}>Set Init Data</button>
       <button onClick={() => ctx.setPrebidReleaseInfo({ latestVersion: '1.0' })}>Set Release Info</button>
-      <button onClick={() => ctx.setTopics(['topicA'])}>Set Topics</button>
     </div>
   );
 };
@@ -171,78 +169,9 @@ describe('StateContextProvider', () => {
       screen.getByText('Set Refresh').click();
       screen.getByText('Set Init Data').click();
       screen.getByText('Set Release Info').click();
-      screen.getByText('Set Topics').click();
     });
 
     expect(screen.getByTestId('isRefresh').textContent).toBe('true');
     expect(screen.getByTestId('initDataLoaded').textContent).toBe('true');
-    expect(screen.getByTestId('topics').textContent).toBe('topicA');
-  });
-
-  it('fetches browsingTopics when supported by document', async () => {
-    const mockBrowsingTopics = vi.fn().mockResolvedValue(['sports', 'news']);
-    const originalFeaturePolicy = document.featurePolicy;
-    const originalBrowsingTopics = document.browsingTopics;
-
-    (document as any).featurePolicy = {
-      allowsFeature: (feature: string) => feature === 'browsing-topics',
-    };
-    (document as any).browsingTopics = mockBrowsingTopics;
-
-    const mockInspectedContext: any = {
-      frames: {
-        'top-window': { prebids: { pbjs: { events: [] } } },
-      },
-    };
-
-    await act(async () => {
-      render(
-        <InspectedPageContext.Provider value={mockInspectedContext}>
-          <StateContextProvider>
-            <TestChild />
-          </StateContextProvider>
-        </InspectedPageContext.Provider>
-      );
-    });
-
-    expect(mockBrowsingTopics).toHaveBeenCalled();
-    expect(screen.getByTestId('topics').textContent).toBe('sports,news');
-
-    (document as any).featurePolicy = originalFeaturePolicy;
-    (document as any).browsingTopics = originalBrowsingTopics;
-  });
-
-  it('handles browsingTopics failure gracefully', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const mockBrowsingTopics = vi.fn().mockRejectedValue(new Error('Topics permission error'));
-    const originalFeaturePolicy = document.featurePolicy;
-    const originalBrowsingTopics = document.browsingTopics;
-
-    (document as any).featurePolicy = {
-      allowsFeature: (feature: string) => feature === 'browsing-topics',
-    };
-    (document as any).browsingTopics = mockBrowsingTopics;
-
-    const mockInspectedContext: any = {
-      frames: {
-        'top-window': { prebids: { pbjs: { events: [] } } },
-      },
-    };
-
-    await act(async () => {
-      render(
-        <InspectedPageContext.Provider value={mockInspectedContext}>
-          <StateContextProvider>
-            <TestChild />
-          </StateContextProvider>
-        </InspectedPageContext.Provider>
-      );
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith('Error fetching topics', expect.any(Error));
-
-    consoleSpy.mockRestore();
-    (document as any).featurePolicy = originalFeaturePolicy;
-    (document as any).browsingTopics = originalBrowsingTopics;
   });
 });

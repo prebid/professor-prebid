@@ -34,8 +34,6 @@ const makeContext = (config: any): AppState => ({
   setInitDataLoaded: vi.fn(),
   prebidReleaseInfo: {},
   setPrebidReleaseInfo: vi.fn(),
-  topics: [],
-  setTopics: vi.fn(),
 });
 
 const wrap = (config: any) => (

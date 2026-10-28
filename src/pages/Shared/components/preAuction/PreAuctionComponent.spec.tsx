@@ -46,8 +46,6 @@ const makeContext = (prebid: any = {}, auctionEndEvents: any[] = [], harLog: any
     setInitDataLoaded: vi.fn(),
     prebidReleaseInfo: {},
     setPrebidReleaseInfo: vi.fn(),
-    topics: [],
-    setTopics: vi.fn(),
   };
 
   const inspectedState: any = {
