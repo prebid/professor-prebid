@@ -9,6 +9,7 @@ import AppStateContext from '../../contexts/appStateContext';
 import UserIdsTab from './UserIdsTab';
 import ConfigTab from './UserIdsConfigTab';
 import { GridCell } from '../bids/BidsComponent';
+import { HeaderTab } from '../HeaderTab';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { download } from '../../utils';
 import JSONViewerComponent from '../JSONViewerComponent';
@@ -43,47 +44,13 @@ const UserIdsComponent = (): JSX.Element => {
   return (
     <Grid container spacing={0.75} sx={{ width: '100%', p: 0.5 }}>
       {/* Header Row aligned with AdUnits and Bids tabs */}
-      <GridCell
-        cols={2}
-        variant="h2"
-        sx={{
-          cursor: 'pointer',
-          userSelect: 'none',
-          border: '1px solid',
-          borderColor: tab === 0 ? 'primary.main' : 'divider',
-          backgroundColor: tab === 0 ? 'action.selected' : 'background.paper',
-          transition: 'all 0.2s',
-          '&:hover': { borderColor: 'primary.main' },
-        }}
-        onClick={() => setTab(0)}
-      >
-        <Tooltip title="View Active User IDs (EIDs)" arrow>
-          <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: tab === 0 ? 'primary.main' : 'text.secondary' }}>
-            User IDs: {eidsCount}
-          </Typography>
-        </Tooltip>
-      </GridCell>
+      <HeaderTab selected={tab === 0} onClick={() => setTab(0)} tooltip="View Active User IDs (EIDs)">
+        User IDs: {eidsCount}
+      </HeaderTab>
 
-      <GridCell
-        cols={2}
-        variant="h2"
-        sx={{
-          cursor: 'pointer',
-          userSelect: 'none',
-          border: '1px solid',
-          borderColor: tab === 1 ? 'primary.main' : 'divider',
-          backgroundColor: tab === 1 ? 'action.selected' : 'background.paper',
-          transition: 'all 0.2s',
-          '&:hover': { borderColor: 'primary.main' },
-        }}
-        onClick={() => setTab(1)}
-      >
-        <Tooltip title="View User ID Module Configuration" arrow>
-          <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: tab === 1 ? 'primary.main' : 'text.secondary' }}>
-            Modules: {modulesCount}
-          </Typography>
-        </Tooltip>
-      </GridCell>
+      <HeaderTab selected={tab === 1} onClick={() => setTab(1)} tooltip="View User ID Module Configuration">
+        Modules: {modulesCount}
+      </HeaderTab>
 
       <Grid size={{ xs: 7 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
         <AutoComplete query={query} onQueryChange={setQuery} options={options} fieldKeys={['source', 'id', 'name', 'storage']} placeholder="Filter by source, ID or module name..." />

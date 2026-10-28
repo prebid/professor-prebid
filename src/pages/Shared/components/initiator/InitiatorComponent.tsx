@@ -20,7 +20,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
 import AppStateContext from '../../contexts/appStateContext';
 import JSONViewerComponent from '../JSONViewerComponent';
-import { GridCell } from '../bids/BidsComponent';
+import { HeaderTab } from '../HeaderTab';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { createQueryEngine, distinct } from '../autocomplete/utils';
 import { download, getTabId } from '../../utils';
@@ -45,6 +45,15 @@ export const NETWORK_FIELD_MAP = {
   privacy: (entry: IClassifiedNetworkEntry) => entry.privacy.verdict,
   url: (entry: IClassifiedNetworkEntry) => entry.entry.url.toLowerCase(),
 } as const;
+
+const CATEGORY_TABS: { category: NetworkCategory | 'all'; label: string; tooltip: string }[] = [
+  { category: 'all', label: 'All', tooltip: 'View all captured network requests' },
+  { category: 'bid', label: 'Bids', tooltip: 'Filter by Bid Requests (OpenRTB, PBS, Bidders)' },
+  { category: 'sync', label: 'Syncs', tooltip: 'Filter by SSP User Sync Pixels and ID Syncs' },
+  { category: 'userId', label: 'User IDs', tooltip: 'Filter by User ID Modules (ID5, LiveRamp, SharedID)' },
+  { category: 'rtd', label: 'RTD', tooltip: 'Filter by Real-Time Data (RTD) modules' },
+  { category: 'analytics', label: 'Analytics', tooltip: 'Filter by Prebid Analytics Beacons' },
+];
 
 const networkQueryEngine = createQueryEngine<IClassifiedNetworkEntry>(NETWORK_FIELD_MAP);
 
@@ -192,125 +201,11 @@ const InitiatorComponent = (): JSX.Element => {
     >
       {/* Category Metric Badges Header */}
       <Grid container spacing={0.75} sx={{ width: '100%', flexShrink: 0 }}>
-        <GridCell
-          cols={2}
-          variant="h2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            border: '1px solid',
-            borderColor: selectedCategory === 'all' ? 'primary.main' : 'divider',
-            backgroundColor: selectedCategory === 'all' ? 'action.selected' : 'background.paper',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-          onClick={() => setSelectedCategory('all')}
-        >
-          <Tooltip title="View all captured network requests" arrow>
-            <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: selectedCategory === 'all' ? 'primary.main' : 'text.secondary' }}>
-              All: {counts.all}
-            </Typography>
-          </Tooltip>
-        </GridCell>
-
-        <GridCell
-          cols={2}
-          variant="h2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            border: '1px solid',
-            borderColor: selectedCategory === 'bid' ? 'primary.main' : 'divider',
-            backgroundColor: selectedCategory === 'bid' ? 'action.selected' : 'background.paper',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-          onClick={() => setSelectedCategory(selectedCategory === 'bid' ? 'all' : 'bid')}
-        >
-          <Tooltip title="Filter by Bid Requests (OpenRTB, PBS, Bidders)" arrow>
-            <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: selectedCategory === 'bid' ? 'primary.main' : 'text.secondary' }}>
-              Bids: {counts.bid}
-            </Typography>
-          </Tooltip>
-        </GridCell>
-
-        <GridCell
-          cols={2}
-          variant="h2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            border: '1px solid',
-            borderColor: selectedCategory === 'sync' ? 'primary.main' : 'divider',
-            backgroundColor: selectedCategory === 'sync' ? 'action.selected' : 'background.paper',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-          onClick={() => setSelectedCategory(selectedCategory === 'sync' ? 'all' : 'sync')}
-        >
-          <Tooltip title="Filter by SSP User Sync Pixels and ID Syncs" arrow>
-            <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: selectedCategory === 'sync' ? 'primary.main' : 'text.secondary' }}>
-              Syncs: {counts.sync}
-            </Typography>
-          </Tooltip>
-        </GridCell>
-
-        <GridCell
-          cols={2}
-          variant="h2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            border: '1px solid',
-            borderColor: selectedCategory === 'userId' ? 'primary.main' : 'divider',
-            backgroundColor: selectedCategory === 'userId' ? 'action.selected' : 'background.paper',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-          onClick={() => setSelectedCategory(selectedCategory === 'userId' ? 'all' : 'userId')}
-        >
-          <Tooltip title="Filter by User ID Modules (ID5, LiveRamp, SharedID)" arrow>
-            <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: selectedCategory === 'userId' ? 'primary.main' : 'text.secondary' }}>
-              User IDs: {counts.userId}
-            </Typography>
-          </Tooltip>
-        </GridCell>
-
-        <GridCell
-          cols={2}
-          variant="h2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            border: '1px solid',
-            borderColor: selectedCategory === 'rtd' ? 'primary.main' : 'divider',
-            backgroundColor: selectedCategory === 'rtd' ? 'action.selected' : 'background.paper',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-          onClick={() => setSelectedCategory(selectedCategory === 'rtd' ? 'all' : 'rtd')}
-        >
-          <Tooltip title="Filter by Real-Time Data (RTD) modules" arrow>
-            <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: selectedCategory === 'rtd' ? 'primary.main' : 'text.secondary' }}>
-              RTD: {counts.rtd}
-            </Typography>
-          </Tooltip>
-        </GridCell>
-
-        <GridCell
-          cols={2}
-          variant="h2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            border: '1px solid',
-            borderColor: selectedCategory === 'analytics' ? 'primary.main' : 'divider',
-            backgroundColor: selectedCategory === 'analytics' ? 'action.selected' : 'background.paper',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-          onClick={() => setSelectedCategory(selectedCategory === 'analytics' ? 'all' : 'analytics')}
-        >
-          <Tooltip title="Filter by Prebid Analytics Beacons" arrow>
-            <Typography variant="h2" component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: selectedCategory === 'analytics' ? 'primary.main' : 'text.secondary' }}>
-              Analytics: {counts.analytics}
-            </Typography>
-          </Tooltip>
-        </GridCell>
+        {CATEGORY_TABS.map(({ category, label, tooltip }) => (
+          <HeaderTab key={category} selected={selectedCategory === category} onClick={() => setSelectedCategory(selectedCategory === category ? 'all' : category)} tooltip={tooltip}>
+            {label}: {counts[category]}
+          </HeaderTab>
+        ))}
       </Grid>
 
       {/* Toolbar: Search, View Mode Tabs, Action Buttons */}
