@@ -1,12 +1,12 @@
 import React from 'react';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import HistoryToggleOffOutlinedIcon from '@mui/icons-material/HistoryToggleOffOutlined';
+import { VersionCard } from './VersionCard';
 
 export interface VersionStatsSummaryProps {
   newFeaturesCount: number;
@@ -52,20 +52,7 @@ export const VersionStatsSummary: React.FC<VersionStatsSummaryProps> = ({ newFea
     <>
       {stats.map((stat, index) => (
         <Grid key={index} size={{ xs: 6, sm: 3 }}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 1.25,
-              border: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: 'background.paper',
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxSizing: 'border-box',
-            }}
-          >
+          <VersionCard>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75 }}>
               <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.secondary' }}>
                 {stat.label}
@@ -97,7 +84,7 @@ export const VersionStatsSummary: React.FC<VersionStatsSummaryProps> = ({ newFea
             >
               {stat.value}
             </Typography>
-          </Paper>
+          </VersionCard>
         </Grid>
       ))}
     </>
