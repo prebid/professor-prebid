@@ -13,6 +13,7 @@ import VersionStatusHero from './components/VersionStatusHero';
 import VersionComparisonCards from './components/VersionComparisonCards';
 import VersionStatsSummary from './components/VersionStatsSummary';
 import VersionReleaseList from './components/VersionReleaseList';
+import { SectionCard, SectionGrid } from '../Section';
 
 const getSectionCount = (text: string, titleStr: string) => {
   const regex = new RegExp(`(?:^|\\n)#{1,5}\\s*(?:<a[^>]*>)?(?:[^\\n]*?)${titleStr}(?:[^\\n]*?)(?:<\\/a>)?\\s*\\n([\\s\\S]*?)(?=(?:^|\\n)#{1,5}|$)`, 'i');
@@ -243,7 +244,7 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
   const releasesList = prebidReleaseInfo?.releasesSinceInstalledVersion || [];
 
   return (
-    <Grid container spacing={0.75} sx={{ width: '100%', p: 0.5 }}>
+    <SectionGrid>
       {/* Optional Top Close Bar (when rendered inside a modal/popover) */}
       {close && (
         <Grid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end', mb: -0.5 }}>
@@ -337,13 +338,7 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
           {/* If already running the latest version: Helpful quick links */}
           {isLatest && (
             <Grid size={{ xs: 12 }}>
-              <Paper elevation={1} sx={{ p: 1.5, border: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="h3" sx={{ fontSize: '0.8rem', fontWeight: 700, mb: 0.5, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Resources & Documentation
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Stay up to date with the latest Prebid.js documentation, releases, and discussions:
-                </Typography>
+              <SectionCard title="Resources & Documentation" description="Stay up to date with the latest Prebid.js documentation, releases, and discussions:">
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   <Button size="small" variant="outlined" href="https://docs.prebid.org" target="_blank" rel="noreferrer" sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
                     Prebid.org Docs
@@ -355,12 +350,12 @@ export const PbjsVersionInfoContent: React.FC<PbjsVersionInfoContentProps> = ({ 
                     Issue Tracker
                   </Button>
                 </Box>
-              </Paper>
+              </SectionCard>
             </Grid>
           )}
         </>
       )}
-    </Grid>
+    </SectionGrid>
   );
 };
 

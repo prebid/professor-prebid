@@ -1,8 +1,6 @@
 import React, { useContext } from 'react';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import GoogleIcon from '@mui/icons-material/Google';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -15,6 +13,7 @@ import AppStateContext from '../../contexts/appStateContext';
 import { getTabId } from '../../../Shared/utils';
 import DebuggingModuleComponent from './debugging/DebuggingModuleComponent';
 import ModifyBidResponsesComponent from './legacyDebugging/ModifyBidResponsesComponent';
+import { SectionCard, SectionGrid } from '../Section';
 
 const isNewDebugVersion = (input?: string): boolean => {
   if (!input) return true;
@@ -72,13 +71,9 @@ const ToolsComponent = (): JSX.Element => {
   const domainName = prebid?.eventsUrl ? prebid.eventsUrl.split('//')[1]?.split('/')[0] : 'prebid-session';
 
   return (
-    <Grid container spacing={0.75} sx={{ width: '100%', p: 0.5 }}>
+    <SectionGrid>
       <Grid size={{ xs: 12 }}>
-        <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="h3" sx={{ fontSize: '0.8rem', fontWeight: 700, mb: 0.75, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Quick Actions & Utilities
-          </Typography>
-
+        <SectionCard title="Quick Actions & Utilities">
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
             <Tooltip title="Inject & open Google AdManager Publisher Console on page" arrow>
               <Button size="small" variant="outlined" onClick={dfp_open_console} startIcon={<GoogleIcon />} sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
@@ -98,7 +93,7 @@ const ToolsComponent = (): JSX.Element => {
               </Button>
             </Tooltip>
           </Box>
-        </Paper>
+        </SectionCard>
       </Grid>
 
       {/* Model Context Protocol (MCP) & AI Diagnostics */}
@@ -113,7 +108,7 @@ const ToolsComponent = (): JSX.Element => {
 
       {/* Prebid Debugging Module (v7.3.0+ or Legacy Fallback) */}
       <Grid size={{ xs: 12 }}>{isNewDebugVersion(prebid?.version) ? <DebuggingModuleComponent /> : <ModifyBidResponsesComponent />}</Grid>
-    </Grid>
+    </SectionGrid>
   );
 };
 

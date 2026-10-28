@@ -9,7 +9,7 @@ import ComputerIcon from '@mui/icons-material/Computer';
 import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import LaunchIcon from '@mui/icons-material/Launch';
-import { VersionCard } from './VersionCard';
+import { SectionCard } from '../../Section';
 
 export interface VersionComparisonCardsProps {
   installedVersion: string;
@@ -32,33 +32,21 @@ interface IVersionTileProps {
 
 const VersionTile = ({ title, icon, version, chip, published, publishedRelative, highlighted = false, link }: IVersionTileProps): JSX.Element => (
   <Grid size={{ xs: 12, sm: 6 }}>
-    <VersionCard highlighted={highlighted}>
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            {icon}
-            <Typography variant="h3" sx={{ fontSize: '0.78rem', fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {title}
-            </Typography>
-          </Box>
-          <Chip size="small" label={version} {...chip} sx={{ fontWeight: 700, fontSize: '0.75rem', height: 22 }} />
-        </Box>
+    <SectionCard highlighted={highlighted} icon={icon} title={title} actions={<Chip size="small" label={version} {...chip} sx={{ fontWeight: 700, fontSize: '0.75rem', height: 22 }} />}>
+      <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>
+        Prebid.js {version}
+      </Typography>
 
-        <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.95rem', mb: 0.5 }}>
-          Prebid.js {version}
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
-            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-              Published {published} {publishedRelative ? `(${publishedRelative})` : ''}
-            </Typography>
-          </Box>
-          {link}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+          <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            Published {published} {publishedRelative ? `(${publishedRelative})` : ''}
+          </Typography>
         </Box>
+        {link}
       </Box>
-    </VersionCard>
+    </SectionCard>
   </Grid>
 );
 

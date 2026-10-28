@@ -9,6 +9,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import VersionReleaseItem from './VersionReleaseItem';
+import { SectionCard } from '../../Section';
 
 export interface VersionReleaseListProps {
   releases: any[];
@@ -53,35 +54,14 @@ export const VersionReleaseList: React.FC<VersionReleaseListProps> = ({ releases
   };
 
   return (
-    <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: 'divider' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'center' },
-          justifyContent: 'space-between',
-          gap: 1,
-          mb: 1.25,
-        }}
-      >
-        <Box>
-          <Typography
-            variant="h3"
-            sx={{
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              color: 'text.secondary',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}
-          >
-            Release Changelog ({releases.length} release{releases.length === 1 ? '' : 's'} since {installedVersion})
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Review features, fixes, and changes introduced across intermediate releases.
-          </Typography>
-        </Box>
-
+    <SectionCard
+      title={
+        <>
+          Release Changelog ({releases.length} release{releases.length === 1 ? '' : 's'} since {installedVersion})
+        </>
+      }
+      description="Review features, fixes, and changes introduced across intermediate releases."
+      actions={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <TextField
             size="small"
@@ -110,8 +90,8 @@ export const VersionReleaseList: React.FC<VersionReleaseListProps> = ({ releases
             </Button>
           )}
         </Box>
-      </Box>
-
+      }
+    >
       <Box sx={{ mt: 1 }}>
         {filteredReleases.length === 0 ? (
           <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: 'action.hover', border: '1px dashed', borderColor: 'divider' }}>
@@ -126,7 +106,7 @@ export const VersionReleaseList: React.FC<VersionReleaseListProps> = ({ releases
           })
         )}
       </Box>
-    </Paper>
+    </SectionCard>
   );
 };
 

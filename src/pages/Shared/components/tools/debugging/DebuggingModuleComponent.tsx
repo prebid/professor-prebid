@@ -5,7 +5,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -24,6 +23,7 @@ import { IPrebidDebugModuleConfig, IPrebidDebugModuleConfigRule } from '../../..
 import { STORE_RULES_TOGGLE } from '../../../constants';
 import RuleComponent from './RuleComponent';
 import AppStateContext from '../../../contexts/appStateContext';
+import { SectionCard } from '../../Section';
 
 const get = (obj: any, path: string[] = []): any => {
   return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
@@ -240,21 +240,12 @@ const DebuggingModuleComponent = (): JSX.Element => {
   }, [pbjsNamespace]);
 
   return (
-    <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: debuggingModuleConfig?.enabled ? 'primary.main' : 'divider' }}>
-      {/* Hidden File Input for Import */}
-      <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleImportFile} />
-
-      {/* Header Title Bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <BugReportIcon color={debuggingModuleConfig?.enabled ? 'primary' : 'action'} />
-          <Typography variant="h3" sx={{ fontSize: '0.9rem', fontWeight: 700 }}>
-            Prebid.js Debugging Module (v7.3.0+)
-          </Typography>
-          <Chip label={debuggingModuleConfig?.enabled ? 'MODULE ENABLED' : 'DISABLED'} size="small" color={debuggingModuleConfig?.enabled ? 'primary' : 'default'} sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }} />
-        </Box>
-
-        {/* JSON Sharing Action Buttons */}
+    <SectionCard
+      highlighted={debuggingModuleConfig?.enabled}
+      icon={<BugReportIcon color={debuggingModuleConfig?.enabled ? 'primary' : 'action'} />}
+      title="Prebid.js Debugging Module (v7.3.0+)"
+      badge={<Chip label={debuggingModuleConfig?.enabled ? 'MODULE ENABLED' : 'DISABLED'} size="small" color={debuggingModuleConfig?.enabled ? 'primary' : 'default'} sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }} />}
+      actions={
         <Box sx={{ display: 'flex', gap: 0.75 }}>
           <Tooltip title="Export current rules to JSON file for sharing" arrow>
             <Button size="small" variant="outlined" startIcon={<DownloadIcon />} onClick={exportRulesJson} sx={{ fontSize: '0.725rem', textTransform: 'none', py: 0.25 }}>
@@ -274,7 +265,10 @@ const DebuggingModuleComponent = (): JSX.Element => {
             </Button>
           </Tooltip>
         </Box>
-      </Box>
+      }
+    >
+      {/* Hidden File Input for Import */}
+      <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }} onChange={handleImportFile} />
 
       {/* Master Toggles Row */}
       <Grid container spacing={0.75} sx={{ mb: 1, alignItems: 'center' }}>
@@ -381,7 +375,7 @@ const DebuggingModuleComponent = (): JSX.Element => {
           {snackbarMsg}
         </Alert>
       </Snackbar>
-    </Paper>
+    </SectionCard>
   );
 };
 

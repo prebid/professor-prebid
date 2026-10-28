@@ -1,6 +1,5 @@
 import React, { useContext, useState } from 'react';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
@@ -15,6 +14,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AppStateContext from '../../../contexts/appStateContext';
 import { getTabId } from '../../../../Shared/utils';
 import { MCP_BRIDGE_ENABLE } from '../../../constants';
+import { SectionCard } from '../../Section';
 
 export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
   try {
@@ -201,14 +201,10 @@ export const McpToolsComponent: React.FC = () => {
   };
 
   return (
-    <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: 'divider' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <SmartToyIcon color="primary" sx={{ fontSize: '1.1rem' }} />
-          <Typography variant="h3" sx={{ fontSize: '0.8rem', fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Model Context Protocol (MCP) & AI Diagnostics
-          </Typography>
-        </Box>
+    <SectionCard
+      icon={<SmartToyIcon color="primary" sx={{ fontSize: '1.1rem' }} />}
+      title="Model Context Protocol (MCP) & AI Diagnostics"
+      actions={
         <Chip
           icon={isMcpActive ? <CheckCircleOutlineIcon /> : undefined}
           label={isMcpActive ? 'DevTools MCP Active' : 'MCP Standalone Inactive'}
@@ -217,8 +213,8 @@ export const McpToolsComponent: React.FC = () => {
           variant="outlined"
           sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }}
         />
-      </Box>
-
+      }
+    >
       <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary', mb: 1.25 }}>
         Enables Chrome DevTools MCP (Prebid.js PR #15356) and autonomous AI coding agents (Gemini, Claude, Cursor) to query live auctions, bidder latency, and GAM targeting directly from the browser session.
       </Typography>
@@ -250,7 +246,7 @@ export const McpToolsComponent: React.FC = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Paper>
+    </SectionCard>
   );
 };
 

@@ -6,7 +6,7 @@ import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import BuildCircleOutlinedIcon from '@mui/icons-material/BuildCircleOutlined';
 import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
 import HistoryToggleOffOutlinedIcon from '@mui/icons-material/HistoryToggleOffOutlined';
-import { VersionCard } from './VersionCard';
+import { SectionCard } from '../../Section';
 
 export interface VersionStatsSummaryProps {
   newFeaturesCount: number;
@@ -52,11 +52,9 @@ export const VersionStatsSummary: React.FC<VersionStatsSummaryProps> = ({ newFea
     <>
       {stats.map((stat, index) => (
         <Grid key={index} size={{ xs: 6, sm: 3 }}>
-          <VersionCard>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75 }}>
-              <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.secondary' }}>
-                {stat.label}
-              </Typography>
+          <SectionCard
+            title={stat.label}
+            actions={
               <Box
                 sx={{
                   display: 'flex',
@@ -69,8 +67,8 @@ export const VersionStatsSummary: React.FC<VersionStatsSummaryProps> = ({ newFea
               >
                 {stat.icon}
               </Box>
-            </Box>
-
+            }
+          >
             <Typography
               variant="h2"
               sx={{
@@ -84,7 +82,7 @@ export const VersionStatsSummary: React.FC<VersionStatsSummaryProps> = ({ newFea
             >
               {stat.value}
             </Typography>
-          </VersionCard>
+          </SectionCard>
         </Grid>
       ))}
     </>
