@@ -1,9 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { IconButton, Paper, Tooltip, Typography } from '@mui/material';
-import { replaceLastToken } from '../autocomplete/utils';
-import { AutoComplete } from '../autocomplete/AutoComplete';
-import {} from '../../utils';
 import { Bid } from 'prebid.js/types.d.ts';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -12,34 +9,24 @@ import AppsIcon from '@mui/icons-material/Apps';
 import JSONViewerComponent from '../JSONViewerComponent';
 import BidsComponentState, { getBidKey } from './BidsComponentState';
 import { DownloadButton } from '../DownloadButton';
+import { TabEmptyState, TabToolbar } from '../TabToolbar';
 
 export const BidsComponent = (): JSX.Element => {
   const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, BID_FIELD_MAP } = BidsComponentState();
 
   return (
     <Grid container sx={{ width: '100%' }}>
-      <GridCell cols={1.5} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setQuery('')}>
-        All ({counts.all})
-      </GridCell>
-
-      <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setQuery('cpm>0')}>
-        Received ({counts.received})
-      </GridCell>
-
-      <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setQuery('cpm=0')}>
-        No Bids ({counts.nobid})
-      </GridCell>
-
-      <Grid size={{ xs: 6 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-        <AutoComplete fieldKeys={Object.keys(BID_FIELD_MAP) as string[]} options={suggestions} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter bids..." query={query} />
-      </Grid>
-      <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <DownloadButton data={() => sortedBids.map(({ _stableKey, ...b }: any) => b)} fileName="filtered-bids" tooltip="Download filtered bids as JSON" />
-      </GridCell>
+      <TabToolbar
+        stats={[
+          { label: `All (${counts.all})`, onClick: () => setQuery(''), selected: query === '' },
+          { label: `Received (${counts.received})`, onClick: () => setQuery('cpm>0'), selected: query === 'cpm>0' },
+          { label: `No Bids (${counts.nobid})`, onClick: () => setQuery('cpm=0'), selected: query === 'cpm=0' },
+        ]}
+        search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: Object.keys(BID_FIELD_MAP), placeholder: 'Filter bids...' }}
+        actions={<DownloadButton data={() => sortedBids.map(({ _stableKey, ...b }: any) => b)} fileName="filtered-bids" tooltip="Download filtered bids as JSON" />}
+      />
       {sortedBids.length === 0 ? (
-        <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>No matching bids</Paper>
-        </Grid>
+        <TabEmptyState>No matching bids</TabEmptyState>
       ) : (
         <>
           <HeaderRow globalOpen={globalOpen} toggleGlobalOpen={toggleGlobalOpen} sort={sort} onSort={toggleSort} />

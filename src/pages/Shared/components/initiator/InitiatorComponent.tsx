@@ -1,5 +1,4 @@
 import React, { useContext, useMemo, useState } from 'react';
-import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -19,7 +18,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
 import AppStateContext from '../../contexts/appStateContext';
 import JSONViewerComponent from '../JSONViewerComponent';
-import { HeaderTab } from '../HeaderTab';
+import { TabStat } from '../TabToolbar';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { createQueryEngine, distinct } from '../autocomplete/utils';
 import { download, getTabId } from '../../utils';
@@ -200,13 +199,11 @@ const InitiatorComponent = (): JSX.Element => {
       }}
     >
       {/* Category Metric Badges Header */}
-      <Grid container spacing={0.75} sx={{ width: '100%', flexShrink: 0 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, flexShrink: 0 }}>
         {CATEGORY_TABS.map(({ category, label, tooltip }) => (
-          <HeaderTab key={category} selected={selectedCategory === category} onClick={() => setSelectedCategory(selectedCategory === category ? 'all' : category)} tooltip={tooltip}>
-            {label}: {counts[category]}
-          </HeaderTab>
+          <TabStat key={category} label={`${label}: ${counts[category]}`} tooltip={tooltip} selected={selectedCategory === category} onClick={() => setSelectedCategory(selectedCategory === category ? 'all' : category)} />
         ))}
-      </Grid>
+      </Box>
 
       {/* Toolbar: Search, View Mode Tabs, Action Buttons */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mt: 0.5, flexShrink: 0 }}>

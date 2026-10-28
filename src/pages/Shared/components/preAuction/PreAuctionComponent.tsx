@@ -13,9 +13,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import AppStateContext from '../../contexts/appStateContext';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
 import JSONViewerComponent from '../JSONViewerComponent';
-import { GridCell } from '../bids/BidsComponent';
-import { AutoComplete } from '../autocomplete/AutoComplete';
-import { createQueryEngine, distinct, replaceLastToken } from '../autocomplete/utils';
+import { createQueryEngine, distinct } from '../autocomplete/utils';
 import { conditionalPluralization as cP } from '../../utils';
 import { getProviderDiagnostics, IAuctionVerdict, IProviderDiagnostic } from './providerDiagnostics';
 import { correlateHar, IProviderTiming } from './harCorrelation';
@@ -23,6 +21,7 @@ import { ATTRIBUTION_HELP, ATTRIBUTION_LABEL, formatMs, VERDICT_COLOR, VERDICT_H
 import PreAuctionHelp from './PreAuctionHelp';
 import { JsonViewToggle } from '../JsonViewToggle';
 import { DownloadButton } from '../DownloadButton';
+import { TabToolbar } from '../TabToolbar';
 
 export const PROVIDER_FIELD_MAP = {
   provider: (provider: IProviderDiagnostic) => provider.name,
@@ -288,33 +287,21 @@ const PreAuctionComponent = (): JSX.Element => {
     <Grid container sx={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       <PreAuctionHelp />
 
-      {/* Header Bar */}
-      <Grid container size={{ xs: 12 }} sx={{ mb: 0.5 }}>
-        <GridCell cols={2} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap' }}>
-          Provider{cP(diagnostics.providers)}: {diagnostics.providers.length}
-        </GridCell>
-        <GridCell cols={2.5} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap' }}>
-          Auction{cP(diagnostics.auctions)}: {diagnostics.auctions.length}
-        </GridCell>
-        <GridCell cols={2} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap' }}>
-          RTD delay: {diagnostics.rtdAuctionDelay}ms
-        </GridCell>
-        <GridCell cols={2} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap' }}>
-          ID delay: {diagnostics.userSyncAuctionDelay}ms
-        </GridCell>
-
-        <Grid size={{ xs: 2.5 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-          <AutoComplete fieldKeys={Object.keys(PROVIDER_FIELD_MAP) as string[]} options={suggestions} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter providers..." query={query} />
-        </Grid>
-
-        <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="the verdict view" toolbar />
-        </GridCell>
-
-        <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <DownloadButton data={() => ({ diagnostics, correlation })} fileName="pre-auction-diagnostics" tooltip="Download the diagnostics as JSON" />
-        </GridCell>
-      </Grid>
+      <TabToolbar
+        stats={[
+          { label: `Provider${cP(diagnostics.providers)}: ${diagnostics.providers.length}` },
+          { label: `Auction${cP(diagnostics.auctions)}: ${diagnostics.auctions.length}` },
+          { label: `RTD delay: ${diagnostics.rtdAuctionDelay}ms` },
+          { label: `ID delay: ${diagnostics.userSyncAuctionDelay}ms` },
+        ]}
+        search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: Object.keys(PROVIDER_FIELD_MAP), placeholder: 'Filter providers...' }}
+        actions={
+          <>
+            <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="the verdict view" toolbar />
+            <DownloadButton data={() => ({ diagnostics, correlation })} fileName="pre-auction-diagnostics" tooltip="Download the diagnostics as JSON" />
+          </>
+        }
+      />
 
       {showJson ? (
         <Grid size={{ xs: 12 }}>

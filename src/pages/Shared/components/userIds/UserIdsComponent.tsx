@@ -5,13 +5,10 @@ import Paper from '@mui/material/Paper';
 import AppStateContext from '../../contexts/appStateContext';
 import UserIdsTab from './UserIdsTab';
 import ConfigTab from './UserIdsConfigTab';
-import { GridCell } from '../bids/BidsComponent';
-import { HeaderTab } from '../HeaderTab';
-import { AutoComplete } from '../autocomplete/AutoComplete';
-import {} from '../../utils';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { JsonViewToggle } from '../JsonViewToggle';
 import { DownloadButton } from '../DownloadButton';
+import { TabToolbar } from '../TabToolbar';
 
 const UserIdsComponent = (): JSX.Element => {
   const { prebid } = useContext(AppStateContext);
@@ -40,24 +37,20 @@ const UserIdsComponent = (): JSX.Element => {
   }, [prebid]);
 
   return (
-    <Grid container spacing={0.75} sx={{ width: '100%', p: 0.5 }}>
-      {/* Header Row aligned with AdUnits and Bids tabs */}
-      <HeaderTab selected={tab === 0} onClick={() => setTab(0)} tooltip="View Active User IDs (EIDs)">
-        User IDs: {eidsCount}
-      </HeaderTab>
-
-      <HeaderTab selected={tab === 1} onClick={() => setTab(1)} tooltip="View User ID Module Configuration">
-        Modules: {modulesCount}
-      </HeaderTab>
-
-      <Grid size={{ xs: 7 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-        <AutoComplete query={query} onQueryChange={setQuery} options={options} fieldKeys={['source', 'id', 'name', 'storage']} placeholder="Filter by source, ID or module name..." />
-      </Grid>
-
-      <GridCell cols={1} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', border: 0 }}>
-        <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="list view" toolbar />
-        <DownloadButton data={() => ({ eids: prebid?.eids, userSync: prebid?.config?.userSync })} fileName="prebid-user-ids.json" tooltip="Download User ID session data as JSON" />
-      </GridCell>
+    <Grid container sx={{ width: '100%' }}>
+      <TabToolbar
+        stats={[
+          { label: `User IDs: ${eidsCount}`, onClick: () => setTab(0), selected: tab === 0, tooltip: 'View Active User IDs (EIDs)' },
+          { label: `Modules: ${modulesCount}`, onClick: () => setTab(1), selected: tab === 1, tooltip: 'View User ID Module Configuration' },
+        ]}
+        search={{ query, onQueryChange: setQuery, options, fieldKeys: ['source', 'id', 'name', 'storage'], placeholder: 'Filter by source, ID or module name...' }}
+        actions={
+          <>
+            <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="list view" toolbar />
+            <DownloadButton data={() => ({ eids: prebid?.eids, userSync: prebid?.config?.userSync })} fileName="prebid-user-ids.json" tooltip="Download User ID session data as JSON" />
+          </>
+        }
+      />
 
       {/* Raw JSON Overlay */}
       {showRawJson && (

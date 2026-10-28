@@ -5,10 +5,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import AppStateContext from '../../contexts/appStateContext';
 import JSONViewerComponent from '../JSONViewerComponent';
-import { GridCell } from '../bids/BidsComponent';
-import { AutoComplete } from '../autocomplete/AutoComplete';
-import { replaceLastToken } from '../autocomplete/utils';
-import {} from '../../utils';
 
 import PriceGranularityComponent from './tiles/PriceGranularityComponent';
 import UserIdModule from './tiles/UserIdModule';
@@ -26,6 +22,7 @@ import CurrencyComponent from './tiles/CurrencyComponent';
 import RtdComponent from './tiles/RtdComponent';
 import OtherConfigsComponent from './tiles/OtherConfigsComponent';
 import { DownloadButton } from '../DownloadButton';
+import { TabToolbar } from '../TabToolbar';
 
 export const tileHeight = 255;
 
@@ -86,14 +83,7 @@ const ConfigComponent = (): JSX.Element => {
 
   return (
     <Grid container alignItems="flex-start">
-      {/* Header Bar: Full-width search bar + download button */}
-      <Grid size={{ xs: 11.5 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-        <AutoComplete query={query} fieldKeys={fieldKeys} options={options} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter config..." />
-      </Grid>
-
-      <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <DownloadButton data={fullConfig} fileName="prebid-config" tooltip="Download Prebid config as JSON" />
-      </GridCell>
+      <TabToolbar search={{ query, onQueryChange: setQuery, options, fieldKeys, placeholder: 'Filter config...' }} actions={<DownloadButton data={fullConfig} fileName="prebid-config" tooltip="Download Prebid config as JSON" />} />
 
       {/* Content View Switcher */}
       {query.trim() !== '' ? (

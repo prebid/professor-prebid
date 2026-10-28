@@ -11,14 +11,12 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
 import GanttChartComponent, { TimelineViewMode } from '../../../Popup/components/timeline/GanttChartComponent';
 import AppStateContext from '../../contexts/appStateContext';
-import { GridCell } from '../bids/BidsComponent';
 import JSONViewerComponent from '../JSONViewerComponent';
-import { AutoComplete } from '../autocomplete/AutoComplete';
-import { replaceLastToken } from '../autocomplete/utils';
 import { conditionalPluralization as cP } from '../../utils';
 import { getPreAuctionTimeline } from './preAuctionTimeline';
 import { JsonViewToggle } from '../JsonViewToggle';
 import { DownloadButton } from '../DownloadButton';
+import { TabToolbar } from '../TabToolbar';
 
 const TimeLineComponent = (): JSX.Element => {
   const { prebid, auctionEndEvents } = useContext(AppStateContext);
@@ -76,48 +74,28 @@ const TimeLineComponent = (): JSX.Element => {
     <Grid container sx={{ width: '100%', height: '100%', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       {/* Header Bar */}
       <Grid container size={{ xs: 12 }} sx={{ mb: 0.5 }}>
-        <GridCell cols={1.7} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap', '& span': { whiteSpace: 'nowrap' } }}>
-          Auction{cP(auctionEndEvents)}: {totalAuctions}
-        </GridCell>
-
-        <GridCell cols={2.8} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap', '& span': { whiteSpace: 'nowrap' } }}>
-          {isAllAuctions ? 'Max Duration:' : 'Duration:'} {activeDuration}ms
-        </GridCell>
-
-        <GridCell cols={2} variant="h2" sx={{ border: 0, whiteSpace: 'nowrap', '& span': { whiteSpace: 'nowrap' } }}>
-          Timeout: {timeoutMs}ms
-        </GridCell>
-
-        {/* Search Bar */}
-        <Grid size={{ xs: 4 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-          <AutoComplete fieldKeys={['bidder']} options={suggestions} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter bidder timeline..." query={query} />
-        </Grid>
-
-        {/* Pre-Auction Toggle Button */}
-        <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <Tooltip
-            title={
-              preAuctionDuration > 0 ? `${showPreAuction ? 'Hide' : 'Show'} the pre-auction phase — consent, user ids, real time data and first party data took ${Math.round(preAuctionDuration)}ms` : 'Prebid reported no pre-auction metrics for this auction'
-            }
-            arrow
-          >
-            <span>
-              <IconButton size="small" disabled={preAuctionDuration <= 0} onClick={() => setShowPreAuction(!showPreAuction)} color={showPreAuction ? 'secondary' : 'default'} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-                <HourglassTopIcon fontSize="inherit" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </GridCell>
-
-        {/* JSON Toggle Button */}
-        <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="SVG Timeline view" toolbar />
-        </GridCell>
-
-        {/* Download Button */}
-        <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <DownloadButton data={auctionEndEvents} fileName="timeline-auctions" tooltip="Download timeline auction events as JSON" />
-        </GridCell>
+        <TabToolbar
+          stats={[{ label: `Auction${cP(auctionEndEvents)}: ${totalAuctions}` }, { label: `${isAllAuctions ? 'Max Duration:' : 'Duration:'} ${activeDuration}ms` }, { label: `Timeout: ${timeoutMs}ms` }]}
+          search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: ['bidder'], placeholder: 'Filter bidder timeline...' }}
+          actions={
+            <>
+              <Tooltip
+                title={
+                  preAuctionDuration > 0 ? `${showPreAuction ? 'Hide' : 'Show'} the pre-auction phase — consent, user ids, real time data and first party data took ${Math.round(preAuctionDuration)}ms` : 'Prebid reported no pre-auction metrics for this auction'
+                }
+                arrow
+              >
+                <span>
+                  <IconButton size="small" disabled={preAuctionDuration <= 0} onClick={() => setShowPreAuction(!showPreAuction)} color={showPreAuction ? 'secondary' : 'default'} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
+                    <HourglassTopIcon fontSize="inherit" />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="SVG Timeline view" toolbar />
+              <DownloadButton data={auctionEndEvents} fileName="timeline-auctions" tooltip="Download timeline auction events as JSON" />
+            </>
+          }
+        />
 
         {/* Auction Sub-Tabs Header - Removes disabled left scroll button gap */}
         <Grid size={{ xs: 12 }} sx={{ mb: 0.5 }}>

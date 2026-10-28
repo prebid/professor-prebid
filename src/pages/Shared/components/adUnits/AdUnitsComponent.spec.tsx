@@ -69,7 +69,7 @@ describe('AdUnitsComponent & Grid', () => {
     const input = screen.getByPlaceholderText('Filter Ad Units...');
     fireEvent.change(input, { target: { value: 'nonexistent' } });
 
-    expect(screen.getByText('No matching adunits')).toBeTruthy();
+    expect(screen.getByText('No matching ad units')).toBeTruthy();
   });
 
   it('triggers download button click', () => {
