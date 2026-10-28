@@ -16,6 +16,7 @@ import MinimizeIcon from '@mui/icons-material/Minimize';
 import MaximizeIcon from '@mui/icons-material/Maximize';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import { getParentGamPubAds, isSameGamSlot } from '../InjectedApp';
+import { ChipRow } from '../../Shared/components/Section';
 
 const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, timeToRespond, closePortal, shadowRoot, contentRef, pbjsNameSpace, attachVersion, onOpenPopover }: AdOverlayComponentProps): JSX.Element => {
   const gridRef = React.useRef<HTMLDivElement>(null);
@@ -155,7 +156,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
           </Grid>
 
           {expanded && (currency || winningBidder || winningCPM || timeToRespond || elementId) && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5, width: '100%' }}>
+            <ChipRow sx={{ mt: 0.5, width: '100%' }}>
               {winningCPM && (
                 <Box sx={{ p: 0.5, borderRadius: 1, backgroundColor: '#ffffff', border: '1px solid', borderColor: 'rgba(67, 142, 217, 0.3)', boxShadow: '0 1px 2px rgba(0,0,0,0.06)' }}>
                   <Typography variant="caption" sx={{ color: 'text.primary', fontSize: 11 }}>
@@ -181,7 +182,7 @@ const AdOverlayComponent = ({ elementId, winningCPM, winningBidder, currency, ti
                 </Box>
               )}
               {elementId && <GamDetailsComponent elementId={elementId} inPopOver={false} truncate={truncate} />}
-            </Box>
+            </ChipRow>
           )}
         </Box>
       </ThemeProvider>

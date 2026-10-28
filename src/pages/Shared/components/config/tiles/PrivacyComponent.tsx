@@ -1,21 +1,18 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext } from 'react';
 import BusinessIcon from '@mui/icons-material/Business';
-import CodeIcon from '@mui/icons-material/Code';
 import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
 
 import AppStateContext from '../../../contexts/appStateContext';
 import { ExpandableTile } from './ExpandableTile';
 import JSONViewerComponent from '../../JSONViewerComponent';
 import { TCString } from '@iabtcf/core';
+import { ChipRow, SectionLabel } from '../../Section';
 
 const PrivacyComponent = (): JSX.Element | null => {
   const { prebid, tcf } = useContext(AppStateContext);
-  const [showJson, setShowJson] = useState(false);
 
   const consentManagement = prebid?.config?.consentManagement;
   if (!consentManagement && !tcf) return null;
@@ -24,56 +21,38 @@ const PrivacyComponent = (): JSX.Element | null => {
   const coppa = prebid?.config?.coppa;
   const { cmpApi, defaultGdprScope, timeout, rules } = gdpr || {};
 
-  const jsonToggleAction = (
-    <Tooltip title={showJson ? 'Switch to formatted view' : 'Switch to raw JSON view'} arrow>
-      <IconButton size="small" onClick={() => setShowJson(!showJson)} color={showJson ? 'primary' : 'default'} sx={{ mr: 0.5 }}>
-        <CodeIcon fontSize="small" />
-      </IconButton>
-    </Tooltip>
-  );
-
   return (
-    <ExpandableTile icon={<BusinessIcon />} title="Consent Management" subtitle="TCF, CPA, USP, …" defaultMaxWidth={4} expandedMaxWidth={8} headerAction={jsonToggleAction}>
-      {showJson ? (
-        <Grid size={{ xs: 12 }}>
-          <JSONViewerComponent src={{ consentManagement, tcf, coppa }} name="" collapsed={1} />
-        </Grid>
-      ) : (
-        <Grid size={{ xs: 12 }}>
-          {}
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.75rem' }}>
-            Frameworks & Scope
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.25 }}>
-            {cmpApi && <Chip label={`CMP API: ${cmpApi}`} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />}
-            {timeout !== undefined && <Chip label={`Timeout: ${timeout}ms`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
-            {defaultGdprScope !== undefined && (
-              <Chip label={`Default GDPR Scope: ${String(defaultGdprScope)}`} size="small" color={defaultGdprScope ? 'warning' : 'default'} variant={defaultGdprScope ? 'filled' : 'outlined'} sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
-            )}
-            {usp && <Chip label={`USP CMP: ${usp.cmpApi || 'configured'}`} size="small" color="secondary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
-            {gpp && <Chip label={`GPP CMP: ${gpp.cmpApi || 'configured'}`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
-            {coppa !== undefined && <Chip label={`COPPA: ${coppa ? 'enabled' : 'disabled'}`} size="small" color={coppa ? 'warning' : 'default'} variant={coppa ? 'filled' : 'outlined'} sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
-          </Box>
-
-          {/* GDPR Rules */}
-          {rules && rules.length > 0 && (
-            <Box sx={{ mb: 1.25 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.75rem' }}>
-                GDPR Rules ({rules.length})
-              </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {rules.map((rule: any, index: number) => {
-                  const ruleText = typeof rule === 'object' ? JSON.stringify(rule) : String(rule);
-                  return <Chip key={`rule-${index}`} label={`Rule #${index + 1}: ${ruleText}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', maxWidth: '100%' }} />;
-                })}
-              </Box>
-            </Box>
+    <ExpandableTile icon={<BusinessIcon />} title="Consent Management" subtitle="TCF, CPA, USP, …" defaultMaxWidth={4} expandedMaxWidth={8} json={{ consentManagement, tcf, coppa }}>
+      <Grid size={{ xs: 12 }}>
+        {}
+        <SectionLabel>Frameworks & Scope</SectionLabel>
+        <ChipRow sx={{ mb: 1.25 }}>
+          {cmpApi && <Chip label={`CMP API: ${cmpApi}`} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />}
+          {timeout !== undefined && <Chip label={`Timeout: ${timeout}ms`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+          {defaultGdprScope !== undefined && (
+            <Chip label={`Default GDPR Scope: ${String(defaultGdprScope)}`} size="small" color={defaultGdprScope ? 'warning' : 'default'} variant={defaultGdprScope ? 'filled' : 'outlined'} sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
           )}
+          {usp && <Chip label={`USP CMP: ${usp.cmpApi || 'configured'}`} size="small" color="secondary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+          {gpp && <Chip label={`GPP CMP: ${gpp.cmpApi || 'configured'}`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+          {coppa !== undefined && <Chip label={`COPPA: ${coppa ? 'enabled' : 'disabled'}`} size="small" color={coppa ? 'warning' : 'default'} variant={coppa ? 'filled' : 'outlined'} sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+        </ChipRow>
 
-          {/* TCF Component */}
-          {tcf && Object.keys(tcf).map((key) => <TcfComponent key={key} tcf={tcf} tcfKey={key} />)}
-        </Grid>
-      )}
+        {/* GDPR Rules */}
+        {rules && rules.length > 0 && (
+          <Box sx={{ mb: 1.25 }}>
+            <SectionLabel>GDPR Rules ({rules.length})</SectionLabel>
+            <ChipRow>
+              {rules.map((rule: any, index: number) => {
+                const ruleText = typeof rule === 'object' ? JSON.stringify(rule) : String(rule);
+                return <Chip key={`rule-${index}`} label={`Rule #${index + 1}: ${ruleText}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', maxWidth: '100%' }} />;
+              })}
+            </ChipRow>
+          </Box>
+        )}
+
+        {/* TCF Component */}
+        {tcf && Object.keys(tcf).map((key) => <TcfComponent key={key} tcf={tcf} tcfKey={key} />)}
+      </Grid>
     </ExpandableTile>
   );
 };
@@ -140,12 +119,12 @@ const TcfComponent = ({ tcf, tcfKey }: { tcf: any; tcfKey: string }): JSX.Elemen
           <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary', display: 'block', mb: 0.25 }}>
             Decoded Consent:
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          <ChipRow>
             {decoded.cmpId !== undefined && <Chip label={`CMP ID: ${decoded.cmpId}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
             {decoded.cmpVersion !== undefined && <Chip label={`CMP Ver: ${decoded.cmpVersion}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
             {decoded.consentScreen !== undefined && <Chip label={`Screen: ${decoded.consentScreen}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
             {decoded.consentLanguage && <Chip label={`Lang: ${decoded.consentLanguage}`} size="small" variant="outlined" sx={{ height: 20, fontSize: '0.65rem' }} />}
-          </Box>
+          </ChipRow>
           <Box sx={{ mt: 0.5 }}>
             <JSONViewerComponent src={readableTcModel(decoded)} name="decoded" collapsed={1} />
           </Box>

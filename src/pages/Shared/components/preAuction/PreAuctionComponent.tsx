@@ -9,7 +9,6 @@ import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import Alert from '@mui/material/Alert';
 import Popover from '@mui/material/Popover';
-import CodeIcon from '@mui/icons-material/Code';
 import DownloadIcon from '@mui/icons-material/Download';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
@@ -24,6 +23,7 @@ import { getProviderDiagnostics, IAuctionVerdict, IProviderDiagnostic } from './
 import { correlateHar, IProviderTiming } from './harCorrelation';
 import { ATTRIBUTION_HELP, ATTRIBUTION_LABEL, formatMs, VERDICT_COLOR, VERDICT_HELP, verdictLabel } from './labels';
 import PreAuctionHelp from './PreAuctionHelp';
+import { JsonViewToggle } from '../JsonViewToggle';
 
 export const PROVIDER_FIELD_MAP = {
   provider: (provider: IProviderDiagnostic) => provider.name,
@@ -309,11 +309,7 @@ const PreAuctionComponent = (): JSX.Element => {
         </Grid>
 
         <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <Tooltip title={showJson ? 'Switch to the verdict view' : 'Switch to raw JSON view'} arrow>
-            <IconButton size="small" onClick={() => setShowJson(!showJson)} color={showJson ? 'primary' : 'default'} sx={{ p: 0.5, fontSize: '1.05rem' }}>
-              <CodeIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="the verdict view" toolbar />
         </GridCell>
 
         <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>

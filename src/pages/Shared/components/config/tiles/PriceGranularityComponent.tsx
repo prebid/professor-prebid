@@ -15,6 +15,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { ChipRow } from '../../Section';
 
 const defaultBuckets: IDefaultBuckets = {
   low: [{ precision: 2, min: 0, max: 5, increment: 0.5 }],
@@ -86,12 +87,12 @@ const PriceGranularityComponent = (): JSX.Element | null => {
         {/* Summary Stats */}
         {activeBucket?.[0] && (
           <Grid size={{ xs: 12 }}>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+            <ChipRow sx={{ mb: 1 }}>
               <Chip label={`Min: ${activeBucket[0]?.min}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
               <Chip label={`Max: ${activeBucket[activeBucket.length - 1]?.max ?? activeBucket[0]?.max}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
               <Chip label={`Precision: ${activeBucket[0]?.precision ?? 2}`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
               {activeBucket.length === 1 && <Chip label={`Increment: ${activeBucket[0]?.increment}`} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
-            </Box>
+            </ChipRow>
           </Grid>
         )}
 

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import EventsState from './EventsState';
 import Grid from '@mui/material/Grid';
 import { CircularProgress, IconButton, Paper, Tooltip, Chip, Typography, Box, Collapse, Card } from '@mui/material';
-import CodeIcon from '@mui/icons-material/Code';
 import DownloadIcon from '@mui/icons-material/Download';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -12,6 +11,7 @@ import { AutoComplete } from '../autocomplete/AutoComplete';
 import { replaceLastToken } from '../autocomplete/utils';
 import { download, conditionalPluralization as cP } from '../../utils';
 import { IPrebidEvent } from '../../../Injected/prebid';
+import { JsonViewToggle } from '../JsonViewToggle';
 
 const EventRowComponent = ({ event, index }: { event: IPrebidEvent; index: number }): JSX.Element => {
   const [expanded, setExpanded] = useState(false);
@@ -196,11 +196,7 @@ const EventsComponent = (): JSX.Element => {
 
       {/* JSON Toggle Icon */}
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title={showJson ? 'Switch to Event Stream view' : 'Switch to raw JSON view'} arrow>
-          <IconButton size="small" onClick={() => setShowJson(!showJson)} color={showJson ? 'primary' : 'default'} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-            <CodeIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="Event Stream view" toolbar />
       </GridCell>
 
       {/* Download Icon */}

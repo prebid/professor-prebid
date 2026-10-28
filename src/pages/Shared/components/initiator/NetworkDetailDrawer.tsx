@@ -22,6 +22,7 @@ import { IClassifiedNetworkEntry } from './networkClassifier';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { decompressPayload } from './payloadDecompressor';
 import Button from '@mui/material/Button';
+import { ChipRow } from '../Section';
 
 export interface NetworkDetailDrawerProps {
   selectedEntry: IClassifiedNetworkEntry | null;
@@ -344,7 +345,7 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
                       <TableRow>
                         <TableCell sx={{ fontWeight: 600 }}>Purpose Consents</TableCell>
                         <TableCell>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          <ChipRow>
                             {privacy.decodedTcf.purposeConsents && privacy.decodedTcf.purposeConsents.length > 0 ? (
                               privacy.decodedTcf.purposeConsents.map((p) => <Chip key={p} label={`P${p}`} size="small" color="primary" variant="outlined" />)
                             ) : (
@@ -352,13 +353,13 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
                                 None granted
                               </Typography>
                             )}
-                          </Box>
+                          </ChipRow>
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 600 }}>Special Features</TableCell>
                         <TableCell>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          <ChipRow>
                             {privacy.decodedTcf.specialFeatureOptins && privacy.decodedTcf.specialFeatureOptins.length > 0 ? (
                               privacy.decodedTcf.specialFeatureOptins.map((f) => <Chip key={f} label={`SF${f}`} size="small" color="secondary" variant="outlined" />)
                             ) : (
@@ -366,7 +367,7 @@ export const NetworkDetailDrawer = ({ selectedEntry, onClose }: NetworkDetailDra
                                 None
                               </Typography>
                             )}
-                          </Box>
+                          </ChipRow>
                         </TableCell>
                       </TableRow>
                       <TableRow>

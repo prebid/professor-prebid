@@ -7,7 +7,6 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import CodeIcon from '@mui/icons-material/Code';
 import DownloadIcon from '@mui/icons-material/Download';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
@@ -19,6 +18,7 @@ import { AutoComplete } from '../autocomplete/AutoComplete';
 import { replaceLastToken } from '../autocomplete/utils';
 import { download, conditionalPluralization as cP } from '../../utils';
 import { getPreAuctionTimeline } from './preAuctionTimeline';
+import { JsonViewToggle } from '../JsonViewToggle';
 
 const TimeLineComponent = (): JSX.Element => {
   const { prebid, auctionEndEvents } = useContext(AppStateContext);
@@ -111,11 +111,7 @@ const TimeLineComponent = (): JSX.Element => {
 
         {/* JSON Toggle Button */}
         <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <Tooltip title={showJson ? 'Switch to SVG Timeline view' : 'Switch to raw JSON view'} arrow>
-            <IconButton size="small" onClick={() => setShowJson(!showJson)} color={showJson ? 'primary' : 'default'} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-              <CodeIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="SVG Timeline view" toolbar />
         </GridCell>
 
         {/* Download Button */}

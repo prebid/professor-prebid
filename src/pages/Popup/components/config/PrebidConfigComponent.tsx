@@ -1,15 +1,12 @@
 import React, { useContext, useState } from 'react';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
-import CodeIcon from '@mui/icons-material/Code';
 import Chip from '@mui/material/Chip';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
 import AppStateContext from '../../../Shared/contexts/appStateContext';
 import { ExpandableTile } from '../../../Shared/components/config/tiles/ExpandableTile';
 import JSONViewerComponent from '../../../Shared/components/JSONViewerComponent';
+import { ChipRow, SectionLabel } from '../../../Shared/components/Section';
+import { JsonViewToggle } from '../../../Shared/components/JsonViewToggle';
 
 const PrebidConfigComponent = (): JSX.Element | null => {
   const { prebid } = useContext(AppStateContext);
@@ -18,13 +15,7 @@ const PrebidConfigComponent = (): JSX.Element | null => {
 
   if (!config) return null;
 
-  const jsonToggleAction = (
-    <Tooltip title={showJson ? 'Switch to formatted view' : 'Switch to raw JSON view'} arrow>
-      <IconButton size="small" onClick={() => setShowJson(!showJson)} color={showJson ? 'primary' : 'default'} sx={{ mr: 0.5 }}>
-        <CodeIcon fontSize="small" />
-      </IconButton>
-    </Tooltip>
-  );
+  const jsonToggleAction = <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} />;
 
   const bidderTimeout = config.bidderTimeout ? `${config.bidderTimeout}ms` : '3000ms';
   const bidderSequence = config.bidderSequence || 'random';
@@ -42,10 +33,8 @@ const PrebidConfigComponent = (): JSX.Element | null => {
         </Grid>
       ) : (
         <Grid size={{ xs: 12 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.75rem' }}>
-            Core Timing & Sequence
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1.25 }}>
+          <SectionLabel>Core Timing & Sequence</SectionLabel>
+          <ChipRow sx={{ mb: 1.25 }}>
             <Chip
               label={
                 <>
@@ -81,12 +70,10 @@ const PrebidConfigComponent = (): JSX.Element | null => {
               variant="outlined"
               sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }}
             />
-          </Box>
+          </ChipRow>
 
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.secondary', fontSize: '0.75rem' }}>
-            Flags & Cache
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          <SectionLabel>Flags & Cache</SectionLabel>
+          <ChipRow>
             <Chip
               label={
                 <>
@@ -138,7 +125,7 @@ const PrebidConfigComponent = (): JSX.Element | null => {
                 sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500, maxWidth: '100%' }}
               />
             )}
-          </Box>
+          </ChipRow>
         </Grid>
       )}
     </ExpandableTile>

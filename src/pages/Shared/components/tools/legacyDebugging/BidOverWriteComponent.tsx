@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { IPrebidAuctionEndEventData, IPrebidDebugConfig, IPrebidDebugConfigBid } from '../../../../Injected/prebid';
 import AppStateContext from '../../../contexts/appStateContext';
+import { ChipRow } from '../../Section';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -158,7 +159,7 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
             onChange={handleBidderSelectionChange}
             input={<OutlinedInput label="Detected Bidders" />}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              <ChipRow>
                 {selected.map((value) => (
                   <Chip
                     size="small"
@@ -170,7 +171,7 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
                     }}
                   />
                 ))}
-              </Box>
+              </ChipRow>
             )}
             MenuProps={MenuProps}
             disabled={!bidsOverwriteEnabled}
@@ -193,7 +194,7 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
             onChange={handleAdunitSelectionChange}
             input={<OutlinedInput label="Detected AdUnit(s)" />}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              <ChipRow>
                 {selected.map((value) => (
                   <Chip
                     size="small"
@@ -205,7 +206,7 @@ const BidOverWriteComponent = ({ debugConfigState, setDebugConfigState }: BidOve
                     }}
                   />
                 ))}
-              </Box>
+              </ChipRow>
             )}
             MenuProps={MenuProps}
             disabled={!bidsOverwriteEnabled || selectedBidders.length === 0}
