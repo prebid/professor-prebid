@@ -24,7 +24,6 @@ const PrivacyComponent = (): JSX.Element | null => {
   return (
     <ExpandableTile icon={<BusinessIcon />} title="Consent Management" subtitle="TCF, CPA, USP, …" defaultMaxWidth={4} expandedMaxWidth={8} json={{ consentManagement, tcf, coppa }}>
       <Grid size={{ xs: 12 }}>
-        {}
         <SectionLabel>Frameworks & Scope</SectionLabel>
         <ChipRow sx={{ mb: 1.25 }}>
           {cmpApi && <Chip label={`CMP API: ${cmpApi}`} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />}

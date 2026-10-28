@@ -73,7 +73,6 @@ const ToolsComponent = (): JSX.Element => {
 
   return (
     <Grid container spacing={0.75} sx={{ width: '100%', p: 0.5 }}>
-      {}
       <Grid size={{ xs: 12 }}>
         <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: 'divider' }}>
           <Typography variant="h3" sx={{ fontSize: '0.8rem', fontWeight: 700, mb: 0.75, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.5px' }}>

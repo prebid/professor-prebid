@@ -20,7 +20,6 @@ const RuleComponent = ({ rule, ruleIndex, handleRulesFormChange, prebid, removeR
       <CardHeader
         action={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {}
             <Tooltip title="Simulate network latency delay (ms) before returning this mock bid response" arrow>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                 <Typography variant="body2" sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.secondary', whiteSpace: 'nowrap' }}>

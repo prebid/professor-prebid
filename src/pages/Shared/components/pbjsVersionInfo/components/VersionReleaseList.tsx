@@ -54,7 +54,6 @@ export const VersionReleaseList: React.FC<VersionReleaseListProps> = ({ releases
 
   return (
     <Paper elevation={1} sx={{ p: 1.25, border: '1px solid', borderColor: 'divider' }}>
-      {}
       <Box
         sx={{
           display: 'flex',
@@ -113,7 +112,6 @@ export const VersionReleaseList: React.FC<VersionReleaseListProps> = ({ releases
         </Box>
       </Box>
 
-      {}
       <Box sx={{ mt: 1 }}>
         {filteredReleases.length === 0 ? (
           <Paper sx={{ p: 2, textAlign: 'center', backgroundColor: 'action.hover', border: '1px dashed', borderColor: 'divider' }}>

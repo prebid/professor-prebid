@@ -30,7 +30,6 @@ const UserSyncComponent = (): JSX.Element | null => {
   return (
     <ExpandableTile icon={<PeopleOutlinedIcon />} title="User Sync" subtitle={syncEnabled === false ? 'Syncing disabled' : 'User sync rules'} defaultMaxWidth={4} expandedMaxWidth={8} json={userSync}>
       <Grid size={{ xs: 12 }}>
-        {}
         <SectionLabel>Sync Modes</SectionLabel>
         <ChipRow sx={{ mb: 1.25 }}>
           {activeSyncTypes.map((item) => (

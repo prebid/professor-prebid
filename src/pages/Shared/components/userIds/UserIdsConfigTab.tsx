@@ -48,7 +48,6 @@ const ConfigTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element 
           <Grid key={userId?.name || index} size={{ xs: 12 }}>
             <Card elevation={1} sx={{ border: '1px solid', borderColor: 'divider', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 2 } }}>
               <CardContent sx={{ p: 1.25, '&:last-child': { pb: 1.25 } }}>
-                {}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, flexWrap: 'wrap', gap: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <SettingsIcon color="primary" sx={{ fontSize: '1.2rem' }} />
