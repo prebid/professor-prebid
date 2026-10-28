@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
@@ -46,6 +47,29 @@ export const TabStat = ({ label, onClick, selected = false, tooltip }: ITabStat)
   );
 };
 
+interface IToolbarButtonProps {
+  tooltip: string;
+  onClick: () => void;
+  icon: ReactNode;
+  color?: IconButtonProps['color'];
+  disabled?: boolean;
+}
+
+/** An icon button in a tab's toolbar; every toolbar action (download, JSON view, reload...) uses it. */
+export const ToolbarButton = ({ tooltip, onClick, icon, color = 'default', disabled = false }: IToolbarButtonProps): JSX.Element => {
+  const button = (
+    <IconButton size="small" onClick={onClick} color={color} disabled={disabled} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
+      {icon}
+    </IconButton>
+  );
+  // A disabled button fires no events, so the tooltip needs a wrapper to show on hover.
+  return (
+    <Tooltip title={tooltip} arrow>
+      {disabled ? <span>{button}</span> : button}
+    </Tooltip>
+  );
+};
+
 export interface ITabSearch {
   query: string;
   onQueryChange: (query: string) => void;
@@ -57,13 +81,15 @@ export interface ITabSearch {
 interface ITabToolbarProps {
   stats?: ITabStat[];
   search: ITabSearch;
-  /** Icon buttons on the right, such as the JSON toggle and download. */
+  /** Shown between the filter and the actions, e.g. a view switcher. */
+  extra?: ReactNode;
+  /** ToolbarButtons on the right, such as the JSON toggle and download. */
   actions?: ReactNode;
 }
 
 /** The header row of a data tab: its counts, then the filter, which takes the remaining width, then its actions. */
-export const TabToolbar = ({ stats = [], search, actions }: ITabToolbarProps): JSX.Element => (
-  <Grid size={{ xs: 12 }} sx={{ display: 'flex', alignItems: 'stretch', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
+export const TabToolbar = ({ stats = [], search, extra, actions }: ITabToolbarProps): JSX.Element => (
+  <Box sx={{ width: '100%', flexShrink: 0, display: 'flex', alignItems: 'stretch', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
     {stats.map((stat, i) => (
       <TabStat key={i} {...stat} />
     ))}
@@ -72,8 +98,9 @@ export const TabToolbar = ({ stats = [], search, actions }: ITabToolbarProps): J
         <AutoComplete {...search} />
       </Box>
     </Box>
+    {extra}
     {actions && <Paper sx={{ display: 'flex', alignItems: 'center', px: 0.25 }}>{actions}</Paper>}
-  </Grid>
+  </Box>
 );
 
 /** Takes the place of a tab's list when nothing matches the filter. */

@@ -5,8 +5,6 @@ import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
 import GanttChartComponent, { TimelineViewMode } from '../../../Popup/components/timeline/GanttChartComponent';
@@ -16,7 +14,7 @@ import { conditionalPluralization as cP } from '../../utils';
 import { getPreAuctionTimeline } from './preAuctionTimeline';
 import { JsonViewToggle } from '../JsonViewToggle';
 import { DownloadButton } from '../DownloadButton';
-import { TabToolbar } from '../TabToolbar';
+import { TabToolbar, ToolbarButton } from '../TabToolbar';
 
 const TimeLineComponent = (): JSX.Element => {
   const { prebid, auctionEndEvents } = useContext(AppStateContext);
@@ -79,18 +77,15 @@ const TimeLineComponent = (): JSX.Element => {
           search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: ['bidder'], placeholder: 'Filter bidder timeline...' }}
           actions={
             <>
-              <Tooltip
-                title={
+              <ToolbarButton
+                tooltip={
                   preAuctionDuration > 0 ? `${showPreAuction ? 'Hide' : 'Show'} the pre-auction phase — consent, user ids, real time data and first party data took ${Math.round(preAuctionDuration)}ms` : 'Prebid reported no pre-auction metrics for this auction'
                 }
-                arrow
-              >
-                <span>
-                  <IconButton size="small" disabled={preAuctionDuration <= 0} onClick={() => setShowPreAuction(!showPreAuction)} color={showPreAuction ? 'secondary' : 'default'} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-                    <HourglassTopIcon fontSize="inherit" />
-                  </IconButton>
-                </span>
-              </Tooltip>
+                onClick={() => setShowPreAuction(!showPreAuction)}
+                icon={<HourglassTopIcon fontSize="inherit" />}
+                color={showPreAuction ? 'secondary' : 'default'}
+                disabled={preAuctionDuration <= 0}
+              />
               <JsonViewToggle active={showJson} onToggle={() => setShowJson(!showJson)} formattedView="SVG Timeline view" toolbar />
               <DownloadButton data={auctionEndEvents} fileName="timeline-auctions" tooltip="Download timeline auction events as JSON" />
             </>

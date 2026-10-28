@@ -3,12 +3,9 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import DownloadIcon from '@mui/icons-material/Download';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import TableRowsIcon from '@mui/icons-material/TableRows';
@@ -18,10 +15,10 @@ import SecurityIcon from '@mui/icons-material/Security';
 import InspectedPageContext from '../../contexts/inspectedPageContext';
 import AppStateContext from '../../contexts/appStateContext';
 import JSONViewerComponent from '../JSONViewerComponent';
-import { TabStat } from '../TabToolbar';
-import { AutoComplete } from '../autocomplete/AutoComplete';
+import { TabToolbar, ToolbarButton } from '../TabToolbar';
+import { DownloadButton } from '../DownloadButton';
 import { createQueryEngine, distinct } from '../autocomplete/utils';
-import { download, getTabId } from '../../utils';
+import { getTabId } from '../../utils';
 import { preAuctionHarKey } from '../../constants';
 
 import { classifyRequest, IClassifiedNetworkEntry, NetworkCategory } from './networkClassifier';
@@ -180,11 +177,6 @@ const InitiatorComponent = (): JSX.Element => {
     chrome.devtools?.inspectedWindow?.reload({ ignoreCache: true });
   };
 
-  const handleExportJson = () => {
-    const dataToExport = filteredEntries.map((c) => c.entry);
-    download(dataToExport, `network_log_${Date.now()}`);
-  };
-
   return (
     <Box
       sx={{
@@ -198,47 +190,32 @@ const InitiatorComponent = (): JSX.Element => {
         overflow: 'hidden',
       }}
     >
-      {/* Category Metric Badges Header */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, flexShrink: 0 }}>
-        {CATEGORY_TABS.map(({ category, label, tooltip }) => (
-          <TabStat key={category} label={`${label}: ${counts[category]}`} tooltip={tooltip} selected={selectedCategory === category} onClick={() => setSelectedCategory(selectedCategory === category ? 'all' : category)} />
-        ))}
-      </Box>
-
-      {/* Toolbar: Search, View Mode Tabs, Action Buttons */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mt: 0.5, flexShrink: 0 }}>
-        {/* Search Bar */}
-        <Box sx={{ flex: 1, minWidth: 260 }}>
-          <AutoComplete query={query} onQueryChange={setQuery} options={suggestions} fieldKeys={['category', 'bidder', 'status', 'domain', 'privacy']} placeholder="Filter requests (e.g. bidder:rubicon category:sync privacy:valid)..." />
-        </Box>
-
-        {/* View Switcher Tabs */}
-        <Tabs value={viewMode} onChange={(_, v) => setViewMode(v)} sx={{ minHeight: 36, '& .MuiTab-root': { minHeight: 36, py: 0.5, px: 1.5, fontSize: '0.75rem' } }}>
-          <Tab icon={<TableRowsIcon fontSize="small" />} iconPosition="start" label="Waterfall" />
-          <Tab icon={<AccountTreeIcon fontSize="small" />} iconPosition="start" label="Initiator Cascade" />
-          <Tab icon={<SecurityIcon fontSize="small" />} iconPosition="start" label="Privacy Audit" />
-        </Tabs>
-
-        {/* Actions */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Tooltip title="Reload Inspected Page" arrow>
-            <IconButton size="small" onClick={handleReloadPage} color="default">
-              <RefreshIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Export Filtered Network Requests as JSON" arrow>
-            <IconButton size="small" onClick={handleExportJson} color="default">
-              <DownloadIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="table view" />
-          <Tooltip title="Clear Captured Network Log" arrow>
-            <IconButton size="small" onClick={handleClearLog} color="default">
-              <DeleteOutlineIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+      <TabToolbar
+        stats={CATEGORY_TABS.map(({ category, label, tooltip }) => ({
+          label: `${label}: ${counts[category]}`,
+          tooltip,
+          selected: selectedCategory === category,
+          onClick: () => setSelectedCategory(selectedCategory === category ? 'all' : category),
+        }))}
+        search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: ['category', 'bidder', 'status', 'domain', 'privacy'], placeholder: 'Filter requests (e.g. bidder:rubicon category:sync privacy:valid)...' }}
+        extra={
+          <Paper sx={{ display: 'flex', alignItems: 'center' }}>
+            <Tabs value={viewMode} onChange={(_, v) => setViewMode(v)} sx={{ minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0.25, px: 1.5, fontSize: '0.75rem' } }}>
+              <Tab icon={<TableRowsIcon fontSize="small" />} iconPosition="start" label="Waterfall" />
+              <Tab icon={<AccountTreeIcon fontSize="small" />} iconPosition="start" label="Initiator Cascade" />
+              <Tab icon={<SecurityIcon fontSize="small" />} iconPosition="start" label="Privacy Audit" />
+            </Tabs>
+          </Paper>
+        }
+        actions={
+          <>
+            <ToolbarButton tooltip="Reload Inspected Page" onClick={handleReloadPage} icon={<RefreshIcon fontSize="inherit" />} />
+            <DownloadButton data={() => filteredEntries.map((c) => c.entry)} fileName="network-log" tooltip="Export Filtered Network Requests as JSON" />
+            <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="table view" toolbar />
+            <ToolbarButton tooltip="Clear Captured Network Log" onClick={handleClearLog} icon={<DeleteOutlineIcon fontSize="inherit" />} />
+          </>
+        }
+      />
 
       {/* Main View Area */}
       <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
