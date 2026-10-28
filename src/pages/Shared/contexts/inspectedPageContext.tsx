@@ -2,6 +2,9 @@ import React, { createContext, useEffect, useState } from 'react';
 import { getTabId } from '../utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';
+import { preAuctionHarKey } from '../constants';
+import { harChunkIdFromKey, harChunkKey, parseStoredArray } from '../harLogStorage';
+import { IHarEntry } from '../components/preAuction/harCorrelation';
 
 const InspectedPageContext = createContext<IPageContext | undefined>(undefined);
 
@@ -12,54 +15,94 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
   const [frames, setFrames] = useState<{ [key: string]: IFrameInfo }>({});
   const [downloading, setDownloading] = useState<'true' | 'false' | 'error'>('false');
   const [syncInfo, setSyncInfo] = useState<string>('');
-  const [initReqChainData, setInitReqChainData] = useState<initReqChainResult>({});
-  const initReqChainResult = useDebounce(initReqChainData, 2000);
-  const [downloadingUrls, setDownloadingUrls] = useState<string[]>([]);
+
+  const [harLogData, setHarLogData] = useState<IHarEntry[]>([]);
+  const harLog = useDebounce(harLogData, 1000);
 
   useEffect(() => {
-    // Read initial value from chrome.storage.local
-    chrome.storage.local.get(['tabInfos'], async ({ tabInfos, url }) => {
-      if (tabInfos && url) {
-        const tabInfoWithEvents = await fetchEvents(tabInfos, setDownloading, setSyncInfo, []);
-        setFrames(tabInfoWithEvents);
-      }
+    getTabId().then((tabId) => {
+      const key = `tab_info_${tabId}`;
+      chrome.storage.local.get([key], async (res) => {
+        const tabInfo = res[key];
+        if (tabInfo) {
+          const tabInfoWithEvents = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
+          setFrames(tabInfoWithEvents);
+        }
+      });
     });
   }, []);
 
   useEffect(() => {
     // Subscribe to changes in local storage
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'local' && changes?.tabInfos) {
+      if (areaName === 'local') {
         getTabId().then((tabId) => {
-          if (JSON.stringify(changes.tabInfos.newValue[tabId]) !== JSON.stringify(changes.tabInfos.oldValue[tabId])) {
-            fetchEvents({ ...changes.tabInfos.newValue, [tabId]: changes.tabInfos.newValue[tabId] }, setDownloading, setSyncInfo, downloadingUrls).then(setFrames);
+          const key = `tab_info_${tabId}`;
+          if (changes[key]) {
+            if (JSON.stringify(changes[key].newValue) !== JSON.stringify(changes[key].oldValue)) {
+              fetchEvents(changes[key].newValue || {}, setDownloading, setSyncInfo).then(setFrames);
+            }
           }
         });
       }
     };
     chrome.storage.onChanged.addListener(handler);
 
-    // keep only the last 100 urls
-    if (downloadingUrls.length > 100) {
-      setDownloadingUrls(downloadingUrls.slice(1));
-    }
-
     // Unsubscribe when component unmounts
     return () => {
       chrome.storage.onChanged.removeListener(handler);
     };
-  }, [downloadingUrls]);
+  }, []);
 
   useEffect(() => {
-    // Subscribe to changes in local storage
+    // The log is stored in chunks (see harLogStorage); keep each parsed chunk and re-parse only those that change.
+    let tabId: number | undefined;
+    let chunkIds: number[] = [];
+    let indexChanged = false; // once a change arrived, the initial read is stale
+    const chunkEntries = new Map<number, IHarEntry[]>();
+    const publish = () => setHarLogData(chunkIds.flatMap((id) => chunkEntries.get(id) || []));
+    const readChunkIds = (raw: unknown) => parseStoredArray<number>(raw).filter(Number.isInteger);
+
+    getTabId().then((id) => {
+      if (id === undefined) return;
+      tabId = id;
+      const indexKey = preAuctionHarKey(id);
+      chrome.storage?.session?.get(indexKey, (index) => {
+        const ids = readChunkIds(index?.[indexKey]);
+        if (ids.length === 0) return;
+        chrome.storage.session.get(
+          ids.map((chunkId) => harChunkKey(id, chunkId)),
+          (stored) => {
+            if (indexChanged) return;
+            ids.forEach((chunkId) => chunkEntries.set(chunkId, parseStoredArray<IHarEntry>(stored?.[harChunkKey(id, chunkId)])));
+            chunkIds = ids;
+            publish();
+          }
+        );
+      });
+    });
+
     const handler = (changes: { [key: string]: chrome.storage.StorageChange }, areaName: 'local' | 'sync' | 'managed' | 'session') => {
-      if (areaName === 'local' && changes.initReqChain && changes.initReqChain.newValue) {
-        setInitReqChainData(JSON.parse(changes.initReqChain.newValue));
-      }
+      if (areaName !== 'session' || tabId === undefined) return;
+      let changed = false;
+      Object.entries(changes).forEach(([key, change]) => {
+        if (key === preAuctionHarKey(tabId)) {
+          // A removed index means the log was reset for a new page, '[]' that the panel cleared it.
+          chunkIds = readChunkIds(change.newValue);
+          indexChanged = true;
+          changed = true;
+          return;
+        }
+        const chunkId = harChunkIdFromKey(tabId, key);
+        if (chunkId === null) return;
+        if (change.newValue === undefined) chunkEntries.delete(chunkId);
+        else chunkEntries.set(chunkId, parseStoredArray<IHarEntry>(change.newValue));
+        changed = true;
+      });
+      if (changed) publish();
     };
     chrome.storage.onChanged.addListener(handler);
 
-    // Unsubscribe when component unmounts
     return () => {
       chrome.storage.onChanged.removeListener(handler);
     };
@@ -69,7 +112,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
     frames,
     downloading,
     syncState: syncInfo,
-    initReqChainResult,
+    harLog,
   };
 
   return <InspectedPageContext.Provider value={contextValue}>{children}</InspectedPageContext.Provider>;
@@ -81,5 +124,5 @@ export interface IPageContext {
   frames: { [key: string]: IFrameInfo };
   downloading: string;
   syncState: string;
-  initReqChainResult: any;
+  harLog: IHarEntry[];
 }

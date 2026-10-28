@@ -1,6 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
+import { Paper } from '@mui/material';
 import { ErrorBoundary } from 'react-error-boundary';
+
+import AppStateContext from '../../contexts/appStateContext';
+import JSONViewerComponent from '../JSONViewerComponent';
+
 import PriceGranularityComponent from './tiles/PriceGranularityComponent';
 import UserIdModule from './tiles/UserIdModule';
 import PrebidServerComponent from './tiles/PrebidServerComponent';
@@ -11,19 +16,89 @@ import FloorsModuleComponent from './tiles/FloorsModuleComponent';
 import GptPreAuctionComponent from './tiles/GptPreAuctionComponent';
 import InstalledModulesComponent from './tiles/InstalledModules';
 import UserSyncComponent from './tiles/UserSyncComponent';
+import AnalyticsComponent from './tiles/AnalyticsComponent';
+import FirstPartyDataComponent from './tiles/FirstPartyDataComponent';
+import CurrencyComponent from './tiles/CurrencyComponent';
+import RtdComponent from './tiles/RtdComponent';
+import OtherConfigsComponent from './tiles/OtherConfigsComponent';
+import { DownloadButton } from '../DownloadButton';
+import { TabToolbar } from '../TabToolbar';
 
 export const tileHeight = 255;
 
+const tiles = [
+  InstalledModulesComponent,
+  PriceGranularityComponent,
+  PrebidConfigComponent,
+  BidderSettingsComponent,
+  PrebidServerComponent,
+  PrivacyComponent,
+  UserIdModule,
+  FloorsModuleComponent,
+  GptPreAuctionComponent,
+  UserSyncComponent,
+  AnalyticsComponent,
+  FirstPartyDataComponent,
+  CurrencyComponent,
+  RtdComponent,
+  OtherConfigsComponent,
+];
+
 const ConfigComponent = (): JSX.Element => {
-  const tiles = [InstalledModulesComponent, PriceGranularityComponent, PrebidConfigComponent, BidderSettingsComponent, PrebidServerComponent, PrivacyComponent, UserIdModule, FloorsModuleComponent, GptPreAuctionComponent, UserSyncComponent];
+  const { prebid } = useContext(AppStateContext);
+  const [query, setQuery] = useState('');
+
+  const fullConfig = useMemo(() => (prebid?.config || {}) as Record<string, any>, [prebid?.config]);
+  const fieldKeys = useMemo(() => Object.keys(fullConfig), [fullConfig]);
+  const options = useMemo(() => Object.keys(fullConfig).map((k) => `${k}:`), [fullConfig]);
+
+  const filteredConfig = useMemo(() => {
+    if (!query.trim()) return {};
+    const q = query.trim().toLowerCase();
+    const result: Record<string, any> = {};
+
+    const colonIndex = q.indexOf(':');
+    const targetKey = colonIndex >= 0 ? q.slice(0, colonIndex).trim() : '';
+    const targetVal = colonIndex >= 0 ? q.slice(colonIndex + 1).trim() : '';
+    // Only `key:value` when the part before the colon names a config key: values such as URLs contain colons too.
+    const isKeyValue = colonIndex >= 0 && Object.keys(fullConfig).some((key) => key.toLowerCase().includes(targetKey));
+
+    Object.keys(fullConfig).forEach((key) => {
+      const lowerKey = key.toLowerCase();
+      const val = fullConfig[key];
+      const valStr = typeof val === 'object' ? JSON.stringify(val).toLowerCase() : String(val).toLowerCase();
+
+      if (isKeyValue) {
+        const keyMatch = lowerKey.includes(targetKey);
+        if (keyMatch && (!targetVal || valStr.includes(targetVal))) {
+          result[key] = val;
+        }
+      } else if (lowerKey.includes(q) || valStr.includes(q)) {
+        result[key] = val;
+      }
+    });
+
+    return result;
+  }, [fullConfig, query]);
 
   return (
-    <Grid container>
-      {tiles.map((Tile, index) => (
-        <ErrorBoundary key={index} FallbackComponent={ErrorFallback}>
-          <Tile />
-        </ErrorBoundary>
-      ))}
+    <Grid container alignItems="flex-start">
+      <TabToolbar search={{ query, onQueryChange: setQuery, options, fieldKeys, placeholder: 'Filter config...' }} actions={<DownloadButton data={fullConfig} fileName="prebid-config" tooltip="Download Prebid config as JSON" />} />
+
+      {/* Content View Switcher */}
+      {query.trim() !== '' ? (
+        <Grid size={{ xs: 12 }}>
+          <Paper sx={{ p: 1, mt: 0.5 }}>{Object.keys(filteredConfig).length > 0 ? <JSONViewerComponent src={filteredConfig} name="config" collapsed={false} /> : <Paper sx={{ p: 2, textAlign: 'center' }}>No matching configuration parameters</Paper>}</Paper>
+        </Grid>
+      ) : (
+        <Grid size={{ xs: 12 }} sx={{ columnCount: { xs: 1, sm: 2, md: 3 }, columnGap: '4px', '& > *': { width: '100% !important', maxWidth: '100% !important' } }}>
+          {tiles.map((Tile, index) => (
+            <ErrorBoundary key={Tile.name || index} FallbackComponent={ErrorFallback}>
+              <Tile />
+            </ErrorBoundary>
+          ))}
+        </Grid>
+      )}
     </Grid>
   );
 };

@@ -7,7 +7,8 @@ import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import DifferenceIcon from '@mui/icons-material/Difference';
 import LinkIcon from '@mui/icons-material/Link';
-import PrivacyTipOutlinedIcon from '@mui/icons-material/PrivacyTipOutlined';
+
+import HubOutlinedIcon from '@mui/icons-material/HubOutlined';
 import { OverridableComponent } from '@mui/material/OverridableComponent';
 import { SvgIconTypeMap } from '@mui/material';
 
@@ -34,12 +35,14 @@ export const SAVE_MASKS = 'PP_SAVE_MASKS';
 export const DOWNLOAD_FAILED = 'PP_DOWNLOAD_FAILED';
 export const INITIATOR_TOGGLE = 'initiator_state';
 export const INITIATOR_ROOT_URL = 'initiator_root_url';
+export const PRE_AUCTION_HAR = 'preAuctionHar';
+export const preAuctionHarKey = (tabId: number) => `${PRE_AUCTION_HAR}_${tabId}`;
 export const POPUP_LOADED = 'PP_POPUP_LOADED';
+export const MCP_BRIDGE_ENABLE = 'PP_MCP_BRIDGE_ENABLE';
 export const PREBID_DETECTION_TIMEOUT = 60000;
 export const PREBID_DETECTION_TIMEOUT_IFRAME = 3000;
 
 export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
-  // all mediaTypes
   { value: 'bidderCode', label: 'bidderCode', mediaType: 'allMediaTypes', default: '', type: 'string' },
   { value: 'cpm', label: 'cpm', mediaType: 'allMediaTypes', default: '20', type: 'number' },
   { value: 'currency', label: 'currency', mediaType: 'allMediaTypes', default: 'USD', type: 'string' },
@@ -49,14 +52,14 @@ export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
   { value: 'netRevenue', label: 'netRevenue', mediaType: 'allMediaTypes', default: '', type: 'number' },
   { value: 'requestBidder', label: 'requestBidder', mediaType: 'allMediaTypes', default: '', type: 'string' },
   { value: 'ttl', label: 'ttl', mediaType: 'allMediaTypes', default: '', type: 'number' },
-  //mediaType banner
+
   { value: 'ad', label: 'ad', mediaType: 'banner', default: '', type: 'string' },
   { value: 'height', label: 'height', mediaType: 'banner', default: '300', type: 'number' },
   { value: 'width', label: 'width', mediaType: 'banner', default: '', type: 'number' },
-  //mediaType video
+
   { value: 'vastUrl', label: 'vastUrl', mediaType: 'video', default: '', type: 'string' },
   { value: 'vastXml', label: 'vastXml', mediaType: 'video', default: '', type: 'string' },
-  //mediaType native
+
   { value: 'clickUrl', label: 'clickUrl', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
   { value: 'title', label: 'title', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
   { value: 'image', label: 'image', mediaType: 'native', default: '', subkey: 'native', type: 'string' },
@@ -79,18 +82,19 @@ export const replaceRuleTargets: IReplaceRuleKeyOptions[] = [
 export const PAGES: {
   label: string;
   path: string;
-  Icon: OverridableComponent<SvgIconTypeMap<{}, "svg">> & {
+  Icon: OverridableComponent<SvgIconTypeMap<{}, 'svg'>> & {
     muiName: string;
   };
   beta: boolean;
 }[] = [
-    { label: 'Ad Units', path: '', Icon: AdUnitsOutlinedIcon, beta: false },
-    { label: 'Bids', path: 'bids', Icon: AccountBalanceOutlinedIcon, beta: false },
-    { label: 'Config', path: 'config', Icon: SettingsOutlinedIcon, beta: false },
-    { label: 'Events', path: 'events', Icon: WarningAmberOutlinedIcon, beta: false },
-    { label: 'Network Inspector', path: 'initiator', Icon: LinkIcon, beta: true },
-    { label: 'Timeline', path: 'timeline', Icon: TimelineOutlinedIcon, beta: false },
-    { label: 'Tools', path: 'tools', Icon: DnsOutlinedIcon, beta: false },
-    { label: 'User Id', path: 'userId', Icon: ContactPageOutlinedIcon, beta: false },
-    { label: 'Version', path: 'version', Icon: DifferenceIcon, beta: false },
-  ];
+  { label: 'Ad Units', path: '', Icon: AdUnitsOutlinedIcon, beta: false },
+  { label: 'Bids', path: 'bids', Icon: AccountBalanceOutlinedIcon, beta: false },
+  { label: 'Config', path: 'config', Icon: SettingsOutlinedIcon, beta: false },
+  { label: 'Events', path: 'events', Icon: WarningAmberOutlinedIcon, beta: false },
+  { label: 'Network Inspector', path: 'initiator', Icon: LinkIcon, beta: true },
+  { label: 'Pre-Auction', path: 'preAuction', Icon: HubOutlinedIcon, beta: true },
+  { label: 'Timeline', path: 'timeline', Icon: TimelineOutlinedIcon, beta: false },
+  { label: 'Tools', path: 'tools', Icon: DnsOutlinedIcon, beta: false },
+  { label: 'User Id', path: 'userId', Icon: ContactPageOutlinedIcon, beta: false },
+  { label: 'Version', path: 'version', Icon: DifferenceIcon, beta: false },
+];

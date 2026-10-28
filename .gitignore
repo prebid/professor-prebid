@@ -5,11 +5,17 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/blob-report
 
 # production
 /build
+/dist
+**/dist/
 **/dist/*.js
 **/dist/**/*.js
+
 # zip
 /zip
 *.zip
@@ -17,6 +23,7 @@ build.zip
 
 # misc
 .DS_Store
+**/.DS_Store
 .env.local
 .env.development.local
 .env.test.local
@@ -28,10 +35,6 @@ secrets.*.js
 *.cert
 *.key
 
-
-**/dist/*.js
-**/dist/**/*.js
-
-**/.DS_Store
-**/dist/
-build.zip
+# Third-party vendor payloads fetched for analysis (scanVendorPayloads.mjs) - never commit them
+*.payload.js
+/vendor-payloads/

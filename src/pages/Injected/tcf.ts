@@ -1,5 +1,5 @@
 import { EVENTS } from '../Shared/constants';
-import { sendWindowPostMessage } from '../Shared/utils';
+import { EventBus } from '../Shared/utils';
 
 declare global {
   interface Window {
@@ -10,7 +10,6 @@ declare global {
 class IabTcf {
   lastMessage: string;
   stopLoop: boolean = false;
-  criteoVendorId: number = 91;
   init() {
     setTimeout(() => {
       this.stopLoop = true;
@@ -23,7 +22,6 @@ class IabTcf {
       this.sendDetailsToContentScript();
     } else if (!this.stopLoop) {
       setTimeout(() => this.loop(), 1000);
-      // requestIdleCallback(() => this.loop());
     }
   }
 
@@ -32,7 +30,7 @@ class IabTcf {
     try {
       window.__cmp('ping', null, (val: IPingReturn, success: boolean) => {
         if (success) {
-          cmpLoaded = val.cmpLoaded;
+          cmpLoaded = val?.cmpLoaded;
         }
         if (typeof callback === 'function') {
           callback.apply(null, [cmpLoaded]);
@@ -46,9 +44,9 @@ class IabTcf {
   }
 
   getConsentDataV1(callback: Function) {
-    let consentData: string = null;
+    let consentData: any = null;
     try {
-      window.__cmp('getConsentData', null, (val: string, success: boolean) => {
+      window.__cmp('getConsentData', null, (val: any, success: boolean) => {
         if (success) {
           consentData = val;
         }
@@ -80,9 +78,9 @@ class IabTcf {
   }
 
   getTCDataV2(callback: Function) {
-    let tcData: string = null;
+    let tcData: any = null;
     try {
-      window.__tcfapi('getTCData', 2, (data: string, success: boolean) => {
+      window.__tcfapi('getTCData', 2, (data: any, success: boolean) => {
         if (success) {
           tcData = data;
         }
@@ -106,6 +104,7 @@ class IabTcf {
       try {
         this.pingV1((cmpLoaded: boolean) => {
           this.getConsentDataV1((consentData: { gdprApplies: boolean; consentData: string }) => {
+            if (!consentData) return;
             const detail: ITcfDetails = {
               v1: {
                 cmpLoaded: cmpLoaded,
@@ -114,7 +113,7 @@ class IabTcf {
               },
             };
             if (this.lastMessage !== JSON.stringify(detail)) {
-              sendWindowPostMessage(EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
+              EventBus.emit(EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
               this.lastMessage = JSON.stringify(detail);
             }
           });
@@ -126,6 +125,7 @@ class IabTcf {
       try {
         this.pingV2((pingReturn: IPingReturn) => {
           this.getTCDataV2((tcData: { tcString: string }) => {
+            if (!pingReturn || !tcData) return;
             const detail: ITcfDetails = {
               v2: {
                 cmpLoaded: pingReturn.cmpLoaded,
@@ -134,7 +134,7 @@ class IabTcf {
               },
             };
             if (this.lastMessage !== JSON.stringify(detail)) {
-              sendWindowPostMessage(EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
+              EventBus.emit(EVENTS.SEND_TCF_DETAILS_TO_BACKGROUND, detail);
               this.lastMessage = JSON.stringify(detail);
             }
           });

@@ -1,4 +1,4 @@
-import { sendWindowPostMessage } from '../Shared/utils';
+import { EventBus } from '../Shared/utils';
 import { EVENTS } from '../Shared/constants';
 import { getSlotTargeting } from '../Shared/gptTargeting';
 
@@ -14,7 +14,10 @@ class GoogleAdManager {
   postAuctionEndTimestamp: number = null;
   googletag: typeof googletag;
   init() {
-    this.googletag = window.googletag || ({} as typeof googletag);
+    // At document_start GPT usually has not loaded yet: create the shared stub on window
+    // so GPT finds the queued hook and runs it once it loads.
+    window.googletag = window.googletag || ({} as typeof googletag);
+    this.googletag = window.googletag;
     if (!Array.isArray(this.googletag.cmd)) {
       (this.googletag as any).cmd = [];
     }
@@ -31,49 +34,49 @@ class GoogleAdManager {
   }
 
   addEventListeners(): void {
-    // 1. Adding an event listener for the PubAdsService
-
     this.googletag.pubads().addEventListener('slotRequested', (event) => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.updatePostAuctionTimestamps(timestamp);
-      this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotRequested', timestamp }];
-      // this.sendDetailsToContentScript()
+      if (!this.slotEvents[slotElementId]) this.slotEvents[slotElementId] = [];
+      this.slotEvents[slotElementId].push({ type: 'slotRequested', timestamp });
     });
 
     this.googletag.pubads().addEventListener('slotResponseReceived', (event) => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
       this.updatePostAuctionTimestamps(timestamp);
-      this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotResponseReceived', timestamp }];
+      if (!this.slotEvents[slotElementId]) this.slotEvents[slotElementId] = [];
+      this.slotEvents[slotElementId].push({ type: 'slotResponseReceived', timestamp });
       this.sendDetailsToContentScript();
     });
 
     this.googletag.pubads().addEventListener('slotRenderEnded', (event) => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
-      this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotRenderEnded', timestamp }];
-      // this.sendDetailsToContentScript()
+      if (!this.slotEvents[slotElementId]) this.slotEvents[slotElementId] = [];
+      this.slotEvents[slotElementId].push({ type: 'slotRenderEnded', timestamp });
     });
 
     this.googletag.pubads().addEventListener('slotOnload', (event) => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
-      this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotOnload', timestamp }];
-      // this.sendDetailsToContentScript()
+      if (!this.slotEvents[slotElementId]) this.slotEvents[slotElementId] = [];
+      this.slotEvents[slotElementId].push({ type: 'slotOnload', timestamp });
     });
 
     this.googletag.pubads().addEventListener('slotVisibilityChanged', (event) => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
-      this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'slotVisibilityChanged', timestamp }];
-      // this.sendDetailsToContentScript()
+      if (!this.slotEvents[slotElementId]) this.slotEvents[slotElementId] = [];
+      this.slotEvents[slotElementId].push({ type: 'slotVisibilityChanged', timestamp });
     });
 
     this.googletag.pubads().addEventListener('impressionViewable', (event) => {
       const slotElementId = event.slot.getSlotElementId();
       const timestamp = Date.now();
-      this.slotEvents[slotElementId as keyof ISlotEvents] = [...(this.slotEvents[slotElementId] || []), { type: 'impressionViewable', timestamp }];
+      if (!this.slotEvents[slotElementId]) this.slotEvents[slotElementId] = [];
+      this.slotEvents[slotElementId].push({ type: 'impressionViewable', timestamp });
       this.sendDetailsToContentScript();
     });
   }
@@ -91,10 +94,8 @@ class GoogleAdManager {
       const messageId = typeof message?.getMessageId === 'function' ? message?.getMessageId() : null;
 
       if (messageId == 70) {
-        // refreshing ads
         if (refreshIndex == null) refreshIndex = e;
       } else if (messageId == 3) {
-        // fetching ad slot
         if (fetchslotIndex == null) fetchslotIndex = e;
       }
     }
@@ -110,7 +111,6 @@ class GoogleAdManager {
     const events = gpt?.getEventLog()?.getAllEvents() || [];
 
     let isFetchBeforeKeyvalue = false;
-    let refreshIndex = null;
     let fetchslotIndex = null;
     let keyvalueIndex = null;
 
@@ -119,18 +119,11 @@ class GoogleAdManager {
       const message = typeof event?.getMessage === 'function' ? event?.getMessage() : null;
       const messageId = typeof message?.getMessageId === 'function' ? message?.getMessageId() : null;
 
-      if (messageId == 70) {
-        // refreshing ads
-        if (refreshIndex == null) {
-          refreshIndex = e;
-        }
-      } else if (messageId == 3) {
-        // fetching ad slot
+      if (messageId == 3) {
         if (fetchslotIndex == null) {
           fetchslotIndex = e;
         }
       } else if (messageId == 17) {
-        // Setting targeting attribute for ad slot
         if (keyvalueIndex == null) {
           keyvalueIndex = e;
         }
@@ -151,8 +144,8 @@ class GoogleAdManager {
     for (const event of events) {
       const message = event?.getMessage ? event.getMessage() : null;
       const messageId = message ? message.getMessageId() : null;
-      const messageArgs = message ? message.getMessageArgs() : null;
-      if (messageId == 63 && messageArgs[0] == 'synchronous rendering') {
+      const messageArgs = typeof message?.getMessageArgs === 'function' ? message.getMessageArgs() : null;
+      if (messageId == 63 && messageArgs?.[0] == 'synchronous rendering') {
         asyncRendermode = false;
       }
     }
@@ -213,7 +206,7 @@ class GoogleAdManager {
       postAuctionEndTimestamp: this.postAuctionEndTimestamp,
     };
     if (this.lastMessage !== JSON.stringify(detail)) {
-      sendWindowPostMessage(EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, detail);
+      EventBus.emit(EVENTS.SEND_GAM_DETAILS_TO_BACKGROUND, detail);
       this.lastMessage = JSON.stringify(detail);
     }
   }

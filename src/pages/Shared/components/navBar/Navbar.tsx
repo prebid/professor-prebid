@@ -8,7 +8,7 @@ export const NavBar = (): JSX.Element => {
   return (
     <AppBar
       sx={{
-        height: '40px',
+        height: '42px',
         position: 'relative',
         backgroundColor: 'background.paper',
         display: 'flex',

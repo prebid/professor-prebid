@@ -1,249 +1,255 @@
-import React, { useEffect, useState, useContext } from 'react';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import { INITIATOR_TOGGLE, INITIATOR_ROOT_URL } from '../../constants';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import React, { useContext, useMemo, useState } from 'react';
+import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
-import JSONViewerComponent from '../JSONViewerComponent';
-import AppStateContext from '../../contexts/appStateContext';
-import InspectedPageContext from '../../contexts/inspectedPageContext';
-import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+
+import Button from '@mui/material/Button';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import Snackbar from '@mui/material/Snackbar';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
-import './InitiatorComponent.css';
-import { Bars } from 'react-loader-spinner';
+import TableRowsIcon from '@mui/icons-material/TableRows';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import SecurityIcon from '@mui/icons-material/Security';
 
-export interface ToastMessage {
-  message: string;
-  key: number;
-}
+import InspectedPageContext from '../../contexts/inspectedPageContext';
+import AppStateContext from '../../contexts/appStateContext';
+import JSONViewerComponent from '../JSONViewerComponent';
+import { TabToolbar, ToolbarButton } from '../TabToolbar';
+import { DownloadButton } from '../DownloadButton';
+import { createQueryEngine, distinct } from '../autocomplete/utils';
+import { getTabId } from '../../utils';
+import { preAuctionHarKey } from '../../constants';
 
-const gridStyle = {
-  '& .MuiGrid-item > .MuiPaper-root': {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+import { classifyRequest, IClassifiedNetworkEntry, NetworkCategory } from './networkClassifier';
+import { NetworkWaterfallView } from './NetworkWaterfallView';
+import { NetworkCascadeView } from './NetworkCascadeView';
+import { NetworkPrivacyAuditView } from './NetworkPrivacyAuditView';
+import { NetworkDetailDrawer } from './NetworkDetailDrawer';
+import { decompressPayload } from './payloadDecompressor';
+import { JsonViewToggle } from '../JsonViewToggle';
+
+// Query terms are split on whitespace, so provider names are matched without it ('Magnite / Rubicon' -> 'magnite/rubicon').
+const providerKey = (providerName: string) => providerName.toLowerCase().replace(/\s+/g, '');
+
+export const NETWORK_FIELD_MAP = {
+  category: (entry: IClassifiedNetworkEntry) => entry.category,
+  bidder: (entry: IClassifiedNetworkEntry) => providerKey(entry.providerName),
+  status: (entry: IClassifiedNetworkEntry) => String(entry.entry.status),
+  method: (entry: IClassifiedNetworkEntry) => entry.entry.method.toLowerCase(),
+  domain: (entry: IClassifiedNetworkEntry) => entry.entry.host.toLowerCase(),
+  privacy: (entry: IClassifiedNetworkEntry) => entry.privacy.verdict,
+  url: (entry: IClassifiedNetworkEntry) => entry.entry.url.toLowerCase(),
+} as const;
+
+const VIEW_MODES = [
+  { label: 'Waterfall', Icon: TableRowsIcon },
+  { label: 'Initiator Cascade', Icon: AccountTreeIcon },
+  { label: 'Privacy Audit', Icon: SecurityIcon },
+];
+
+const CATEGORY_TABS: { category: NetworkCategory | 'all'; label: string; tooltip: string }[] = [
+  { category: 'all', label: 'All', tooltip: 'View all captured network requests' },
+  { category: 'bid', label: 'Bids', tooltip: 'Filter by Bid Requests (OpenRTB, PBS, Bidders)' },
+  { category: 'sync', label: 'Syncs', tooltip: 'Filter by SSP User Sync Pixels and ID Syncs' },
+  { category: 'userId', label: 'User IDs', tooltip: 'Filter by User ID Modules (ID5, LiveRamp, SharedID)' },
+  { category: 'rtd', label: 'RTD', tooltip: 'Filter by Real-Time Data (RTD) modules' },
+  { category: 'analytics', label: 'Analytics', tooltip: 'Filter by Prebid Analytics Beacons' },
+];
+
+const networkQueryEngine = createQueryEngine<IClassifiedNetworkEntry>(NETWORK_FIELD_MAP);
+
+const buildSearchSuggestions = (entries: IClassifiedNetworkEntry[]): string[] => {
+  return distinct([
+    'category:',
+    'bidder:',
+    'status:',
+    'domain:',
+    'privacy:',
+    'category:bid',
+    'category:sync',
+    'category:userId',
+    'category:rtd',
+    'category:analytics',
+    'category:gam',
+    'privacy:valid',
+    'privacy:missing',
+    'privacy:warning',
+    'status:200',
+    'status:302',
+    ...entries.map((e) => `bidder:${providerKey(e.providerName)}`),
+    ...entries.map((e) => `domain:${e.entry.host}`),
+  ]).sort();
 };
 
 const InitiatorComponent = (): JSX.Element => {
-  const { isRefresh, initDataLoaded, setInitiatorOutput, setInitDataLoaded, setIsRefresh } = useContext(AppStateContext);
-  const { initReqChainResult } = useContext(InspectedPageContext);
-  const [initChainFeatureStatus, setInitChainFeatureStatus] = useState<boolean>(null);
-  const [rootUrl, setRootUrl] = useState<string>('');
-  const [showReqChain, setShowReqChain] = useState<boolean>(false);
-  const [urlButtonDisabled, setUrlButtonDisabled] = useState<boolean>(true);
+  const { harLog } = useContext(InspectedPageContext);
+  const { tcf } = useContext(AppStateContext);
+  const cmpConsentString = ((tcf as any)?.v2?.consentData || (tcf as any)?.v1?.consentData || (tcf as any)?.gdpr?.consentData?.tcString || '') as string;
 
-  const [toastMessage, setToastMessage] = React.useState<readonly ToastMessage[]>([]);
-  const [showToastMessage, setShowToastMessage] = React.useState(false);
-  const [messageInfo, setMessageInfo] = React.useState<ToastMessage | undefined>(undefined);
+  const [query, setQuery] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<NetworkCategory | 'all'>('all');
+  const [viewMode, setViewMode] = useState<number>(0);
+  const [showRawJson, setShowRawJson] = useState<boolean>(false);
+  const [selectedEntry, setSelectedEntry] = useState<IClassifiedNetworkEntry | null>(null);
+  const [decompressedMap, setDecompressedMap] = useState<Record<string, string>>({});
 
-  chrome.tabs?.onUpdated.addListener(function (tabId, info) {
-    if (info.status === 'complete') {
-      setShowReqChain(true);
-      setInitDataLoaded(true);
-    }
-  });
+  React.useEffect(() => {
+    let active = true;
+    const rawList = harLog || [];
+    const entriesToDecompress = rawList.filter((e: any) => e.postData?.text && decompressedMap[e.id] === undefined);
 
-  useEffect(() => {
-    if (toastMessage.length && !messageInfo) {
-      // Set a new toast message when we don't have an active one
-      setMessageInfo({ ...toastMessage[0] });
-      setToastMessage((prev) => prev.slice(1));
-      setShowToastMessage(true);
-    } else if (toastMessage.length && messageInfo && showToastMessage) {
-      // Close an active toast message when a new one is added
-      setShowToastMessage(false);
-    }
-  }, [toastMessage, messageInfo, showToastMessage]);
-
-  useEffect(() => {
-    chrome.storage.local.get(INITIATOR_TOGGLE, (result) => {
-      const value = result ? result[INITIATOR_TOGGLE] : false;
-      setInitChainFeatureStatus(value);
-    });
-  }, [initChainFeatureStatus]);
-
-  useEffect(() => {
-    chrome.storage.local.get(INITIATOR_ROOT_URL, (result) => {
-      const value = result ? result[INITIATOR_ROOT_URL] : rootUrl;
-      setRootUrl(value);
-    });
-  }, []);
-
-  const handleRefreshClickToShowToastMessage = (message: string) => {
-    setToastMessage((prev) => [...prev, { message, key: new Date().getTime() }]);
-  };
-
-  const handleCloseToastMessageClick = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setShowToastMessage(false);
-  };
-
-  const handleToastMessageExited = () => {
-    setMessageInfo(undefined);
-  };
-
-  const handleInitChainFeatureStatusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInitChainFeatureStatus(event.target.checked);
-    const { checked } = event.target;
-    chrome.storage.local.set({ [INITIATOR_TOGGLE]: checked }, () => {
-      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-        const tab = tabs[0];
-        chrome.tabs.sendMessage(tab.id as number, { type: INITIATOR_TOGGLE, consoleState: checked });
+    if (entriesToDecompress.length > 0) {
+      Promise.all(
+        entriesToDecompress.map(async (e: any) => {
+          const res = await decompressPayload(e.postData!.text!);
+          return { id: e.id, text: res.text, isDecompressed: res.isDecompressed };
+        })
+      ).then((results) => {
+        if (active) {
+          const updates: Record<string, string> = {};
+          results.forEach((r) => {
+            if (r.isDecompressed) {
+              updates[r.id] = r.text;
+            } else {
+              updates[r.id] = '';
+            }
+          });
+          if (Object.keys(updates).length > 0) {
+            setDecompressedMap((prev) => ({ ...prev, ...updates }));
+          }
+        }
       });
-    });
-  };
-
-  const handleSettingRootUrl = () => {
-    if (rootUrl === '') {
-      return;
     }
-    chrome.storage.local.set({ [INITIATOR_ROOT_URL]: rootUrl }, () => {
-      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-        const tab = tabs[0];
-        chrome.tabs.sendMessage(tab.id as number, { type: INITIATOR_ROOT_URL, rootUrl });
-      });
-      setUrlButtonDisabled(true);
+
+    return () => {
+      active = false;
+    };
+  }, [harLog, decompressedMap]);
+
+  // Classify all incoming HAR entries
+  const classifiedEntries: IClassifiedNetworkEntry[] = useMemo(() => {
+    const rawList = harLog || [];
+    return rawList.map((entry: any) => classifyRequest(entry, decompressedMap[entry.id], cmpConsentString));
+  }, [harLog, decompressedMap, cmpConsentString]);
+
+  // Counts by category
+  const counts = useMemo(() => {
+    const map: Record<NetworkCategory | 'all', number> = {
+      all: classifiedEntries.length,
+      bid: 0,
+      sync: 0,
+      userId: 0,
+      rtd: 0,
+      analytics: 0,
+      gam: 0,
+      other: 0,
+    };
+    classifiedEntries.forEach((c) => {
+      map[c.category] = (map[c.category] || 0) + 1;
+    });
+    return map;
+  }, [classifiedEntries]);
+
+  // Autocomplete search suggestions
+  const suggestions = useMemo(() => buildSearchSuggestions(classifiedEntries), [classifiedEntries]);
+
+  // Query engine predicate
+  const filterFn = useMemo(() => networkQueryEngine.runQuery(query), [query]);
+
+  // Filtered entries based on Category chip & Search query
+  const filteredEntries = useMemo(() => {
+    let result = classifiedEntries;
+
+    if (selectedCategory !== 'all') {
+      result = result.filter((c) => c.category === selectedCategory);
+    }
+
+    if (query.trim()) {
+      result = result.filter(filterFn);
+    }
+
+    return result;
+  }, [classifiedEntries, selectedCategory, query, filterFn]);
+
+  const handleClearLog = () => {
+    setSelectedEntry(null);
+    getTabId().then((tabId) => {
+      if (tabId !== undefined) chrome.storage?.session?.set({ [preAuctionHarKey(tabId)]: JSON.stringify([]) });
     });
   };
 
-  const handleChangeOfRootUrlField = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRootUrl(e.target.value);
-    setUrlButtonDisabled(false);
-  };
-
-  const renderToasterContent = (message: any) => {
-    return (
-      <div className="toaster-content-wrapper">
-        <WarningAmberOutlinedIcon className="toaster-warning-icon" color="secondary" />
-        <p>{message}</p>
-      </div>
-    );
+  const handleReloadPage = () => {
+    chrome.devtools?.inspectedWindow?.reload({ ignoreCache: true });
   };
 
   return (
-    <>
-      <Grid container sx={gridStyle}>
-        <Grid size={{ xs: 12 }}>
-          <Box sx={{ backgroundColor: 'background.paper', borderRadius: 1, p: 1 }} className="box-wrapper">
-            <Typography paragraph>
-              <b>Use Case:</b>
-            </Typography>
-            <Typography paragraph>
-              This tool was designed to be used to test SSP User Sync URL's in order to create transparancy and determine if privacy parameters were correctly getting passing down the request chain generated by a User Sync URL. Under the hood this tool uses
-              the Chrome Devtools Network API{' '}
-              <strong className="initiator__strong">which requires that a new instance of the Chrome devtools be opened each time a modification is made to this Network Inspector tool (Ex. modifying the root URL, toggling the feature on/off, etc.)</strong>.
-              For more details see the instructions below.
-            </Typography>
-            <Typography paragraph>
-              <b>Instructions on How to Use:</b>
-            </Typography>
-            <Typography paragraph>
-              Note: It is advised when testing User Sync URL's that you clear cookies relative to the domain you are testing. This will ensure that results are in-line with an initial visit to the current page. Additionally, the first resource matching the
-              root URL will be used to generate the initiator request chain.
-            </Typography>
-            <Typography paragraph>
-              View instructions on the Prebid documentation site{' '}
-              <a href="https://docs.prebid.org/tools/professor-prebid.html" target="_blank" rel="noreferrer">
-                here
-              </a>
-              .
-            </Typography>
-            <br />
-            <br />
-            <div className="initiator-form">
-              <FormControl>
-                <FormControlLabel control={<Switch checked={initChainFeatureStatus || false} onChange={handleInitChainFeatureStatusChange} />} label={initChainFeatureStatus ? 'On' : 'Off'} />
-              </FormControl>
-              <TextField id="outlined-basic" label="Enter Root URL" variant="outlined" size="small" className="child margin-right" value={rootUrl} onChange={handleChangeOfRootUrlField} />
-              <Button variant="outlined" className="submit-button margin-right" onClick={handleSettingRootUrl} disabled={urlButtonDisabled}>
-                Set URL
-              </Button>
-            </div>
-            <div className={`initiator__output ${(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? 'initiator__output-left-align' : ''}`}>
-              {(showReqChain || initDataLoaded) && initReqChainResult && Object.keys(initReqChainResult).length > 0 ? (
-                <JSONViewerComponent
-                  src={initReqChainResult}
-                  name={''}
-                  collapsed={2}
-                  displayObjectSize={true}
-                  displayDataTypes={false}
-                  sortKeys={false}
-                  quotesOnKeys={false}
-                  indentWidth={2}
-                  collapseStringsAfterLength={100}
-                  style={{ fontSize: '12px', fontFamily: 'roboto', padding: '5px' }}
-                />
-              ) : isRefresh ? (
-                <div className="initiator__loader-wrapper">
-                  <p>Generating initiator request chain...</p>
-                  <div className="loader">
-                    <Bars height="80" width="50" color="#ff6f00" ariaLabel="bars-loading" wrapperStyle={{}} wrapperClass="" visible={true} />
-                  </div>
-                </div>
-              ) : (
-                <p className="initiator__short-instructions">
-                  The initiator request chain will go here.
-                  <br />
-                  Follow the instructions above, then <strong className="initiator__strong">close</strong> and <strong className="initiator__strong">re-open</strong> the Chrome Devtools.
-                  <br />
-                  Afterwards navigate back to the "Network Inspector" tool and click the refresh icon here:&nbsp;&nbsp;
-                  <RefreshIcon
-                    className="initiator__refresh-icon"
-                    onClick={() => {
-                      if (!initChainFeatureStatus || !rootUrl) {
-                        handleRefreshClickToShowToastMessage(`Make sure that the Network Inspector tool is enabled and that a root URL has been set.`);
-                        return;
-                      }
+    <Box
+      sx={{
+        width: '100%',
+        p: 0.5,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 0.5,
+        height: 'calc(100vh - 42px)', // below the 42px navbar
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+      }}
+    >
+      <TabToolbar
+        stats={CATEGORY_TABS.map(({ category, label, tooltip }) => ({
+          label: `${label}: ${counts[category]}`,
+          tooltip,
+          selected: selectedCategory === category,
+          onClick: () => setSelectedCategory(selectedCategory === category ? 'all' : category),
+        }))}
+        search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: ['category', 'bidder', 'status', 'domain', 'privacy'], placeholder: 'Filter requests (e.g. bidder:rubicon category:sync privacy:valid)...' }}
+        extra={
+          <Paper sx={{ display: 'flex', alignItems: 'center', px: 0.25 }}>
+            {VIEW_MODES.map(({ label, Icon }, mode) => (
+              <ToolbarButton key={label} tooltip={label} onClick={() => setViewMode(mode)} icon={<Icon fontSize="inherit" />} color={viewMode === mode ? 'primary' : 'default'} pressed={viewMode === mode} />
+            ))}
+          </Paper>
+        }
+        actions={
+          <>
+            <ToolbarButton tooltip="Reload Inspected Page" onClick={handleReloadPage} icon={<RefreshIcon fontSize="inherit" />} />
+            <DownloadButton data={() => filteredEntries.map((c) => c.entry)} fileName="network-log" tooltip="Export Filtered Network Requests as JSON" />
+            <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="table view" toolbar />
+            <ToolbarButton tooltip="Clear Captured Network Log" onClick={handleClearLog} icon={<DeleteOutlineIcon fontSize="inherit" />} />
+          </>
+        }
+      />
 
-                      setInitiatorOutput({});
-                      setInitDataLoaded(false);
-                      setIsRefresh(true);
-                      chrome.storage.local.set({ initReqChain: JSON.stringify(null) });
-                      chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
-                    }}
-                  />
-                </p>
-              )}
-            </div>
-            <div>
-              <Snackbar
-                key={messageInfo ? messageInfo.key : undefined}
-                open={showToastMessage}
-                autoHideDuration={6000}
-                onClose={handleCloseToastMessageClick}
-                TransitionProps={{ onExited: handleToastMessageExited }}
-                message={messageInfo ? renderToasterContent(messageInfo.message) : undefined}
-                className="toaster-modal"
-                action={
-                  <React.Fragment>
-                    <IconButton aria-label="close" color="inherit" sx={{ p: 0.5 }} onClick={handleCloseToastMessageClick}>
-                      <CloseIcon className="toaster-close-icon" />
-                    </IconButton>
-                  </React.Fragment>
-                }
-              />
-            </div>
-          </Box>
-        </Grid>
-      </Grid>
-    </>
+      {/* Main View Area */}
+      <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {showRawJson ? (
+          <Paper sx={{ flex: 1, minHeight: 0, p: 1.5, overflowY: 'auto' }}>
+            <JSONViewerComponent src={filteredEntries.map((c) => c.entry)} collapsed={2} />
+          </Paper>
+        ) : classifiedEntries.length === 0 ? (
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              No Network Activity Recorded Yet
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto', mb: 2 }}>
+              Network traffic is captured automatically while DevTools is open. Reload the inspected page to capture ad auctions, bid requests, user syncs, and privacy signals.
+            </Typography>
+            <Button variant="contained" startIcon={<RefreshIcon />} onClick={handleReloadPage}>
+              Reload Page
+            </Button>
+          </Paper>
+        ) : viewMode === 0 ? (
+          <NetworkWaterfallView entries={filteredEntries} selectedEntry={selectedEntry} onSelectEntry={setSelectedEntry} />
+        ) : viewMode === 1 ? (
+          <NetworkCascadeView entries={filteredEntries} selectedEntry={selectedEntry} onSelectEntry={setSelectedEntry} />
+        ) : (
+          <NetworkPrivacyAuditView entries={filteredEntries} selectedEntry={selectedEntry} onSelectEntry={setSelectedEntry} />
+        )}
+      </Box>
+
+      {/* Detail Inspection Drawer */}
+      <NetworkDetailDrawer selectedEntry={selectedEntry} onClose={() => setSelectedEntry(null)} />
+    </Box>
   );
 };
-
-export interface InitiatorComponentProps {
-  initReqChain: {
-    [key: string]: any;
-  };
-}
 
 export default InitiatorComponent;

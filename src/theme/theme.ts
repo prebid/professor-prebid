@@ -2,9 +2,8 @@ import { createTheme } from '@mui/material/styles';
 
 const palette = {
   primary: {
-    // main: '#1976d2',
     main: '#438ED9',
-    // light: '#87CEEB',
+
     light: '#ABDDF1',
   },
   secondary: { main: '#f99b0c' },
@@ -56,7 +55,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: ({ ownerState }) => ({
           ...(ownerState.container && {
-            padding: '4px', // p:0.5
+            padding: '4px',
           }),
         }),
       },
@@ -66,18 +65,3 @@ export const theme = createTheme({
     },
   },
 });
-
-// h1 navigation bar
-// h2 component headline
-// h3 component table headline / config modules headline
-// h4 ad overlay headline
-// h5
-// h6
-// subtitle1
-// subtitle2
-// body1
-// body2
-// button
-// caption
-// overline
-
