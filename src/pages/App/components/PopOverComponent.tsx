@@ -21,7 +21,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ThemeProvider } from '@mui/material';
 import { theme } from '../../../theme/theme';
-import { getSlotTargeting } from '../../Shared/gptTargeting';
+import { useGamSlotDetails } from '../useGamSlotDetails';
 import { equivalentAdUnitCodes } from '../InjectedApp';
 
 const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
@@ -161,60 +161,7 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
     setWinningBid(winningBid || null);
   }, [elementId, pbjs]);
 
-  // gam stuff
-  const [networktId, setNetworkId] = useState<string[]>(null);
-  const [creativeId, setCreativeId] = useState<number>(null);
-  const [queryId, setQueryId] = useState<string>(null);
-  const [lineItemId, setLineItemId] = useState<number>(null);
-  const [slotAdUnitPath, setSlotAdUnitPath] = useState<string>(null);
-  const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string[]; id: number }[]>(null);
-  const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
-
-  useEffect(() => {
-    if (!isEffectiveOpen) return;
-    try {
-      if (window.parent?.googletag && typeof window.parent.googletag?.pubads === 'function') {
-        const pubads = window.parent.googletag.pubads();
-        const syncSlotData = () => {
-          const slots = pubads.getSlots ? pubads.getSlots() : [];
-          const slot = slots.find((s: any) => s.getSlotElementId() === elementId) || slots.find((s: any) => s.getAdUnitPath() === elementId);
-          if (slot) {
-            setSlotAdUnitPath(slot.getAdUnitPath());
-            setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-            setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
-            const responseInfo = slot.getResponseInformation();
-            setSlotResponseInfo(responseInfo);
-            const queryIdAttr = document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id');
-            setQueryId(queryIdAttr || null);
-
-            if (responseInfo) {
-              const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
-              setCreativeId(creativeId || sourceAgnosticCreativeId);
-              setLineItemId(lineItemId || sourceAgnosticLineItemId);
-            }
-          }
-        };
-
-        syncSlotData();
-
-        const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
-          const slotElId = event.slot?.getSlotElementId ? event.slot.getSlotElementId() : null;
-          const slotPath = event.slot?.getAdUnitPath ? event.slot.getAdUnitPath() : null;
-          if (slotElId === elementId || slotPath === elementId || (slotElId && elementId.includes(slotElId)) || (slotPath && elementId.includes(slotPath))) {
-            syncSlotData();
-          }
-        };
-        pubads.addEventListener('slotResponseReceived', eventHandler);
-        pubads.addEventListener('slotRenderEnded', eventHandler);
-        return () => {
-          pubads.removeEventListener('slotResponseReceived', eventHandler);
-          pubads.removeEventListener('slotRenderEnded', eventHandler);
-        };
-      }
-    } catch {
-      // Ignore cross-origin access errors
-    }
-  }, [elementId, isEffectiveOpen]);
+  const { networkId, creativeId, queryId, lineItemId, slotAdUnitPath, slotTargeting, slotResponseInfo } = useGamSlotDetails(elementId, isEffectiveOpen);
 
   return (
     <CacheProvider value={cacheTopPage}>
@@ -301,9 +248,9 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
             </Grid>
 
             <Grid container spacing={1.5}>
-              {lineItemId && <InfoCard title="LineItem-ID" value={lineItemId} linkUrl={networktId ? `https://admanager.google.com/${networktId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}` : null} />}
-              {creativeId && <InfoCard title="Creative-ID" value={creativeId} linkUrl={networktId ? `https://admanager.google.com/${networktId[0]}#delivery/CreativeDetail/creativeId=${creativeId}` : null} />}
-              {queryId && <InfoCard title="Query-ID" value={queryId} linkUrl={networktId ? `https://admanager.google.com/${networktId[0]}#troubleshooting/screenshot/query_id=${queryId}` : null} />}
+              {lineItemId && <InfoCard title="LineItem-ID" value={lineItemId} linkUrl={networkId ? `https://admanager.google.com/${networkId[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}` : null} />}
+              {creativeId && <InfoCard title="Creative-ID" value={creativeId} linkUrl={networkId ? `https://admanager.google.com/${networkId[0]}#delivery/CreativeDetail/creativeId=${creativeId}` : null} />}
+              {queryId && <InfoCard title="Query-ID" value={queryId} linkUrl={networkId ? `https://admanager.google.com/${networkId[0]}#troubleshooting/screenshot/query_id=${queryId}` : null} />}
               {slotAdUnitPath && <InfoCard title="AdUnit Path" value={slotAdUnitPath} />}
               {pbjs?.version && <InfoCard title="Prebid Version" value={pbjs.version} />}
             </Grid>

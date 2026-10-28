@@ -1,57 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { getParentGamPubAds } from '../InjectedApp';
+import React from 'react';
+import { useGamSlotDetails } from '../useGamSlotDetails';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import JSONViewerComponent from '../../Shared/components/JSONViewerComponent';
-import { getSlotTargeting } from '../../Shared/gptTargeting';
 
 const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailComponentProps): JSX.Element => {
-  const [networktId, setNetworkId] = useState<string[]>(null);
-  const [slotElementId, setSlotElementId] = useState<string>(null);
-  const [creativeId, setCreativeId] = useState<number>(null);
-  const [queryId, setQueryId] = useState<string>(null);
-  const [lineItemId, setLineItemId] = useState<number>(null);
-  const [slotAdUnitPath, setSlotAdUnitPath] = useState<string>(null);
-  const [slotTargeting, setSlotTargeting] = useState<{ key: string; value: string[]; id: number }[]>(null);
-  const [slotResponseInfo, setSlotResponseInfo] = useState<googletag.ResponseInformation>(null);
-
-  useEffect(() => {
-    const pubads = getParentGamPubAds();
-    if (pubads) {
-      const slots = pubads.getSlots();
-      const slot = slots.find((slot) => slot.getSlotElementId() === elementId) || slots.find((slot) => slot.getAdUnitPath() === elementId);
-      if (slot) {
-        const syncSlot = () => {
-          setSlotElementId(slot.getSlotElementId());
-          setSlotAdUnitPath(slot.getAdUnitPath());
-          setNetworkId(slot.getAdUnitPath()?.split('/')[1]?.split(','));
-          setSlotTargeting(Object.entries(getSlotTargeting(slot)).map(([key, value], id) => ({ key, value, id })));
-          const responseInfo = slot.getResponseInformation();
-          setSlotResponseInfo(responseInfo);
-          setQueryId(document.getElementById(slot.getSlotElementId())?.getAttribute('data-google-query-id') || null);
-          if (responseInfo) {
-            const { creativeId, lineItemId, sourceAgnosticCreativeId, sourceAgnosticLineItemId } = responseInfo as any;
-            setCreativeId(creativeId || sourceAgnosticCreativeId);
-            setLineItemId(lineItemId || sourceAgnosticLineItemId);
-          }
-        };
-        syncSlot();
-        const eventHandler = (event: googletag.events.SlotRenderEndedEvent | googletag.events.SlotResponseReceived) => {
-          if (event.slot.getSlotElementId() === slot.getSlotElementId()) {
-            syncSlot();
-          }
-        };
-        pubads.addEventListener('slotResponseReceived', eventHandler);
-        pubads.addEventListener('slotRenderEnded', eventHandler);
-        return () => {
-          pubads.removeEventListener('slotResponseReceived', eventHandler);
-          pubads.removeEventListener('slotRenderEnded', eventHandler);
-        };
-      }
-    }
-  }, [elementId, inPopOver]);
+  const { networkId, slotElementId, creativeId, queryId, lineItemId, slotAdUnitPath, slotTargeting, slotResponseInfo } = useGamSlotDetails(elementId);
 
   return (
     <React.Fragment>
@@ -77,11 +33,11 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             <strong style={{ color: '#d97706', fontWeight: 700 }}>LineItem-ID: </strong>
           </Typography>
           <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
-            <a href={`https://admanager.google.com/${networktId?.[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+            <a href={`https://admanager.google.com/${networkId?.[0]}#delivery/LineItemDetail/lineItemId=${lineItemId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
               {lineItemId}
             </a>
-            {networktId?.[1] &&
-              networktId.map((nwId, index) => (
+            {networkId?.[1] &&
+              networkId.map((nwId, index) => (
                 <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                   {index === 0 && ' ('}
                   {index > 0 && (
@@ -89,7 +45,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                       {`${index}`}
                     </a>
                   )}
-                  {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                  {index === networkId.length - 1 ? ')' : index === 0 ? '' : ', '}
                 </Typography>
               ))}
           </Typography>
@@ -118,11 +74,11 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             <strong style={{ color: '#d97706', fontWeight: 700 }}>Creative-ID: </strong>
           </Typography>
           <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
-            <a href={`https://admanager.google.com/${networktId?.[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+            <a href={`https://admanager.google.com/${networkId?.[0]}#delivery/CreativeDetail/creativeId=${creativeId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
               {creativeId}
             </a>
-            {networktId?.[1] &&
-              networktId.map((nwId, index) => (
+            {networkId?.[1] &&
+              networkId.map((nwId, index) => (
                 <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                   {index === 0 && ' ('}
                   {index > 0 && (
@@ -130,7 +86,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                       {`${index}`}
                     </a>
                   )}
-                  {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                  {index === networkId.length - 1 ? ')' : index === 0 ? '' : ', '}
                 </Typography>
               ))}
           </Typography>
@@ -159,11 +115,11 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
             <strong style={{ color: '#d97706', fontWeight: 700 }}>Query-ID: </strong>
           </Typography>
           <Typography component={'span'} variant="caption" sx={{ fontSize: 'inherit', '& a': { color: '#1976d2', textDecoration: 'none', fontWeight: 600 } }}>
-            <a href={`https://admanager.google.com/${networktId?.[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
+            <a href={`https://admanager.google.com/${networkId?.[0]}#troubleshooting/screenshot/query_id=${queryId}`} rel="noreferrer" target="_blank" style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 600 }}>
               {truncate ? `${queryId.substring(0, 4)}...${queryId.substring(queryId.length - 4)}` : queryId}
             </a>
-            {networktId?.[1] &&
-              networktId.map((nwId, index) => (
+            {networkId?.[1] &&
+              networkId.map((nwId, index) => (
                 <Typography key={nwId} component={'span'} variant="body1" sx={{ color: 'secondary.main', '& a': { color: 'secondary.main' } }}>
                   {index === 0 && ' ('}
                   {index > 0 && (
@@ -171,7 +127,7 @@ const GamDetailsComponent = ({ elementId, inPopOver, truncate }: IGamDetailCompo
                       {`${index}`}
                     </a>
                   )}
-                  {index === networktId.length - 1 ? ')' : index === 0 ? '' : ', '}
+                  {index === networkId.length - 1 ? ')' : index === 0 ? '' : ', '}
                 </Typography>
               ))}
           </Typography>
