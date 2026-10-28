@@ -3,13 +3,13 @@ import Grid from '@mui/material/Grid';
 import { AdUnitsGridComponent } from './AdUnitsGridComponent';
 import { conditionalPluralization as cP } from '../../utils';
 import AdUnitsComponentState from './AdUnitsComponentState';
-import { Tooltip, IconButton } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { GridCell } from '../bids/BidsComponent';
 import PbjsVersionInfoPopOver from '../pbjsVersionInfo/PbjsVersionInfoPopOver';
-import DownloadIcon from '@mui/icons-material/Download';
-import { download } from '../../utils';
+import {} from '../../utils';
 import { replaceLastToken } from '../autocomplete/utils';
+import { DownloadButton } from '../DownloadButton';
 
 interface AdUnitsHeaderProps {
   prebid: any;
@@ -44,11 +44,7 @@ const AdUnitsHeader = ({ prebid, allAdUnitCodes, allBidderEvents, query, setQuer
       </Grid>
 
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title="Download filtered ad units as JSON" arrow>
-          <IconButton size="small" onClick={() => download(filteredAdUnits, 'filtered adunits')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-            <DownloadIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <DownloadButton data={filteredAdUnits} fileName="filtered adunits" tooltip="Download filtered ad units as JSON" />
       </GridCell>
 
       <PbjsVersionInfoPopOver pbjsVersionPopUpOpen={pbjsVersionPopUpOpen} setPbjsVersionPopUpOpen={setPbjsVersionPopUpOpen} />

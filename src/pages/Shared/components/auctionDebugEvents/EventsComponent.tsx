@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import EventsState from './EventsState';
 import Grid from '@mui/material/Grid';
-import { CircularProgress, IconButton, Paper, Tooltip, Chip, Typography, Box, Collapse, Card } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
+import { CircularProgress, IconButton, Paper, Chip, Typography, Box, Collapse, Card } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import { GridCell } from '../bids/BidsComponent';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { replaceLastToken } from '../autocomplete/utils';
-import { download, conditionalPluralization as cP } from '../../utils';
+import { conditionalPluralization as cP } from '../../utils';
 import { IPrebidEvent } from '../../../Injected/prebid';
 import { JsonViewToggle } from '../JsonViewToggle';
+import { DownloadButton } from '../DownloadButton';
 
 const EventRowComponent = ({ event, index }: { event: IPrebidEvent; index: number }): JSX.Element => {
   const [expanded, setExpanded] = useState(false);
@@ -201,11 +201,7 @@ const EventsComponent = (): JSX.Element => {
 
       {/* Download Icon */}
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title="Download filtered events as JSON" arrow>
-          <IconButton size="small" onClick={() => download(sortedEvents, 'filtered-events')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-            <DownloadIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <DownloadButton data={sortedEvents} fileName="filtered-events" tooltip="Download filtered events as JSON" />
       </GridCell>
 
       {/* Content Stream or JSON */}

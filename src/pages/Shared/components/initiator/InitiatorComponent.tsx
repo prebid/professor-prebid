@@ -9,7 +9,6 @@ import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import CodeIcon from '@mui/icons-material/Code';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -32,6 +31,7 @@ import { NetworkCascadeView } from './NetworkCascadeView';
 import { NetworkPrivacyAuditView } from './NetworkPrivacyAuditView';
 import { NetworkDetailDrawer } from './NetworkDetailDrawer';
 import { decompressPayload } from './payloadDecompressor';
+import { JsonViewToggle } from '../JsonViewToggle';
 
 // Query terms are split on whitespace, so provider names are matched without it ('Magnite / Rubicon' -> 'magnite/rubicon').
 const providerKey = (providerName: string) => providerName.toLowerCase().replace(/\s+/g, '');
@@ -234,11 +234,7 @@ const InitiatorComponent = (): JSX.Element => {
               <DownloadIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title={showRawJson ? 'Switch to Table view' : 'Switch to Raw JSON view'} arrow>
-            <IconButton size="small" onClick={() => setShowRawJson(!showRawJson)} color={showRawJson ? 'primary' : 'default'}>
-              <CodeIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="table view" />
           <Tooltip title="Clear Captured Network Log" arrow>
             <IconButton size="small" onClick={handleClearLog} color="default">
               <DeleteOutlineIcon fontSize="small" />

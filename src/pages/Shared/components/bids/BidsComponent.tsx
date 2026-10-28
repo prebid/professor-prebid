@@ -3,8 +3,7 @@ import Grid from '@mui/material/Grid';
 import { IconButton, Paper, Tooltip, Typography } from '@mui/material';
 import { replaceLastToken } from '../autocomplete/utils';
 import { AutoComplete } from '../autocomplete/AutoComplete';
-import DownloadIcon from '@mui/icons-material/Download';
-import { download } from '../../utils';
+import {} from '../../utils';
 import { Bid } from 'prebid.js/types.d.ts';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -12,6 +11,7 @@ import { SxProps } from '@mui/material';
 import AppsIcon from '@mui/icons-material/Apps';
 import JSONViewerComponent from '../JSONViewerComponent';
 import BidsComponentState, { getBidKey } from './BidsComponentState';
+import { DownloadButton } from '../DownloadButton';
 
 export const BidsComponent = (): JSX.Element => {
   const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, BID_FIELD_MAP } = BidsComponentState();
@@ -34,20 +34,7 @@ export const BidsComponent = (): JSX.Element => {
         <AutoComplete fieldKeys={Object.keys(BID_FIELD_MAP) as string[]} options={suggestions} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter bids..." query={query} />
       </Grid>
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title="Download filtered bids as JSON" arrow>
-          <IconButton
-            size="small"
-            onClick={() =>
-              download(
-                sortedBids.map(({ _stableKey, ...b }: any) => b),
-                'filtered-bids'
-              )
-            }
-            sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}
-          >
-            <DownloadIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <DownloadButton data={() => sortedBids.map(({ _stableKey, ...b }: any) => b)} fileName="filtered-bids" tooltip="Download filtered bids as JSON" />
       </GridCell>
       {sortedBids.length === 0 ? (
         <Grid size={{ xs: 12 }}>

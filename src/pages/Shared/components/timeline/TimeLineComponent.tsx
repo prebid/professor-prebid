@@ -7,7 +7,6 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import DownloadIcon from '@mui/icons-material/Download';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
 import GanttChartComponent, { TimelineViewMode } from '../../../Popup/components/timeline/GanttChartComponent';
@@ -16,9 +15,10 @@ import { GridCell } from '../bids/BidsComponent';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { replaceLastToken } from '../autocomplete/utils';
-import { download, conditionalPluralization as cP } from '../../utils';
+import { conditionalPluralization as cP } from '../../utils';
 import { getPreAuctionTimeline } from './preAuctionTimeline';
 import { JsonViewToggle } from '../JsonViewToggle';
+import { DownloadButton } from '../DownloadButton';
 
 const TimeLineComponent = (): JSX.Element => {
   const { prebid, auctionEndEvents } = useContext(AppStateContext);
@@ -116,11 +116,7 @@ const TimeLineComponent = (): JSX.Element => {
 
         {/* Download Button */}
         <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <Tooltip title="Download timeline auction events as JSON" arrow>
-            <IconButton size="small" onClick={() => download(auctionEndEvents, 'timeline-auctions')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-              <DownloadIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <DownloadButton data={auctionEndEvents} fileName="timeline-auctions" tooltip="Download timeline auction events as JSON" />
         </GridCell>
 
         {/* Auction Sub-Tabs Header - Removes disabled left scroll button gap */}

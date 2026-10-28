@@ -2,18 +2,16 @@ import React, { useContext, useState, useMemo } from 'react';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import DownloadIcon from '@mui/icons-material/Download';
 import AppStateContext from '../../contexts/appStateContext';
 import UserIdsTab from './UserIdsTab';
 import ConfigTab from './UserIdsConfigTab';
 import { GridCell } from '../bids/BidsComponent';
 import { HeaderTab } from '../HeaderTab';
 import { AutoComplete } from '../autocomplete/AutoComplete';
-import { download } from '../../utils';
+import {} from '../../utils';
 import JSONViewerComponent from '../JSONViewerComponent';
 import { JsonViewToggle } from '../JsonViewToggle';
+import { DownloadButton } from '../DownloadButton';
 
 const UserIdsComponent = (): JSX.Element => {
   const { prebid } = useContext(AppStateContext);
@@ -58,11 +56,7 @@ const UserIdsComponent = (): JSX.Element => {
 
       <GridCell cols={1} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', border: 0 }}>
         <JsonViewToggle active={showRawJson} onToggle={() => setShowRawJson(!showRawJson)} formattedView="list view" toolbar />
-        <Tooltip title="Download User ID session data as JSON" arrow>
-          <IconButton size="small" onClick={() => download({ eids: prebid?.eids, userSync: prebid?.config?.userSync }, 'prebid-user-ids.json')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-            <DownloadIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <DownloadButton data={() => ({ eids: prebid?.eids, userSync: prebid?.config?.userSync })} fileName="prebid-user-ids.json" tooltip="Download User ID session data as JSON" />
       </GridCell>
 
       {/* Raw JSON Overlay */}

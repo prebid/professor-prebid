@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext, useMemo } from 'react';
 import Grid from '@mui/material/Grid';
-import { Paper, Tooltip, IconButton } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
+import { Paper } from '@mui/material';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import AppStateContext from '../../contexts/appStateContext';
@@ -9,7 +8,7 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import { GridCell } from '../bids/BidsComponent';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { replaceLastToken } from '../autocomplete/utils';
-import { download } from '../../utils';
+import {} from '../../utils';
 
 import PriceGranularityComponent from './tiles/PriceGranularityComponent';
 import UserIdModule from './tiles/UserIdModule';
@@ -26,6 +25,7 @@ import FirstPartyDataComponent from './tiles/FirstPartyDataComponent';
 import CurrencyComponent from './tiles/CurrencyComponent';
 import RtdComponent from './tiles/RtdComponent';
 import OtherConfigsComponent from './tiles/OtherConfigsComponent';
+import { DownloadButton } from '../DownloadButton';
 
 export const tileHeight = 255;
 
@@ -92,11 +92,7 @@ const ConfigComponent = (): JSX.Element => {
       </Grid>
 
       <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title="Download Prebid config as JSON" arrow>
-          <IconButton size="small" onClick={() => download(fullConfig, 'prebid-config')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-            <DownloadIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
+        <DownloadButton data={fullConfig} fileName="prebid-config" tooltip="Download Prebid config as JSON" />
       </GridCell>
 
       {/* Content View Switcher */}

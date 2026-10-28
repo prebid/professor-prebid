@@ -5,11 +5,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import Alert from '@mui/material/Alert';
 import Popover from '@mui/material/Popover';
-import DownloadIcon from '@mui/icons-material/Download';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import AppStateContext from '../../contexts/appStateContext';
@@ -18,12 +16,13 @@ import JSONViewerComponent from '../JSONViewerComponent';
 import { GridCell } from '../bids/BidsComponent';
 import { AutoComplete } from '../autocomplete/AutoComplete';
 import { createQueryEngine, distinct, replaceLastToken } from '../autocomplete/utils';
-import { download, conditionalPluralization as cP } from '../../utils';
+import { conditionalPluralization as cP } from '../../utils';
 import { getProviderDiagnostics, IAuctionVerdict, IProviderDiagnostic } from './providerDiagnostics';
 import { correlateHar, IProviderTiming } from './harCorrelation';
 import { ATTRIBUTION_HELP, ATTRIBUTION_LABEL, formatMs, VERDICT_COLOR, VERDICT_HELP, verdictLabel } from './labels';
 import PreAuctionHelp from './PreAuctionHelp';
 import { JsonViewToggle } from '../JsonViewToggle';
+import { DownloadButton } from '../DownloadButton';
 
 export const PROVIDER_FIELD_MAP = {
   provider: (provider: IProviderDiagnostic) => provider.name,
@@ -313,11 +312,7 @@ const PreAuctionComponent = (): JSX.Element => {
         </GridCell>
 
         <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-          <Tooltip title="Download the diagnostics as JSON" arrow>
-            <IconButton size="small" onClick={() => download({ diagnostics, correlation }, 'pre-auction-diagnostics')} sx={{ p: 0.5, fontSize: '1.05rem' }}>
-              <DownloadIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
+          <DownloadButton data={() => ({ diagnostics, correlation })} fileName="pre-auction-diagnostics" tooltip="Download the diagnostics as JSON" />
         </GridCell>
       </Grid>
 
