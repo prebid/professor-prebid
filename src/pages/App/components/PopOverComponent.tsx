@@ -23,6 +23,7 @@ import { ThemeProvider } from '@mui/material';
 import { theme } from '../../../theme/theme';
 import { useGamSlotDetails } from '../useGamSlotDetails';
 import { equivalentAdUnitCodes } from '../InjectedApp';
+import { POPOVER_Z_INDEX } from './zIndex';
 
 const ExpandableItem = ({ avatar, children, title, json }: { avatar: JSX.Element; title: string; children?: JSX.Element; json?: object }): JSX.Element => {
   const [expanded, setExpanded] = React.useState(true);
@@ -173,7 +174,7 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
           maxWidth="lg"
           fullWidth
           sx={{
-            zIndex: 99999999,
+            zIndex: POPOVER_Z_INDEX,
             position: 'fixed !important',
             inset: '0 !important',
             '& .MuiBackdrop-root': {
@@ -207,7 +208,7 @@ const PopOverComponent = ({ elementId, winningCPM, winningBidder, currency, time
             .MuiDialog-root {
               position: fixed !important;
               inset: 0 !important;
-              z-index: 99999999 !important;
+              z-index: ${POPOVER_Z_INDEX} !important;
               display: flex !important;
               align-items: center !important;
               justify-content: center !important;

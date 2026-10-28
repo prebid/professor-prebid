@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import AdOverlayPortal, { OVERLAY_Z_INDEX } from './AdOverlayPortal';
+import AdOverlayPortal from './AdOverlayPortal';
+import { OVERLAY_Z_INDEX, POPOVER_Z_INDEX } from './zIndex';
 
 vi.mock('./AdOverlayComponent', () => {
   return {
@@ -32,9 +33,10 @@ describe('AdOverlayPortal', () => {
     document.body.appendChild(container);
   });
 
-  describe('OVERLAY_Z_INDEX', () => {
-    it('is the largest z-index browsers accept, so page elements using it cannot cover the overlay', () => {
-      expect(OVERLAY_Z_INDEX).toBe(2147483647);
+  describe('z-index', () => {
+    it('puts the opened popover at the largest z-index browsers accept and the overlays just below it', () => {
+      expect(POPOVER_Z_INDEX).toBe(2147483647);
+      expect(OVERLAY_Z_INDEX).toBe(2147483646);
     });
   });
 

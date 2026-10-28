@@ -2,10 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
 import { createPortal } from 'react-dom';
 import { findAdContainer, isContainerVisible, getParentGamPubAds } from '../InjectedApp';
-
-// The largest z-index browsers accept: ad wrappers, sticky units and consent banners often use it, and the overlay must stay above them.
-// A constant rather than a scan of every element's computed style, which is too slow on ad-heavy pages.
-export const OVERLAY_Z_INDEX = 2147483647;
+import { OVERLAY_Z_INDEX } from './zIndex';
 
 const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, mask, consoleState, pbjsNameSpace, onOpenPopover }) => {
   const { elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
