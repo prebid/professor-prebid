@@ -4,8 +4,6 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 import Button from '@mui/material/Button';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import TableRowsIcon from '@mui/icons-material/TableRows';
@@ -41,6 +39,12 @@ export const NETWORK_FIELD_MAP = {
   privacy: (entry: IClassifiedNetworkEntry) => entry.privacy.verdict,
   url: (entry: IClassifiedNetworkEntry) => entry.entry.url.toLowerCase(),
 } as const;
+
+const VIEW_MODES = [
+  { label: 'Waterfall', Icon: TableRowsIcon },
+  { label: 'Initiator Cascade', Icon: AccountTreeIcon },
+  { label: 'Privacy Audit', Icon: SecurityIcon },
+];
 
 const CATEGORY_TABS: { category: NetworkCategory | 'all'; label: string; tooltip: string }[] = [
   { category: 'all', label: 'All', tooltip: 'View all captured network requests' },
@@ -199,12 +203,10 @@ const InitiatorComponent = (): JSX.Element => {
         }))}
         search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: ['category', 'bidder', 'status', 'domain', 'privacy'], placeholder: 'Filter requests (e.g. bidder:rubicon category:sync privacy:valid)...' }}
         extra={
-          <Paper sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tabs value={viewMode} onChange={(_, v) => setViewMode(v)} sx={{ minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0.25, px: 1.5, fontSize: '0.75rem' } }}>
-              <Tab icon={<TableRowsIcon fontSize="small" />} iconPosition="start" label="Waterfall" />
-              <Tab icon={<AccountTreeIcon fontSize="small" />} iconPosition="start" label="Initiator Cascade" />
-              <Tab icon={<SecurityIcon fontSize="small" />} iconPosition="start" label="Privacy Audit" />
-            </Tabs>
+          <Paper sx={{ display: 'flex', alignItems: 'center', px: 0.25 }}>
+            {VIEW_MODES.map(({ label, Icon }, mode) => (
+              <ToolbarButton key={label} tooltip={label} onClick={() => setViewMode(mode)} icon={<Icon fontSize="inherit" />} color={viewMode === mode ? 'primary' : 'default'} pressed={viewMode === mode} />
+            ))}
           </Paper>
         }
         actions={

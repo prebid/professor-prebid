@@ -5,6 +5,7 @@ import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import { lighten } from '@mui/material/styles';
 import { AutoComplete } from './autocomplete/AutoComplete';
 
 export interface ITabStat {
@@ -26,11 +27,10 @@ export const TabStat = ({ label, onClick, selected = false, tooltip }: ITabStat)
         display: 'flex',
         alignItems: 'center',
         whiteSpace: 'nowrap',
-        border: '1px solid',
-        borderColor: selected ? 'primary.main' : 'transparent',
-        backgroundColor: selected ? 'action.selected' : 'background.paper',
-        transition: 'border-color 0.2s',
-        ...(onClick && { cursor: 'pointer', userSelect: 'none', '&:hover': { borderColor: 'primary.main' } }),
+        // Selected: blue text on a light tint of the primary colour (opaque, so the page background does not show through).
+        backgroundColor: (theme) => (selected ? lighten(theme.palette.primary.main, 0.9) : theme.palette.background.paper),
+        transition: 'background-color 0.2s',
+        ...(onClick && { cursor: 'pointer', userSelect: 'none', '&:hover': { backgroundColor: (theme) => lighten(theme.palette.primary.main, selected ? 0.85 : 0.95) } }),
       }}
     >
       <Typography variant="h2" component="span" sx={{ color: selected ? 'primary.main' : 'text.primary' }}>
@@ -53,12 +53,14 @@ interface IToolbarButtonProps {
   icon: ReactNode;
   color?: IconButtonProps['color'];
   disabled?: boolean;
+  /** For buttons that switch something on or off, e.g. a view: whether it is on. */
+  pressed?: boolean;
 }
 
 /** An icon button in a tab's toolbar; every toolbar action (download, JSON view, reload...) uses it. */
-export const ToolbarButton = ({ tooltip, onClick, icon, color = 'default', disabled = false }: IToolbarButtonProps): JSX.Element => {
+export const ToolbarButton = ({ tooltip, onClick, icon, color = 'default', disabled = false, pressed }: IToolbarButtonProps): JSX.Element => {
   const button = (
-    <IconButton size="small" onClick={onClick} color={color} disabled={disabled} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
+    <IconButton size="small" onClick={onClick} color={color} disabled={disabled} aria-pressed={pressed} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
       {icon}
     </IconButton>
   );

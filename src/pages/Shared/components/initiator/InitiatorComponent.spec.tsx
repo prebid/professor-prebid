@@ -178,11 +178,11 @@ describe('InitiatorComponent', () => {
       </InspectedPageContext.Provider>
     );
 
-    const cascadeTab = screen.getByRole('tab', { name: /Initiator Cascade/i });
+    const cascadeTab = screen.getByRole('button', { name: /Initiator Cascade/i });
     fireEvent.click(cascadeTab);
     expect(screen.getByPlaceholderText(/Filter tree cascade/i)).toBeTruthy();
 
-    const privacyTab = screen.getByRole('tab', { name: /Privacy Audit/i });
+    const privacyTab = screen.getByRole('button', { name: /Privacy Audit/i });
     fireEvent.click(privacyTab);
     expect(screen.getByText('TCF Consent (GDPR)')).toBeTruthy();
   });
