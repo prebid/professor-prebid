@@ -1,4 +1,4 @@
-import { sendChromeTabsMessage } from '../../Shared/utils';
+import { getTabId, sendChromeTabsMessage } from '../../Shared/utils';
 import { DOWNLOAD_FAILED } from '../constants';
 
 const safelyConstructURL = (url: string) => {
@@ -10,19 +10,12 @@ const safelyConstructURL = (url: string) => {
   }
 };
 
+// The inspected tab in the DevTools panel, the active tab in the popup. In the panel the active tab of the
+// current window may be another tab, or none when DevTools is undocked.
 const getCurrentTabURL = async (): Promise<URL> => {
+  const tabId = await getTabId();
   return new Promise((resolve) => {
-    chrome.tabs.query(
-      {
-        active: true,
-        windowId: chrome.windows.WINDOW_ID_CURRENT,
-      },
-      (tabs) => {
-        const activeTab = tabs[0];
-        const urlObj = safelyConstructURL(activeTab?.url);
-        resolve(urlObj);
-      }
-    );
+    chrome.tabs.get(tabId, (tab) => resolve(safelyConstructURL(tab?.url)));
   });
 };
 
