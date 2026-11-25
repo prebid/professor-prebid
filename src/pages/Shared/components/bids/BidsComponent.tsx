@@ -1,10 +1,6 @@
-import React, { useMemo, useState, useCallback, useEffect, useContext } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import { IconButton, Paper, Tooltip, Typography } from '@mui/material';
-import { replaceLastToken } from '../autocomplete/utils';
-import { AutoComplete } from '../autocomplete/AutoComplete';
-import DownloadIcon from '@mui/icons-material/Download';
-import { download } from '../../utils';
 import { Bid } from 'prebid.js/types.d.ts';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -12,38 +8,25 @@ import { SxProps } from '@mui/material';
 import AppsIcon from '@mui/icons-material/Apps';
 import JSONViewerComponent from '../JSONViewerComponent';
 import BidsComponentState, { getBidKey } from './BidsComponentState';
+import { DownloadButton } from '../DownloadButton';
+import { TabEmptyState, TabToolbar } from '../TabToolbar';
 
 export const BidsComponent = (): JSX.Element => {
-  const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, filteredBids, BID_FIELD_MAP } = BidsComponentState();
+  const { globalOpen, toggleGlobalOpen, query, setQuery, sort, toggleSort, counts, suggestions, sortedBids, BID_FIELD_MAP } = BidsComponentState();
 
   return (
     <Grid container sx={{ width: '100%' }}>
-      <GridCell cols={1.5} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setQuery('')}>
-        All ({counts.all})
-      </GridCell>
-
-      <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setQuery('cpm>0')}>
-        Received ({counts.received})
-      </GridCell>
-
-      <GridCell cols={2} variant="h2" sx={{ border: 0, cursor: 'pointer' }} onClick={() => setQuery('cpm=0')}>
-        No Bids ({counts.nobid})
-      </GridCell>
-
-      <Grid size={{ xs: 6 }} sx={{ display: 'flex', alignItems: 'center', border: 0, '& .MuiInputBase-input': { paddingLeft: '4px !important', paddingTop: '4px !important' } }}>
-        <AutoComplete fieldKeys={Object.keys(BID_FIELD_MAP) as string[]} options={suggestions} onPick={(opt) => setQuery((cur) => replaceLastToken(cur, opt))} onQueryChange={setQuery} placeholder="Filter bids..." query={query} />
-      </Grid>
-      <GridCell cols={0.5} sx={{ display: 'flex', alignItems: 'center', border: 0 }}>
-        <Tooltip title="Download filtered bids as JSON" arrow>
-          <IconButton size="small" onClick={() => download(sortedBids, 'filtered-bids')} sx={{ p: 0.5, fontSize: '1.05rem', height: 'auto' }}>
-            <DownloadIcon fontSize="inherit" />
-          </IconButton>
-        </Tooltip>
-      </GridCell>
+      <TabToolbar
+        stats={[
+          { label: `All (${counts.all})`, onClick: () => setQuery(''), selected: query === '' },
+          { label: `Received (${counts.received})`, onClick: () => setQuery('cpm>0'), selected: query === 'cpm>0' },
+          { label: `No Bids (${counts.nobid})`, onClick: () => setQuery('cpm=0'), selected: query === 'cpm=0' },
+        ]}
+        search={{ query, onQueryChange: setQuery, options: suggestions, fieldKeys: Object.keys(BID_FIELD_MAP), placeholder: 'Filter bids...' }}
+        actions={<DownloadButton data={() => sortedBids.map(({ _stableKey, ...b }: any) => b)} fileName="filtered-bids" tooltip="Download filtered bids as JSON" />}
+      />
       {sortedBids.length === 0 ? (
-        <Grid size={{ xs: 12 }}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>No matching bids</Paper>
-        </Grid>
+        <TabEmptyState>No matching bids</TabEmptyState>
       ) : (
         <>
           <HeaderRow globalOpen={globalOpen} toggleGlobalOpen={toggleGlobalOpen} sort={sort} onSort={toggleSort} />
@@ -75,20 +58,29 @@ const useRowExpand = (globalOpen?: boolean) => {
 
 const truncate = (text?: string, length = 30): string => (text && text.length > length ? `${text.substring(0, length)}…` : text ?? '');
 
-const formatCpm = (cpm?: number): string => (Number.isFinite(cpm) && typeof cpm === 'number' ? `${Math.round(cpm * 100) / 100}` : 'no cpm');
-
+const formatCpm = (cpm?: any): string => {
+  if (cpm == null || String(cpm).trim() === '') return 'no cpm';
+  if (typeof cpm === 'number' && Number.isFinite(cpm)) return `${Math.round(cpm * 100) / 100}`;
+  const raw = String(cpm);
+  const normalized = raw.includes(',') && !raw.includes('.') ? raw.replace(',', '.') : raw;
+  const num = Number(normalized.replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(num) ? `${Math.round(num * 100) / 100}` : 'no cpm';
+};
 const displaySize = (bid: Bid): string => (bid as any).size ?? (bid.width && bid.height ? `${bid.width} x ${bid.height}` : 'no size');
 
-const ExpandedRowComponent = React.memo(({ bid }: { bid: Bid }) => (
-  <>
-    <Grid size={{ xs: 0.62 }} />
-    <Grid size={{ xs: 11.38 }}>
-      <Paper sx={{ width: '100%', height: '100%' }}>
-        <JSONViewerComponent src={bid} />
-      </Paper>
-    </Grid>
-  </>
-));
+const ExpandedRowComponent = React.memo(({ bid }: { bid: Bid }) => {
+  const { _stableKey, ...cleanBid } = bid as any;
+  return (
+    <>
+      <Grid size={{ xs: 0.62 }} />
+      <Grid size={{ xs: 11.38 }}>
+        <Paper sx={{ width: '100%', height: '100%' }}>
+          <JSONViewerComponent src={cleanBid} />
+        </Paper>
+      </Grid>
+    </>
+  );
+});
 
 export const BidRowComponent = React.memo(({ bid, globalOpen }: { bid: Bid; globalOpen?: boolean }) => {
   const { open, toggle } = useRowExpand(globalOpen);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState, useContext, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AdUnit, AdUnitBid, EventRecord } from 'prebid.js';
 import Popover from '@mui/material/Popover';
 import Chip from '@mui/material/Chip';
@@ -9,7 +9,6 @@ import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import ScreenshotMonitorIcon from '@mui/icons-material/ScreenshotMonitor';
 import PictureInPictureOutlinedIcon from '@mui/icons-material/PictureInPictureOutlined';
 import JSONViewerComponent from '../JSONViewerComponent';
-import StateContext from '../../contexts/appStateContext';
 import { getTabId } from '../../../Shared/utils';
 
 const commonChipStyle = {
@@ -28,10 +27,10 @@ interface DataPreviewChipProps {
   data: any;
   color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
   icon?: React.ReactElement;
-  name?: string;
+  name?: string | null;
 }
 
-const DataPreviewChip = ({ label, data, color = 'primary', icon, name = '' }: DataPreviewChipProps) => {
+const DataPreviewChip = ({ label, data, color = 'primary', icon, name = null }: DataPreviewChipProps) => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -54,11 +53,9 @@ const DataPreviewChip = ({ label, data, color = 'primary', icon, name = '' }: Da
   );
 };
 
-export const Ortb2ImpExtChipComponent = ({ input, label }: { input: AdUnit['ortb2Imp']; label: string }): JSX.Element => <DataPreviewChip label={label} data={input} />;
+export const Ortb2ImpExtChipComponent = ({ input, label }: { input: any; label: string }): JSX.Element => <DataPreviewChip label={label} data={input} />;
 
-export const MediaTypeChipComponent = ({ input, label, isWinner }: { input: AdUnit['mediaTypes']['banner' | 'native' | 'video']; label: string; isWinner?: boolean }): JSX.Element => (
-  <DataPreviewChip label={label} data={input} color={isWinner ? 'secondary' : 'primary'} />
-);
+export const MediaTypeChipComponent = ({ input, label, isWinner }: { input: any; label: string; isWinner?: boolean }): JSX.Element => <DataPreviewChip label={label} data={input} color={isWinner ? 'secondary' : 'primary'} />;
 
 export const InterstitialChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element => (
   <Tooltip title={`ortb2Imp.instl: ${JSON.stringify(adUnit.ortb2Imp.instl)}`}>
@@ -81,8 +78,6 @@ export const BidChipComponent = ({
   bidReceived: EventRecord<'bidResponse'> | undefined;
   isRendered: boolean;
 }): JSX.Element => {
-  const { topics } = useContext(StateContext);
-
   const color = isWinner ? 'secondary' : bidReceived ? 'primary' : 'default';
   const icon = (
     <Stack direction="row" spacing={1}>
@@ -91,7 +86,7 @@ export const BidChipComponent = ({
     </Stack>
   );
 
-  return <DataPreviewChip label={label} data={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid', topics }} color={color} icon={icon} />;
+  return <DataPreviewChip label={label} data={{ input: input, bidderRequest: bidRequested, bidResponse: bidReceived || 'noBid' }} color={color} icon={icon} />;
 };
 
 export const AdUnitChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element => {
@@ -146,17 +141,17 @@ export const AdUnitChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element
             @keyframes pp-march-cycle {
               0% {
                 background-position:
-                  0 0,      /* Top */
-                  100% 0,   /* Right */
-                  0 100%,   /* Bottom */
-                  0 0;      /* Left */
+                  0 0,
+                  100% 0,
+                  0 100%,
+                  0 0;
               }
               100% {
                 background-position:
-                  80px 0,       /* Top moves Right */
-                  100% 80px,    /* Right moves Down */
-                  -80px 100%,   /* Bottom moves Left */
-                  0 -80px;      /* Left moves Up */
+                  80px 0,
+                  100% 80px,
+                  -80px 100%,
+                  0 -80px;
               }
             }
           `;
@@ -177,10 +172,13 @@ export const AdUnitChipComponent = ({ adUnit }: { adUnit: AdUnit }): JSX.Element
       }
     };
     chrome.scripting.executeScript({ target: { tabId }, func, args: [elementId] }, (injectionResults) => {
-      if (injectionResults[0].result) {
+      if (injectionResults?.[0]?.result) {
         setLabelText(`✓ ${adUnit.code}`);
       } else {
         setLabelText(`✗ Element with id="${adUnit.code}" not found.`);
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => setLabelText(adUnit.code), 1500);
     });

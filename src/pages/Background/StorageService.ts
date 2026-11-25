@@ -1,15 +1,14 @@
 export class StorageService {
-    static async loadTabInfos(): Promise<ITabInfos> {
-        const res = await chrome.storage.local.get(['tabInfos']);
-        return res.tabInfos || {};
-    }
+  static async loadTabInfo(tabId: number): Promise<IFrameInfos> {
+    const res = await chrome.storage.local.get([`tab_info_${tabId}`]);
+    return res[`tab_info_${tabId}`] || {};
+  }
 
-    static async saveTabInfos(tabInfos: ITabInfos): Promise<void> {
-        await chrome.storage.local.set({ tabInfos });
-    }
+  static async saveTabInfo(tabId: number, tabInfo: IFrameInfos): Promise<void> {
+    await chrome.storage.local.set({ [`tab_info_${tabId}`]: tabInfo });
+  }
 
-    static async deleteTabInfo(tabInfos: ITabInfos, tabId: number): Promise<void> {
-        delete tabInfos[tabId];
-        await this.saveTabInfos(tabInfos);
-    }
+  static async deleteTabInfo(tabId: number): Promise<void> {
+    await chrome.storage.local.remove([`tab_info_${tabId}`]);
+  }
 }

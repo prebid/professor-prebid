@@ -10,7 +10,8 @@
     "googletag": "readonly"
   },
   "parserOptions": {
-    "ecmaVersion": 12
+    "ecmaVersion": 12,
+    "warnOnUnsupportedTypeScriptVersion": false
   },
   "rules": {
     "no-extra-semi": "off",

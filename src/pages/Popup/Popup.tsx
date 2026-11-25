@@ -16,7 +16,6 @@ export const Popup = (): JSX.Element => {
   }, [pbjsNamespace]);
 
   useEffect(() => {
-    // console.log('popup POPUP_LOADED', );
     sendChromeTabsMessage(POPUP_LOADED, {});
   }, []);
 

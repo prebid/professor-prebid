@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { sendChromeTabsMessage } from '../../utils';
 import { PBJS_NAMESPACE_CHANGE } from '../../constants';
 import Box from '@mui/material/Box';
@@ -13,33 +13,36 @@ import PrebidLogo from './Logo';
 declare const __APP_VERSION__: string;
 export const NavbarSelector = (): JSX.Element => {
   const [expanded, setExpanded] = useState<boolean>(false);
-  const [enterDelay, setEnterDelay] = useState<NodeJS.Timeout | null>(null);
-  const [leaveDelay, setLeaveDelay] = useState<NodeJS.Timeout | null>(null);
+  const enterDelayRef = React.useRef<NodeJS.Timeout | null>(null);
+  const leaveDelayRef = React.useRef<NodeJS.Timeout | null>(null);
   const { pbjsNamespace, setPbjsNamespace, frameId, setIframeId, prebids, isPanel } = useContext(StateContext);
   const pageContext = useContext(InspectedPageContext);
 
+  useEffect(() => {
+    return () => {
+      if (enterDelayRef.current) clearTimeout(enterDelayRef.current);
+      if (leaveDelayRef.current) clearTimeout(leaveDelayRef.current);
+    };
+  }, []);
+
   const handleMouseEnter = () => {
-    if (leaveDelay) {
-      clearTimeout(leaveDelay);
-      setLeaveDelay(null);
+    if (leaveDelayRef.current) {
+      clearTimeout(leaveDelayRef.current);
+      leaveDelayRef.current = null;
     }
-    setEnterDelay(
-      setTimeout(() => {
-        setExpanded(true);
-      }, 200) // Delay of 200ms
-    );
+    enterDelayRef.current = setTimeout(() => {
+      setExpanded(true);
+    }, 200);
   };
 
   const handleMouseLeave = () => {
-    if (enterDelay) {
-      clearTimeout(enterDelay);
-      setEnterDelay(null);
+    if (enterDelayRef.current) {
+      clearTimeout(enterDelayRef.current);
+      enterDelayRef.current = null;
     }
-    setLeaveDelay(
-      setTimeout(() => {
-        setExpanded(false);
-      }, 200)
-    );
+    leaveDelayRef.current = setTimeout(() => {
+      setExpanded(false);
+    }, 200);
   };
 
   const handlePbjsNamespaceChange = (event: SelectChangeEvent) => {
@@ -51,21 +54,45 @@ export const NavbarSelector = (): JSX.Element => {
     setIframeId(event.target.value || '');
   };
 
-  if (
-    isPanel ||
-    expanded
-    // true
-  ) {
+  if (isPanel || expanded) {
     return (
-      <Box component="form" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: 1, padding: '0 5px', '& MuiInputLabel': { top: '4px' } }} onMouseEnter={() => setExpanded(true)} onMouseLeave={() => setExpanded(false)}>
+      <Box component="form" sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', columnGap: 1, padding: '0 5px' }} onMouseEnter={() => setExpanded(true)} onMouseLeave={() => setExpanded(false)}>
         <FormControl sx={{ minWidth: 90, maxWidth: 180 }} size="small">
-          <InputLabel sx={{ fontSize: '0.8rem', top: '-4px' }}>Frame-ID</InputLabel>
+          <InputLabel
+            id="frame-id-select-label"
+            size="small"
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              lineHeight: 1,
+              '&.MuiInputLabel-shrink': {
+                transform: 'translate(14px, -5px) scale(0.85)',
+                fontWeight: 600,
+                color: 'text.primary',
+                backgroundColor: 'background.paper',
+                paddingX: '3px',
+              },
+            }}
+          >
+            Frame-ID
+          </InputLabel>
           <Select
+            labelId="frame-id-select-label"
+            id="frame-id-select"
             size="small"
             value={frameId}
-            label="frameId"
+            label="Frame-ID"
             onChange={handleFrameIdChange}
-            sx={{ fontSize: '0.8rem', height: 28, paddingY: 0 }}
+            sx={{
+              fontSize: '0.8rem',
+              height: 28,
+              paddingY: 0,
+              '& .MuiSelect-select': {
+                paddingY: '3px',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
             MenuProps={{
               PaperProps: {
                 sx: { fontSize: '0.8rem' },
@@ -74,22 +101,51 @@ export const NavbarSelector = (): JSX.Element => {
           >
             {pageContext &&
               Object.keys(pageContext.frames || {})
-                .filter((key) => !['downloading', 'syncState', 'initReqChainResult'].includes(key))
-                .map((frameId, index) => (
-                  <MenuItem value={frameId} key={index} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
+                .filter((key) => !['downloading', 'syncState'].includes(key))
+                .map((frameId) => (
+                  <MenuItem value={frameId} key={frameId} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
                     <em>{frameId}</em>
                   </MenuItem>
                 ))}
           </Select>
         </FormControl>
         <FormControl sx={{ minWidth: 110, maxWidth: 330 }} size="small">
-          <InputLabel sx={{ fontSize: '0.8rem', top: '-4px' }}>Namespace</InputLabel>
+          <InputLabel
+            id="namespace-select-label"
+            size="small"
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              lineHeight: 1,
+              '&.MuiInputLabel-shrink': {
+                transform: 'translate(14px, -5px) scale(0.85)',
+                fontWeight: 600,
+                color: 'text.primary',
+                backgroundColor: 'background.paper',
+                paddingX: '3px',
+              },
+            }}
+          >
+            Namespace
+          </InputLabel>
           <Select
+            labelId="namespace-select-label"
+            id="namespace-select"
             size="small"
             value={pbjsNamespace}
+            label="Namespace"
             onChange={handlePbjsNamespaceChange}
             autoWidth
-            sx={{ fontSize: '0.8rem', height: 28, paddingY: 0 }}
+            sx={{
+              fontSize: '0.8rem',
+              height: 28,
+              paddingY: 0,
+              '& .MuiSelect-select': {
+                paddingY: '3px',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
             MenuProps={{
               PaperProps: {
                 sx: { fontSize: '0.8rem' },
@@ -97,8 +153,8 @@ export const NavbarSelector = (): JSX.Element => {
             }}
           >
             {prebids &&
-              Object.keys(prebids).map((global, index) => (
-                <MenuItem key={index} value={global} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
+              Object.keys(prebids).map((global) => (
+                <MenuItem key={global} value={global} sx={{ fontSize: '0.8rem', minHeight: 28 }}>
                   {global}
                 </MenuItem>
               ))}

@@ -3,13 +3,7 @@ import Popover from '@mui/material/Popover';
 import StateContext from '../../contexts/appStateContext';
 import PbjsVersionInfoComponent from './PbjsVersionInfoComponent';
 
-const PbjsVersionInfoPopOver = ({
-  pbjsVersionPopUpOpen,
-  setPbjsVersionPopUpOpen,
-}: {
-  pbjsVersionPopUpOpen: boolean;
-  setPbjsVersionPopUpOpen: Function;
-}): JSX.Element => {
+const PbjsVersionInfoPopOver = ({ pbjsVersionPopUpOpen, setPbjsVersionPopUpOpen }: { pbjsVersionPopUpOpen: boolean; setPbjsVersionPopUpOpen: Function }): JSX.Element => {
   const { prebid } = useContext(StateContext);
   if (!prebid) return null;
   return (

@@ -1,4 +1,4 @@
-import { IPrebidConfig, IPrebidConfigPriceBucket } from "../../../Injected/prebid";
+import { IPrebidConfig, IPrebidConfigPriceBucket } from '../../../Injected/prebid';
 
 const _defaultPrecision = 2;
 const _lgPriceConfig = {
@@ -69,11 +69,7 @@ const isEmpty = (o: Object) => {
   return false;
 };
 
-const getPriceBucketString = (
-  cpm: string,
-  customConfig: IPrebidConfigPriceBucket,
-  granularityMultiplier: number = 1
-): { low: string; med: string; high: string; auto: string; dense: string; custom: string } => {
+const getPriceBucketString = (cpm: string, customConfig: IPrebidConfigPriceBucket, granularityMultiplier: number = 1): { low: string; med: string; high: string; auto: string; dense: string; custom: string } => {
   let cpmFloat: number = parseFloat(cpm);
   if (isNaN(cpmFloat)) {
     cpmFloat = NaN;
@@ -107,23 +103,25 @@ const getCpmStringValue = (cpm: string, config: any, granularityMultiplier: numb
   );
 
   let bucketFloor = 0;
-  let bucket = config.buckets.find((bucket: IPrebidConfigPriceBucket) => {
+  let bucketMin = 0;
+  const bucket = config.buckets.find((bucket: IPrebidConfigPriceBucket) => {
+    const currentMin = bucket.min > bucketFloor ? bucket.min : bucketFloor;
     if (Number(cpm) > cap.max * granularityMultiplier) {
-      // cpm exceeds cap, just return the cap.
       let precision = bucket.precision;
       if (typeof precision === 'undefined') {
         precision = _defaultPrecision;
       }
       cpmStr = (bucket.max * granularityMultiplier).toFixed(precision);
-    } else if (Number(cpm) <= bucket.max * granularityMultiplier && Number(cpm) >= bucketFloor * granularityMultiplier) {
-      bucket.min = bucketFloor;
-      return bucket;
+    } else if (Number(cpm) <= bucket.max * granularityMultiplier && Number(cpm) >= currentMin * granularityMultiplier) {
+      bucketMin = currentMin;
+      return true;
     } else {
       bucketFloor = bucket.max;
     }
+    return false;
   });
   if (bucket) {
-    cpmStr = getCpmTarget(cpm, bucket, granularityMultiplier);
+    cpmStr = getCpmTarget(cpm, { ...bucket, min: bucketMin }, granularityMultiplier);
   }
   return cpmStr;
 };
@@ -146,17 +144,12 @@ const getCpmTarget = (cpm: string, bucket: IPrebidConfigPriceBucket, granularity
   const increment = bucket.increment * granularityMultiplier;
   const bucketMin = bucket.min * granularityMultiplier;
   let roundingFunction = Math.floor;
-  // start increments at the bucket min and then add bucket min back to arrive at the correct rounding
-  // note - we're padding the values to avoid using decimals in the math prior to flooring
-  // this is done as JS can return values slightly below the expected mark which would skew the price bucket target
-  //   (eg 4.01 / 0.01 = 400.99999999999994)
-  // min precison should be 2 to move decimal place over.
+
   let pow = Math.pow(10, precision + 2);
   let cpmToRound = (Number(cpm) * pow - bucketMin * pow) / (increment * pow);
   let cpmTarget;
   let invalidRounding;
-  // It is likely that we will be passed {cpmRoundingFunction: roundingFunction()}
-  // rather than the expected {cpmRoundingFunction: roundingFunction}. Default back to floor in that case
+
   try {
     cpmTarget = roundingFunction(cpmToRound) * increment + bucketMin;
   } catch (err) {
@@ -165,8 +158,6 @@ const getCpmTarget = (cpm: string, bucket: IPrebidConfigPriceBucket, granularity
   if (invalidRounding || typeof cpmTarget !== 'number') {
     cpmTarget = Math.floor(cpmToRound) * increment + bucketMin;
   }
-  // force to 10 decimal places to deal with imprecise decimal/binary conversions
-  //    (for example 0.1 * 3 = 0.30000000000000004)
 
   cpmTarget = Number(cpmTarget.toFixed(10));
   return cpmTarget.toFixed(precision);

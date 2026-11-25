@@ -3,10 +3,19 @@ import { IPrebidConfigPriceBucket } from '../../../../Injected/prebid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import Box from '@mui/system/Box';
 import AppStateContext from '../../../contexts/appStateContext';
 import { ExpandableTile } from './ExpandableTile';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import { ChipRow } from '../../Section';
 
 const defaultBuckets: IDefaultBuckets = {
   low: [{ precision: 2, min: 0, max: 5, increment: 0.5 }],
@@ -24,11 +33,12 @@ const defaultBuckets: IDefaultBuckets = {
   ],
 };
 
-const PriceGranularityComponent = () => {
+const PriceGranularityComponent = (): JSX.Element | null => {
   const { prebid } = useContext(AppStateContext);
-  const {
-    config: { priceGranularity, customPriceBucket, mediaTypePriceGranularity },
-  } = prebid;
+  const config: Record<string, any> = prebid?.config || {};
+  const { priceGranularity, customPriceBucket, mediaTypePriceGranularity } = config;
+
+  if (!priceGranularity) return null;
 
   const hasMediaTypePriceGranularityBuckets = (() => {
     if (!mediaTypePriceGranularity) {
@@ -40,167 +50,16 @@ const PriceGranularityComponent = () => {
     return Object.values(typedMediaTypePg).some((value) => Array.isArray(value.buckets) && value.buckets.length > 0);
   })();
 
-  const hasMediaTypePriceGranularityBuckets = (() => {
-    if (!mediaTypePriceGranularity) {
-      return false;
-    }
-
-    const typedMediaTypePg = mediaTypePriceGranularity as Record<string, { buckets?: IPrebidConfigPriceBucket[] }>;
-
-    return Object.values(typedMediaTypePg).some((value) => Array.isArray(value.buckets) && value.buckets.length > 0);
-  })();
+  const activeBucket = defaultBuckets[priceGranularity] || (customPriceBucket?.buckets as any);
 
   return (
-
     <ExpandableTile icon={<StraightenIcon />} title="Price Granularity" subtitle={`${priceGranularity} (${Object.keys(defaultBuckets)?.includes(priceGranularity) ? 'default' : 'custom'})`} defaultMaxWidth={4} expandedMaxWidth={12}>
       {/* Media-type specific price granularities */}
       {hasMediaTypePriceGranularityBuckets && (
         <Box sx={{ mb: 2, width: '100%' }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Media type price granularity (overrides global priceGranularity when present):
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'text.secondary', fontSize: '0.75rem' }}>
+            Media Type Overrides
           </Typography>
-
-    <Grid item xs={12} sm={maxWidth} ref={ref}>
-      <Card sx={{ width: 1, minHeight: tileHeight }}>
-        <CardHeader
-          avatar={
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
-              <StraightenIcon />
-            </Avatar>
-          }
-          title={<Typography variant="h3">Price Granularity</Typography>}
-          subheader={
-            <Typography variant="subtitle1">
-              {priceGranularity} ({Object.keys(defaultBuckets)?.includes(priceGranularity) ? 'default' : 'custom'})
-            </Typography>
-          }
-          action={
-            <ExpandMoreIcon
-              sx={{
-                transform: !expanded ? 'rotate(0deg)' : 'rotate(180deg)',
-                marginLeft: 'auto',
-              }}
-            />
-          }
-          onClick={handleExpandClick}
-        />
-        <CardContent>
-          {/* Media-type specific price granularities, shown before global priceGranularity */}
-          {hasMediaTypePriceGranularityBuckets && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                Media type price granularity (overrides global priceGranularity when present):
-              </Typography>
-
-              {/* Collapsed: just show how many buckets per media type */}
-              {!expanded && (
-                <Grid container spacing={1}>
-                  {Object.entries(mediaTypePriceGranularity)
-                    .filter(([, value]) => value && Array.isArray((value as any).buckets))
-                    .map(([mediaType, value]) => {
-                      const buckets = (value as any).buckets || [];
-
-                      if (!buckets.length) {
-                        return null;
-                      }
-
-                      return (
-                        <Grid item xs={12} key={mediaType}>
-                          <Typography variant="body2">
-                            <strong>{mediaType}</strong>: {buckets.length} bucket{buckets.length > 1 ? 's' : ''}
-                          </Typography>
-                        </Grid>
-                      );
-                    })}
-                </Grid>
-              )}
-
-              {/* Expanded: full table of buckets per media type */}
-              {expanded && (
-                <Grid container spacing={2}>
-                  {Object.entries(mediaTypePriceGranularity)
-                    .filter(([, value]) => value && Array.isArray((value as any).buckets))
-                    .map(([mediaType, value]) => {
-                      const buckets = (value as any).buckets || [];
-
-                      if (!buckets.length) {
-                        return null;
-                      }
-
-                      return (
-                        <Grid item xs={12} key={mediaType}>
-                          <Box sx={{ backgroundColor: 'text.disabled', p: 0.25, borderRadius: 1 }}>
-                            <Typography variant="body1" sx={{ mb: 0.5, ml: 0.5 }}>
-                              <strong>{mediaType}</strong>
-                            </Typography>
-                            <Grid container spacing={0.2}>
-                              <Grid item xs={3}>
-                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                  <Typography variant="h3">Bucket</Typography>
-                                </Paper>
-                              </Grid>
-                              <Grid item xs={3}>
-                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                  <Typography variant="h3">Precision</Typography>
-                                </Paper>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                  <Typography variant="h3">Min</Typography>
-                                </Paper>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                  <Typography variant="h3">Max</Typography>
-                                </Paper>
-                              </Grid>
-                              <Grid item xs={2}>
-                                <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                  <Typography variant="h3">Increment</Typography>
-                                </Paper>
-                              </Grid>
-
-                              {buckets.map((bucket: IPrebidConfigPriceBucket, index: number) => (
-                                <React.Fragment key={`${mediaType}-${index}`}>
-                                  <Grid item xs={3}>
-                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                      <Typography variant="body1">
-                                        {mediaType} #{index + 1}
-                                      </Typography>
-                                    </Paper>
-                                  </Grid>
-                                  <Grid item xs={3}>
-                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                      <Typography variant="body1">{bucket.precision ?? 2}</Typography>
-                                    </Paper>
-                                  </Grid>
-                                  <Grid item xs={2}>
-                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                      <Typography variant="body1">{bucket.min}</Typography>
-                                    </Paper>
-                                  </Grid>
-                                  <Grid item xs={2}>
-                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                      <Typography variant="body1">{bucket.max}</Typography>
-                                    </Paper>
-                                  </Grid>
-                                  <Grid item xs={2}>
-                                    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-                                      <Typography variant="body1">{bucket.increment}</Typography>
-                                    </Paper>
-                                  </Grid>
-                                </React.Fragment>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </Grid>
-                      );
-                    })}
-                </Grid>
-              )}
-            </Box>
-          )}
-
 
           <Grid container spacing={2}>
             {Object.entries(mediaTypePriceGranularity)
@@ -211,9 +70,9 @@ const PriceGranularityComponent = () => {
 
                 return (
                   <Grid size={{ xs: 12 }} key={mediaType}>
-                    <Box sx={{ backgroundColor: 'text.disabled', p: 0.25, borderRadius: 1 }}>
-                      <Typography variant="body1" sx={{ mb: 0.5, ml: 0.5 }}>
-                        <strong>{mediaType}</strong>
+                    <Box sx={{ backgroundColor: 'action.hover', p: 0.5, borderRadius: 1 }}>
+                      <Typography variant="body2" sx={{ mb: 0.5, ml: 0.5, fontWeight: 600 }}>
+                        {mediaType}
                       </Typography>
                       <BucketTable buckets={buckets} type={mediaType} />
                     </Box>
@@ -224,37 +83,18 @@ const PriceGranularityComponent = () => {
         </Box>
       )}
 
-      <Grid container spacing={2} sx={{ width: '100%' }}>
+      <Grid container spacing={1} sx={{ width: '100%' }}>
         {/* Summary Stats */}
-        {(() => {
-          if (['auto', 'dense', 'custom', 'medium', 'high'].includes(priceGranularity)) {
-            return (
-              <React.Fragment>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body1">
-                    <strong>Min: </strong> {(defaultBuckets[priceGranularity] || (customPriceBucket?.buckets as any))?.[0]?.min}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body1">
-                    <strong>Max: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)?.[0]?.max}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body1">
-                    <strong>Precision: </strong>
-                    {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)?.[0]?.precision || 2}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <Typography variant="body1">
-                    <strong>Increment: </strong> {(defaultBuckets[priceGranularity] || customPriceBucket?.buckets)?.[0]?.increment}
-                  </Typography>
-                </Grid>
-              </React.Fragment>
-            );
-          }
-        })()}
+        {activeBucket?.[0] && (
+          <Grid size={{ xs: 12 }}>
+            <ChipRow sx={{ mb: 1 }}>
+              <Chip label={`Min: ${activeBucket[0]?.min}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
+              <Chip label={`Max: ${activeBucket[activeBucket.length - 1]?.max ?? activeBucket[0]?.max}`} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
+              <Chip label={`Precision: ${activeBucket[0]?.precision ?? 2}`} size="small" color="info" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />
+              {activeBucket.length === 1 && <Chip label={`Increment: ${activeBucket[0]?.increment}`} size="small" color="primary" variant="outlined" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 500 }} />}
+            </ChipRow>
+          </Grid>
+        )}
 
         <Grid size={{ xs: 12 }}>
           <PriceGranularityTable priceGranularity={priceGranularity} customPriceBucket={customPriceBucket as any} />
@@ -264,54 +104,50 @@ const PriceGranularityComponent = () => {
   );
 };
 
-const HeaderCell = ({ children }: { children: React.ReactNode }) => (
-  <Grid size={{ xs: 3 }}>
-    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-      <Typography variant="h3">{children}</Typography>
-    </Paper>
-  </Grid>
-);
-const HeaderCellSmall = ({ children }: { children: React.ReactNode }) => (
-  <Grid size={{ xs: 2 }}>
-    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-      <Typography variant="h3">{children}</Typography>
-    </Paper>
-  </Grid>
-);
-const BodyCell = ({ children }: { children: React.ReactNode }) => (
-  <Grid size={{ xs: 3 }}>
-    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-      <Typography variant="body1">{children}</Typography>
-    </Paper>
-  </Grid>
-);
-const BodyCellSmall = ({ children }: { children: React.ReactNode }) => (
-  <Grid size={{ xs: 2 }}>
-    <Paper sx={{ height: 1, borderRadius: 1, display: 'flex', justifyContent: 'center' }}>
-      <Typography variant="body1">{children}</Typography>
-    </Paper>
-  </Grid>
-);
-
 const BucketTable = ({ buckets, type }: { buckets: IPrebidConfigPriceBucket[]; type?: string }) => {
   return (
-    <Grid container spacing={0.2}>
-      <HeaderCell>Bucket</HeaderCell>
-      <HeaderCell>Precision</HeaderCell>
-      <HeaderCellSmall>Min</HeaderCellSmall>
-      <HeaderCellSmall>Max</HeaderCellSmall>
-      <HeaderCellSmall>Increment</HeaderCellSmall>
-
-      {buckets.map((bucket: IPrebidConfigPriceBucket, index: number) => (
-        <React.Fragment key={`${type}-${index}`}>
-          <BodyCell>{type ? `${type} #${index + 1}` : `Bucket #${index + 1}`}</BodyCell>
-          <BodyCell>{bucket.precision ?? 2}</BodyCell>
-          <BodyCellSmall>{bucket.min}</BodyCellSmall>
-          <BodyCellSmall>{bucket.max}</BodyCellSmall>
-          <BodyCellSmall>{bucket.increment}</BodyCellSmall>
-        </React.Fragment>
-      ))}
-    </Grid>
+    <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1.5, overflow: 'hidden' }}>
+      <Table size="small" aria-label="price granularity buckets">
+        <TableHead sx={{ bgcolor: 'action.hover' }}>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem', py: 0.75 }}>Bucket</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', py: 0.75 }}>
+              Precision
+            </TableCell>
+            <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', py: 0.75 }}>
+              Min
+            </TableCell>
+            <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', py: 0.75 }}>
+              Max
+            </TableCell>
+            <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.75rem', py: 0.75 }}>
+              Increment
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {buckets.map((bucket: IPrebidConfigPriceBucket, index: number) => (
+            <TableRow key={`${type}-${index}`} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component="th" scope="row" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                {type ? `${type} #${index + 1}` : `Bucket #${index + 1}`}
+              </TableCell>
+              <TableCell align="right" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                {bucket.precision ?? 2}
+              </TableCell>
+              <TableCell align="right" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                {bucket.min}
+              </TableCell>
+              <TableCell align="right" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                {bucket.max}
+              </TableCell>
+              <TableCell align="right" sx={{ fontSize: '0.75rem', py: 0.5 }}>
+                {bucket.increment}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 
@@ -323,7 +159,7 @@ const PriceGranularityTable = ({ priceGranularity, customPriceBucket }: IPriceGr
   }, [priceGranularity, customPriceBucket?.buckets]);
 
   return (
-    <Box sx={{ backgroundColor: 'text.disabled', p: 0.25, borderRadius: 1 }}>
+    <Box sx={{ width: '100%', mt: 1 }}>
       <BucketTable buckets={rows} type={priceGranularity} />
     </Box>
   );

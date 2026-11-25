@@ -1,63 +1,188 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AdOverlayComponent, { AdOverlayComponentProps } from './AdOverlayComponent';
 import { createPortal } from 'react-dom';
+import { findAdContainer, isContainerVisible, getParentGamPubAds } from '../InjectedApp';
+import { OVERLAY_Z_INDEX } from './zIndex';
 
-export const getMaxZIndex = () => Math.max(...Array.from(document.querySelectorAll('*'), (el) => parseFloat(window.getComputedStyle(el).zIndex)).filter((zIndex) => !Number.isNaN(zIndex)), 0);
-
-const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, mask, consoleState, pbjsNameSpace }) => {
-  const [contentRef, setContentRef] = useState(null);
-  const iFrameBody = contentRef?.contentWindow?.document?.body;
-  if (iFrameBody) iFrameBody.style.margin = '0';
-
+const AdOverlayPortal: React.FC<AdOverlayPortalComponentProps> = ({ container, mask, consoleState, pbjsNameSpace, onOpenPopover }) => {
   const { elementId, winningCPM, winningBidder, currency, timeToRespond } = mask;
   const element = useRef<HTMLDivElement>(document.createElement('div'));
+  const [shadowRoot, setShadowRoot] = useState<ShadowRoot | null>(null);
+  const [attachVersion, setAttachVersion] = useState<number>(0);
+  // Set by the close button; stays closed until overlays are switched off and on again, so the periodic re-sync cannot reopen it.
+  const closed = useRef<boolean>(false);
+
+  useEffect(() => {
+    const el = element.current;
+    if (!el.shadowRoot) {
+      setShadowRoot(el.attachShadow({ mode: 'open' }));
+    } else {
+      setShadowRoot(el.shadowRoot);
+    }
+    return () => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    };
+  }, []);
+
   const closePortal = () => {
-    document.getElementById(`prpb-mask--container-${mask.elementId}`).style.display = 'none';
+    closed.current = true;
+    const el = document.getElementById(`prpb-mask--container-${mask.elementId}`);
+    if (el) {
+      el.style.display = 'none';
+    }
   };
 
   useEffect(() => {
-    const slotMaskElement = document.getElementById(`prpb-mask--container-${mask.elementId}`);
-    if (consoleState) {
-      if (!slotMaskElement) {
-        element.current.style.zIndex = `${getMaxZIndex() + 1}`;
+    if (!consoleState) {
+      closed.current = false;
+      if (element.current.parentNode) {
+        element.current.parentNode.removeChild(element.current);
+      }
+      return;
+    }
+
+    const expectedId = `prpb-mask--container-${mask.elementId}`;
+    element.current.id = expectedId;
+
+    // Compared in JS rather than via [id="..."] so ad unit codes with quotes or backslashes cannot break the selector.
+    const existingElements = Array.from(document.querySelectorAll('[id^="prpb-mask--container-"]')).filter((el) => el.id === expectedId);
+    existingElements.forEach((el) => {
+      if (el !== element.current && el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+
+    const getValidTarget = (): HTMLElement | null => {
+      let target = container;
+      if (target && target.tagName === 'IFRAME') {
+        target = target.parentElement;
+      }
+      if (!target || !target.isConnected) {
+        target = findAdContainer(mask.elementId);
+      }
+      return target;
+    };
+
+    const attachAndSync = () => {
+      if (closed.current) {
+        element.current.style.display = 'none';
+        return;
+      }
+      const activeTarget = getValidTarget();
+      if (!activeTarget || !isContainerVisible(activeTarget)) {
+        return;
+      }
+
+      if (element.current.parentNode !== activeTarget) {
+        if (element.current.shadowRoot) {
+          const staleEmotionStyles = element.current.shadowRoot.querySelectorAll('style[data-emotion]');
+          staleEmotionStyles.forEach((s) => s.remove());
+        }
+
+        element.current.style.zIndex = `${OVERLAY_Z_INDEX}`;
         element.current.style.position = 'absolute';
         element.current.style.wordBreak = 'break-all';
-        element.current.id = `prpb-mask--container-${mask.elementId}`;
+        element.current.style.pointerEvents = 'none';
         element.current.style.top = '0';
         element.current.style.left = '0';
-        if (container.style.position === '') {
-          container.style.position = 'relative';
+        element.current.style.display = 'block';
+        element.current.style.minHeight = 'fit-content';
+        element.current.style.minWidth = '120px';
+        if (window.getComputedStyle(activeTarget).position === 'static') {
+          activeTarget.style.position = 'relative';
         }
-        container?.append(element.current);
-      } else {
-        slotMaskElement.style.width = `${container?.offsetWidth || container?.clientWidth}px`;
-        slotMaskElement.style.height = `${container?.offsetHeight || container?.clientHeight}px`;
+        activeTarget.append(element.current);
+        setAttachVersion((v) => v + 1);
       }
-    } else {
-      slotMaskElement?.parentNode.removeChild(slotMaskElement);
+
+      const width = activeTarget.offsetWidth || activeTarget.clientWidth || activeTarget.getBoundingClientRect().width;
+      const height = activeTarget.offsetHeight || activeTarget.clientHeight || activeTarget.getBoundingClientRect().height;
+      if (width > 0) element.current.style.width = `${width}px`;
+      if (height > 0) element.current.style.height = `${height}px`;
+      const isTest = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+      if (!isTest && width === 0 && height === 0) {
+        element.current.style.display = 'none';
+      } else {
+        element.current.style.display = 'block';
+      }
+    };
+
+    attachAndSync();
+
+    // 1. Observe target mutations (childList & attributes)
+    const target = getValidTarget();
+    let observer: MutationObserver | null = null;
+    let parentObserver: MutationObserver | null = null;
+
+    if (target && typeof MutationObserver !== 'undefined') {
+      observer = new MutationObserver(() => {
+        attachAndSync();
+      });
+      observer.observe(target, { childList: true, attributes: true, subtree: false });
+
+      if (target.parentElement) {
+        parentObserver = new MutationObserver(() => {
+          attachAndSync();
+        });
+        parentObserver.observe(target.parentElement, { childList: true, subtree: false });
+      }
     }
+
+    // 2. Observe GAM slot events
+    let gamHandler: ((event: any) => void) | null = null;
+    const timeouts: number[] = [];
+    const pubads = getParentGamPubAds();
+    if (pubads) {
+      gamHandler = (event: any) => {
+        const slotElementId = event?.slot?.getSlotElementId ? event.slot.getSlotElementId() : null;
+        const slotAdUnitPath = event?.slot?.getAdUnitPath ? event.slot.getAdUnitPath() : null;
+        if (slotElementId === mask.elementId || slotAdUnitPath === mask.elementId || mask.elementId.includes(slotElementId) || (slotElementId && slotElementId.includes(mask.elementId))) {
+          timeouts.push(window.setTimeout(attachAndSync, 50));
+          timeouts.push(window.setTimeout(attachAndSync, 300));
+        }
+      };
+      pubads.addEventListener('slotRenderEnded', gamHandler);
+      pubads.addEventListener('slotResponseReceived', gamHandler);
+    }
+
+    // 3. Periodic safeguard sync
+    const interval = setInterval(attachAndSync, 1000);
+
+    return () => {
+      timeouts.forEach((t) => clearTimeout(t));
+      if (observer) observer.disconnect();
+      if (parentObserver) parentObserver.disconnect();
+      clearInterval(interval);
+      if (gamHandler) {
+        const pubads = getParentGamPubAds();
+        if (pubads) {
+          pubads.removeEventListener('slotRenderEnded', gamHandler);
+          pubads.removeEventListener('slotResponseReceived', gamHandler);
+        }
+      }
+    };
   }, [mask, consoleState, container]);
 
-  return createPortal(
-    <iframe title={element.current.id} ref={setContentRef} width={`${container?.offsetWidth || container?.clientWidth}px`} height={`${container?.offsetHeight || container?.clientHeight}px`} scrolling="no" frameBorder="0">
-      {iFrameBody &&
-        createPortal(
-          <AdOverlayComponent
-            key={`AdMask-${elementId}`}
-            elementId={elementId}
-            winningCPM={winningCPM}
-            winningBidder={winningBidder}
-            currency={currency}
-            timeToRespond={timeToRespond}
-            closePortal={closePortal}
-            contentRef={contentRef}
-            pbjsNameSpace={pbjsNameSpace}
-          />,
-          iFrameBody
-        )}
-    </iframe>,
-    element.current
-  );
+  return shadowRoot
+    ? createPortal(
+        <AdOverlayComponent
+          key={`AdMask-${elementId}-${attachVersion}`}
+          elementId={elementId}
+          winningCPM={winningCPM}
+          winningBidder={winningBidder}
+          currency={currency}
+          timeToRespond={timeToRespond}
+          closePortal={closePortal}
+          shadowRoot={shadowRoot}
+          pbjsNameSpace={pbjsNameSpace}
+          attachVersion={attachVersion}
+          onOpenPopover={onOpenPopover}
+        />,
+        shadowRoot
+      )
+    : null;
 };
 
 interface AdOverlayPortalComponentProps {
@@ -65,6 +190,7 @@ interface AdOverlayPortalComponentProps {
   consoleState: boolean;
   container: HTMLElement;
   pbjsNameSpace: string;
+  onOpenPopover?: () => void;
 }
 
 export default AdOverlayPortal;

@@ -8,7 +8,7 @@ import { reloadPage } from '../utils';
 const NoPrebidCardComponent = (): JSX.Element => {
   return (
     <Box sx={{ backgroundColor: 'primary.light' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#ABDDF' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'primary.light' }}>
         <Card sx={{ maxWidth: 0.75, minWidth: 0.75 }}>
           <CardHeader
             action={

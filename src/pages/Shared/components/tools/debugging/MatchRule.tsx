@@ -12,7 +12,6 @@ import { IPrebidAuctionInitEventData, IPrebidDebugModuleConfigRule, IPrebidDetai
 export const matchRuleTargets: { value: string; label: string }[] = [
   { value: 'adUnitCode', label: 'AdUnitCode' },
   { value: 'bidder', label: 'Bidder' },
-  // { value: 'mediaType', label: 'Mediatype' }, // match on mediaType not working
 ];
 
 const MatchRule = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, path }: IMatchRuleProps): JSX.Element => {
@@ -29,32 +28,31 @@ const MatchRule = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, p
   };
 
   useEffect(() => {
-    // extract the matchRuleTargetOptions from  events
     const adUnitCodes = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
       if (!args || !args.adUnitCodes) return prevValue;
 
       return Array.from(new Set([...prevValue, ...args.adUnitCodes]));
     }, [] as string[]);
 
-    const mediaTypes = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
+    const mediaTypes = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue: string[], { args }) => {
       if (!args || !args.adUnits) return prevValue;
 
-      const newMediaTypes = args.adUnits?.reduce((prevValue, { mediaTypes }) => {
-        if (!mediaTypes) return prevValue;
+      const newMediaTypes = args.adUnits?.reduce((innerPrev: string[], { mediaTypes }: any) => {
+        if (!mediaTypes) return innerPrev;
 
-        return Array.from(new Set([...prevValue, ...Object.keys(mediaTypes)]));
+        return Array.from(new Set([...innerPrev, ...Object.keys(mediaTypes)]));
       }, [] as string[]);
 
       return Array.from(new Set([...prevValue, ...newMediaTypes]));
     }, [] as string[]);
 
-    const bidders = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue, { args }) => {
+    const bidders = (events as IPrebidAuctionInitEventData[])?.reduce((prevValue: string[], { args }) => {
       if (!args || !args.adUnits) return prevValue;
 
-      const newBidders = args.adUnits?.reduce((prevValue, { bids }) => {
-        if (!bids) return prevValue;
+      const newBidders = args.adUnits?.reduce((innerPrev: string[], { bids }: any) => {
+        if (!bids) return innerPrev;
 
-        return Array.from(new Set([...prevValue, ...bids.map(({ bidder }) => bidder)]));
+        return Array.from(new Set([...innerPrev, ...bids.map(({ bidder }: any) => bidder)]));
       }, [] as string[]);
 
       return Array.from(new Set([...prevValue, ...newBidders]));
@@ -86,8 +84,8 @@ const MatchRule = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, p
         onChange={(e) => {
           handleRulesFormChange('update', null, [...path.slice(0, path.length - 1), e.target.value], [...path.slice(0, path.length - 1), ruleKey]);
         }}
-        children={matchRuleTargets?.map((option, key) => (
-          <MenuItem key={key} value={option.value} disabled={Object.keys(rule.when).includes(option.value)}>
+        children={matchRuleTargets?.map((option) => (
+          <MenuItem key={option.value} value={option.value} disabled={Object.keys(rule.when).includes(option.value)}>
             {option.label}
           </MenuItem>
         ))}
@@ -105,8 +103,8 @@ const MatchRule = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, p
           handleRulesFormChange('update', e.target.value, path);
         }}
         children={
-          options[ruleKey as keyof IMatchRuleKeyOptions]?.map((option: string, i: number) => (
-            <MenuItem key={i} value={option} disabled={Object.values(rule.when).includes(option)}>
+          options[ruleKey as keyof IMatchRuleKeyOptions]?.map((option: string) => (
+            <MenuItem key={option} value={option} disabled={Object.values(rule.when).includes(option)}>
               {option}
             </MenuItem>
           )) || <MenuItem key={0} value={rule.when[ruleKey] || ''} />
@@ -123,9 +121,7 @@ const MatchRule = ({ groupIndex, rule, ruleKey, handleRulesFormChange, prebid, p
           }}
         />
       )}
-      {Object.keys(rule.when).length < matchRuleTargets.length && (
-        <IconButton size="small" color="primary" children={<AddIcon />} onClick={addMatchRule} />
-      )}
+      {Object.keys(rule.when).length < matchRuleTargets.length && <IconButton size="small" color="primary" children={<AddIcon />} onClick={addMatchRule} />}
     </React.Fragment>
   );
 };
