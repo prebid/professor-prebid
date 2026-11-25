@@ -18,7 +18,8 @@
     "test:e2e": "playwright test",
     "test:e2e:live": "playwright test -c playwright.live.config.ts",
     "test:perf": "playwright test -c playwright.perf.config.ts",
-    "audit:surface": "playwright test e2e/specs/09_prebid_surface_audit.spec.ts"
+    "audit:surface": "playwright test e2e/specs/09_prebid_surface_audit.spec.ts",
+    "release": "node utils/release.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

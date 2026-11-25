@@ -96,6 +96,20 @@ needs network access, and depends on those sites' consent banners and ad
 setups. Set `HEADED=true` to watch the browser. The performance benchmark takes
 over an hour.
 
+## Releasing to the Chrome Web Store
+
+```bash
+npm run release -- --dry-run   # checks, build, login and store version check; no upload
+npm run release                # upload and submit for review, staged until you publish it
+npm run release -- --publish   # upload and submit, published as soon as it is approved
+```
+
+The script runs the type check, the unit tests and the build, then opens your
+browser to sign in with the Google account that owns the listing. The token is
+kept in memory and revoked at the end; nothing that can publish is stored.
+Raise `version` in `package.json` first. The one-time OAuth setup and the
+environment variables it needs are described at the top of `utils/release.mjs`.
+
 ## Contributing
 
 Contributions, bug reports, and pull requests are welcome! Before submitting a pull request, please ensure all tests and builds pass:
