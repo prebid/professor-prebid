@@ -62,6 +62,16 @@ const readStoreRulesToggle = () =>
     chrome.storage.local.get(STORE_RULES_TOGGLE, (result) => resolve(result ? !!result[STORE_RULES_TOGGLE] : false));
   });
 
+const isRecord = (value: unknown): value is Record<string, any> => !!value && typeof value === 'object' && !Array.isArray(value);
+
+/** A debugging config from the page's storage or an imported file, reduced to what the rule editor can render; null when it is not one. */
+export const sanitizeDebuggingConfig = (input: unknown): IPrebidDebugModuleConfig | null => {
+  const rules = Array.isArray(input) ? input : isRecord(input) && (input.intercept === undefined || Array.isArray(input.intercept)) ? input.intercept || [] : null;
+  if (!rules) return null;
+  const intercept = rules.filter((rule: unknown) => isRecord(rule) && isRecord(rule.when) && isRecord(rule.then) && (rule.then.native === undefined || isRecord(rule.then.native)));
+  return { enabled: Array.isArray(input) ? true : !!(input as Record<string, any>).enabled, intercept };
+};
+
 // Prebid's debugging module reads its rules from sessionStorage; localStorage is only the persisted copy.
 const writeToPageStorage = async (tabId: number, namespace: string, storageName: 'sessionStorage' | 'localStorage', input: IPrebidDebugModuleConfig) => {
   await chrome.scripting.executeScript({
@@ -175,8 +185,10 @@ const DebuggingModuleComponent = (): JSX.Element => {
   // Copy rules to clipboard
   const copyRulesToClipboard = () => {
     const dataStr = JSON.stringify(debuggingModuleConfig, null, 2);
-    navigator.clipboard.writeText(dataStr);
-    setSnackbarMsg('Rules JSON copied to clipboard!');
+    Promise.resolve()
+      .then(() => navigator.clipboard.writeText(dataStr))
+      .then(() => setSnackbarMsg('Rules JSON copied to clipboard!'))
+      .catch(() => setSnackbarMsg('Could not copy: the clipboard is not available here.'));
   };
 
   // Import rules from JSON file
@@ -188,13 +200,10 @@ const DebuggingModuleComponent = (): JSX.Element => {
       try {
         const content = e.target?.result as string;
         const parsed = JSON.parse(content);
-        if (typeof parsed === 'object' && Array.isArray(parsed.intercept)) {
-          await writeConfigToStorage(parsed);
-          setSnackbarMsg(`Successfully imported ${parsed.intercept.length} rule(s)!`);
-        } else if (Array.isArray(parsed)) {
-          const newConfig = { enabled: true, intercept: parsed };
-          await writeConfigToStorage(newConfig);
-          setSnackbarMsg(`Successfully imported ${parsed.length} rule(s)!`);
+        const imported = Array.isArray(parsed) || Array.isArray(parsed?.intercept) ? sanitizeDebuggingConfig(parsed) : null;
+        if (imported) {
+          await writeConfigToStorage(imported);
+          setSnackbarMsg(`Successfully imported ${imported.intercept.length} rule(s)!`);
         } else {
           setSnackbarMsg('Invalid rules JSON format!');
         }
@@ -227,7 +236,9 @@ const DebuggingModuleComponent = (): JSX.Element => {
           fromLocalStorage = true;
         }
         if (first && first.result) {
-          const savedConfig: IPrebidDebugModuleConfig = JSON.parse(first.result);
+          // The stored value is whatever the page (or Prebid) left there, so it may not be a config at all.
+          const savedConfig = sanitizeDebuggingConfig(JSON.parse(first.result));
+          if (!savedConfig) return;
           setDebuggingModuleConfig(savedConfig);
           // A new session starts with empty sessionStorage: copy the persisted rules over so Prebid applies what the UI shows.
           if (fromLocalStorage) await writeToPageStorage(tabId, pbjsNamespace || 'pbjs', 'sessionStorage', savedConfig);

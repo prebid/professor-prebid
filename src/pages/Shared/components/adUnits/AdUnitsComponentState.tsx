@@ -2,10 +2,13 @@ import { useState, useContext, useMemo } from 'react';
 import type { AdUnit, EventRecord } from 'prebid.js/types.d.ts';
 import StateContext from '../../contexts/appStateContext';
 import { createQueryEngine, distinct } from '../autocomplete/utils';
+import { isUnsafeKey } from '../../utils';
 
 const merge = (target: any, ...sources: any[]) => {
   for (const source of sources) {
     for (const key in source) {
+      // Ad units are parsed from page JSON, where '__proto__' is an ordinary key; merging into it would write to Object.prototype.
+      if (isUnsafeKey(key)) continue;
       if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
         if (!target[key] || typeof target[key] !== 'object') {
           target[key] = {};

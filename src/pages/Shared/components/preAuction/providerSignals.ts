@@ -22,7 +22,7 @@ export interface IProviderSignal {
 
 export const PROVIDER_SIGNALS: { [typeAndName: string]: IProviderSignal } = {
   'rtd:1plusX': { ortb2Imp: [], ortb2: [], segments: ['1plusx.com'], eidSources: [] },
-  'rtd:51Degrees': { ortb2Imp: [], ortb2: [], segments: [], eidSources: ['51d.es'] },
+  'rtd:51Degrees': { ortb2Imp: [], ortb2: ['device.ext.fod'], segments: [], eidSources: ['51d.es'] },
   'rtd:a1Media': { ortb2Imp: [], ortb2: [], segments: ['a1mediagroup.com'], eidSources: ['a1mediagroup.com'] },
   'rtd:adagio': { ortb2Imp: ['ext.data.adg_rtd.adunit_position', 'ext.data.adg_rtd.placement', 'ext.data.divId'], ortb2: ['site.ext.data.adg_rtd'], segments: [], eidSources: [] },
   'rtd:adloox': { ortb2Imp: ['ext.data.adloox_rtd'], ortb2: ['site.ext.data.adloox_rtd', 'user.ext.data.adloox_rtd'], segments: [], eidSources: [] },
@@ -41,6 +41,8 @@ export const PROVIDER_SIGNALS: { [typeAndName: string]: IProviderSignal } = {
   'rtd:NeuwoRTDModule': { ortb2Imp: [], ortb2: [], segments: ['www.neuwo.ai'], eidSources: [] },
   'rtd:oneKey': { ortb2Imp: ['ext.data.paf.transaction_id'], ortb2: [], segments: [], eidSources: [] },
   'rtd:optimeraRTD': { ortb2Imp: ['ext.data.optimera'], ortb2: [], segments: [], eidSources: [] },
+  'rtd:overtone': { ortb2Imp: [], ortb2: ['site.ext.data.overtone'], segments: [], eidSources: [] },
+  'rtd:panxo': { ortb2Imp: [], ortb2: ['device.ext.panxo', 'site.ext.data.panxo'], segments: [], eidSources: [] },
   'rtd:rayn': { ortb2Imp: [], ortb2: [], segments: ['rayn.io'], eidSources: [] },
   'rtd:RelevadRTDModule': { ortb2Imp: ['ext.data.relevad_rtd'], ortb2: [], segments: [], eidSources: [] },
   'rtd:scope3': { ortb2Imp: [], ortb2: [], segments: ['scope3.com'], eidSources: [] },

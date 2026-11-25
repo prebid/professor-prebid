@@ -23,6 +23,7 @@ This document defines conventions and operational guidelines for AI agents worki
   - End-to-End tests: `npm run test:e2e` (Playwright against mock pages; loads `./build`, so run `npm run build` first)
   - Live-site End-to-End tests: `npm run test:e2e:live` (tests tagged `@live`; need network access and depend on the publishers' setups)
   - Performance benchmark: `npm run test:perf` (live A/B benchmark, over an hour; not part of `test:e2e`)
+- **Releasing**: `npm run release` uploads to the Chrome Web Store as the maintainer, after an interactive Google login. Never run it without being asked; `npm run release -- --dry-run` stops before the upload.
 - **Formatting & Style**:
   - Code formatting is managed with Prettier (configured in `package.json`).
   - Follow existing TypeScript and React functional component patterns.

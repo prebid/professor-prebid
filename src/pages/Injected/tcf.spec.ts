@@ -254,4 +254,27 @@ describe('IabTcf', () => {
 
     expect(() => iabTcf.sendDetailsToContentScript()).not.toThrow();
   });
+
+  it('reports again when the CMP announces changed consent', async () => {
+    const { EventBus } = await import('../Shared/utils');
+    const emit = vi.spyOn(EventBus, 'emit').mockImplementation(() => {});
+    let tcString = 'before';
+    let onChange: Function = () => {};
+    (window as any).__cmp = undefined;
+    (window as any).__tcfapi = vi.fn((cmd: string, _version: number, cb: Function) => {
+      if (cmd === 'ping') cb({ cmpLoaded: true, gdprApplies: true });
+      if (cmd === 'getTCData') cb({ tcString }, true);
+      if (cmd === 'addEventListener') onChange = cb;
+    });
+    iabTcf.lastMessage = undefined as any;
+    iabTcf.listeningForChanges = false;
+
+    iabTcf.loop();
+    tcString = 'after';
+    onChange({ tcString }, true);
+
+    const sent = emit.mock.calls.map(([, detail]) => (detail as any).v2.consentData);
+    expect(sent).toEqual(['before', 'after']);
+    emit.mockRestore();
+  });
 });

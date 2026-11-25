@@ -27,9 +27,12 @@ export const fetchEvents = async (tabInfo: IFrameInfos, setDownloading: React.Di
     if (!prebids) continue;
     for (const [namespace, prebid] of Object.entries(prebids)) {
       if (!prebid?.eventsUrl) continue;
+      // The events log is always a blob created by the page. The URL comes from the page, so never fetch anything else.
+      if (typeof prebid.eventsUrl !== 'string' || !prebid.eventsUrl.startsWith('blob:')) continue;
       const { hostname: eventsURLHost } = safelyConstructURL(prebid.eventsUrl);
       const { hostname: currentTabURLHost } = frameId === 'top-window' ? await getCurrentTabURL() : safelyConstructURL(frameId);
-      if (eventsURLHost !== currentTabURLHost) continue;
+      // Two URLs that failed to parse both have no hostname and must not count as a match.
+      if (!eventsURLHost || eventsURLHost !== currentTabURLHost) continue;
 
       setSyncInfo(`try to download Events from ${prebid.eventsUrl}`);
       setDownloading('true');

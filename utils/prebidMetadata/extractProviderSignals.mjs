@@ -21,7 +21,7 @@ const CORE_PATHS = new Set(['ext.gpid', 'ext.tid', 'ext.ae', 'ext.data.adserver'
 const collapse = (paths) => paths.filter((p) => !paths.some((other) => other !== p && p.startsWith(`${other}.`)));
 
 // Bare ortb2 branches - present on every page, so useless as evidence.
-const ORTB2_CONTAINERS = new Set(['', 'site', 'device', 'user', 'app', 'site.ext', 'device.ext', 'user.ext', 'site.ext.data', 'user.data']);
+const ORTB2_CONTAINERS = new Set(['', 'site', 'device', 'user', 'app', 'site.ext', 'device.ext', 'user.ext', 'app.ext', 'site.ext.data', 'user.ext.data', 'app.ext.data', 'site.content', 'site.content.data', 'app.content', 'app.content.data', 'user.data']);
 
 /**
  * Global ortb2 paths that cannot be read from prebid's source, because the vendor payload decides the
@@ -64,8 +64,8 @@ const resolvePath = (raw, consts) => {
  * Top level keys of the object literal at `open`. Only read at a `{` or `,` boundary - scanning every
  * offset matches inside a word and yields substrings of it.
  */
-const literalKeys = (code, open) => {
-  const keys = [];
+const literalEntries = (code, open) => {
+  const entries = [];
   let depth = 0;
   let brackets = 0;
   let expectKey = false;
@@ -95,13 +95,25 @@ const literalKeys = (code, open) => {
     }
     if (/\s/.test(char)) continue;
     if (depth === 1 && brackets === 0 && expectKey) {
-      const key = /^['"]?([A-Za-z_$][\w$]*)['"]?\s*:/.exec(code.slice(i, i + 80));
-      if (key) keys.push(key[1]);
+      const key = /^['"]?([A-Za-z_$][\w$]*)['"]?\s*:\s*/.exec(code.slice(i, i + 80));
+      if (key) entries.push({ key: key[1], value: i + key[0].length });
       expectKey = false;
     }
   }
-  return keys;
+  return entries;
 };
+
+const literalKeys = (code, open) => literalEntries(code, open).map(({ key }) => key);
+
+/**
+ * Full ortb2 paths an object literal writes: `{ device: { ext: { panxo: x } } }` is `device.ext.panxo`.
+ * Descends only through the bare ortb2 branches, so a vendor's own object stays one path.
+ */
+const literalPaths = (code, open, prefix = '') =>
+  literalEntries(code, open).flatMap(({ key, value }) => {
+    const path = join(prefix, key);
+    return ORTB2_CONTAINERS.has(path) && code[value] === '{' ? literalPaths(code, value, path) : [path];
+  });
 
 /** The ortb2Imp path a target expression addresses, or null. */
 const impBase = (target) => {
@@ -146,6 +158,11 @@ const ortb2ImpWrites = (code) => {
 const fragmentAliases = (code) => {
   const aliases = new Set();
   for (const m of code.matchAll(/(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*[^;\n]*ortb2Fragments[?.]*\.(?:global|bidder)/g)) aliases.add(m[1]);
+  // A local object built up first and merged in whole: `mergeDeep(reqBidsConfigObj.ortb2Fragments.global, ortb2)`.
+  for (const m of code.matchAll(/mergeDeep\(\s*([^,]+?)\s*,\s*([A-Za-z_$][\w$]*)\s*\)/g)) {
+    const target = m[1].trim();
+    if (/ortb2Fragments[?.]*\.(?:global|bidder)/.test(target) || aliases.has(target)) aliases.add(m[2]);
+  }
   return aliases;
 };
 
@@ -164,7 +181,7 @@ const ortb2Writes = (code) => {
   for (const m of code.matchAll(/mergeDeep\(\s*([^,]+?)\s*,\s*\{/g)) {
     const target = m[1].trim();
     if (!/ortb2Fragments\.global/.test(target) && !aliases.has(target)) continue;
-    literalKeys(code, m.index + m[0].length - 1).forEach((key) => found.add(key));
+    literalPaths(code, m.index + m[0].length - 1).forEach((path) => found.add(path));
   }
 
   return Array.from(found).filter((p) => p && !ORTB2_CONTAINERS.has(p) && !CORE_PATHS.has(p));
@@ -205,6 +222,8 @@ const documentedPaths = (docs) => {
   const ortb2 = new Set();
   const ortb2Imp = new Set();
   for (const m of docs.matchAll(/\bortb2\.((?:site|device|user|app)\.(?:ext|data)(?:\.[a-zA-Z0-9_]+)*)/g)) ortb2.add(m[1]);
+  // Also a bare path in code formatting, e.g. "through `device.ext.panxo`"; prose is too loose to trust.
+  for (const m of docs.matchAll(/`((?:site|device|user|app)\.ext(?:\.[a-zA-Z0-9_]+)+)`/g)) ortb2.add(m[1]);
   for (const m of docs.matchAll(/\bortb2Imp\.((?:ext|data)(?:\.[a-zA-Z0-9_]+)*)/g)) ortb2Imp.add(m[1]);
   return {
     ortb2: Array.from(ortb2).filter((path) => !ORTB2_CONTAINERS.has(path) && !CORE_PATHS.has(path)),

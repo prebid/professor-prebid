@@ -63,6 +63,32 @@ describe('surfaceReconciler', () => {
     expect(md).toContain('11.29.0');
   });
 
+  it('accepts winning bids the extension saw after the page was read, but not missing ones', () => {
+    const truth: PrebidGroundTruth = { namespace: 'pbjs', version: '11.42.0', installedModules: [], config: {}, eids: [], adUnits: [], events: [], winningBids: [{ bidder: 'appnexus' }] };
+    const later: ExtensionCapturedState = { namespace: 'pbjs', version: '11.42.0', mcpSnapshot: { winningBids: [{ bidder: 'appnexus' }, { bidder: 'rubicon' }] } };
+    const missing: ExtensionCapturedState = { namespace: 'pbjs', version: '11.42.0', mcpSnapshot: { winningBids: [] } };
+
+    expect(reconcilePrebidSurface(truth, later).domains.bids.passed).toBe(true);
+    expect(reconcilePrebidSurface(truth, missing).domains.bids.passed).toBe(false);
+  });
+
+  it('accepts config values the extension captured after the page was read', () => {
+    const truth: PrebidGroundTruth = { namespace: 'pbjs', version: '1', installedModules: [], config: { userSync: { userIds: [{ name: 'intentIqId', params: { gam: {} } }] } }, eids: [], adUnits: [], events: [], winningBids: [] };
+    const captured: ExtensionCapturedState = { namespace: 'pbjs', version: '1', config: { userSync: { userIds: [{ name: 'intentIqId', params: { gam: { queryIds: ['q1'] } } }] } } };
+
+    expect(reconcilePrebidSurface(truth, captured).domains.config.passed).toBe(true);
+  });
+
+  it('names the paths inside a mismatched config section', () => {
+    const truth: PrebidGroundTruth = { namespace: 'pbjs', version: '1', installedModules: [], config: { userSync: { syncDelay: 3000, userIds: [{ name: 'id5Id', storage: { expires: 90 } }] } }, eids: [], adUnits: [], events: [], winningBids: [] };
+    const captured: ExtensionCapturedState = { namespace: 'pbjs', version: '1', config: { userSync: { syncDelay: 3000, userIds: [{ name: 'id5Id', storage: { expires: 0 } }] } } };
+
+    const { config } = reconcilePrebidSurface(truth, captured).domains;
+
+    expect(config.passed).toBe(false);
+    expect(config.details.discrepancies).toEqual(['userSync.userIds.0.storage.expires: 90 → 0']);
+  });
+
   it('does not report config keys that cannot be messaged to the background as missing', () => {
     const config = { bidderTimeout: 1500, enableSendAllBids: undefined as unknown, customFn: () => 1 };
     const truth: PrebidGroundTruth = { namespace: 'pbjs', version: '11.42.0', installedModules: [], config, eids: [], adUnits: [], events: [], winningBids: [] };

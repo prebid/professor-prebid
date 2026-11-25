@@ -128,4 +128,15 @@ describe('AdUnitsComponentState', () => {
     });
     expect(result.current.filteredAdUnits.length).toBe(1);
   });
+
+  it('does not write to Object.prototype when merging ad units that carry a __proto__ key', () => {
+    const adUnit = JSON.parse('{"code":"div-1","mediaTypes":{"banner":{"sizes":[[300,250]]}},"bids":[],"__proto__":{"polluted":"yes"}}');
+    const mockContext: any = { auctionInitEvents: [{ args: { adUnits: [adUnit] } }, { args: { adUnits: [adUnit] } }], prebid: {}, allBidderEvents: [], allAdUnitCodes: [] };
+    const wrapper = ({ children }: { children: React.ReactNode }) => <AppStateContext.Provider value={mockContext}>{children}</AppStateContext.Provider>;
+
+    const { result } = renderHook(() => AdUnitsComponentState(), { wrapper });
+
+    expect(result.current.adUnits).toHaveLength(1);
+    expect(({} as any).polluted).toBeUndefined();
+  });
 });

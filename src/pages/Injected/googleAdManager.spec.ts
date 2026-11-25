@@ -13,6 +13,8 @@ describe('GoogleAdManager', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    // init() turns the global into an accessor; start each test from a plain property again.
+    delete (window as any).googletag;
 
     const mockPubads = {
       addEventListener: vi.fn(),
@@ -40,24 +42,52 @@ describe('GoogleAdManager', () => {
   });
 
   describe('init', () => {
-    it('initializes googletag and cmd if undefined on window', () => {
+    it('leaves no googletag stub on a page that has not defined one', () => {
       delete (window as any).googletag;
       gam.init();
-      expect(gam.googletag).toBeDefined();
-      expect(Array.isArray(gam.googletag.cmd)).toBe(true);
+      expect((window as any).googletag).toBeUndefined();
     });
 
-    it('queues the listener hook on the shared window.googletag so GPT runs it when it loads', () => {
+    it('queues the listener hook as soon as the page defines googletag, so GPT runs it when it loads', () => {
       delete (window as any).googletag;
       gam.init();
-      expect((window as any).googletag).toBe(gam.googletag);
-      expect((window as any).googletag.cmd).toHaveLength(1);
+      const pageGoogletag: any = {};
+      (window as any).googletag = (window as any).googletag || pageGoogletag;
+      expect((window as any).googletag).toBe(pageGoogletag);
+      expect(gam.googletag).toBe(pageGoogletag);
+      expect(pageGoogletag.cmd).toHaveLength(1);
+      // The page's own snippet keeps the queue.
+      pageGoogletag.cmd = pageGoogletag.cmd || [];
+      expect(pageGoogletag.cmd).toHaveLength(1);
+    });
+
+    it('hooks a googletag object only once, and a pubads service only once', () => {
+      const addEventListener = vi.fn();
+      const pubads = { addEventListener };
+      const pageGoogletag: any = { cmd: [], pubads: () => pubads };
+      (window as any).googletag = pageGoogletag;
+      (window as any).googletag = pageGoogletag;
+      expect(pageGoogletag.cmd).toHaveLength(1);
+      pageGoogletag.cmd[0]();
+      pageGoogletag.cmd[0]();
+      expect(addEventListener).toHaveBeenCalledTimes(6);
     });
 
     it('initializes cmd array if googletag exists but cmd is not an array', () => {
       (window as any).googletag = { cmd: 'not-an-array' };
       gam.init();
       expect(Array.isArray(gam.googletag.cmd)).toBe(true);
+    });
+  });
+
+  describe('init after gpt.js has loaded', () => {
+    it("keeps GPT's own command queue, which is not an array", () => {
+      const ran: Function[] = [];
+      const gptQueue = { push: (fn: Function) => ran.push(fn) };
+      (window as any).googletag = { cmd: gptQueue };
+      gam.init();
+      expect((window as any).googletag.cmd).toBe(gptQueue);
+      expect(ran).toHaveLength(1);
     });
   });
 

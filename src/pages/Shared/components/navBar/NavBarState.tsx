@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PAGES } from '../../constants';
+import { PAGES } from '../../pages';
 import React from 'react';
 
 const NavBarState = () => {

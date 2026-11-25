@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
-import { PAGES } from '../../constants';
+import { PAGES } from '../../pages';
 import AppStateContext from '../../contexts/appStateContext';
 import OptionsContext from '../../contexts/optionsContext';
 import NavBarState from './NavBarState';

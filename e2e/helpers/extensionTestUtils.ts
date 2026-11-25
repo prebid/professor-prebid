@@ -73,8 +73,11 @@ export const getDetectedPrebids = async (serviceWorker: Worker): Promise<Detecte
     .flatMap((tabKey) => Object.entries(storage[tabKey] || {}).flatMap(([frameId, frame]: [string, any]) => Object.entries(frame?.prebids || {}).map(([namespace, details]) => ({ tabKey, frameId, namespace, details }))));
 };
 
-/** Waits until the extension has stored a Prebid instance for a tab showing `pageUrl`'s host, and returns it. */
-export const waitForDetectedPrebid = async (serviceWorker: Worker, pageUrl: string, timeoutMs = 20000): Promise<DetectedPrebid | null> => {
+/**
+ * Waits until the extension has stored a Prebid instance for a tab showing `pageUrl`'s host, and returns it.
+ * A tab can hold several (frames, namespaces); `match` picks one, e.g. the top window's.
+ */
+export const waitForDetectedPrebid = async (serviceWorker: Worker, pageUrl: string, timeoutMs = 20000, match: { frameId?: string; namespace?: string } = {}): Promise<DetectedPrebid | null> => {
   const host = new URL(pageUrl).host;
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -83,7 +86,7 @@ export const waitForDetectedPrebid = async (serviceWorker: Worker, pageUrl: stri
       return tabs.filter((tab) => tab.url?.startsWith('http') && new URL(tab.url).host === pageHost).map((tab) => tab.id);
     }, host);
     const tabKeys = tabIds.map((id) => `tab_info_${id}`);
-    const detected = (await getDetectedPrebids(serviceWorker)).find((prebid) => tabKeys.includes(prebid.tabKey));
+    const detected = (await getDetectedPrebids(serviceWorker)).find((prebid) => tabKeys.includes(prebid.tabKey) && (!match.frameId || prebid.frameId === match.frameId) && (!match.namespace || prebid.namespace === match.namespace));
     if (detected) return detected;
     await new Promise((resolve) => setTimeout(resolve, 500));
   }

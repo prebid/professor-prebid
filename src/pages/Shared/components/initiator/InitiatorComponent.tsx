@@ -92,6 +92,12 @@ const InitiatorComponent = (): JSX.Element => {
   const [selectedEntry, setSelectedEntry] = useState<IClassifiedNetworkEntry | null>(null);
   const [decompressedMap, setDecompressedMap] = useState<Record<string, string>>({});
 
+  // Results for requests that have left the log (cleared, or a new page) are dropped.
+  React.useEffect(() => {
+    const ids = new Set((harLog || []).map((e: any) => e.id));
+    setDecompressedMap((prev) => (Object.keys(prev).every((id) => ids.has(id)) ? prev : Object.fromEntries(Object.entries(prev).filter(([id]) => ids.has(id)))));
+  }, [harLog]);
+
   React.useEffect(() => {
     let active = true;
     const rawList = harLog || [];

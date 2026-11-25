@@ -67,14 +67,20 @@ It parses source, so it inherits source's ambiguities. Each of these has bitten 
 A path that survives should carry a vendor namespace of its own. A generic-looking one is usually a
 parse artefact — check the source before accepting it.
 
-**Indirections that hide a write.** Three are handled; a fourth will appear eventually:
+**Indirections that hide a write.** Five are handled; another will appear eventually:
 
 - string constants — `const NAME = '<domain>'` … `name: NAME`
 - local aliases — `const ortb2 = bidConfig.ortb2Fragments?.global`, then a write through `ortb2`
+- staging objects — `const ortb2 = {}`, written to, then `mergeDeep(reqBidsConfigObj.ortb2Fragments.global, ortb2)`
+- nested literals — `mergeDeep(global, { device: { ext: { panxo } } })` is `device.ext.panxo`, not `device`
 - EID sources published by RTD modules, which otherwise read as an unconfigured identity module
 
-All three were found by running against a live page, not by reading source. **If a provider you know
-delivers reports `unknown`, suspect a new one.**
+All of them were found by running against a live page, not by reading source. **If a provider you know
+delivers reports `unknown`, or a write shows as unattributable, suspect a new one.**
+
+A `.md` path counts in two shapes: with the `ortb2.` prefix, or bare inside backticks
+(`` `device.ext.panxo` ``). Generic branches such as `user.ext.data` or `site.content.data` are filtered as
+containers; a path needs a vendor key of its own to count.
 
 ## Repairing the other two maps
 

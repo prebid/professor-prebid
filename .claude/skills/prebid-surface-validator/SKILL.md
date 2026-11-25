@@ -70,6 +70,12 @@ AUDIT_URL=https://www.eatpicks.com/ npm run audit:surface
 
 Accepts the consent banner, waits for an auction to end, and prints the same report for that page. It fails on version, module or config mismatches; differences in events, EIDs, bids and ad units are reported but do not fail it, since live pages keep changing.
 
+How the comparison treats a live page:
+
+- The page is read first, then the extension is asked for a fresh update (as opening the panel does). Anything the extension has on top — more events, more winning bids, config values added in between — counts as captured. Only something the page had that the extension lost or changed is a discrepancy.
+- The page's config is compared the way the extension transfers it (`decycle` and JSON in `src/pages/Shared/utils.ts`): functions, `undefined` values, cycles and window-like objects are left out. Publisher configs can hold live third-party objects, such as a `googletag` reference passed to an ID module.
+- A config discrepancy lists the paths that differ (`userSync.userIds.2.params...: expected → actual`), so a real loss can be told apart from a value that moved.
+
 ### C. The UI
 
 `npm run test:e2e` includes `e2e/panel.spec.ts`. It opens the real DevTools panel for a mock page and checks that the Ad Units, Bids, Events and User ID tabs show what the page reported. Extend it when a tab starts showing new data.

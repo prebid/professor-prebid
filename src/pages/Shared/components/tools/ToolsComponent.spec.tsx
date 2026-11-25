@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ToolsComponent from './ToolsComponent';
 import OverlayControlComponent from './OverlayControlComponent';
@@ -16,8 +16,10 @@ describe('Tools & OverlayControl components', () => {
     global.chrome = {
       storage: {
         local: {
-          get: vi.fn((key, cb) => cb({ consoleState: true })),
+          // Called with a callback for one key, or as a promise for everything (key null).
+          get: vi.fn((key, cb) => (cb ? cb({ consoleState: true }) : Promise.resolve({ consoleState: true, tab_info_1: {}, tab_info_22: {}, pbjsReleasesData: '[]' }))),
           set: vi.fn((val, cb) => cb?.()),
+          remove: vi.fn().mockResolvedValue(undefined),
         },
       },
       scripting: {
@@ -75,7 +77,7 @@ describe('Tools & OverlayControl components', () => {
 
     const resetBtn = screen.getByText('Reset Extension Storage');
     fireEvent.click(resetBtn);
-    expect(chrome.storage.local.set).toHaveBeenCalledWith({ tabInfos: null });
+    await waitFor(() => expect(chrome.storage.local.remove).toHaveBeenCalledWith(['tab_info_1', 'tab_info_22']));
   });
 
   it('renders ToolsComponent with version < 7.3.0 (ModifyBidResponsesComponent)', () => {

@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useRef, useState } from 'react';
 import { getTabId } from '../utils';
 import { useDebounce } from '../hooks/useDebounce';
 import { fetchEvents } from './fetchEvents';
@@ -18,16 +18,20 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
 
   const [harLogData, setHarLogData] = useState<IHarEntry[]>([]);
   const harLog = useDebounce(harLogData, 1000);
+  // Event downloads finish in any order; only the result for the newest tab info may be shown.
+  const latestLoad = useRef(0);
+  const loadFrames = async (tabInfo: IFrameInfos) => {
+    const load = ++latestLoad.current;
+    const tabInfoWithEvents = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
+    if (load === latestLoad.current) setFrames(tabInfoWithEvents);
+  };
 
   useEffect(() => {
     getTabId().then((tabId) => {
       const key = `tab_info_${tabId}`;
       chrome.storage.local.get([key], async (res) => {
         const tabInfo = res[key];
-        if (tabInfo) {
-          const tabInfoWithEvents = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
-          setFrames(tabInfoWithEvents);
-        }
+        if (tabInfo) await loadFrames(tabInfo);
       });
     });
   }, []);
@@ -40,7 +44,7 @@ export const InspectedPageContextProvider = ({ children }: ChromeStorageProvider
           const key = `tab_info_${tabId}`;
           if (changes[key]) {
             if (JSON.stringify(changes[key].newValue) !== JSON.stringify(changes[key].oldValue)) {
-              fetchEvents(changes[key].newValue || {}, setDownloading, setSyncInfo).then(setFrames);
+              loadFrames(changes[key].newValue || {});
             }
           }
         });

@@ -18,19 +18,34 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
   const extractPageTruth = async function (page: Page): Promise<PrebidGroundTruth> {
     return await page.evaluate(() => {
       const win = window as any;
-      const pb = win.pbjs || (win._pbjsGlobals && win[win._pbjsGlobals[0]]);
+      const namespace = win.pbjs ? 'pbjs' : win._pbjsGlobals?.[0];
+      const pb = namespace && win[namespace];
       if (!pb) {
         throw new Error('Prebid.js not found on page');
       }
+      // The extension sends its details through decycle() and JSON (src/pages/Shared/utils.ts), which drops
+      // functions, undefined values, cycles and window-like objects. Compare against that, not the live object.
+      const transferable = (value: unknown) => {
+        const ancestors: unknown[] = [];
+        const json = JSON.stringify(value, function (_key, child) {
+          if (typeof child !== 'object' || child === null) return child;
+          if (!Array.isArray(child) && child['location']) return undefined;
+          while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) ancestors.pop();
+          if (ancestors.includes(child)) return undefined;
+          ancestors.push(child);
+          return child;
+        });
+        return json === undefined ? null : JSON.parse(json);
+      };
       const events = pb.getEvents ? pb.getEvents() : [];
-      const config = pb.getConfig ? pb.getConfig() : {};
+      const config = transferable(pb.getConfig ? pb.getConfig() : {});
       const eids = pb.getUserIdsAsEids ? pb.getUserIdsAsEids() : [];
       const adUnits = pb.adUnits || [];
       const winningBids = pb.getAllWinningBids ? pb.getAllWinningBids() : [];
       const installedModules = pb.installedModules || [];
       const bidderSettings = pb.bidderSettings || {};
       return {
-        namespace: pb.namespace || (win._pbjsGlobals && win._pbjsGlobals[0]) || 'pbjs',
+        namespace,
         version: pb.version || null,
         installedModules,
         config,
@@ -46,26 +61,28 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
   /**
    * Helper: Extracts Extension Captured State from chrome.storage.local & MCP bridge.
    */
-  const extractExtensionCapturedState = async function (page: Page, serviceWorker: Worker): Promise<ExtensionCapturedState> {
+  const extractExtensionCapturedState = async function (page: Page, serviceWorker: Worker, namespace: string): Promise<ExtensionCapturedState> {
+    // The page was read from the top window, so compare the instance the extension stored for it, not one from a frame.
+    const match = { frameId: 'top-window', namespace };
     // Updates are throttled and only follow some Prebid events, so storage can lag behind the page. Opening the
     // popup or panel asks the page for a fresh update; do the same, and wait for it to replace the stored one.
     // Every update with events has a new events URL. Both audits run after Prebid logged events, so wait for one
     // that is neither missing nor the URL stored before the request.
-    const before = await waitForDetectedPrebid(serviceWorker, page.url(), 10000);
+    const before = await waitForDetectedPrebid(serviceWorker, page.url(), 10000, match);
     if (before) {
       const tabId = Number(before.tabKey.replace('tab_info_', ''));
       await serviceWorker.evaluate((id) => chrome.tabs.sendMessage(id, { type: 'PP_POPUP_LOADED', payload: {} }).catch((): void => undefined), tabId);
       await expect
         .poll(
           async () => {
-            const eventsUrl = (await waitForDetectedPrebid(serviceWorker, page.url(), 1000))?.details.eventsUrl;
+            const eventsUrl = (await waitForDetectedPrebid(serviceWorker, page.url(), 1000, match))?.details.eventsUrl;
             return !!eventsUrl && eventsUrl !== before.details.eventsUrl;
           },
           { timeout: 10000, message: 'the extension should store a fresh update after the popup-loaded request' }
         )
         .toBe(true);
     }
-    const detected = await waitForDetectedPrebid(serviceWorker, page.url(), 10000);
+    const detected = await waitForDetectedPrebid(serviceWorker, page.url(), 10000, match);
     const foundNamespace = detected?.namespace || 'pbjs';
     const prebidData = detected?.details;
     // Events are stored as an object URL to a blob in the page
@@ -229,7 +246,7 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     expect(groundTruth.installedModules.length).toBe(5);
     expect(groundTruth.events.length).toBe(5);
     // 2. Extract Extension Captured State
-    const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker);
+    const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker, groundTruth.namespace);
     expect(capturedState.version).toBe('11.29.0');
     // 3. Reconcile & Audit
     const report = reconcilePrebidSurface(groundTruth, capturedState, 'https://example.com/synthetic-prebid-audit');
@@ -251,7 +268,7 @@ test.describe('Professor Prebid Data Surface Audit E2E', () => {
     expect(await liveSite.waitForAuctionEnd(), `Prebid.js should run an auction on ${targetUrl}`).toBe(true);
 
     const groundTruth = await extractPageTruth(page);
-    const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker);
+    const capturedState = await extractExtensionCapturedState(page, extension.serviceWorker, groundTruth.namespace);
     const report = reconcilePrebidSurface(groundTruth, capturedState, targetUrl!);
     await attachReport(testInfo, report);
 

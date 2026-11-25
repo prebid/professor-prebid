@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import OptionsContext, { OptionsContextProvider } from './optionsContext';
-import { PAGES } from '../constants';
+import { PAGES } from '../pages';
 
 const TestComponent = () => {
   const ctx = useContext(OptionsContext);

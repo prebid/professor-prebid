@@ -22,7 +22,7 @@ const MAX_ARRAY_ITEMS = 50;
 const MAX_CALL_FRAMES = 20;
 const MAX_URL_LENGTH = 2000;
 const REDACTED = '[redacted]';
-const SENSITIVE_HEADERS = ['cookie', 'set-cookie', 'authorization', 'proxy-authorization'];
+const SENSITIVE_HEADERS = ['cookie', 'set-cookie', 'authorization', 'proxy-authorization', 'x-api-key', 'x-auth-token', 'x-csrf-token', 'x-xsrf-token', 'x-amz-security-token'];
 
 interface IHarLogChunk {
   id: number;

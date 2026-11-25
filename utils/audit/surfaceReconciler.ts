@@ -69,6 +69,27 @@ export const sanitizeForComparison = function (val: any): any {
   return clean;
 };
 
+/**
+ * Where the captured value lost or changed something the page had, as `path: expected → actual`. The page is
+ * read before the extension, so values that only the captured copy has were added in between and are not listed.
+ */
+export const differingPaths = function (expected: any, actual: any, path: string, limit = 5, out: string[] = []): string[] {
+  if (out.length >= limit || expected === undefined) return out;
+  const short = (value: any) => {
+    const text = JSON.stringify(value);
+    return text === undefined ? 'missing' : text.length > 60 ? `${text.slice(0, 57)}...` : text;
+  };
+  const isContainer = (value: any) => value !== null && typeof value === 'object';
+  if (isContainer(expected) && isContainer(actual) && Array.isArray(expected) === Array.isArray(actual)) {
+    for (const key of Array.from(new Set([...Object.keys(expected), ...Object.keys(actual)]))) {
+      differingPaths(expected[key], actual[key], `${path}.${key}`, limit, out);
+    }
+  } else if (JSON.stringify(sanitizeForComparison(expected)) !== JSON.stringify(sanitizeForComparison(actual))) {
+    out.push(`${path}: ${short(expected)} → ${short(actual)}`);
+  }
+  return out;
+};
+
 export const reconcilePrebidSurface = function (truth: PrebidGroundTruth, captured: ExtensionCapturedState, targetUrl: string = 'synthetic'): SurfaceAuditReport {
   const versionPassed = truth.version ? truth.version === captured.version : true;
   const versionResult: DomainAuditResult = {
@@ -104,14 +125,14 @@ export const reconcilePrebidSurface = function (truth: PrebidGroundTruth, captur
   const truthConfigKeys = Object.keys(truthConfig).filter((k) => truthConfig[k] !== undefined && typeof truthConfig[k] !== 'function');
   const missingConfigKeys = truthConfigKeys.filter((k) => !(k in capturedConfig));
   const valueMismatches: string[] = [];
+  const mismatchedPaths: string[] = [];
 
   for (const key of truthConfigKeys) {
     if (key in capturedConfig) {
-      const expVal = JSON.stringify(sanitizeForComparison(truthConfig[key]));
-      const actVal = JSON.stringify(sanitizeForComparison(capturedConfig[key]));
-      if (expVal !== actVal) {
-        // Deep compare check
+      const paths = differingPaths(truthConfig[key], capturedConfig[key], key);
+      if (paths.length > 0) {
         valueMismatches.push(key);
+        mismatchedPaths.push(...paths);
       }
     }
   }
@@ -125,7 +146,7 @@ export const reconcilePrebidSurface = function (truth: PrebidGroundTruth, captur
     summary: configPassed ? `All ${truthConfigKeys.length} config sections correctly surfaced.` : `Config discrepancies: missing [${missingConfigKeys.join(', ')}], mismatched values [${valueMismatches.join(', ')}]`,
     details: {
       missing: missingConfigKeys,
-      discrepancies: valueMismatches,
+      discrepancies: mismatchedPaths,
     },
   };
 
@@ -191,12 +212,13 @@ export const reconcilePrebidSurface = function (truth: PrebidGroundTruth, captur
   const capturedWinning = captured.mcpSnapshot?.winningBids || [];
   const truthWinners = truthWinning.map((b: any) => b.bidder || b.bidderCode);
   const capturedWinners = capturedWinning.map((b: any) => b.bidder || b.bidderCode);
-  const bidsPassed = truthWinners.length === capturedWinners.length;
+  // The page is read before the extension, so the extension may have seen more winners since, never fewer.
+  const bidsPassed = capturedWinners.length >= truthWinners.length;
   const bidsResult: DomainAuditResult = {
     domain: 'Bids & Winning Bids',
     passed: bidsPassed,
     score: bidsPassed ? 100 : 50,
-    summary: bidsPassed ? `Winning bids accounted for (${truthWinners.length} winners).` : `Winning bids mismatch: expected ${truthWinners.length}, captured ${capturedWinners.length}`,
+    summary: bidsPassed ? `Winning bids accounted for (${truthWinners.length} on the page, ${capturedWinners.length} captured).` : `Winning bids missing: expected ${truthWinners.length}, captured ${capturedWinners.length}`,
     details: {
       expected: truthWinners,
       actual: capturedWinners,

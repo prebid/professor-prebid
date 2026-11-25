@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '../../theme/theme';
 import { ErrorBoundary } from 'react-error-boundary';
 import ErrorCardComponent from '../Shared/components/ErrorCardComponent';
-import { PAGES } from '../Shared/constants';
+import { PAGES } from '../Shared/pages';
 import OptionsContext, { OptionsContextProvider } from '../Shared/contexts/optionsContext';
 
 const NaviOptions: React.FC<{}> = () => {

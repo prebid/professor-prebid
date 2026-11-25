@@ -412,7 +412,7 @@ export const classifyRequest = (entry: IHarLogEntry, decompressedPostText?: stri
   } else if (/id5-sync|liveramp|unifiedid|sharedid|criteo_id|parrable|identity/i.test(lowerUrl)) {
     category = 'userId';
   } else if (!matchedCategory) {
-    if (/openrtb2\/auction|ut\/v3\/prebid|fastlane|auction|\/bid\b|\/bids\b|header/i.test(lowerUrl) || (method === 'POST' && /auction|bid|openrtb/i.test(lowerPath))) {
+    if (/openrtb2\/auction|ut\/v3\/prebid|fastlane|auction|\/bid\b|\/bids\b|header[-_]?bid/i.test(lowerUrl) || (method === 'POST' && /auction|bid|openrtb/i.test(lowerPath))) {
       category = 'bid';
     } else if (/analytics|event-tracker|prebid-analytics|beacon/i.test(lowerUrl)) {
       category = 'analytics';
