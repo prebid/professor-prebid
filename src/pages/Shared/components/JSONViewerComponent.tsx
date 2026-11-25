@@ -175,13 +175,14 @@ const JSONViewerComponent = ({ src = null, name = null, collapsed = 3, displayOb
   const bgColor = isDark ? 'transparent' : 'transparent';
 
   const handleCopy = () => {
-    try {
-      navigator.clipboard.writeText(JSON.stringify(src, null, indentWidth));
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      console.error('Failed to copy JSON', e);
-    }
+    // Rejects where the clipboard is unavailable (an unfocused DevTools panel, for example); only then is nothing shown.
+    Promise.resolve()
+      .then(() => navigator.clipboard.writeText(JSON.stringify(src, null, indentWidth)))
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((e) => console.error('Failed to copy JSON', e));
   };
 
   return (

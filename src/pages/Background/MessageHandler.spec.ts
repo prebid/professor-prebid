@@ -99,9 +99,60 @@ describe('MessageHandler', () => {
     const payload = { frameId: 'https://widget.example/-abc', namespace: 'pbjs' };
     mockTabContextService.getTabInfo.mockResolvedValue({});
 
-    await handler.handle({ type: EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, payload: payload as any }, { tab: { id: 4 }, frameId: 7 } as any);
+    await handler.handle({ type: EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, payload: payload as any }, { tab: { id: 4 }, frameId: 7, url: 'https://widget.example/' } as any);
 
     expect(mockTabContextService.saveTabInfo).toHaveBeenCalledWith(4, { [payload.frameId]: { prebids: { pbjs: payload } } });
+  });
+
+  it('keeps the top window and the newest frames when a tab collects more subframes than the cap', async () => {
+    const existing: any = { 'top-window': { url: 'https://example.com' } };
+    for (let i = 0; i < 40; i++) existing[`https://example.com/frame-${i}`] = { prebids: { pbjs: {} } };
+    mockTabContextService.getTabInfo.mockResolvedValue(existing);
+
+    await handler.handle({ type: EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, payload: { frameId: 'https://example.com/frame-new', namespace: 'pbjs' } as any }, { tab: { id: 6 } } as any);
+
+    const saved = mockTabContextService.saveTabInfo.mock.calls[0][1];
+    expect(Object.keys(saved)).toHaveLength(31);
+    expect(saved['top-window']).toBeDefined();
+    expect(saved['https://example.com/frame-new']).toBeDefined();
+    expect(saved['https://example.com/frame-0']).toBeUndefined();
+    expect(saved['https://example.com/frame-39']).toBeDefined();
+  });
+
+  describe('forged Prebid details', () => {
+    const send = (payload: object, sender: object) => handler.handle({ type: EVENTS.SEND_PREBID_DETAILS_TO_BACKGROUND, payload: payload as any }, { tab: { id: 5 }, ...sender } as any);
+    const stored = () => mockTabContextService.saveTabInfo.mock.calls[0][1];
+
+    it("does not let a subframe write the top window or another origin's frame", async () => {
+      const subframe = { frameId: 7, url: 'https://ads.example/frame.html' };
+      await send({ frameId: 'top-window', namespace: 'pbjs' }, subframe);
+      expect(stored()).toEqual({});
+      mockTabContextService.saveTabInfo.mockClear();
+      await send({ frameId: 'http://localhost/x-123', namespace: 'pbjs' }, subframe);
+      expect(stored()).toEqual({});
+    });
+
+    it('never stores under keys that reach Object.prototype', async () => {
+      await send({ frameId: '__proto__', namespace: 'x' }, { url: 'https://example.com/' });
+      expect(stored()).toEqual({});
+      mockTabContextService.saveTabInfo.mockClear();
+      await send({ frameId: 'top-window', namespace: '__proto__' }, { url: 'https://example.com/' });
+      expect(stored()).toEqual({});
+      expect(({} as any).prebids).toBeUndefined();
+    });
+
+    it('accepts only an events URL that is a blob of the sending origin', async () => {
+      const top = { frameId: 0, origin: 'https://example.com', url: 'https://example.com/page' };
+      for (const eventsUrl of ['http://localhost:8080/admin.json', 'https://example.com/events.json', 'blob:https://other.example/123', 123]) {
+        mockTabContextService.saveTabInfo.mockClear();
+        await send({ frameId: 'top-window', namespace: 'pbjs', eventsUrl }, top);
+        expect(stored()).toEqual({});
+      }
+      mockTabContextService.saveTabInfo.mockClear();
+      const payload = { frameId: 'top-window', namespace: 'pbjs', eventsUrl: 'blob:https://example.com/123' };
+      await send(payload, top);
+      expect(stored()).toEqual({ 'top-window': { prebids: { pbjs: payload } } });
+    });
   });
 
   it('ignores TCF messages that have neither v1 nor v2 details', async () => {

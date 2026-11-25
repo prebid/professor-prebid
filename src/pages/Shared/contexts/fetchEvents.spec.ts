@@ -57,7 +57,7 @@ describe('fetchEvents', () => {
       'top-window': {
         prebids: {
           pbjs: {
-            eventsUrl: 'https://example.com/events.json',
+            eventsUrl: 'blob:https://example.com/events',
           },
         },
       },
@@ -92,7 +92,7 @@ describe('fetchEvents', () => {
       'https://sub.example.com/iframe.html': {
         prebids: {
           pbjs: {
-            eventsUrl: 'https://sub.example.com/events.json',
+            eventsUrl: 'blob:https://sub.example.com/events',
           },
         },
       },
@@ -112,7 +112,7 @@ describe('fetchEvents', () => {
       'top-window': {
         prebids: {
           pbjs: {
-            eventsUrl: 'https://otherdomain.com/events.json',
+            eventsUrl: 'blob:https://otherdomain.com/events',
           },
         },
       },
@@ -127,7 +127,7 @@ describe('fetchEvents', () => {
       'top-window': {
         prebids: {
           pbjs: {
-            eventsUrl: 'https://example.com/events.json',
+            eventsUrl: 'blob:https://example.com/events',
           },
         },
       },
@@ -136,7 +136,7 @@ describe('fetchEvents', () => {
     global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
     const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
-    expect(sendChromeTabsMessage).toHaveBeenCalledWith(DOWNLOAD_FAILED, { eventsUrl: 'https://example.com/events.json' });
+    expect(sendChromeTabsMessage).toHaveBeenCalledWith(DOWNLOAD_FAILED, { eventsUrl: 'blob:https://example.com/events' });
     expect(setDownloading).toHaveBeenCalledWith('error');
     expect(result['top-window']).toBeUndefined();
   });
@@ -146,10 +146,10 @@ describe('fetchEvents', () => {
       'top-window': {
         prebids: {
           failingPbjs: {
-            eventsUrl: 'https://example.com/failing.json',
+            eventsUrl: 'blob:https://example.com/failing',
           },
           workingPbjs: {
-            eventsUrl: 'https://otherdomain.com/working.json',
+            eventsUrl: 'blob:https://otherdomain.com/working',
           },
         },
       },
@@ -163,27 +163,32 @@ describe('fetchEvents', () => {
     expect(result['top-window'].prebids.workingPbjs).toBeDefined();
   });
 
-  it('handles invalid URLs safely in safelyConstructURL and getCurrentTabURL', async () => {
+  it('does not fetch when neither the events URL nor the tab URL parses', async () => {
     global.chrome = {
       tabs: {
         get: vi.fn((tabId, cb) => cb({})),
       },
     } as any;
+    global.fetch = vi.fn();
 
+    await fetchEvents({ 'top-window': { prebids: { pbjs: { eventsUrl: 'blob:invalid-url-string' } } } } as any, setDownloading, setSyncInfo);
+
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(setDownloading).not.toHaveBeenCalled();
+  });
+
+  it('never fetches an events URL that is not a blob, even when its host matches the frame', async () => {
+    global.fetch = vi.fn();
     const tabInfo: any = {
-      'top-window': {
-        prebids: {
-          pbjs: {
-            eventsUrl: 'invalid-url-string',
-          },
-        },
-      },
+      'top-window': { prebids: { pbjs: { eventsUrl: 'https://example.com/events.json' } } },
+      'http://localhost/x-123': { prebids: { pbjs: { eventsUrl: 'http://localhost:8080/admin.json' } } },
+      bar: { prebids: { pbjs: { eventsUrl: 'foo' } } },
+      'https://a.example/-1': { prebids: { pbjs: { eventsUrl: 123 } } },
     };
 
-    global.fetch = vi.fn().mockRejectedValue(new Error('Invalid URL'));
+    const result = await fetchEvents(tabInfo, setDownloading, setSyncInfo);
 
-    await fetchEvents(tabInfo, setDownloading, setSyncInfo);
-    expect(setDownloading).toHaveBeenCalledWith('true');
-    expect(setDownloading).toHaveBeenCalledWith('error');
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(result['top-window'].prebids.pbjs).toBeDefined();
   });
 });

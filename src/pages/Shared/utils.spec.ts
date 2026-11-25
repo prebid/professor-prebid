@@ -43,11 +43,15 @@ describe('Shared Utils', () => {
       expect(result.list).toEqual([null]);
     });
 
-    it('removes DOM elements (location/document)', () => {
-      const obj = { a: 1, dom: { location: 'some-location' } };
+    it('removes windows, documents and DOM nodes', () => {
+      const obj = { a: 1, win: window, doc: document, node: document.createElement('div'), loc: window.location };
       const result = JSON.parse(decycle(obj));
-      expect(result.a).toBe(1);
-      expect(result.dom).toBeUndefined();
+      expect(result).toEqual({ a: 1 });
+    });
+
+    it('keeps plain data that has a location field', () => {
+      const obj = { geo: { location: 'DE', zip: '1' }, params: { location: 'top', placement: 5 } };
+      expect(JSON.parse(decycle(obj))).toEqual(obj);
     });
 
     it('handles nested objects', () => {

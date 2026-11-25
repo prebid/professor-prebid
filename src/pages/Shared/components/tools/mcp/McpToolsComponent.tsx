@@ -37,6 +37,8 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
 
         const recordEvent = (eventType: string, args: any) => {
           events.push({ eventType, args, timestamp: Date.now() });
+          // Bounded, so a page that keeps refreshing does not grow these without end.
+          if (events.length > 2000) events.shift();
           if (args) {
             const auctionId = args.auctionId || args.auction?.auctionId;
             if (auctionId) {
@@ -49,6 +51,7 @@ export const injectDevtoolsMcpScript = async (): Promise<boolean> => {
                   noBids: [],
                   winningBids: [],
                 });
+                if (auctionMap.size > 200) auctionMap.delete(auctionMap.keys().next().value);
               }
               const record = auctionMap.get(auctionId);
               if (eventType === 'bidResponse') record.bidsReceived.push(args);

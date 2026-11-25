@@ -1,19 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import {
-  EVENTS,
-  CONSOLE_TOGGLE,
-  STORE_RULES_TOGGLE,
-  PBJS_NAMESPACE_CHANGE,
-  SAVE_MASKS,
-  DOWNLOAD_FAILED,
-  INITIATOR_TOGGLE,
-  INITIATOR_ROOT_URL,
-  POPUP_LOADED,
-  PREBID_DETECTION_TIMEOUT,
-  PREBID_DETECTION_TIMEOUT_IFRAME,
-  PAGES,
-  replaceRuleTargets,
-} from './constants';
+import { EVENTS, CONSOLE_TOGGLE, STORE_RULES_TOGGLE, PBJS_NAMESPACE_CHANGE, SAVE_MASKS, DOWNLOAD_FAILED, INITIATOR_TOGGLE, INITIATOR_ROOT_URL, POPUP_LOADED, PREBID_DETECTION_TIMEOUT, PREBID_DETECTION_TIMEOUT_IFRAME, replaceRuleTargets } from './constants';
+import { PAGES } from './pages';
 
 describe('Shared Constants', () => {
   describe('EVENTS', () => {

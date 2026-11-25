@@ -10,6 +10,7 @@ declare global {
 class IabTcf {
   lastMessage: string;
   stopLoop: boolean = false;
+  listeningForChanges: boolean = false;
   init() {
     setTimeout(() => {
       this.stopLoop = true;
@@ -20,9 +21,21 @@ class IabTcf {
   loop() {
     if (this.isTCFInpage()) {
       this.sendDetailsToContentScript();
+      this.listenForChanges();
     } else if (!this.stopLoop) {
       setTimeout(() => this.loop(), 1000);
     }
+  }
+
+  // The first read usually happens before the visitor has answered the consent dialog; report again whenever the CMP's data changes.
+  listenForChanges() {
+    if (this.listeningForChanges || typeof window.__tcfapi !== 'function') return;
+    this.listeningForChanges = true;
+    try {
+      window.__tcfapi('addEventListener', 2, (_tcData: unknown, success: boolean) => {
+        if (success) this.sendDetailsToContentScript();
+      });
+    } catch (e) {}
   }
 
   pingV1(callback: Function) {

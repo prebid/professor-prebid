@@ -1,9 +1,19 @@
+// Windows, documents and DOM nodes cannot be serialised (and a cross-origin window throws on access).
+// Plain data that merely has a `location` field must be kept.
+const isHostObject = (value: any): boolean => {
+  try {
+    return value.window === value || (typeof value.nodeType === 'number' && typeof value.nodeName === 'string') || Object.prototype.toString.call(value) === '[object Location]';
+  } catch {
+    return true;
+  }
+};
+
 export const decycle = (obj: any) => {
   // Track only the current ancestor chain, so a shared (non-circular) object is kept every time it appears and only true cycles are dropped.
   const ancestors: any[] = [];
   return JSON.stringify(obj, function (key, value) {
     if (typeof value !== 'object' || value === null) return value;
-    if (!Array.isArray(value) && value['location']) {
+    if (isHostObject(value)) {
       return;
     }
     while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) {
@@ -16,6 +26,9 @@ export const decycle = (obj: any) => {
     return value;
   });
 };
+
+/** Keys that reach Object.prototype when used to index a plain object. Data from the page must never be stored under them. */
+export const isUnsafeKey = (key: unknown): boolean => key === '__proto__' || key === 'constructor' || key === 'prototype';
 
 export const getTabId = (): Promise<number> => {
   return new Promise((resolve) => {

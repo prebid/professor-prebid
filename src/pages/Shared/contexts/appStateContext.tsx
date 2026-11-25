@@ -69,7 +69,9 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   }, [prebids]);
 
   useEffect(() => {
-    if (frameId === '' && frames && Object.keys(frames).length > 0) {
+    // After a navigation the selected frame may be gone, or Prebid may now live in another frame: pick again.
+    const selectedFrameIsStale = frameId !== '' && frames && Object.keys(frames).length > 0 && !frames[frameId]?.prebids && Object.values(frames).some((frame) => frame?.prebids);
+    if ((frameId === '' || selectedFrameIsStale) && frames && Object.keys(frames).length > 0) {
       if (frames['top-window']?.prebids) {
         setIframeId('top-window');
         return;
@@ -95,7 +97,8 @@ export const StateContextProvider = ({ children }: StateContextProviderProps) =>
   }, [frameId, frames]);
 
   useEffect(() => {
-    if (pbjsNamespace === '' && pbjsNamespaces.length > 0) {
+    // A namespace that the current page does not have (after navigating to another site) is replaced, not kept.
+    if ((pbjsNamespace === '' || !pbjsNamespaces.includes(pbjsNamespace)) && pbjsNamespaces.length > 0) {
       const defaultNameSpaceIndex = pbjsNamespaces.findIndex((el) => el === 'pbjs');
       const newValue = defaultNameSpaceIndex > -1 ? pbjsNamespaces[defaultNameSpaceIndex] : pbjsNamespaces[0];
       setPbjsNamespace(newValue || '');

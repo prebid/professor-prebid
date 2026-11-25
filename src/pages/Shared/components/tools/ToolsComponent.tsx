@@ -51,6 +51,14 @@ const dfp_open_console = async () => {
   });
 };
 
+// Tab data is stored under one `tab_info_<tabId>` key per tab.
+const resetTabStorage = async () => {
+  if (!chrome.storage?.local) return;
+  const stored = (await chrome.storage.local.get(null)) as any;
+  const keys = Object.keys(stored || {}).filter((key) => key.startsWith('tab_info_'));
+  if (keys.length > 0) await chrome.storage.local.remove(keys);
+};
+
 const download = (input: any, fileName: string) => {
   if (!input) return;
   const clone = { ...input };
@@ -88,7 +96,7 @@ const ToolsComponent = (): JSX.Element => {
             </Tooltip>
 
             <Tooltip title="Reset saved extension tab cache in local storage" arrow>
-              <Button size="small" variant="outlined" color="error" onClick={() => chrome.storage?.local.set({ tabInfos: null })} startIcon={<DeleteOutlineIcon />} sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
+              <Button size="small" variant="outlined" color="error" onClick={resetTabStorage} startIcon={<DeleteOutlineIcon />} sx={{ fontSize: '0.75rem', textTransform: 'none', fontWeight: 600, py: 0.25 }}>
                 Reset Extension Storage
               </Button>
             </Tooltip>

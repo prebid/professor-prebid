@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MatchRule from './MatchRule';
 import ReplaceRule from './ReplaceRule';
 import RuleComponent from './RuleComponent';
-import DebuggingModuleComponent from './DebuggingModuleComponent';
+import DebuggingModuleComponent, { sanitizeDebuggingConfig } from './DebuggingModuleComponent';
 import AppStateContext from '../../../contexts/appStateContext';
 import { IPrebidDetails } from '../../../../Injected/prebid';
 import { STORE_RULES_TOGGLE } from '../../../constants';
@@ -269,8 +269,8 @@ describe('DebuggingModule', () => {
 
       const copyBtn = screen.getByTestId('ContentCopyIcon').closest('button')!;
       fireEvent.click(copyBtn);
+      expect(await screen.findByText('Rules JSON copied to clipboard!')).toBeTruthy();
       expect(writeTextMock).toHaveBeenCalled();
-      expect(screen.getByText('Rules JSON copied to clipboard!')).toBeTruthy();
     });
 
     it('handles import file flow with valid and invalid JSON', async () => {
@@ -406,6 +406,19 @@ describe('DebuggingModule', () => {
         expect(screen.getByText('MODULE ENABLED')).toBeTruthy();
       });
       expect(setItem).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sanitizeDebuggingConfig', () => {
+    it('rejects values that are not a debugging config', () => {
+      for (const value of [5, 'x', null, { intercept: 5 }]) expect(sanitizeDebuggingConfig(value)).toBeNull();
+    });
+
+    it('drops rules the editor cannot render and keeps the rest', () => {
+      const rule = { when: { adUnitCode: 'a' }, then: { cpm: 1 } };
+      expect(sanitizeDebuggingConfig({ enabled: 1, intercept: [rule, 5, { when: {} }, { when: {}, then: { native: 'x' } }] })).toEqual({ enabled: true, intercept: [rule] });
+      expect(sanitizeDebuggingConfig([rule])).toEqual({ enabled: true, intercept: [rule] });
+      expect(sanitizeDebuggingConfig({ enabled: false })).toEqual({ enabled: false, intercept: [] });
     });
   });
 });

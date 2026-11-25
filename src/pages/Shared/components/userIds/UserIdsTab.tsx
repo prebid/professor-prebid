@@ -32,8 +32,10 @@ const UserIdsTab = ({ searchQuery = '' }: { searchQuery?: string }): JSX.Element
 
   const handleCopy = (text: string) => {
     if (!text) return;
-    navigator.clipboard.writeText(text);
-    setCopiedId(text);
+    Promise.resolve()
+      .then(() => navigator.clipboard.writeText(text))
+      .then(() => setCopiedId(text))
+      .catch(() => {});
   };
 
   const toggleExpand = (key: string) => {

@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { PAGES } from '../constants';
+import { PAGES } from '../pages';
 
 const OptionsContext = createContext<IOptionsContext | undefined>(undefined);
 
